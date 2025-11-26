@@ -10,7 +10,7 @@ A completely client-side PGP encryption tool for generating keys and encrypting/
 
 ## Features
 
-- **Generate PGP Keys** - Create RSA or ECC key pairs with customizable settings
+- **Generate PGP Keys** - Create ECC or RSA key pairs with customizable settings
 - **Encrypt Files** - Encrypt files with PGP public keys
 - **Decrypt Files** - Decrypt files with your private key
 - **100% Client-Side** - All operations happen in your browser
@@ -34,7 +34,7 @@ A completely client-side PGP encryption tool for generating keys and encrypting/
 
 ## Key Generation Options
 
-- **Algorithms:** RSA (2048/3072/4096 bits) or ECC (Curve25519)
+- **Algorithms:** ECC (Curve25519) or RSA (2048/3072/4096 bits)
 - **Expiration:** Never, 1, 2, or 5 years
 - **Passphrase protection** for private keys
 - Download keys individually or together
