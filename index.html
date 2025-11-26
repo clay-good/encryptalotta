@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- SEO Meta Tags -->
+    <title>Encrypt A Lot - Free PGP Encryption Tool | Generate Keys, Encrypt & Decrypt Files Online</title>
+    <meta name="description" content="Free, secure, client-side PGP encryption tool. Generate PGP keys, encrypt and decrypt files entirely in your browser. No server uploads, 100% private and open source.">
+    <meta name="keywords" content="PGP encryption, GPG encryption, encrypt files, decrypt files, PGP key generator, free encryption, client-side encryption, privacy, security, open source encryption">
+    <meta name="author" content="Encrypt A Lot">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://encryptalotta.com/">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://encryptalotta.com/">
+    <meta property="og:title" content="Encrypt A Lot - Free PGP Encryption Tool">
+    <meta property="og:description" content="Free, secure, client-side PGP encryption. Generate keys, encrypt and decrypt files in your browser. 100% private and open source.">
+    <meta property="og:image" content="https://encryptalotta.com/encryptalotta.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://encryptalotta.com/">
+    <meta property="twitter:title" content="Encrypt A Lot - Free PGP Encryption Tool">
+    <meta property="twitter:description" content="Free, secure, client-side PGP encryption. Generate keys, encrypt and decrypt files in your browser.">
+    <meta property="twitter:image" content="https://encryptalotta.com/encryptalotta.png">
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="manifest" href="site.webmanifest">
+
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#000000">
+
+    <script src="https://unpkg.com/openpgp@5.11.1/dist/openpgp.min.js"></script>
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Encrypt A Lot",
+      "url": "https://encryptalotta.com",
+      "description": "Free, secure, client-side PGP encryption tool for generating keys and encrypting/decrypting files",
+      "applicationCategory": "SecurityApplication",
+      "operatingSystem": "Any (Web Browser)",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "featureList": "PGP key generation, File encryption, File decryption, Client-side processing, Open source",
+      "softwareHelp": {
+        "@type": "CreativeWork",
+        "url": "https://github.com/clay-good/encryptalotta"
+      }
+    }
+    </script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #1a1a1a;
+            --bg-tertiary: #2a2a2a;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --text-muted: #707070;
+            --border: #333333;
+            --border-light: #404040;
+            --accent: #ffffff;
+            --accent-hover: #e0e0e0;
+            --success: #ffffff;
+            --warning: #ffffff;
+            --danger: #ffffff;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg-primary);
+            min-height: 100vh;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 60px 20px 40px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .logo {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 20px;
+            animation: float 3s ease-in-out infinite;
+            filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.3));
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            letter-spacing: -1px;
+            color: var(--text-primary);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 25px;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        .github-link {
+            display: inline-block;
+            color: var(--text-primary);
+            text-decoration: none;
+            padding: 12px 28px;
+            border: 2px solid var(--border-light);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .github-link:hover {
+            background: var(--bg-secondary);
+            border-color: var(--text-primary);
+            transform: translateY(-2px);
+        }
+
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            padding: 14px 32px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-secondary);
+        }
+
+        .nav-tab:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--border-light);
+            color: var(--text-primary);
+        }
+
+        .nav-tab.active {
+            background: var(--text-primary);
+            color: var(--bg-primary);
+            border-color: var(--text-primary);
+        }
+
+        .content {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 40px;
+            border: 1px solid var(--border);
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--text-primary);
+            background: var(--bg-primary);
+        }
+
+        input::placeholder, textarea::placeholder {
+            color: var(--text-muted);
+        }
+
+        .btn {
+            background: var(--text-primary);
+            color: var(--bg-primary);
+            border: none;
+            padding: 14px 32px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-block;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-success {
+            background: var(--text-primary);
+            color: var(--bg-primary);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-danger {
+            background: var(--text-primary);
+            color: var(--bg-primary);
+        }
+
+        .alert {
+            padding: 18px 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-weight: 500;
+            animation: slideIn 0.5s ease-out;
+            border: 1px solid var(--border);
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .alert-warning {
+            border-left: 3px solid var(--text-primary);
+        }
+
+        .alert-danger {
+            border-left: 3px solid var(--text-primary);
+        }
+
+        .alert-success {
+            border-left: 3px solid var(--text-primary);
+        }
+
+        .alert-info {
+            border-left: 3px solid var(--text-primary);
+        }
+
+        .file-upload {
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: var(--bg-tertiary);
+        }
+
+        .file-upload:hover {
+            border-color: var(--text-primary);
+            background: var(--bg-primary);
+        }
+
+        .file-upload.dragover {
+            border-color: var(--text-primary);
+            background: var(--bg-primary);
+            transform: scale(1.01);
+        }
+
+        .file-list {
+            margin-top: 20px;
+        }
+
+        .file-item {
+            background: var(--bg-tertiary);
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin: 8px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--border);
+        }
+
+        .file-item button {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+
+        .file-item button:hover {
+            background: var(--text-primary);
+            color: var(--bg-primary);
+        }
+
+        .key-display {
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+            margin: 15px 0;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+        }
+
+        .warning-box {
+            background: var(--bg-tertiary);
+            border: 2px solid var(--text-primary);
+            padding: 25px;
+            border-radius: 8px;
+            margin: 25px 0;
+            animation: pulse-warning 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-warning {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.2); }
+            50% { box-shadow: 0 0 0 8px rgba(255, 255, 255, 0); }
+        }
+
+        .warning-box h3 {
+            color: var(--text-primary);
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .warning-box ul {
+            margin-left: 20px;
+            color: var(--text-secondary);
+        }
+
+        .warning-box li {
+            margin: 10px 0;
+            font-weight: 500;
+        }
+
+        .download-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .spinner {
+            border: 3px solid var(--border);
+            border-top: 3px solid var(--text-primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        h2 {
+            color: var(--text-primary);
+            font-weight: 700;
+            font-size: 1.8rem;
+        }
+
+        h3 {
+            color: var(--text-primary);
+        }
+
+        h4 {
+            color: var(--text-primary);
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .subtitle {
+                font-size: 1.1rem;
+            }
+
+            .logo {
+                width: 90px;
+                height: 90px;
+            }
+
+            .nav-tab {
+                padding: 12px 25px;
+                font-size: 0.95rem;
+            }
+
+            .content {
+                padding: 25px;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .size-warning {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 5px;
+            font-weight: 500;
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--text-primary);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <img src="encryptalotta.png" alt="Encrypt A Lot Logo" class="logo">
+            <p class="subtitle">Free, secure, client-side PGP encryption tool for generating keys and encrypting/decrypting files</p>
+            <a href="https://github.com/clay-good/encryptalotta/" target="_blank" class="github-link">
+                Audit and contribute to our code here
+            </a>
+        </header>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="switchView('generate')">Generate Keys</button>
+            <button class="nav-tab" onclick="switchView('encrypt')">Encrypt</button>
+            <button class="nav-tab" onclick="switchView('decrypt')">Decrypt</button>
+        </div>
+
+        <div class="content">
+            <!-- Generate Keys View -->
+            <div id="generate-view" class="view active">
+                <h2 style="margin-bottom: 25px;">Generate PGP Key Pair</h2>
+
+                <div class="alert alert-info">
+                    <strong>100% Client-Side:</strong> Your keys are generated locally in your browser. Nothing is sent to any server.
+                </div>
+
+                <form id="generate-form">
+                    <div class="form-group">
+                        <label for="name">Your Name *</label>
+                        <input type="text" id="name" required placeholder="John Doe">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Your Email *</label>
+                        <input type="email" id="email" required placeholder="your@domain.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="comment">Comment (Optional)</label>
+                        <input type="text" id="comment" placeholder="Work key, Personal key, etc.">
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label for="algorithm">Algorithm *</label>
+                            <select id="algorithm" required onchange="updateKeySizes()">
+                                <option value="rsa">RSA (Recommended)</option>
+                                <option value="ecc">ECC (Curve25519)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="keysize">Key Size *</label>
+                            <select id="keysize" required>
+                                <option value="2048">2048 bits</option>
+                                <option value="3072">3072 bits</option>
+                                <option value="4096" selected>4096 bits (Most Secure)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="expires">Key Expiration *</label>
+                        <select id="expires" required>
+                            <option value="0">Never</option>
+                            <option value="1">1 year</option>
+                            <option value="2">2 years</option>
+                            <option value="5">5 years</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="passphrase">Passphrase *</label>
+                        <input type="password" id="passphrase" required placeholder="Enter a strong passphrase">
+                        <p class="size-warning">Use a strong passphrase - you cannot recover your key without it!</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="passphrase-confirm">Confirm Passphrase *</label>
+                        <input type="password" id="passphrase-confirm" required placeholder="Re-enter your passphrase">
+                    </div>
+
+                    <button type="submit" class="btn">Generate Key Pair</button>
+                </form>
+
+                <div id="generating" class="hidden">
+                    <div class="spinner"></div>
+                    <p style="text-align: center; font-weight: 600; color: var(--text-primary);">Generating your keys... This may take a moment.</p>
+                </div>
+
+                <div id="key-result" class="hidden">
+                    <div class="warning-box">
+                        <h3>CRITICAL: SAVE YOUR KEYS NOW!</h3>
+                        <ul>
+                            <li><strong>You MUST download and securely backup both keys immediately.</strong></li>
+                            <li><strong>If you lose your private key, you CANNOT decrypt your files. Ever.</strong></li>
+                            <li><strong>If someone steals your private key, they can decrypt all your files.</strong></li>
+                            <li><strong>Store your private key in a secure location (password manager, encrypted drive, etc.)</strong></li>
+                            <li><strong>NEVER share your private key with anyone.</strong></li>
+                            <li><strong>Share your public key freely - it's meant to be public.</strong></li>
+                        </ul>
+                    </div>
+
+                    <h3 style="margin-top: 30px;">Keys Generated Successfully</h3>
+
+                    <div class="download-buttons">
+                        <button onclick="downloadPublicKey()" class="btn btn-success">Download Public Key</button>
+                        <button onclick="downloadPrivateKey()" class="btn btn-danger">Download Private Key</button>
+                        <button onclick="downloadBothKeys()" class="btn">Download Both Keys</button>
+                    </div>
+
+                    <div style="margin-top: 30px;">
+                        <h4>Public Key (Share this):</h4>
+                        <div class="key-display" id="public-key-display"></div>
+                    </div>
+
+                    <div style="margin-top: 20px;">
+                        <h4>Private Key (KEEP SECRET!):</h4>
+                        <div class="key-display" id="private-key-display"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Encrypt View -->
+            <div id="encrypt-view" class="view">
+                <h2 style="margin-bottom: 25px;">Encrypt Files</h2>
+
+                <div class="alert alert-info">
+                    <strong>100% Client-Side:</strong> Your files are encrypted locally in your browser. Nothing is uploaded to any server.
+                </div>
+
+                <div class="alert alert-warning">
+                    <strong>File Size Limit:</strong> For best performance, keep files under 100MB. Files over 500MB may cause browser slowdown or crashes. Very large files (1GB+) are not recommended.
+                </div>
+
+                <div class="form-group">
+                    <label for="encrypt-public-key">Recipient's Public Key *</label>
+                    <textarea id="encrypt-public-key" placeholder="Paste the recipient's public PGP key here..." required></textarea>
+                    <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 5px;">Or upload a .asc file:</p>
+                    <input type="file" id="public-key-file" accept=".asc,.txt,.pub" onchange="loadPublicKeyFile(this)">
+                </div>
+
+                <div class="form-group">
+                    <label>Files to Encrypt *</label>
+                    <div class="file-upload" id="encrypt-dropzone">
+                        <p style="font-size: 1.1rem; margin-bottom: 10px; color: var(--text-primary);">Drag & drop files here</p>
+                        <p style="color: var(--text-muted);">or click to select files</p>
+                        <input type="file" id="encrypt-files" multiple style="display: none;">
+                    </div>
+                    <div id="encrypt-file-list" class="file-list"></div>
+                </div>
+
+                <button onclick="encryptFiles()" class="btn">Encrypt Files</button>
+
+                <div id="encrypting" class="hidden">
+                    <div class="spinner"></div>
+                    <p style="text-align: center; font-weight: 600; color: var(--text-primary);">Encrypting your files...</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="encrypt-progress"></div>
+                    </div>
+                </div>
+
+                <div id="encrypt-result" class="hidden"></div>
+            </div>
+
+            <!-- Decrypt View -->
+            <div id="decrypt-view" class="view">
+                <h2 style="margin-bottom: 25px;">Decrypt Files</h2>
+
+                <div class="alert alert-info">
+                    <strong>100% Client-Side:</strong> Your files are decrypted locally in your browser. Nothing is uploaded to any server.
+                </div>
+
+                <div class="alert alert-warning">
+                    <strong>File Size Limit:</strong> For best performance, keep files under 100MB. Files over 500MB may cause browser slowdown or crashes. Very large files (1GB+) are not recommended.
+                </div>
+
+                <div class="form-group">
+                    <label for="decrypt-private-key">Your Private Key *</label>
+                    <textarea id="decrypt-private-key" placeholder="Paste your private PGP key here..." required></textarea>
+                    <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 5px;">Or upload a .asc file:</p>
+                    <input type="file" id="private-key-file" accept=".asc,.txt" onchange="loadPrivateKeyFile(this)">
+                </div>
+
+                <div class="form-group">
+                    <label for="decrypt-passphrase">Passphrase *</label>
+                    <input type="password" id="decrypt-passphrase" placeholder="Enter your private key passphrase" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Files to Decrypt *</label>
+                    <div class="file-upload" id="decrypt-dropzone">
+                        <p style="font-size: 1.1rem; margin-bottom: 10px; color: var(--text-primary);">Drag & drop encrypted files here</p>
+                        <p style="color: var(--text-muted);">or click to select files</p>
+                        <input type="file" id="decrypt-files" multiple style="display: none;">
+                    </div>
+                    <div id="decrypt-file-list" class="file-list"></div>
+                </div>
+
+                <button onclick="decryptFiles()" class="btn">Decrypt Files</button>
+
+                <div id="decrypting" class="hidden">
+                    <div class="spinner"></div>
+                    <p style="text-align: center; font-weight: 600; color: var(--text-primary);">Decrypting your files...</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="decrypt-progress"></div>
+                    </div>
+                </div>
+
+                <div id="decrypt-result" class="hidden"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let generatedPublicKey = '';
+        let generatedPrivateKey = '';
+        let encryptFilesToProcess = [];
+        let decryptFilesToProcess = [];
+
+        // View switching
+        function switchView(view) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+
+            document.getElementById(`${view}-view`).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Update key sizes based on algorithm
+        function updateKeySizes() {
+            const algorithm = document.getElementById('algorithm').value;
+            const keysizeSelect = document.getElementById('keysize');
+
+            if (algorithm === 'ecc') {
+                keysizeSelect.innerHTML = '<option value="curve25519" selected>Curve25519 (High Security)</option>';
+            } else {
+                keysizeSelect.innerHTML = `
+                    <option value="2048">2048 bits</option>
+                    <option value="3072">3072 bits</option>
+                    <option value="4096" selected>4096 bits (Most Secure)</option>
+                `;
+            }
+        }
+
+        // Generate Keys
+        document.getElementById('generate-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const passphrase = document.getElementById('passphrase').value;
+            const passphraseConfirm = document.getElementById('passphrase-confirm').value;
+
+            if (passphrase !== passphraseConfirm) {
+                alert('Error: Passphrases do not match!');
+                return;
+            }
+
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const comment = document.getElementById('comment').value;
+            const algorithm = document.getElementById('algorithm').value;
+            const keysize = document.getElementById('keysize').value;
+            const expiresYears = parseInt(document.getElementById('expires').value);
+
+            document.getElementById('generate-form').classList.add('hidden');
+            document.getElementById('generating').classList.remove('hidden');
+
+            try {
+                let options = {
+                    type: algorithm === 'ecc' ? 'ecc' : 'rsa',
+                    userIDs: [{
+                        name: name,
+                        email: email,
+                        comment: comment || undefined
+                    }],
+                    passphrase: passphrase,
+                    format: 'armored'
+                };
+
+                if (algorithm === 'ecc') {
+                    options.curve = 'curve25519';
+                } else {
+                    options.rsaBits = parseInt(keysize);
+                }
+
+                if (expiresYears > 0) {
+                    options.keyExpirationTime = expiresYears * 365 * 24 * 60 * 60;
+                }
+
+                const { privateKey, publicKey } = await openpgp.generateKey(options);
+
+                generatedPublicKey = publicKey;
+                generatedPrivateKey = privateKey;
+
+                document.getElementById('public-key-display').textContent = publicKey;
+                document.getElementById('private-key-display').textContent = privateKey;
+
+                document.getElementById('generating').classList.add('hidden');
+                document.getElementById('key-result').classList.remove('hidden');
+
+            } catch (error) {
+                alert('Error generating keys: ' + error.message);
+                document.getElementById('generating').classList.add('hidden');
+                document.getElementById('generate-form').classList.remove('hidden');
+            }
+        });
+
+        // Download functions
+        function downloadPublicKey() {
+            downloadFile(generatedPublicKey, 'public-key.asc', 'text/plain');
+        }
+
+        function downloadPrivateKey() {
+            downloadFile(generatedPrivateKey, 'private-key.asc', 'text/plain');
+        }
+
+        function downloadBothKeys() {
+            const both = `PUBLIC KEY:\n${generatedPublicKey}\n\nPRIVATE KEY:\n${generatedPrivateKey}`;
+            downloadFile(both, 'pgp-keys.asc', 'text/plain');
+        }
+
+        function downloadFile(content, filename, type) {
+            const blob = new Blob([content], { type: type });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // File upload handling for encryption
+        const encryptDropzone = document.getElementById('encrypt-dropzone');
+        const encryptFileInput = document.getElementById('encrypt-files');
+
+        encryptDropzone.addEventListener('click', () => encryptFileInput.click());
+
+        encryptDropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            encryptDropzone.classList.add('dragover');
+        });
+
+        encryptDropzone.addEventListener('dragleave', () => {
+            encryptDropzone.classList.remove('dragover');
+        });
+
+        encryptDropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            encryptDropzone.classList.remove('dragover');
+            handleEncryptFiles(e.dataTransfer.files);
+        });
+
+        encryptFileInput.addEventListener('change', (e) => {
+            handleEncryptFiles(e.target.files);
+        });
+
+        function handleEncryptFiles(files) {
+            encryptFilesToProcess = Array.from(files);
+            displayFileList(encryptFilesToProcess, 'encrypt-file-list');
+        }
+
+        // File upload handling for decryption
+        const decryptDropzone = document.getElementById('decrypt-dropzone');
+        const decryptFileInput = document.getElementById('decrypt-files');
+
+        decryptDropzone.addEventListener('click', () => decryptFileInput.click());
+
+        decryptDropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            decryptDropzone.classList.add('dragover');
+        });
+
+        decryptDropzone.addEventListener('dragleave', () => {
+            decryptDropzone.classList.remove('dragover');
+        });
+
+        decryptDropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            decryptDropzone.classList.remove('dragover');
+            handleDecryptFiles(e.dataTransfer.files);
+        });
+
+        decryptFileInput.addEventListener('change', (e) => {
+            handleDecryptFiles(e.target.files);
+        });
+
+        function handleDecryptFiles(files) {
+            decryptFilesToProcess = Array.from(files);
+            displayFileList(decryptFilesToProcess, 'decrypt-file-list');
+        }
+
+        function displayFileList(files, containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+
+            files.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+
+                const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
+                let sizeWarning = '';
+
+                if (file.size > 500 * 1024 * 1024) {
+                    sizeWarning = ' WARNING: VERY LARGE - May crash!';
+                } else if (file.size > 100 * 1024 * 1024) {
+                    sizeWarning = ' WARNING: Large file - May be slow';
+                }
+
+                fileItem.innerHTML = `
+                    <span>${file.name} (${sizeInMB} MB)${sizeWarning}</span>
+                    <button onclick="removeFile('${containerId}', ${index})">Remove</button>
+                `;
+                container.appendChild(fileItem);
+            });
+        }
+
+        function removeFile(containerId, index) {
+            if (containerId === 'encrypt-file-list') {
+                encryptFilesToProcess.splice(index, 1);
+                displayFileList(encryptFilesToProcess, containerId);
+            } else {
+                decryptFilesToProcess.splice(index, 1);
+                displayFileList(decryptFilesToProcess, containerId);
+            }
+        }
+
+        // Load public key from file
+        async function loadPublicKeyFile(input) {
+            const file = input.files[0];
+            if (file) {
+                const text = await file.text();
+                document.getElementById('encrypt-public-key').value = text;
+            }
+        }
+
+        // Load private key from file
+        async function loadPrivateKeyFile(input) {
+            const file = input.files[0];
+            if (file) {
+                const text = await file.text();
+                document.getElementById('decrypt-private-key').value = text;
+            }
+        }
+
+        // Encrypt files
+        async function encryptFiles() {
+            if (encryptFilesToProcess.length === 0) {
+                alert('Error: Please select at least one file to encrypt');
+                return;
+            }
+
+            const publicKeyArmored = document.getElementById('encrypt-public-key').value.trim();
+            if (!publicKeyArmored) {
+                alert('Error: Please provide a public key');
+                return;
+            }
+
+            document.getElementById('encrypting').classList.remove('hidden');
+            document.getElementById('encrypt-result').classList.add('hidden');
+
+            try {
+                const publicKey = await openpgp.readKey({ armoredKey: publicKeyArmored });
+                const results = [];
+
+                for (let i = 0; i < encryptFilesToProcess.length; i++) {
+                    const file = encryptFilesToProcess[i];
+                    const progress = ((i + 1) / encryptFilesToProcess.length) * 100;
+                    document.getElementById('encrypt-progress').style.width = progress + '%';
+
+                    const fileData = await file.arrayBuffer();
+
+                    const encrypted = await openpgp.encrypt({
+                        message: await openpgp.createMessage({ binary: new Uint8Array(fileData) }),
+                        encryptionKeys: publicKey,
+                        format: 'armored'
+                    });
+
+                    results.push({
+                        name: file.name + '.pgp',
+                        data: encrypted
+                    });
+                }
+
+                document.getElementById('encrypting').classList.add('hidden');
+
+                const resultDiv = document.getElementById('encrypt-result');
+                resultDiv.innerHTML = '<div class="alert alert-success"><strong>Files encrypted successfully</strong></div>';
+
+                results.forEach((result, index) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn btn-success';
+                    btn.textContent = `Download ${result.name}`;
+                    btn.onclick = () => downloadFile(result.data, result.name, 'text/plain');
+                    resultDiv.appendChild(btn);
+                });
+
+                resultDiv.classList.remove('hidden');
+
+            } catch (error) {
+                alert('Error encrypting files: ' + error.message);
+                document.getElementById('encrypting').classList.add('hidden');
+            }
+        }
+
+        // Decrypt files
+        async function decryptFiles() {
+            if (decryptFilesToProcess.length === 0) {
+                alert('Error: Please select at least one file to decrypt');
+                return;
+            }
+
+            const privateKeyArmored = document.getElementById('decrypt-private-key').value.trim();
+            const passphrase = document.getElementById('decrypt-passphrase').value;
+
+            if (!privateKeyArmored) {
+                alert('Error: Please provide your private key');
+                return;
+            }
+
+            if (!passphrase) {
+                alert('Error: Please provide your passphrase');
+                return;
+            }
+
+            document.getElementById('decrypting').classList.remove('hidden');
+            document.getElementById('decrypt-result').classList.add('hidden');
+
+            try {
+                const privateKey = await openpgp.decryptKey({
+                    privateKey: await openpgp.readPrivateKey({ armoredKey: privateKeyArmored }),
+                    passphrase: passphrase
+                });
+
+                const results = [];
+
+                for (let i = 0; i < decryptFilesToProcess.length; i++) {
+                    const file = decryptFilesToProcess[i];
+                    const progress = ((i + 1) / decryptFilesToProcess.length) * 100;
+                    document.getElementById('decrypt-progress').style.width = progress + '%';
+
+                    const fileText = await file.text();
+
+                    const message = await openpgp.readMessage({ armoredMessage: fileText });
+
+                    const { data: decrypted } = await openpgp.decrypt({
+                        message: message,
+                        decryptionKeys: privateKey,
+                        format: 'binary'
+                    });
+
+                    const originalName = file.name.replace(/\.pgp$/i, '');
+                    results.push({
+                        name: originalName,
+                        data: decrypted
+                    });
+                }
+
+                document.getElementById('decrypting').classList.add('hidden');
+
+                const resultDiv = document.getElementById('decrypt-result');
+                resultDiv.innerHTML = '<div class="alert alert-success"><strong>Files decrypted successfully</strong></div>';
+
+                results.forEach((result, index) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn btn-success';
+                    btn.textContent = `Download ${result.name}`;
+                    btn.onclick = () => {
+                        const blob = new Blob([result.data], { type: 'application/octet-stream' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = result.name;
+                        a.click();
+                        URL.revokeObjectURL(url);
+                    };
+                    resultDiv.appendChild(btn);
+                });
+
+                resultDiv.classList.remove('hidden');
+
+            } catch (error) {
+                alert('Error decrypting files: ' + error.message + '\n\nPlease check your private key and passphrase.');
+                document.getElementById('decrypting').classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
