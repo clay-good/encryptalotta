@@ -4,7 +4,7 @@
 
 A completely client-side PGP encryption tool for generating keys and encrypting/decrypting files. No server uploads, 100% private and open source.
 
-**Inspired by [Kevin Qiu] (https://www.linkedin.com/in/kevinmqiu)
+**Inspired by [Kevin Qiu](https://www.linkedin.com/in/kevinmqiu)**
 
 **Live Site:** [encryptalotta.com](https://encryptalotta.com)
 
