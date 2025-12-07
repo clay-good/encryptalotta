@@ -1,0 +1,31 @@
+/*
+  # HTTPS Enforcement
+  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+
+  # Prevent MIME-type sniffing
+  X-Content-Type-Options: nosniff
+
+  # Clickjacking protection
+  X-Frame-Options: DENY
+
+  # XSS Protection (legacy browsers)
+  X-XSS-Protection: 1; mode=block
+
+  # Referrer Policy - don't leak URLs
+  Referrer-Policy: no-referrer
+
+  # Content Security Policy - strict lockdown
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; form-action 'self'; base-uri 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+
+  # Permissions Policy - disable unnecessary browser features
+  Permissions-Policy: accelerometer=(), autoplay=(), camera=(), cross-origin-isolated=(), display-capture=(), encrypted-media=(), fullscreen=(), geolocation=(), gyroscope=(), keyboard-map=(), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), sync-xhr=(), usb=(), web-share=(), xr-spatial-tracking=()
+
+  # Prevent browsers from caching sensitive pages
+  Cache-Control: no-store, no-cache, must-revalidate, proxy-revalidate
+  Pragma: no-cache
+  Expires: 0
+
+  # Cross-Origin policies
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Embedder-Policy: require-corp
+  Cross-Origin-Resource-Policy: same-origin
