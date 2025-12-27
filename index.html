@@ -171,7 +171,7 @@
         .nav-tabs {
             display: flex;
             justify-content: center;
-            gap: 15px;
+            gap: 8px;
             margin: 40px 0;
             flex-wrap: wrap;
         }
@@ -179,8 +179,8 @@
         .nav-tab {
             background: var(--bg-secondary);
             border: 1px solid var(--border);
-            padding: 14px 32px;
-            font-size: 1rem;
+            padding: 10px 16px;
+            font-size: 0.9rem;
             font-weight: 600;
             border-radius: 8px;
             cursor: pointer;
@@ -545,8 +545,8 @@
             }
 
             .nav-tab {
-                padding: 12px 25px;
-                font-size: 0.95rem;
+                padding: 8px 12px;
+                font-size: 0.85rem;
             }
 
             .content {
@@ -585,6 +585,85 @@
             width: 0%;
             transition: width 0.3s ease;
         }
+
+        .key-info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .key-info-table th,
+        .key-info-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .key-info-table th {
+            color: var(--text-muted);
+            font-weight: 500;
+            width: 30%;
+        }
+
+        .key-info-table td {
+            color: var(--text-primary);
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+        }
+
+        .password-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-tertiary);
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin: 8px 0;
+            border: 1px solid var(--border);
+        }
+
+        .password-item code {
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            color: var(--text-primary);
+            user-select: all;
+        }
+
+        .password-item button {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+
+        .password-item button:hover {
+            background: var(--text-primary);
+            color: var(--bg-primary);
+        }
+
+        .verification-success {
+            background: #1a2e1a;
+            border: 2px solid #4caf50;
+            color: #4caf50;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .verification-failed {
+            background: #2e1a1a;
+            border: 2px solid #f44336;
+            color: #f44336;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
@@ -599,8 +678,16 @@
 
         <nav class="nav-tabs" role="tablist" aria-label="Main navigation">
             <button class="nav-tab active" role="tab" aria-selected="true" aria-controls="generate-view" id="tab-generate" data-view="generate">Generate Keys</button>
-            <button class="nav-tab" role="tab" aria-selected="false" aria-controls="encrypt-view" id="tab-encrypt" data-view="encrypt">Encrypt</button>
-            <button class="nav-tab" role="tab" aria-selected="false" aria-controls="decrypt-view" id="tab-decrypt" data-view="decrypt">Decrypt</button>
+            <button class="nav-tab" role="tab" aria-selected="false" aria-controls="encrypt-view" id="tab-encrypt" data-view="encrypt">Encrypt Files</button>
+            <button class="nav-tab" role="tab" aria-selected="false" aria-controls="decrypt-view" id="tab-decrypt" data-view="decrypt">Decrypt Files</button>
+            <button class="nav-tab" role="tab" aria-selected="false" aria-controls="text-crypto-view" id="tab-text-crypto" data-view="text-crypto">Text Messages</button>
+            <button class="nav-tab" role="tab" aria-selected="false" aria-controls="password-encrypt-view" id="tab-password-encrypt" data-view="password-encrypt">Password Encrypt</button>
+            <button class="nav-tab" role="tab" aria-selected="false" aria-controls="sign-view" id="tab-sign" data-view="sign">Sign</button>
+            <button class="nav-tab" role="tab" aria-selected="false" aria-controls="verify-view" id="tab-verify" data-view="verify">Verify</button>
+            <button class="nav-tab" role="tab" aria-selected="false" aria-controls="key-info-view" id="tab-key-info" data-view="key-info">Key Info</button>
+            <button class="nav-tab" role="tab" aria-selected="false" aria-controls="passwords-view" id="tab-passwords" data-view="passwords">Passwords</button>
+            <button class="nav-tab" role="tab" aria-selected="false" aria-controls="revoke-view" id="tab-revoke" data-view="revoke">Revoke Key</button>
+            <button class="nav-tab" role="tab" aria-selected="false" aria-controls="armor-view" id="tab-armor" data-view="armor">Armor</button>
         </nav>
 
         <main class="content">
@@ -794,6 +881,362 @@
                 </div>
 
                 <div id="decrypt-result" class="hidden"></div>
+            </div>
+
+            <!-- Sign View -->
+            <div id="sign-view" class="view" role="tabpanel" aria-labelledby="tab-sign">
+                <h2 style="margin-bottom: 25px;">Sign Files or Messages</h2>
+
+                <div class="alert alert-info">
+                    <strong>100% Client-Side:</strong> All signing operations happen locally in your browser. Nothing is uploaded to any server.
+                </div>
+
+                <div class="form-group">
+                    <label for="sign-private-key">Your Private Key *</label>
+                    <textarea id="sign-private-key" placeholder="Paste your private PGP key here..." required></textarea>
+                    <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 5px;">Or upload a .asc file:</p>
+                    <input type="file" id="sign-private-key-file" accept=".asc,.txt" aria-label="Upload private key file for signing">
+                </div>
+
+                <div class="form-group">
+                    <label for="sign-passphrase">Passphrase *</label>
+                    <input type="password" id="sign-passphrase" placeholder="Enter your private key passphrase" required autocomplete="off">
+                </div>
+
+                <div class="form-group">
+                    <label>What do you want to sign?</label>
+                    <div style="display: flex; gap: 15px; margin-top: 10px;">
+                        <label style="display: flex; align-items: center; gap: 5px; font-weight: normal;">
+                            <input type="radio" name="sign-type" value="text" checked> Text Message
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 5px; font-weight: normal;">
+                            <input type="radio" name="sign-type" value="cleartext"> Cleartext Signature
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 5px; font-weight: normal;">
+                            <input type="radio" name="sign-type" value="file"> File
+                        </label>
+                    </div>
+                </div>
+
+                <div id="sign-text-input" class="form-group">
+                    <label for="sign-message">Message to Sign *</label>
+                    <textarea id="sign-message" placeholder="Enter the text you want to sign..." style="min-height: 150px;"></textarea>
+                </div>
+
+                <div id="sign-file-input" class="form-group hidden">
+                    <label id="sign-files-label">Files to Sign *</label>
+                    <div class="file-upload" id="sign-dropzone" aria-describedby="sign-files-label">
+                        <p style="font-size: 1.1rem; margin-bottom: 10px; color: var(--text-primary);">Drag & drop files here</p>
+                        <p style="color: var(--text-muted);">or click to select files</p>
+                        <input type="file" id="sign-files" multiple style="display: none;" aria-label="Select files to sign">
+                    </div>
+                    <div id="sign-file-list" class="file-list" role="list" aria-label="Files selected for signing"></div>
+                </div>
+
+                <button id="btn-sign" class="btn" aria-label="Sign the selected content">Sign</button>
+
+                <div id="signing" class="hidden">
+                    <div class="spinner"></div>
+                    <p style="text-align: center; font-weight: 600; color: var(--text-primary);">Signing...</p>
+                </div>
+
+                <div id="sign-result" class="hidden"></div>
+            </div>
+
+            <!-- Verify View -->
+            <div id="verify-view" class="view" role="tabpanel" aria-labelledby="tab-verify">
+                <h2 style="margin-bottom: 25px;">Verify Signatures</h2>
+
+                <div class="alert alert-info">
+                    <strong>100% Client-Side:</strong> All verification operations happen locally in your browser. Nothing is uploaded to any server.
+                </div>
+
+                <div class="form-group">
+                    <label for="verify-public-key">Signer's Public Key *</label>
+                    <textarea id="verify-public-key" placeholder="Paste the signer's public PGP key here..." required></textarea>
+                    <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 5px;">Or upload a .asc file:</p>
+                    <input type="file" id="verify-public-key-file" accept=".asc,.txt,.pub" aria-label="Upload public key file for verification">
+                </div>
+
+                <div class="form-group">
+                    <label>What do you want to verify?</label>
+                    <div style="display: flex; gap: 15px; margin-top: 10px;">
+                        <label style="display: flex; align-items: center; gap: 5px; font-weight: normal;">
+                            <input type="radio" name="verify-type" value="signed-message" checked> Signed Message
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 5px; font-weight: normal;">
+                            <input type="radio" name="verify-type" value="cleartext"> Cleartext Signature
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 5px; font-weight: normal;">
+                            <input type="radio" name="verify-type" value="detached"> Detached Signature
+                        </label>
+                    </div>
+                </div>
+
+                <div id="verify-message-input" class="form-group">
+                    <label for="verify-signed-message">Signed Message or Cleartext Signature *</label>
+                    <textarea id="verify-signed-message" placeholder="Paste the signed message here..." style="min-height: 200px;"></textarea>
+                </div>
+
+                <div id="verify-detached-input" class="hidden">
+                    <div class="form-group">
+                        <label for="verify-original-message">Original Message/File Content *</label>
+                        <textarea id="verify-original-message" placeholder="Paste the original message here..." style="min-height: 100px;"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="verify-signature">Detached Signature *</label>
+                        <textarea id="verify-signature" placeholder="Paste the detached signature here..." style="min-height: 100px;"></textarea>
+                    </div>
+                </div>
+
+                <button id="btn-verify" class="btn" aria-label="Verify the signature">Verify Signature</button>
+
+                <div id="verifying" class="hidden">
+                    <div class="spinner"></div>
+                    <p style="text-align: center; font-weight: 600; color: var(--text-primary);">Verifying...</p>
+                </div>
+
+                <div id="verify-result" class="hidden"></div>
+            </div>
+
+            <!-- Text Messages View -->
+            <div id="text-crypto-view" class="view" role="tabpanel" aria-labelledby="tab-text-crypto">
+                <h2 style="margin-bottom: 25px;">Text Message Encryption</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 20px;">Encrypt and decrypt text messages using PGP. Perfect for secure emails, chat messages, and notes.</p>
+
+                <div class="alert alert-info">
+                    <strong>100% Client-Side:</strong> Your messages are encrypted locally in your browser. Nothing is sent to any server.
+                </div>
+
+                <div class="form-group">
+                    <label>What do you want to do?</label>
+                    <div style="display: flex; gap: 15px; margin-top: 10px;">
+                        <label style="display: flex; align-items: center; gap: 5px; font-weight: normal;">
+                            <input type="radio" name="text-mode" value="encrypt" checked> Encrypt a message
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 5px; font-weight: normal;">
+                            <input type="radio" name="text-mode" value="decrypt"> Decrypt a message
+                        </label>
+                    </div>
+                </div>
+
+                <div id="text-encrypt-fields">
+                    <div class="form-group">
+                        <label for="text-encrypt-pubkey">Recipient's Public Key *</label>
+                        <textarea id="text-encrypt-pubkey" placeholder="Paste the recipient's public PGP key here..." style="min-height: 100px;"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="text-encrypt-message">Message to Encrypt *</label>
+                        <textarea id="text-encrypt-message" placeholder="Type your secret message here..." style="min-height: 150px;"></textarea>
+                    </div>
+                </div>
+
+                <div id="text-decrypt-fields" class="hidden">
+                    <div class="form-group">
+                        <label for="text-decrypt-privkey">Your Private Key *</label>
+                        <textarea id="text-decrypt-privkey" placeholder="Paste your private PGP key here..." style="min-height: 100px;"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="text-decrypt-passphrase">Passphrase *</label>
+                        <input type="password" id="text-decrypt-passphrase" placeholder="Enter your private key passphrase" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="text-decrypt-message">Encrypted Message *</label>
+                        <textarea id="text-decrypt-message" placeholder="Paste the encrypted PGP message here (starts with -----BEGIN PGP MESSAGE-----)..." style="min-height: 150px;"></textarea>
+                    </div>
+                </div>
+
+                <button id="btn-text-crypto" class="btn">Encrypt Message</button>
+                <div id="text-crypto-result" class="hidden" style="margin-top: 20px;"></div>
+            </div>
+
+            <!-- Password Encryption View -->
+            <div id="password-encrypt-view" class="view" role="tabpanel" aria-labelledby="tab-password-encrypt">
+                <h2 style="margin-bottom: 25px;">Password-Only Encryption</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 20px;">Encrypt files using just a password - no PGP keys required. Perfect for personal file encryption or sharing files with anyone.</p>
+
+                <div class="alert alert-info">
+                    <strong>100% Client-Side:</strong> Your files are encrypted locally in your browser. Nothing is uploaded to any server.
+                </div>
+
+                <div class="form-group">
+                    <label>What do you want to do?</label>
+                    <div style="display: flex; gap: 15px; margin-top: 10px;">
+                        <label style="display: flex; align-items: center; gap: 5px; font-weight: normal;">
+                            <input type="radio" name="symmetric-mode" value="encrypt" checked> Encrypt files
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 5px; font-weight: normal;">
+                            <input type="radio" name="symmetric-mode" value="decrypt"> Decrypt files
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="symmetric-password">Password *</label>
+                    <input type="password" id="symmetric-password" placeholder="Enter a strong password" autocomplete="off">
+                    <p class="size-warning">Use a strong password - you cannot recover your files without it!</p>
+                </div>
+
+                <div class="form-group">
+                    <label id="symmetric-files-label">Files *</label>
+                    <div class="file-upload" id="symmetric-dropzone" aria-describedby="symmetric-files-label">
+                        <p style="font-size: 1.1rem; margin-bottom: 10px; color: var(--text-primary);">Drag & drop files here</p>
+                        <p style="color: var(--text-muted);">or click to select files</p>
+                        <input type="file" id="symmetric-files" multiple style="display: none;" aria-label="Select files">
+                    </div>
+                    <div id="symmetric-file-list" class="file-list" role="list" aria-label="Files selected"></div>
+                </div>
+
+                <button id="btn-symmetric" class="btn">Encrypt with Password</button>
+
+                <div id="symmetric-processing" class="hidden">
+                    <div class="spinner"></div>
+                    <p style="text-align: center; font-weight: 600; color: var(--text-primary);">Processing...</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="symmetric-progress"></div>
+                    </div>
+                </div>
+
+                <div id="symmetric-result" class="hidden"></div>
+            </div>
+
+            <!-- Key Info View -->
+            <div id="key-info-view" class="view" role="tabpanel" aria-labelledby="tab-key-info">
+                <h2 style="margin-bottom: 25px;">Key Information</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 20px;">Inspect any PGP key to see its fingerprint, algorithm, creation date, expiration, and user IDs. Works with both public and private keys.</p>
+
+                <div class="alert alert-info">
+                    <strong>100% Client-Side:</strong> Keys are analyzed locally in your browser. Nothing is sent to any server.
+                </div>
+
+                <div class="form-group">
+                    <label for="key-info-input">PGP Key (Public or Private) *</label>
+                    <textarea id="key-info-input" placeholder="Paste a PGP key here (starts with -----BEGIN PGP PUBLIC KEY BLOCK----- or -----BEGIN PGP PRIVATE KEY BLOCK-----)..." style="min-height: 150px;"></textarea>
+                    <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 5px;">Or upload a .asc file:</p>
+                    <input type="file" id="key-info-file" accept=".asc,.txt,.pub" aria-label="Upload key file">
+                </div>
+
+                <button id="btn-key-info" class="btn">View Key Info</button>
+                <div id="key-info-result" class="hidden" style="margin-top: 20px;"></div>
+            </div>
+
+            <!-- Password Generator View -->
+            <div id="passwords-view" class="view" role="tabpanel" aria-labelledby="tab-passwords">
+                <h2 style="margin-bottom: 25px;">Password Generator</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 20px;">Generate cryptographically secure passwords using your browser's built-in random number generator. Perfect for creating strong passphrases for your PGP keys.</p>
+
+                <div class="alert alert-info">
+                    <strong>100% Client-Side:</strong> Passwords are generated locally using crypto.getRandomValues(). Nothing is sent to any server.
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="password-length">Password Length</label>
+                        <input type="number" id="password-length" value="20" min="8" max="128">
+                    </div>
+                    <div class="form-group">
+                        <label for="password-count">Number of Passwords</label>
+                        <input type="number" id="password-count" value="5" min="1" max="20">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Character Sets</label>
+                    <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 10px;">
+                        <label style="display: flex; align-items: center; gap: 5px; font-weight: normal;">
+                            <input type="checkbox" id="pw-uppercase" checked> Uppercase (A-Z)
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 5px; font-weight: normal;">
+                            <input type="checkbox" id="pw-lowercase" checked> Lowercase (a-z)
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 5px; font-weight: normal;">
+                            <input type="checkbox" id="pw-numbers" checked> Numbers (0-9)
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 5px; font-weight: normal;">
+                            <input type="checkbox" id="pw-symbols" checked> Symbols (!@#$%...)
+                        </label>
+                    </div>
+                </div>
+
+                <button id="btn-generate-password" class="btn">Generate Passwords</button>
+                <div id="password-result" class="hidden" style="margin-top: 20px;"></div>
+            </div>
+
+            <!-- Revocation Certificate View -->
+            <div id="revoke-view" class="view" role="tabpanel" aria-labelledby="tab-revoke">
+                <h2 style="margin-bottom: 25px;">Revocation Certificate</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 20px;">Generate a revocation certificate for your key. If your key is ever compromised, you can publish this certificate to invalidate it.</p>
+
+                <div class="alert alert-info">
+                    <strong>100% Client-Side:</strong> Certificates are generated locally in your browser. Nothing is sent to any server.
+                </div>
+
+                <div class="alert alert-warning">
+                    <strong>Important:</strong> Store your revocation certificate in a safe place, separate from your private key. Generate this immediately after creating a new key pair.
+                </div>
+
+                <div class="form-group">
+                    <label for="revoke-private-key">Your Private Key *</label>
+                    <textarea id="revoke-private-key" placeholder="Paste your private PGP key here..." style="min-height: 100px;"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="revoke-passphrase">Passphrase *</label>
+                    <input type="password" id="revoke-passphrase" placeholder="Enter your private key passphrase" autocomplete="off">
+                </div>
+
+                <div class="form-group">
+                    <label for="revoke-reason">Revocation Reason</label>
+                    <select id="revoke-reason">
+                        <option value="0">No reason specified</option>
+                        <option value="1">Key has been compromised</option>
+                        <option value="2">Key is superseded</option>
+                        <option value="3">Key is no longer used</option>
+                    </select>
+                </div>
+
+                <button id="btn-revoke" class="btn">Generate Revocation Certificate</button>
+                <div id="revoke-result" class="hidden" style="margin-top: 20px;"></div>
+            </div>
+
+            <!-- Armor Converter View -->
+            <div id="armor-view" class="view" role="tabpanel" aria-labelledby="tab-armor">
+                <h2 style="margin-bottom: 25px;">Armor Converter</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 20px;">Convert PGP data between ASCII-armored text format and raw binary format. ASCII armor makes binary data safe for copying, pasting, and email.</p>
+
+                <div class="alert alert-info">
+                    <strong>100% Client-Side:</strong> All conversions happen locally in your browser. Nothing is sent to any server.
+                </div>
+
+                <div class="form-group">
+                    <label>What do you want to do?</label>
+                    <div style="display: flex; gap: 15px; margin-top: 10px;">
+                        <label style="display: flex; align-items: center; gap: 5px; font-weight: normal;">
+                            <input type="radio" name="armor-mode" value="dearmor" checked> Dearmor (ASCII to Binary)
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 5px; font-weight: normal;">
+                            <input type="radio" name="armor-mode" value="armor"> Armor (Binary to ASCII)
+                        </label>
+                    </div>
+                </div>
+
+                <div id="dearmor-input" class="form-group">
+                    <label for="armor-text-input">Armored PGP Data *</label>
+                    <textarea id="armor-text-input" placeholder="Paste ASCII-armored PGP data here (starts with -----BEGIN PGP...)..." style="min-height: 150px;"></textarea>
+                </div>
+
+                <div id="armor-input" class="form-group hidden">
+                    <label id="armor-file-label">Binary File *</label>
+                    <div class="file-upload" id="armor-dropzone" aria-describedby="armor-file-label">
+                        <p style="font-size: 1.1rem; margin-bottom: 10px; color: var(--text-primary);">Drag & drop binary PGP file here</p>
+                        <p style="color: var(--text-muted);">or click to select file</p>
+                        <input type="file" id="armor-file" style="display: none;" aria-label="Select binary file">
+                    </div>
+                    <div id="armor-file-name" style="margin-top: 10px; color: var(--text-secondary);"></div>
+                </div>
+
+                <button id="btn-armor" class="btn">Convert</button>
+                <div id="armor-result" class="hidden" style="margin-top: 20px;"></div>
             </div>
         </main>
     </div>
@@ -1417,6 +1860,1085 @@
 
         // Algorithm change handler
         document.getElementById('algorithm').addEventListener('change', updateKeySizes);
+
+        // ==================== SIGN & VERIFY FEATURES ====================
+
+        // Sign view file handling
+        let signFilesToProcess = [];
+
+        function handleSignFiles(files) {
+            const validatedFiles = validateFileSizes(Array.from(files));
+            signFilesToProcess = validatedFiles;
+            displayFileList(signFilesToProcess, 'sign-file-list');
+        }
+
+        // Initialize sign dropzone
+        setupDropzone('sign-dropzone', 'sign-files', handleSignFiles);
+
+        // Update removeFile function to handle sign files
+        const originalRemoveFile = removeFile;
+        function removeFile(containerId, index) {
+            if (containerId === 'sign-file-list') {
+                signFilesToProcess.splice(index, 1);
+                displayFileList(signFilesToProcess, containerId);
+            } else {
+                originalRemoveFile(containerId, index);
+            }
+        }
+
+        // Sign type radio button handlers
+        document.querySelectorAll('input[name="sign-type"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const textInput = document.getElementById('sign-text-input');
+                const fileInput = document.getElementById('sign-file-input');
+
+                if (e.target.value === 'file') {
+                    textInput.classList.add('hidden');
+                    fileInput.classList.remove('hidden');
+                } else {
+                    textInput.classList.remove('hidden');
+                    fileInput.classList.add('hidden');
+                }
+            });
+        });
+
+        // Load sign private key from file
+        document.getElementById('sign-private-key-file').addEventListener('change', async function() {
+            const file = this.files[0];
+            if (file) {
+                try {
+                    const text = await file.text();
+                    document.getElementById('sign-private-key').value = text;
+                } catch (error) {
+                    alert('Error reading key file: ' + error.message);
+                    this.value = '';
+                }
+            }
+        });
+
+        // Sign function
+        document.getElementById('btn-sign').addEventListener('click', async () => {
+            const privateKeyArmored = document.getElementById('sign-private-key').value.trim();
+            const passphrase = document.getElementById('sign-passphrase').value;
+            const signType = document.querySelector('input[name="sign-type"]:checked').value;
+
+            if (!privateKeyArmored) {
+                alert('Error: Please provide your private key');
+                return;
+            }
+
+            if (!passphrase) {
+                alert('Error: Please provide your passphrase');
+                return;
+            }
+
+            document.getElementById('signing').classList.remove('hidden');
+            document.getElementById('sign-result').classList.add('hidden');
+
+            try {
+                const privateKey = await openpgp.decryptKey({
+                    privateKey: await openpgp.readPrivateKey({ armoredKey: privateKeyArmored }),
+                    passphrase: passphrase
+                });
+
+                let result;
+                const resultDiv = document.getElementById('sign-result');
+
+                if (signType === 'text') {
+                    // Regular text signature (armored)
+                    const message = document.getElementById('sign-message').value;
+                    if (!message) {
+                        throw new Error('Please enter a message to sign');
+                    }
+
+                    const signedMessage = await openpgp.sign({
+                        message: await openpgp.createMessage({ text: message }),
+                        signingKeys: privateKey,
+                        format: 'armored'
+                    });
+
+                    // Clear and build result
+                    while (resultDiv.firstChild) {
+                        resultDiv.removeChild(resultDiv.firstChild);
+                    }
+
+                    const successAlert = document.createElement('div');
+                    successAlert.className = 'alert alert-success';
+                    successAlert.innerHTML = '<strong>Message signed successfully</strong>';
+                    resultDiv.appendChild(successAlert);
+
+                    const label = document.createElement('h4');
+                    label.textContent = 'Signed Message:';
+                    resultDiv.appendChild(label);
+
+                    const display = document.createElement('div');
+                    display.className = 'key-display';
+                    display.textContent = signedMessage;
+                    resultDiv.appendChild(display);
+
+                    const copyBtn = document.createElement('button');
+                    copyBtn.className = 'btn';
+                    copyBtn.textContent = 'Copy to Clipboard';
+                    copyBtn.addEventListener('click', () => {
+                        navigator.clipboard.writeText(signedMessage);
+                        copyBtn.textContent = 'Copied!';
+                        setTimeout(() => { copyBtn.textContent = 'Copy to Clipboard'; }, 2000);
+                    });
+                    resultDiv.appendChild(copyBtn);
+
+                } else if (signType === 'cleartext') {
+                    // Cleartext signature (human-readable)
+                    const message = document.getElementById('sign-message').value;
+                    if (!message) {
+                        throw new Error('Please enter a message to sign');
+                    }
+
+                    const cleartextMessage = await openpgp.createCleartextMessage({ text: message });
+                    const signedMessage = await openpgp.sign({
+                        message: cleartextMessage,
+                        signingKeys: privateKey
+                    });
+
+                    // Clear and build result
+                    while (resultDiv.firstChild) {
+                        resultDiv.removeChild(resultDiv.firstChild);
+                    }
+
+                    const successAlert = document.createElement('div');
+                    successAlert.className = 'alert alert-success';
+                    successAlert.innerHTML = '<strong>Cleartext signature created successfully</strong>';
+                    resultDiv.appendChild(successAlert);
+
+                    const label = document.createElement('h4');
+                    label.textContent = 'Cleartext Signed Message:';
+                    resultDiv.appendChild(label);
+
+                    const display = document.createElement('div');
+                    display.className = 'key-display';
+                    display.textContent = signedMessage;
+                    resultDiv.appendChild(display);
+
+                    const copyBtn = document.createElement('button');
+                    copyBtn.className = 'btn';
+                    copyBtn.textContent = 'Copy to Clipboard';
+                    copyBtn.addEventListener('click', () => {
+                        navigator.clipboard.writeText(signedMessage);
+                        copyBtn.textContent = 'Copied!';
+                        setTimeout(() => { copyBtn.textContent = 'Copy to Clipboard'; }, 2000);
+                    });
+                    resultDiv.appendChild(copyBtn);
+
+                } else if (signType === 'file') {
+                    // File signature (detached)
+                    if (signFilesToProcess.length === 0) {
+                        throw new Error('Please select at least one file to sign');
+                    }
+
+                    // Clear and build result
+                    while (resultDiv.firstChild) {
+                        resultDiv.removeChild(resultDiv.firstChild);
+                    }
+
+                    const successAlert = document.createElement('div');
+                    successAlert.className = 'alert alert-success';
+                    successAlert.innerHTML = '<strong>Files signed successfully</strong>';
+                    resultDiv.appendChild(successAlert);
+
+                    for (const file of signFilesToProcess) {
+                        const fileData = await file.arrayBuffer();
+                        const message = await openpgp.createMessage({ binary: new Uint8Array(fileData) });
+
+                        const detachedSignature = await openpgp.sign({
+                            message: message,
+                            signingKeys: privateKey,
+                            detached: true
+                        });
+
+                        const btn = document.createElement('button');
+                        btn.className = 'btn btn-success';
+                        btn.textContent = `Download ${file.name}.sig`;
+                        btn.addEventListener('click', () => downloadFile(detachedSignature, file.name + '.sig', 'text/plain'));
+                        resultDiv.appendChild(btn);
+                    }
+                }
+
+                document.getElementById('signing').classList.add('hidden');
+                resultDiv.classList.remove('hidden');
+
+                // Clear passphrase
+                document.getElementById('sign-passphrase').value = '';
+
+            } catch (error) {
+                alert('Error signing: ' + error.message);
+                document.getElementById('signing').classList.add('hidden');
+                document.getElementById('sign-passphrase').value = '';
+            }
+        });
+
+        // ==================== VERIFY FEATURE ====================
+
+        // Verify type radio button handlers
+        document.querySelectorAll('input[name="verify-type"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const messageInput = document.getElementById('verify-message-input');
+                const detachedInput = document.getElementById('verify-detached-input');
+
+                if (e.target.value === 'detached') {
+                    messageInput.classList.add('hidden');
+                    detachedInput.classList.remove('hidden');
+                } else {
+                    messageInput.classList.remove('hidden');
+                    detachedInput.classList.add('hidden');
+                }
+            });
+        });
+
+        // Load verify public key from file
+        document.getElementById('verify-public-key-file').addEventListener('change', async function() {
+            const file = this.files[0];
+            if (file) {
+                try {
+                    const text = await file.text();
+                    document.getElementById('verify-public-key').value = text;
+                } catch (error) {
+                    alert('Error reading key file: ' + error.message);
+                    this.value = '';
+                }
+            }
+        });
+
+        // Verify function
+        document.getElementById('btn-verify').addEventListener('click', async () => {
+            const publicKeyArmored = document.getElementById('verify-public-key').value.trim();
+            const verifyType = document.querySelector('input[name="verify-type"]:checked').value;
+
+            if (!publicKeyArmored) {
+                alert('Error: Please provide the signer\'s public key');
+                return;
+            }
+
+            document.getElementById('verifying').classList.remove('hidden');
+            document.getElementById('verify-result').classList.add('hidden');
+
+            try {
+                const publicKey = await openpgp.readKey({ armoredKey: publicKeyArmored });
+                const resultDiv = document.getElementById('verify-result');
+
+                // Clear result div
+                while (resultDiv.firstChild) {
+                    resultDiv.removeChild(resultDiv.firstChild);
+                }
+
+                if (verifyType === 'signed-message' || verifyType === 'cleartext') {
+                    const signedMessageText = document.getElementById('verify-signed-message').value.trim();
+                    if (!signedMessageText) {
+                        throw new Error('Please paste the signed message');
+                    }
+
+                    let message;
+                    let verificationResult;
+
+                    if (verifyType === 'cleartext' || signedMessageText.includes('-----BEGIN PGP SIGNED MESSAGE-----')) {
+                        // Cleartext signature
+                        message = await openpgp.readCleartextMessage({ cleartextMessage: signedMessageText });
+                        verificationResult = await openpgp.verify({
+                            message: message,
+                            verificationKeys: publicKey
+                        });
+                    } else {
+                        // Regular signed message
+                        message = await openpgp.readMessage({ armoredMessage: signedMessageText });
+                        verificationResult = await openpgp.verify({
+                            message: message,
+                            verificationKeys: publicKey
+                        });
+                    }
+
+                    const { verified, keyID } = verificationResult.signatures[0];
+
+                    try {
+                        await verified;
+                        const successDiv = document.createElement('div');
+                        successDiv.className = 'verification-success';
+                        successDiv.innerHTML = '<strong>SIGNATURE VALID</strong><br>The message was signed by the owner of this public key.';
+                        resultDiv.appendChild(successDiv);
+
+                        if (verificationResult.data) {
+                            const label = document.createElement('h4');
+                            label.style.marginTop = '20px';
+                            label.textContent = 'Original Message:';
+                            resultDiv.appendChild(label);
+
+                            const display = document.createElement('div');
+                            display.className = 'key-display';
+                            display.textContent = verificationResult.data;
+                            resultDiv.appendChild(display);
+                        }
+                    } catch (e) {
+                        const failDiv = document.createElement('div');
+                        failDiv.className = 'verification-failed';
+                        failDiv.innerHTML = '<strong>SIGNATURE INVALID</strong><br>The signature could not be verified. The message may have been altered or signed by a different key.';
+                        resultDiv.appendChild(failDiv);
+                    }
+
+                } else if (verifyType === 'detached') {
+                    const originalMessage = document.getElementById('verify-original-message').value;
+                    const signatureText = document.getElementById('verify-signature').value.trim();
+
+                    if (!originalMessage) {
+                        throw new Error('Please provide the original message');
+                    }
+                    if (!signatureText) {
+                        throw new Error('Please provide the detached signature');
+                    }
+
+                    const message = await openpgp.createMessage({ text: originalMessage });
+                    const signature = await openpgp.readSignature({ armoredSignature: signatureText });
+
+                    const verificationResult = await openpgp.verify({
+                        message: message,
+                        signature: signature,
+                        verificationKeys: publicKey
+                    });
+
+                    const { verified } = verificationResult.signatures[0];
+
+                    try {
+                        await verified;
+                        const successDiv = document.createElement('div');
+                        successDiv.className = 'verification-success';
+                        successDiv.innerHTML = '<strong>SIGNATURE VALID</strong><br>The message matches the signature and was signed by the owner of this public key.';
+                        resultDiv.appendChild(successDiv);
+                    } catch (e) {
+                        const failDiv = document.createElement('div');
+                        failDiv.className = 'verification-failed';
+                        failDiv.innerHTML = '<strong>SIGNATURE INVALID</strong><br>The signature does not match. The message may have been altered or signed by a different key.';
+                        resultDiv.appendChild(failDiv);
+                    }
+                }
+
+                document.getElementById('verifying').classList.add('hidden');
+                resultDiv.classList.remove('hidden');
+
+            } catch (error) {
+                alert('Error verifying signature: ' + error.message);
+                document.getElementById('verifying').classList.add('hidden');
+            }
+        });
+
+        // ==================== TEXT ENCRYPT/DECRYPT ====================
+
+        // Mode switching
+        document.querySelectorAll('input[name="text-mode"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const encryptFields = document.getElementById('text-encrypt-fields');
+                const decryptFields = document.getElementById('text-decrypt-fields');
+                const btn = document.getElementById('btn-text-crypto');
+
+                if (e.target.value === 'encrypt') {
+                    encryptFields.classList.remove('hidden');
+                    decryptFields.classList.add('hidden');
+                    btn.textContent = 'Encrypt Message';
+                } else {
+                    encryptFields.classList.add('hidden');
+                    decryptFields.classList.remove('hidden');
+                    btn.textContent = 'Decrypt Message';
+                }
+            });
+        });
+
+        // Text encrypt/decrypt button
+        document.getElementById('btn-text-crypto').addEventListener('click', async () => {
+            const mode = document.querySelector('input[name="text-mode"]:checked').value;
+            const resultDiv = document.getElementById('text-crypto-result');
+
+            try {
+                // Clear result div
+                while (resultDiv.firstChild) {
+                    resultDiv.removeChild(resultDiv.firstChild);
+                }
+
+                if (mode === 'encrypt') {
+                    const publicKeyArmored = document.getElementById('text-encrypt-pubkey').value.trim();
+                    const message = document.getElementById('text-encrypt-message').value;
+
+                    if (!publicKeyArmored) {
+                        throw new Error('Please provide the recipient\'s public key');
+                    }
+                    if (!message) {
+                        throw new Error('Please enter a message to encrypt');
+                    }
+
+                    const publicKey = await openpgp.readKey({ armoredKey: publicKeyArmored });
+                    const encrypted = await openpgp.encrypt({
+                        message: await openpgp.createMessage({ text: message }),
+                        encryptionKeys: publicKey,
+                        format: 'armored'
+                    });
+
+                    const successAlert = document.createElement('div');
+                    successAlert.className = 'alert alert-success';
+                    successAlert.innerHTML = '<strong>Message encrypted successfully</strong>';
+                    resultDiv.appendChild(successAlert);
+
+                    const label = document.createElement('h4');
+                    label.textContent = 'Encrypted Message:';
+                    resultDiv.appendChild(label);
+
+                    const display = document.createElement('div');
+                    display.className = 'key-display';
+                    display.textContent = encrypted;
+                    resultDiv.appendChild(display);
+
+                    const copyBtn = document.createElement('button');
+                    copyBtn.className = 'btn';
+                    copyBtn.textContent = 'Copy to Clipboard';
+                    copyBtn.addEventListener('click', () => {
+                        navigator.clipboard.writeText(encrypted);
+                        copyBtn.textContent = 'Copied!';
+                        setTimeout(() => { copyBtn.textContent = 'Copy to Clipboard'; }, 2000);
+                    });
+                    resultDiv.appendChild(copyBtn);
+
+                } else {
+                    const privateKeyArmored = document.getElementById('text-decrypt-privkey').value.trim();
+                    const passphrase = document.getElementById('text-decrypt-passphrase').value;
+                    const encryptedMessage = document.getElementById('text-decrypt-message').value.trim();
+
+                    if (!privateKeyArmored) {
+                        throw new Error('Please provide your private key');
+                    }
+                    if (!passphrase) {
+                        throw new Error('Please provide your passphrase');
+                    }
+                    if (!encryptedMessage) {
+                        throw new Error('Please paste the encrypted message');
+                    }
+
+                    const privateKey = await openpgp.decryptKey({
+                        privateKey: await openpgp.readPrivateKey({ armoredKey: privateKeyArmored }),
+                        passphrase: passphrase
+                    });
+
+                    const message = await openpgp.readMessage({ armoredMessage: encryptedMessage });
+                    const { data: decrypted } = await openpgp.decrypt({
+                        message: message,
+                        decryptionKeys: privateKey
+                    });
+
+                    const successAlert = document.createElement('div');
+                    successAlert.className = 'alert alert-success';
+                    successAlert.innerHTML = '<strong>Message decrypted successfully</strong>';
+                    resultDiv.appendChild(successAlert);
+
+                    const label = document.createElement('h4');
+                    label.textContent = 'Decrypted Message:';
+                    resultDiv.appendChild(label);
+
+                    const display = document.createElement('div');
+                    display.className = 'key-display';
+                    display.textContent = decrypted;
+                    resultDiv.appendChild(display);
+
+                    const copyBtn = document.createElement('button');
+                    copyBtn.className = 'btn';
+                    copyBtn.textContent = 'Copy to Clipboard';
+                    copyBtn.addEventListener('click', () => {
+                        navigator.clipboard.writeText(decrypted);
+                        copyBtn.textContent = 'Copied!';
+                        setTimeout(() => { copyBtn.textContent = 'Copy to Clipboard'; }, 2000);
+                    });
+                    resultDiv.appendChild(copyBtn);
+
+                    // Clear passphrase
+                    document.getElementById('text-decrypt-passphrase').value = '';
+                }
+
+                resultDiv.classList.remove('hidden');
+
+            } catch (error) {
+                alert('Error: ' + error.message);
+                document.getElementById('text-decrypt-passphrase').value = '';
+            }
+        });
+
+        // ==================== SYMMETRIC (PASSWORD) ENCRYPTION ====================
+
+        let symmetricFilesToProcess = [];
+
+        function handleSymmetricFiles(files) {
+            const validatedFiles = validateFileSizes(Array.from(files));
+            symmetricFilesToProcess = validatedFiles;
+            displaySymmetricFileList();
+        }
+
+        function displaySymmetricFileList() {
+            const container = document.getElementById('symmetric-file-list');
+            while (container.firstChild) {
+                container.removeChild(container.firstChild);
+            }
+
+            symmetricFilesToProcess.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.setAttribute('role', 'listitem');
+
+                const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
+                const fileInfo = document.createElement('span');
+                fileInfo.textContent = `${file.name} (${sizeInMB} MB)`;
+
+                const removeBtn = document.createElement('button');
+                removeBtn.textContent = 'Remove';
+                removeBtn.setAttribute('aria-label', `Remove file ${file.name}`);
+                removeBtn.addEventListener('click', () => {
+                    symmetricFilesToProcess.splice(index, 1);
+                    displaySymmetricFileList();
+                });
+
+                fileItem.appendChild(fileInfo);
+                fileItem.appendChild(removeBtn);
+                container.appendChild(fileItem);
+            });
+        }
+
+        // Initialize symmetric dropzone
+        setupDropzone('symmetric-dropzone', 'symmetric-files', handleSymmetricFiles);
+
+        // Mode switching
+        document.querySelectorAll('input[name="symmetric-mode"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const btn = document.getElementById('btn-symmetric');
+                btn.textContent = e.target.value === 'encrypt' ? 'Encrypt with Password' : 'Decrypt with Password';
+            });
+        });
+
+        // Symmetric encrypt/decrypt
+        document.getElementById('btn-symmetric').addEventListener('click', async () => {
+            const mode = document.querySelector('input[name="symmetric-mode"]:checked').value;
+            const password = document.getElementById('symmetric-password').value;
+
+            if (!password) {
+                alert('Error: Please provide a password');
+                return;
+            }
+
+            if (symmetricFilesToProcess.length === 0) {
+                alert('Error: Please select at least one file');
+                return;
+            }
+
+            document.getElementById('symmetric-progress').style.width = '0%';
+            document.getElementById('symmetric-processing').classList.remove('hidden');
+            document.getElementById('symmetric-result').classList.add('hidden');
+
+            try {
+                const results = [];
+                const resultDiv = document.getElementById('symmetric-result');
+
+                for (let i = 0; i < symmetricFilesToProcess.length; i++) {
+                    const file = symmetricFilesToProcess[i];
+                    const progress = ((i + 1) / symmetricFilesToProcess.length) * 100;
+                    document.getElementById('symmetric-progress').style.width = progress + '%';
+
+                    if (mode === 'encrypt') {
+                        const fileData = await file.arrayBuffer();
+                        const encrypted = await openpgp.encrypt({
+                            message: await openpgp.createMessage({ binary: new Uint8Array(fileData) }),
+                            passwords: [password],
+                            format: 'armored'
+                        });
+
+                        results.push({
+                            name: file.name + '.pgp',
+                            data: encrypted,
+                            type: 'text/plain'
+                        });
+                    } else {
+                        const fileText = await file.text();
+                        const message = await openpgp.readMessage({ armoredMessage: fileText });
+                        const { data: decrypted } = await openpgp.decrypt({
+                            message: message,
+                            passwords: [password],
+                            format: 'binary'
+                        });
+
+                        const originalName = file.name.replace(/\.pgp$/i, '');
+                        results.push({
+                            name: originalName,
+                            data: decrypted,
+                            type: 'application/octet-stream'
+                        });
+                    }
+                }
+
+                // Clear and build result
+                while (resultDiv.firstChild) {
+                    resultDiv.removeChild(resultDiv.firstChild);
+                }
+
+                const successAlert = document.createElement('div');
+                successAlert.className = 'alert alert-success';
+                successAlert.innerHTML = `<strong>Files ${mode}ed successfully</strong>`;
+                resultDiv.appendChild(successAlert);
+
+                results.forEach(result => {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn btn-success';
+                    btn.textContent = `Download ${result.name}`;
+                    btn.addEventListener('click', () => {
+                        if (result.type === 'text/plain') {
+                            downloadFile(result.data, result.name, result.type);
+                        } else {
+                            const blob = new Blob([result.data], { type: result.type });
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = result.name;
+                            a.click();
+                            URL.revokeObjectURL(url);
+                        }
+                    });
+                    resultDiv.appendChild(btn);
+                });
+
+                document.getElementById('symmetric-processing').classList.add('hidden');
+                resultDiv.classList.remove('hidden');
+
+                // Clear password
+                document.getElementById('symmetric-password').value = '';
+
+            } catch (error) {
+                alert('Error: ' + error.message);
+                document.getElementById('symmetric-processing').classList.add('hidden');
+                document.getElementById('symmetric-password').value = '';
+            }
+        });
+
+        // ==================== KEY INFORMATION VIEWER ====================
+
+        // Load key info from file
+        document.getElementById('key-info-file').addEventListener('change', async function() {
+            const file = this.files[0];
+            if (file) {
+                try {
+                    const text = await file.text();
+                    document.getElementById('key-info-input').value = text;
+                } catch (error) {
+                    alert('Error reading key file: ' + error.message);
+                    this.value = '';
+                }
+            }
+        });
+
+        document.getElementById('btn-key-info').addEventListener('click', async () => {
+            const keyArmored = document.getElementById('key-info-input').value.trim();
+
+            if (!keyArmored) {
+                alert('Error: Please paste a PGP key');
+                return;
+            }
+
+            const resultDiv = document.getElementById('key-info-result');
+
+            try {
+                let key;
+                let isPrivate = false;
+
+                // Try to read as public key first, then private
+                try {
+                    key = await openpgp.readKey({ armoredKey: keyArmored });
+                } catch (e) {
+                    key = await openpgp.readPrivateKey({ armoredKey: keyArmored });
+                    isPrivate = true;
+                }
+
+                const fingerprint = key.getFingerprint().toUpperCase();
+                const keyID = key.getKeyID().toHex().toUpperCase();
+                const userIDs = key.getUserIDs();
+                const creationTime = key.getCreationTime();
+                const expirationTime = await key.getExpirationTime();
+                const algorithmInfo = key.getAlgorithmInfo();
+
+                // Clear and build result
+                while (resultDiv.firstChild) {
+                    resultDiv.removeChild(resultDiv.firstChild);
+                }
+
+                const table = document.createElement('table');
+                table.className = 'key-info-table';
+
+                const rows = [
+                    ['Key Type', isPrivate ? 'Private Key' : 'Public Key'],
+                    ['Fingerprint', fingerprint.match(/.{1,4}/g).join(' ')],
+                    ['Key ID', keyID],
+                    ['User IDs', userIDs.join('\n')],
+                    ['Algorithm', algorithmInfo.algorithm.toUpperCase()],
+                    ['Key Size/Curve', algorithmInfo.bits || algorithmInfo.curve || 'N/A'],
+                    ['Created', creationTime.toLocaleString()],
+                    ['Expires', expirationTime ? (expirationTime === Infinity ? 'Never' : expirationTime.toLocaleString()) : 'Never']
+                ];
+
+                rows.forEach(([label, value]) => {
+                    const tr = document.createElement('tr');
+                    const th = document.createElement('th');
+                    th.textContent = label;
+                    const td = document.createElement('td');
+                    td.textContent = value;
+                    td.style.whiteSpace = 'pre-wrap';
+                    tr.appendChild(th);
+                    tr.appendChild(td);
+                    table.appendChild(tr);
+                });
+
+                resultDiv.appendChild(table);
+
+                // Copy fingerprint button
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'btn';
+                copyBtn.style.marginTop = '15px';
+                copyBtn.textContent = 'Copy Fingerprint';
+                copyBtn.addEventListener('click', () => {
+                    navigator.clipboard.writeText(fingerprint);
+                    copyBtn.textContent = 'Copied!';
+                    setTimeout(() => { copyBtn.textContent = 'Copy Fingerprint'; }, 2000);
+                });
+                resultDiv.appendChild(copyBtn);
+
+                resultDiv.classList.remove('hidden');
+
+            } catch (error) {
+                alert('Error reading key: ' + error.message + '\n\nPlease make sure you pasted a valid PGP key.');
+            }
+        });
+
+        // ==================== PASSWORD GENERATOR ====================
+
+        document.getElementById('btn-generate-password').addEventListener('click', () => {
+            const length = parseInt(document.getElementById('password-length').value) || 20;
+            const count = parseInt(document.getElementById('password-count').value) || 5;
+
+            const useUppercase = document.getElementById('pw-uppercase').checked;
+            const useLowercase = document.getElementById('pw-lowercase').checked;
+            const useNumbers = document.getElementById('pw-numbers').checked;
+            const useSymbols = document.getElementById('pw-symbols').checked;
+
+            if (!useUppercase && !useLowercase && !useNumbers && !useSymbols) {
+                alert('Error: Please select at least one character set');
+                return;
+            }
+
+            let charset = '';
+            if (useUppercase) charset += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            if (useLowercase) charset += 'abcdefghijklmnopqrstuvwxyz';
+            if (useNumbers) charset += '0123456789';
+            if (useSymbols) charset += '!@#$%^&*()_+-=[]{}|;:,.<>?';
+
+            const resultDiv = document.getElementById('password-result');
+            while (resultDiv.firstChild) {
+                resultDiv.removeChild(resultDiv.firstChild);
+            }
+
+            // Calculate entropy
+            const entropyPerChar = Math.log2(charset.length);
+            const totalEntropy = (entropyPerChar * length).toFixed(1);
+
+            const entropyInfo = document.createElement('p');
+            entropyInfo.style.color = 'var(--text-secondary)';
+            entropyInfo.style.marginBottom = '15px';
+            entropyInfo.textContent = `Entropy: ${totalEntropy} bits per password (${entropyPerChar.toFixed(2)} bits/character)`;
+            resultDiv.appendChild(entropyInfo);
+
+            for (let i = 0; i < count; i++) {
+                const password = generateSecurePassword(charset, length);
+
+                const item = document.createElement('div');
+                item.className = 'password-item';
+
+                const code = document.createElement('code');
+                code.textContent = password;
+
+                const copyBtn = document.createElement('button');
+                copyBtn.textContent = 'Copy';
+                copyBtn.addEventListener('click', () => {
+                    navigator.clipboard.writeText(password);
+                    copyBtn.textContent = 'Copied!';
+                    setTimeout(() => { copyBtn.textContent = 'Copy'; }, 2000);
+                });
+
+                item.appendChild(code);
+                item.appendChild(copyBtn);
+                resultDiv.appendChild(item);
+            }
+
+            resultDiv.classList.remove('hidden');
+        });
+
+        function generateSecurePassword(charset, length) {
+            const array = new Uint32Array(length);
+            crypto.getRandomValues(array);
+
+            let password = '';
+            for (let i = 0; i < length; i++) {
+                password += charset[array[i] % charset.length];
+            }
+            return password;
+        }
+
+        // ==================== REVOCATION CERTIFICATE ====================
+
+        document.getElementById('btn-revoke').addEventListener('click', async () => {
+            const privateKeyArmored = document.getElementById('revoke-private-key').value.trim();
+            const passphrase = document.getElementById('revoke-passphrase').value;
+            const reasonCode = parseInt(document.getElementById('revoke-reason').value);
+
+            if (!privateKeyArmored) {
+                alert('Error: Please provide your private key');
+                return;
+            }
+
+            if (!passphrase) {
+                alert('Error: Please provide your passphrase');
+                return;
+            }
+
+            const resultDiv = document.getElementById('revoke-result');
+
+            try {
+                const privateKey = await openpgp.decryptKey({
+                    privateKey: await openpgp.readPrivateKey({ armoredKey: privateKeyArmored }),
+                    passphrase: passphrase
+                });
+
+                const reasonText = {
+                    0: 'No reason specified',
+                    1: 'Key has been compromised',
+                    2: 'Key is superseded',
+                    3: 'Key is no longer used'
+                };
+
+                const { publicKey: revokedKey } = await openpgp.revokeKey({
+                    key: privateKey,
+                    reasonForRevocation: {
+                        flag: reasonCode,
+                        string: reasonText[reasonCode]
+                    }
+                });
+
+                const revocationCert = revokedKey.armor();
+
+                // Clear and build result
+                while (resultDiv.firstChild) {
+                    resultDiv.removeChild(resultDiv.firstChild);
+                }
+
+                const warningAlert = document.createElement('div');
+                warningAlert.className = 'alert alert-warning';
+                warningAlert.innerHTML = '<strong>Revocation certificate generated!</strong> Store this in a safe place. If your key is ever compromised, you can publish this certificate to invalidate the key.';
+                resultDiv.appendChild(warningAlert);
+
+                const label = document.createElement('h4');
+                label.textContent = 'Revocation Certificate:';
+                resultDiv.appendChild(label);
+
+                const display = document.createElement('div');
+                display.className = 'key-display';
+                display.textContent = revocationCert;
+                resultDiv.appendChild(display);
+
+                const downloadBtn = document.createElement('button');
+                downloadBtn.className = 'btn btn-success';
+                downloadBtn.textContent = 'Download Revocation Certificate';
+                downloadBtn.addEventListener('click', () => {
+                    downloadFile(revocationCert, 'revocation-certificate.asc', 'text/plain');
+                });
+                resultDiv.appendChild(downloadBtn);
+
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'btn';
+                copyBtn.textContent = 'Copy to Clipboard';
+                copyBtn.addEventListener('click', () => {
+                    navigator.clipboard.writeText(revocationCert);
+                    copyBtn.textContent = 'Copied!';
+                    setTimeout(() => { copyBtn.textContent = 'Copy to Clipboard'; }, 2000);
+                });
+                resultDiv.appendChild(copyBtn);
+
+                resultDiv.classList.remove('hidden');
+
+                // Clear passphrase
+                document.getElementById('revoke-passphrase').value = '';
+
+            } catch (error) {
+                alert('Error generating revocation certificate: ' + error.message);
+                document.getElementById('revoke-passphrase').value = '';
+            }
+        });
+
+        // ==================== ARMOR CONVERTER ====================
+
+        let armorFileData = null;
+
+        // Mode switching
+        document.querySelectorAll('input[name="armor-mode"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const dearmorInput = document.getElementById('dearmor-input');
+                const armorInput = document.getElementById('armor-input');
+
+                if (e.target.value === 'dearmor') {
+                    dearmorInput.classList.remove('hidden');
+                    armorInput.classList.add('hidden');
+                } else {
+                    dearmorInput.classList.add('hidden');
+                    armorInput.classList.remove('hidden');
+                }
+            });
+        });
+
+        // Armor file dropzone
+        const armorDropzone = document.getElementById('armor-dropzone');
+        const armorFileInput = document.getElementById('armor-file');
+
+        armorDropzone.addEventListener('click', () => armorFileInput.click());
+        armorDropzone.setAttribute('tabindex', '0');
+        armorDropzone.setAttribute('role', 'button');
+        armorDropzone.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                armorFileInput.click();
+            }
+        });
+
+        armorDropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            armorDropzone.classList.add('dragover');
+        });
+
+        armorDropzone.addEventListener('dragleave', () => {
+            armorDropzone.classList.remove('dragover');
+        });
+
+        armorDropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            armorDropzone.classList.remove('dragover');
+            if (e.dataTransfer.files.length > 0) {
+                handleArmorFile(e.dataTransfer.files[0]);
+            }
+        });
+
+        armorFileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleArmorFile(e.target.files[0]);
+            }
+        });
+
+        async function handleArmorFile(file) {
+            try {
+                armorFileData = {
+                    name: file.name,
+                    data: new Uint8Array(await file.arrayBuffer())
+                };
+                document.getElementById('armor-file-name').textContent = `Selected: ${file.name}`;
+            } catch (error) {
+                alert('Error reading file: ' + error.message);
+            }
+        }
+
+        document.getElementById('btn-armor').addEventListener('click', async () => {
+            const mode = document.querySelector('input[name="armor-mode"]:checked').value;
+            const resultDiv = document.getElementById('armor-result');
+
+            try {
+                while (resultDiv.firstChild) {
+                    resultDiv.removeChild(resultDiv.firstChild);
+                }
+
+                if (mode === 'dearmor') {
+                    const armoredText = document.getElementById('armor-text-input').value.trim();
+                    if (!armoredText) {
+                        throw new Error('Please paste armored PGP data');
+                    }
+
+                    const { data, type } = await openpgp.unarmor(armoredText);
+
+                    const successAlert = document.createElement('div');
+                    successAlert.className = 'alert alert-success';
+                    successAlert.innerHTML = `<strong>Dearmored successfully!</strong> Type: ${type}`;
+                    resultDiv.appendChild(successAlert);
+
+                    const downloadBtn = document.createElement('button');
+                    downloadBtn.className = 'btn btn-success';
+                    downloadBtn.textContent = 'Download Binary File';
+                    downloadBtn.addEventListener('click', () => {
+                        const blob = new Blob([data], { type: 'application/octet-stream' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'pgp-data.bin';
+                        a.click();
+                        URL.revokeObjectURL(url);
+                    });
+                    resultDiv.appendChild(downloadBtn);
+
+                } else {
+                    if (!armorFileData) {
+                        throw new Error('Please select a binary file');
+                    }
+
+                    // Try to detect the type by reading the data
+                    let armoredOutput;
+                    let detectedType = 'MESSAGE';
+
+                    // Try different parsers to detect type
+                    try {
+                        await openpgp.readKey({ binaryKey: armorFileData.data });
+                        detectedType = 'PUBLIC KEY BLOCK';
+                    } catch (e) {
+                        try {
+                            await openpgp.readPrivateKey({ binaryKey: armorFileData.data });
+                            detectedType = 'PRIVATE KEY BLOCK';
+                        } catch (e2) {
+                            try {
+                                await openpgp.readSignature({ binarySignature: armorFileData.data });
+                                detectedType = 'SIGNATURE';
+                            } catch (e3) {
+                                // Default to MESSAGE
+                            }
+                        }
+                    }
+
+                    armoredOutput = openpgp.armor(openpgp.enums.armor[detectedType.replace(/ /g, '_').toLowerCase()] || openpgp.enums.armor.message, armorFileData.data);
+
+                    const successAlert = document.createElement('div');
+                    successAlert.className = 'alert alert-success';
+                    successAlert.innerHTML = '<strong>Armored successfully!</strong>';
+                    resultDiv.appendChild(successAlert);
+
+                    const label = document.createElement('h4');
+                    label.textContent = 'Armored Output:';
+                    resultDiv.appendChild(label);
+
+                    const display = document.createElement('div');
+                    display.className = 'key-display';
+                    display.textContent = armoredOutput;
+                    resultDiv.appendChild(display);
+
+                    const copyBtn = document.createElement('button');
+                    copyBtn.className = 'btn';
+                    copyBtn.textContent = 'Copy to Clipboard';
+                    copyBtn.addEventListener('click', () => {
+                        navigator.clipboard.writeText(armoredOutput);
+                        copyBtn.textContent = 'Copied!';
+                        setTimeout(() => { copyBtn.textContent = 'Copy to Clipboard'; }, 2000);
+                    });
+                    resultDiv.appendChild(copyBtn);
+                }
+
+                resultDiv.classList.remove('hidden');
+
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        });
     </script>
 </body>
 </html>

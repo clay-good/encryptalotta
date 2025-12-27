@@ -1,8 +1,8 @@
 # encryptalotta
 
-**PGP Key Generation, File Encryption & Decryption**
+**Complete PGP Encryption Suite**
 
-A completely client-side PGP encryption tool for generating keys and encrypting/decrypting files. No server uploads, 100% private and open source.
+A comprehensive client-side PGP encryption tool featuring key generation, file encryption/decryption, digital signatures, and a full suite of cryptographic utilities. No server uploads, 100% private and open source.
 
 **Inspired by [Kevin Qiu](https://www.linkedin.com/in/kevinmqiu)**
 
@@ -11,12 +11,30 @@ A completely client-side PGP encryption tool for generating keys and encrypting/
 
 ## Features
 
-- **Generate PGP Keys** - Create ECC or RSA key pairs with customizable settings
+### Core Encryption
+- **Generate PGP Keys** - Create ECC (Curve25519) or RSA key pairs with customizable settings
 - **Encrypt Files** - Encrypt files with PGP public keys
 - **Decrypt Files** - Decrypt files with your private key
+- **Text Message Encryption** - Encrypt and decrypt text messages for secure communication
+
+### Digital Signatures
+- **Sign Messages** - Create digital signatures to prove authorship
+- **Cleartext Signatures** - Sign messages while keeping content human-readable
+- **Sign Files** - Create detached signatures for file authentication
+- **Verify Signatures** - Verify signed messages, cleartext signatures, and detached signatures
+
+### Encryption Tools
+- **Password-Only Encryption** - Encrypt files with just a password (symmetric encryption)
+- **Key Information Viewer** - Inspect any PGP key's fingerprint, algorithm, expiration, and user IDs
+- **Password Generator** - Generate cryptographically secure passwords with customizable options
+- **Revocation Certificates** - Generate certificates to invalidate compromised keys
+- **Armor Converter** - Convert between ASCII-armored and binary PGP formats
+
+### Security & Privacy
 - **100% Client-Side** - All operations happen in your browser
 - **No Server Uploads** - Your files and keys never leave your device
 - **Open Source** - Audit the code yourself
+- **Works Offline** - Download and use without internet connection
 
 ---
 
@@ -136,6 +154,26 @@ Private keys are protected with enforced passphrase requirements:
 
 ---
 
+## All Features at Your Fingertips
+
+Every feature is a single click away - no nested menus, no hidden options. Just pick what you need:
+
+| Tab | What It Does |
+|-----|--------------|
+| **Generate Keys** | Create new PGP key pairs (ECC Curve25519 or RSA) |
+| **Encrypt Files** | Encrypt files using someone's public key |
+| **Decrypt Files** | Decrypt files using your private key |
+| **Text Messages** | Encrypt/decrypt text for emails, chat, or notes |
+| **Password Encrypt** | Encrypt files with just a password (no keys needed) |
+| **Sign** | Digitally sign messages or files to prove authorship |
+| **Verify** | Verify signatures to confirm authenticity |
+| **Key Info** | Inspect any PGP key's details and fingerprint |
+| **Passwords** | Generate cryptographically secure passwords |
+| **Revoke Key** | Create revocation certificates for compromised keys |
+| **Armor** | Convert between ASCII-armored and binary formats |
+
+---
+
 ## Technology
 
 - Pure HTML, CSS, and JavaScript
@@ -177,6 +215,10 @@ Private keys are protected with enforced passphrase requirements:
 | Open source | Yes | Varies | Usually Yes |
 | Modern ECC default | Yes | Varies | Varies |
 | Enforced CSP | Yes | Rarely | N/A |
+| Digital signatures | Yes | Sometimes | Yes |
+| Password encryption | Yes | Rarely | Yes |
+| Key info viewer | Yes | Rarely | Yes |
+| Password generator | Yes | Rarely | Sometimes |
 
 ---
 
@@ -247,7 +289,13 @@ This site is optimized for Cloudflare Pages deployment with automatic security h
 
 **Browser Security:** This tool is only as secure as your browser environment. Use an updated browser on a trusted device.
 
-**Passphrase Strength:** Use a strong, unique passphrase. Consider using a passphrase generator.
+**Passphrase Strength:** Use a strong, unique passphrase. The built-in password generator can help create secure passphrases.
+
+**Revocation Certificates:** Generate and securely store a revocation certificate immediately after creating a new key pair. This allows you to invalidate the key if it's ever compromised.
+
+**Password Encryption:** When using password-only encryption, choose a strong password. There is no recovery mechanism if you forget the password.
+
+**Signature Verification:** Always verify the public key fingerprint through a trusted channel before trusting signatures from that key.
 
 **Offline Use:** For maximum security, download the repository and use it offline on an air-gapped machine.
 
