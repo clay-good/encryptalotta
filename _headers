@@ -14,11 +14,17 @@
   # Referrer Policy - don't leak URLs
   Referrer-Policy: no-referrer
 
-  # Content Security Policy - strict lockdown
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; form-action 'self'; base-uri 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+  # Content Security Policy - strict lockdown.
+  # img-src 'blob:' is required so user-selected images (Steganography cover/stego inputs,
+  # EXIF Eraser inputs) can be loaded into <img> via URL.createObjectURL(file). No blob:
+  # URLs are ever fetched from the network — all blobs originate from local File or canvas
+  # data and are revoked after use. connect-src 'none' is preserved.
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'none'; form-action 'self'; base-uri 'self'; frame-ancestors 'none'; upgrade-insecure-requests
 
   # Permissions Policy - disable unnecessary browser features
-  Permissions-Policy: accelerometer=(), autoplay=(), camera=(), cross-origin-isolated=(), display-capture=(), encrypted-media=(), fullscreen=(), geolocation=(), gyroscope=(), keyboard-map=(), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), sync-xhr=(), usb=(), web-share=(), xr-spatial-tracking=()
+  # clipboard-write=(self) so per-tool "Copy" buttons can write to the user clipboard;
+  # clipboard-read=() blocks any silent paste-stealing. Every other capability is denied.
+  Permissions-Policy: accelerometer=(), autoplay=(), camera=(), clipboard-read=(), clipboard-write=(self), cross-origin-isolated=(), display-capture=(), encrypted-media=(), fullscreen=(), geolocation=(), gyroscope=(), keyboard-map=(), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), sync-xhr=(), usb=(), web-share=(), xr-spatial-tracking=()
 
   # Prevent browsers from caching sensitive pages
   Cache-Control: no-store, no-cache, must-revalidate, proxy-revalidate

@@ -1,0 +1,31 @@
+#!/bin/sh
+# Pre-commit hook: gate every commit through scripts/audit-release.js.
+#
+# Refuses the commit if any of the following drift:
+#   - innerHTML assignments > 0
+#   - STRINGS parity broken across locales
+#   - data-i18n keys missing from STRINGS.en
+#   - Vendored SHA-384 hashes don't match across HTML / INTEGRITY.md / on-disk bytes
+#   - CSP loses connect-src 'none' OR an outbound vector (fetch/XHR/etc) is introduced
+#   - Page weight exceeds 2 MB gzipped
+#   - Locale variant /<lang>/ STRINGS drift from source
+#
+# Install on a fresh clone with:
+#   ln -sf ../../scripts/git-hooks/pre-commit .git/hooks/pre-commit
+#
+# Bypass once (use sparingly, never for security-relevant changes):
+#   git commit --no-verify
+
+set -e
+
+# Run from repo root
+ROOT="$(git rev-parse --show-toplevel)"
+cd "$ROOT"
+
+if ! command -v node >/dev/null 2>&1; then
+    echo "pre-commit: node not in PATH; install Node.js 18+ to enable the audit." >&2
+    exit 1
+fi
+
+echo "pre-commit: running audit-release.js..."
+node scripts/audit-release.js

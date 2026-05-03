@@ -1,0 +1,75 @@
+name: Quarterly dependency check
+
+# Why this exists: vendored libraries are pinned by SHA-384 and never auto-updated.
+# This workflow is a reminder, not an auto-merger — it runs four times a year and
+# opens an issue if any pinned library is behind upstream. The actual vendoring,
+# hashing, and release ritual stays manual (see README.md "Dependency update cadence").
+#
+# Runs server-side in GitHub Actions only. The shipped site never makes a network
+# call, so this does not violate `connect-src 'none'`.
+
+on:
+  schedule:
+    - cron: '0 12 1 */3 *'   # noon UTC, 1st of each quarter (Jan / Apr / Jul / Oct)
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Check for vendored library updates
+        id: check
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set +e
+          node scripts/check-dependency-updates.js | tee /tmp/dep-check.log
+          echo "exit_code=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
+          {
+            echo "report<<EOF"
+            cat /tmp/dep-check.log
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Open issue if any vendored library is stale
+        if: steps.check.outputs.exit_code == '1'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = `Quarterly dependency check found vendored libraries behind upstream.
+
+            \`\`\`
+            ${{ steps.check.outputs.report }}
+            \`\`\`
+
+            Follow the manual update procedure in [README.md](../blob/main/README.md) ("Dependency update cadence"):
+            1. Download the new minified file from the upstream link in the manifest.
+            2. Re-compute the SHA-384 (\`openssl dgst -sha384 -binary FILE | openssl base64 -A\`).
+            3. Update the hash in two places: the HTML inline comment and the README.md manifest row.
+            4. Bump the version number in both places.
+            5. Run \`node scripts/build-i18n-variants.js\` and \`node scripts/audit-release.js\`.
+            6. Smoke-test the affected tool in a browser.
+
+            This issue was opened automatically by \`.github/workflows/dep-check.yml\`.`;
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: 'Quarterly dep review: vendored libraries have updates',
+              body,
+              labels: ['dependencies']
+            });
+
+      - name: Fail the job if stale (so the run is visibly red)
+        if: steps.check.outputs.exit_code == '1'
+        run: exit 1
