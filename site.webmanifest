@@ -1,13 +1,15 @@
 {
-  "name": "Encrypt A Lot",
-  "short_name": "Encrypt A Lot",
-  "description": "Free, client-side PGP encryption tool. Generate keys, encrypt and decrypt files entirely in your browser.",
+  "name": "encryptalotta — 33 free client-side privacy and developer tools",
+  "short_name": "encryptalotta",
+  "description": "Free, client-side privacy and developer toolbox with 33 tools that run entirely in your browser: PGP encryption / decryption / signing / verification, TLS and SSH key parsers, HMAC, JWT, TOTP / 2FA, hashing, encoding, UUID / ULID, password generator, QR sharing, Shamir secret sharing, EXIF eraser, steganography, regex, CSV / JSON / YAML / XML, cron, color, CIDR. No server uploads, no analytics, no CDN.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#0a0a0a",
   "theme_color": "#0a0a0a",
+  "categories": ["utilities", "productivity", "security", "developer"],
+  "lang": "en",
   "icons": [
     {
       "src": "/favicon-16x16.png",

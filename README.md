@@ -1,40 +1,56 @@
 # encryptalotta
 
-**Complete PGP Encryption Suite**
+**Free, client-side privacy and developer toolbox — 33 tools, zero server uploads.**
 
-A comprehensive client-side PGP encryption tool featuring key generation, file encryption/decryption, digital signatures, and a full suite of cryptographic utilities. No server uploads, 100% private and open source.
+A comprehensive single-page web app with **33 cryptographic, encoding, parsing, and developer utilities** that run entirely in your browser. PGP key generation, key inspection, revocation certificates, QR public-key sharing, TLS / X.509 certificate parsing, OpenSSH public key parsing, PEM ↔ DER conversion, file and text encryption / decryption, password-only (symmetric) file encryption, image steganography, digital signing and verification, HMAC, JWT inspection and verification, TOTP / 2FA, password generation, ASCII armor conversion, Shamir's Secret Sharing, EXIF metadata stripping, hashing and checksums (SHA-1 / 256 / 384 / 512), Base64 / Base32 / Base58 / hex encoding, UUID v4 / v7 and ULID generation, Unix timestamp conversion, URL parsing, line-level diff, CSV ↔ JSON ↔ TSV conversion, regex testing, cron decoding, color conversion with WCAG contrast checking, JSON / YAML / XML formatting, and CIDR / IPv4 subnet calculation. Searchable command palette (`⌘K` / `Ctrl+K`), full keyboard navigation, five UI languages. No server uploads, no analytics, no CDN, no tracking.
 
 **Inspired by [Kevin Qiu](https://www.linkedin.com/in/kevinmqiu)**
 
 
 ---
 
-## Features
+## Features (33 tools)
 
-### Core Encryption
-- **Generate PGP Keys** - Create ECC (Curve25519) or RSA key pairs with customizable settings
-- **Encrypt Files** - Encrypt files with PGP public keys
-- **Decrypt Files** - Decrypt files with your private key
-- **Text Message Encryption** - Encrypt and decrypt text messages for secure communication
+### Keys (7 tools)
+- **Generate PGP Keys** — Create ECC (Curve25519) or RSA 3072 / 4096 key pairs with customizable expiry.
+- **Key Info** — Inspect any PGP public key: fingerprint, user IDs, algorithm, key size, creation and expiration dates.
+- **Revocation Certificate** — Generate a pre-signed certificate to retire a compromised key.
+- **QR Share** — Encode a PGP public key or encrypted message as one or more scannable QR codes (multi-QR `EAL-QR/v1/{n}/{total}/` for long inputs).
+- **TLS Certificate Parser** — Hand-rolled ASN.1 / DER decoder for X.509 certificates: subject, issuer, SAN, validity, public key algorithm, SHA-1 + SHA-256 fingerprints.
+- **SSH Key Parser** — OpenSSH RFC 4253 wire-format parser: key type (rsa / ed25519 / ecdsa-sha2-nistp{256,384,521}), bit size, `SHA256:<base64>` fingerprint, comment.
+- **PEM ↔ DER** — Round-trip between PEM (Base64 with header/footer) and DER (raw binary as hex).
 
-### Digital Signatures
-- **Sign Messages** - Create digital signatures to prove authorship
-- **Cleartext Signatures** - Sign messages while keeping content human-readable
-- **Sign Files** - Create detached signatures for file authentication
-- **Verify Signatures** - Verify signed messages, cleartext signatures, and detached signatures
+### Encrypt / Decrypt (5 tools)
+- **Encrypt Files** — Encrypt files with one or more PGP public keys.
+- **Decrypt Files** — Decrypt PGP-encrypted files with your private key and passphrase.
+- **Text Messages** — Encrypt or decrypt PGP text blocks for email, chat, or notes.
+- **Password Encrypt** — Encrypt a file with a passphrase only (symmetric, no PGP key required).
+- **Steganography** — Hide an encrypted payload inside a PNG using LSB encoding. Optional password XORs the payload (wrong password fails magic-byte validation, no garbage output).
 
-### Encryption Tools
-- **Password-Only Encryption** - Encrypt files with just a password (symmetric encryption)
-- **Key Information Viewer** - Inspect any PGP key's fingerprint, algorithm, expiration, and user IDs
-- **Password Generator** - Generate cryptographically secure passwords with customizable options
-- **Revocation Certificates** - Generate certificates to invalidate compromised keys
-- **Armor Converter** - Convert between ASCII-armored and binary PGP formats
+### Sign / Verify (4 tools)
+- **Sign** — Produce detached, attached, or cleartext PGP signatures for files or text using your private key.
+- **Verify** — Verify any PGP signature against a public key.
+- **HMAC** — Sign and verify with HMAC-SHA-1 / 256 / 384 / 512. Constant-time comparison on verify; key buffer zeroized after use.
+- **JWT Inspector** — Decode the three Base64-URL parts; verify HS256/384/512 (shared secret), RS256/384/512 (PEM SPKI public key), or ES256/384/512 (PEM SPKI ECDSA key). Expiry indicator from the `exp` claim.
 
-### Sharing & Splitting
-- **QR Share** - Encode a public key or encrypted message into a QR code for hand-to-hand sharing. Auto-chunks long inputs into multi-QR sequences with the `EAL-QR/v1/{n}/{total}/` prefix.
-- **Steganography (Image Hiding)** - Hide an encrypted message inside a PNG using LSB encoding. Optional password XORs the payload so a wrong password fails magic-byte validation rather than producing garbage.
-- **Shamir Secret Sharing** - Split a secret into N shares where K are required to reconstruct. Useful for backing up passphrases, private keys, or seed phrases.
-- **EXIF Eraser** - Strip GPS, camera serial number, timestamps and all other metadata from JPEG, PNG, or WebP images via canvas re-encode.
+### Utilities (17 tools)
+- **Strong Password Generator** — Cryptographically random passwords with customizable charset and length.
+- **ASCII Armor Converter** — Round-trip between PGP binary and ASCII-armored encodings.
+- **Shamir Secret Sharing** — Split a secret into N shares where any K reconstruct it; share format `EAL-SSS/v1/{K}-of-{N}/{rawShare}`.
+- **EXIF Eraser** — Strip GPS, camera serial numbers, timestamps from JPEG / PNG / WebP via canvas re-encode.
+- **Hash & Checksum** — SHA-1 / 256 / 384 / 512 over text or files, with constant-time hash comparison.
+- **Base64 / 32 / 58 / Hex Encoder** — Cross-convert text ↔ hex ↔ Base64 (standard + URL-safe) ↔ Base32 ↔ Base58 (Bitcoin alphabet).
+- **UUID / ULID Generator** — UUID v4 (random), UUID v7 (RFC 9562 time-ordered), ULID. Bulk generate up to 1000 per click.
+- **Unix Timestamp Converter** — Auto-detect epoch seconds / milliseconds / ISO 8601; render in UTC, local, and relative ("5 minutes ago").
+- **URL Parser** — Parse via the built-in `URL` API; surface protocol/host/port/path/search/hash/origin and a query-parameter table. Percent-encode and decode utilities.
+- **TOTP / 2FA** — RFC 6238 generator; accepts `otpauth://totp/...` URIs or bare Base32 secrets. SHA-1/256/512, configurable digits (6–10) and period (15–120). Secret zeroed on Stop.
+- **Diff** — Line-level LCS comparison with optional ignore-whitespace and ignore-case toggles.
+- **CSV ↔ JSON ↔ TSV** — RFC 4180-style parser (quoted fields, escaped `""`, CRLF/LF). Auto-detect delimiter, "first row is header" toggle.
+- **Regex Tester** — Live match highlighting, numbered + named capture groups, replacement preview. Built with `createElement` / `textContent` (no `innerHTML`).
+- **Cron Decoder** — Parse 5-field cron (`*`, `*/n`, ranges, lists, named months/dows); show description and next 5 fire times in local timezone.
+- **Color Converter** — HEX ↔ RGB ↔ HSL ↔ OKLCH (hand-rolled Oklab matrices). WCAG AA / AAA contrast checker with live preview swatch.
+- **JSON / YAML / XML Formatter** — Pretty-print, minify, and cross-convert JSON ↔ YAML; pretty-print or minify XML standalone. Auto-detect input format. (TOML omitted — no small browser-ready parser exists without a build step.)
+- **CIDR / Subnet Calculator** — IPv4 only; pure 32-bit unsigned arithmetic. Network, broadcast, netmask (with binary view), wildcard, first/last usable host, total + usable counts, address class, RFC 1918 / loopback / link-local tags. Handles `/0`, `/31` (RFC 3021), and `/32` correctly.
 
 ### Languages
 
@@ -229,7 +245,7 @@ Vendored libraries are pinned by SHA-384 hash, so we don't auto-pull upstream fi
 
 - **Quarterly review** — at least once a quarter, check for new releases of OpenPGP.js, qrcode-generator, and secrets.js-grempe. Compare the diff against the pinned version, vendor the new minified file, update the SHA-384 hash in two places (HTML comment beside the `<script>` tag, and the [Manifest](#manifest) table above), and re-run `node scripts/audit-release.js`.
 - **Immediate response on advisory** — if a CVE or security advisory is published for any vendored library, treat the bump as a P0: vendor the patch within 48 hours, push a release, and note the CVE in the commit message.
-- **Pre-commit hash check** — `scripts/git-hooks/pre-commit` (a versioned hook in this repo) re-hashes every vendored library on every commit and refuses to land changes if the on-disk bytes don't match the recorded hashes. Install on a fresh clone with: `ln -sf ../../scripts/git-hooks/pre-commit .git/hooks/pre-commit`. The hook simply runs `scripts/audit-release.js`, which gates all 9 mechanically-checkable security invariants.
+- **Pre-commit hash check** — `scripts/git-hooks/pre-commit` (a versioned hook in this repo) re-hashes every vendored library on every commit and refuses to land changes if the on-disk bytes don't match the recorded hashes. Install on a fresh clone with: `ln -sf ../../scripts/git-hooks/pre-commit .git/hooks/pre-commit`. The hook simply runs `scripts/audit-release.js`, which gates all 14 mechanically-checkable invariants (innerHTML hygiene, STRINGS parity, i18n key resolution, vendored SHA-384 cross-check, CSP integrity, no outbound vectors, page weight, locale-variant sync, robots.txt + sitemap.xml + JSON-LD presence, and Phase-7 SEO prose key coverage).
 - **Automated quarterly reminder** — `.github/workflows/dep-check.yml` runs `scripts/check-dependency-updates.js` on the 1st of each quarter (Jan / Apr / Jul / Oct). The script reads the [Manifest](#manifest), queries each upstream's GitHub Releases API, and exits non-zero if any pinned version is behind upstream. The workflow then opens a tracking issue. The shipped site never makes a network call — this runs in GitHub Actions only. The reminder is informational; the actual vendoring + re-hashing remains manual (steps below).
 
 ---
@@ -248,38 +264,56 @@ The interface is a **home grid + command palette**, designed to stay minimal on 
 
 ## All Features at Your Fingertips
 
-Tools are organized into four groups. Every tool has a deep-link route (e.g. `/#/keys/qr`, `/#/utilities/exif`).
+All 33 tools are organized into four groups. Every tool has a deep-link route.
 
-### Keys
+### Keys (7)
 | Tool | Route | What it does |
 |---|---|---|
-| **Generate Keys** | `#/keys/generate` | Create new PGP key pairs (ECC Curve25519 or RSA) |
-| **Key Info** | `#/keys/key-info` | Inspect any PGP key's details and fingerprint |
-| **Revoke Key** | `#/keys/revoke` | Create revocation certificates for compromised keys |
-| **QR Share** | `#/keys/qr` | Encode a public key or encrypted message into a QR (multi-QR for long inputs) |
+| **Generate Keys** | `#/keys/generate` | Create new PGP key pairs (ECC Curve25519 or RSA 3072 / 4096) |
+| **Key Info** | `#/keys/key-info` | Inspect any PGP key's fingerprint, user ID, algorithm, expiry |
+| **Revoke Key** | `#/keys/revoke` | Create a revocation certificate for a compromised key |
+| **QR Share** | `#/keys/qr` | Encode a public key or message into a QR (multi-QR for long inputs) |
+| **TLS Certificate Parser** | `#/keys/tls-cert` | Decode an X.509 cert: subject, SAN, validity, fingerprint |
+| **SSH Key Parser** | `#/keys/ssh-key` | Inspect an OpenSSH public key: type, bits, SHA-256 fingerprint |
+| **PEM ↔ DER** | `#/keys/pem-der` | Convert between PEM (Base64) and DER (binary) encodings |
 
-### Encrypt / Decrypt
+### Encrypt / Decrypt (5)
 | Tool | Route | What it does |
 |---|---|---|
-| **Encrypt Files** | `#/crypt/encrypt` | Encrypt files using someone's public key |
-| **Decrypt Files** | `#/crypt/decrypt` | Decrypt files using your private key |
-| **Text Messages** | `#/crypt/text-crypto` | Encrypt/decrypt text for emails, chat, or notes |
-| **Password Encrypt** | `#/crypt/password-encrypt` | Encrypt files with just a password (no keys needed) |
-| **Steganography** | `#/crypt/stego` | Hide an encrypted message inside a PNG (LSB encoding) |
+| **Encrypt Files** | `#/crypt/encrypt` | Encrypt files with one or more PGP public keys |
+| **Decrypt Files** | `#/crypt/decrypt` | Decrypt files with your private key + passphrase |
+| **Text Messages** | `#/crypt/text-crypto` | Encrypt / decrypt PGP text for email, chat, or notes |
+| **Password Encrypt** | `#/crypt/password-encrypt` | Encrypt a file with a passphrase only (no PGP key needed) |
+| **Steganography** | `#/crypt/stego` | Hide a payload inside a PNG using LSB encoding |
 
-### Sign / Verify
+### Sign / Verify (4)
 | Tool | Route | What it does |
 |---|---|---|
-| **Sign** | `#/signing/sign` | Digitally sign messages or files to prove authorship |
-| **Verify** | `#/signing/verify` | Verify signatures to confirm authenticity |
+| **Sign** | `#/signing/sign` | Digitally sign messages or files (detached, attached, cleartext) |
+| **Verify** | `#/signing/verify` | Verify a PGP signature against a public key |
+| **HMAC** | `#/signing/hmac` | HMAC-SHA-1/256/384/512 sign and verify (constant-time compare) |
+| **JWT Inspector** | `#/signing/jwt` | Decode + verify HS / RS / ES JWTs; surface `exp` claim |
 
-### Utilities
+### Utilities (17)
 | Tool | Route | What it does |
 |---|---|---|
-| **Passwords** | `#/utilities/passwords` | Generate cryptographically secure passwords |
-| **Armor** | `#/utilities/armor` | Convert between ASCII-armored and binary formats |
-| **Shamir Split** | `#/utilities/shamir` | Split a secret into N shares; need K to reconstruct |
+| **Passwords** | `#/utilities/passwords` | Generate cryptographically strong random passwords |
+| **Armor** | `#/utilities/armor` | Convert between PGP binary and ASCII-armored encodings |
+| **Shamir Split** | `#/utilities/shamir` | Split a secret into N shares; any K reconstruct |
 | **EXIF Eraser** | `#/utilities/exif` | Strip GPS / metadata from JPEG, PNG, WebP images |
+| **Hash & Checksum** | `#/utilities/hash` | SHA-1/256/384/512 with constant-time compare |
+| **Encode** | `#/utilities/encode` | Cross-convert Base64 / Base32 / Base58 / Hex / text |
+| **UUID / ULID** | `#/utilities/uuid` | Bulk-generate UUID v4, UUID v7, or ULID |
+| **Unix Timestamp** | `#/utilities/timestamp` | Convert epoch ↔ ISO 8601 ↔ UTC ↔ local ↔ relative |
+| **URL Parser** | `#/utilities/url` | Parse + percent-encode / decode URLs and queries |
+| **TOTP / 2FA** | `#/utilities/totp` | RFC 6238 code generator (otpauth:// URI or bare secret) |
+| **Diff** | `#/utilities/diff` | Line-level LCS diff with whitespace / case toggles |
+| **CSV / JSON / TSV** | `#/utilities/csv` | Convert tabular data with RFC 4180 quoting |
+| **Regex Tester** | `#/utilities/regex` | Live match highlight + capture groups + replace |
+| **Cron Decoder** | `#/utilities/cron` | Decode cron expression + show next 5 run times |
+| **Color Converter** | `#/utilities/color` | HEX / RGB / HSL / OKLCH + WCAG contrast checker |
+| **Format / Convert** | `#/utilities/format` | Pretty / minify / convert JSON, YAML, and XML |
+| **CIDR / Subnet** | `#/utilities/cidr` | Decode IPv4 CIDR: network, broadcast, host range, tags |
 
 ---
 
@@ -312,13 +346,14 @@ Tools are organized into four groups. Every tool has a deep-link route (e.g. `/#
 
 ## Technology
 
-- Pure HTML, CSS, and JavaScript
-- [OpenPGP.js](https://openpgpjs.org/) v5.11.1 for encryption (vendored locally)
-- [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) v1.4.4 for QR rendering (vendored locally)
-- [secrets.js-grempe](https://github.com/grempe/secrets.js) v2.0.0 for Shamir Secret Sharing (vendored locally)
-- Web Crypto API (`SubtleCrypto.digest`) for the steganography keystream
-- No frameworks, no build process
-- Single file deployment (plus three vendored libraries)
+- Pure HTML, CSS, and JavaScript — no frameworks, no build step at deploy time.
+- [OpenPGP.js](https://openpgpjs.org/) v5.11.1 — PGP key generation, encryption, decryption, signatures (vendored locally).
+- [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) v1.4.4 — QR rendering for the QR Share tool (vendored locally).
+- [secrets.js-grempe](https://github.com/grempe/secrets.js) v2.0.0 — Shamir's Secret Sharing math (vendored locally).
+- [js-yaml](https://github.com/nodeca/js-yaml) v4.1.0 — YAML parsing and emitting for the Format / Convert tool (vendored locally).
+- **Web Crypto API** (`SubtleCrypto.digest` / `sign` / `verify` / `importKey`) — hashing, HMAC, JWT verification, TOTP, steganography keystream, certificate fingerprints.
+- **Hand-rolled, no library**: ASN.1 / DER decoding (TLS Certificate Parser), OpenSSH wire format (SSH Key Parser), Base32 / Base58 codecs, OKLCH colour matrices, cron parser, CIDR arithmetic, line-level LCS diff, RFC 4180 CSV parser, regex highlighting, percent-encoding helpers — kept hand-rolled rather than vendored to keep total page weight under 0.32 MB gzipped.
+- **Single-file deployment** (`index.html`) plus four vendored libraries — every script pinned with a SHA-384 hash that is cross-checked against the README manifest and the on-disk bytes by `scripts/audit-release.js` on every commit.
 
 ---
 
@@ -379,11 +414,11 @@ cd encryptalotta
 # Regenerate /fr/, /zh/, /de/, /hi/ from the source STRINGS table.
 node scripts/build-i18n-variants.js
 
-# Run all 9 mechanical security/quality gates. Exits non-zero on first failure.
+# Run all 14 mechanical security/quality gates. Exits non-zero on first failure.
 node scripts/audit-release.js
 ```
 
-The audit checks: zero `innerHTML =` assignments, STRINGS parity across all 5 locales, every `data-i18n` key resolves, vendored SHA-384 hashes match across HTML comments + the README manifest + on-disk bytes, CSP `connect-src 'none'` on both meta and `_headers`, no outbound network call sites, page weight under 2 MB gzipped, and locale variants in sync with source.
+The audit checks: zero `innerHTML =` assignments, STRINGS parity across all 5 locales, every `data-i18n` key resolves, vendored SHA-384 hashes match across HTML comments + the README manifest + on-disk bytes, CSP `connect-src 'none'` on both meta and `_headers`, no outbound network call sites, page weight under 2 MB gzipped, locale variants (`/fr/`, `/zh/`, `/de/`, `/hi/`) in sync with source, `robots.txt` + `sitemap.xml` + JSON-LD presence, and Phase-7 SEO prose key coverage for all 33 tools.
 
 ### Pre-commit hook (recommended)
 
@@ -406,12 +441,15 @@ openssl dgst -sha384 -binary qrcode.min.js   | openssl base64 -A
 
 openssl dgst -sha384 -binary secrets.min.js  | openssl base64 -A
 # xfBMbh8fdSIrQ9XbZARwZ5z/Eh9zC7gsgG5vSE331lZSjgXQob1KxM4m7vEdH0e0
+
+openssl dgst -sha384 -binary js-yaml.min.js  | openssl base64 -A
+# +pxiN6T7yvpryuJmE1gM9PX7yQit15auDb+ZwwvJOd/4be2Cie5/IuVXgQb/S9du
 ```
 
 Or all at once:
 
 ```bash
-for f in openpgp.min.js qrcode.min.js secrets.min.js; do
+for f in openpgp.min.js qrcode.min.js secrets.min.js js-yaml.min.js; do
     printf '%-22s %s\n' "$f" "$(openssl dgst -sha384 -binary "$f" | openssl base64 -A)"
 done
 ```
@@ -447,7 +485,7 @@ This site is optimized for Cloudflare Pages deployment with automatic security h
 | `openpgp.min.js` | Vendored OpenPGP.js (key generation, encryption, decryption, signatures) |
 | `qrcode.min.js` | Vendored qrcode-generator (QR Share tool) |
 | `secrets.min.js` | Vendored secrets.js-grempe (Shamir Secret Sharing tool) |
-| `SPEC.md` | Roadmap for the next release wave (new tools, SEO, dep-pinning) |
+| `js-yaml.min.js` | Vendored js-yaml (Format / Convert tool — YAML parse / emit) |
 | `_headers` | HTTP security headers for Cloudflare Pages |
 | `favicon.ico`, `favicon-*.png` | Browser tab icons |
 | `apple-touch-icon.png` | iOS home screen icon |
@@ -458,8 +496,11 @@ This site is optimized for Cloudflare Pages deployment with automatic security h
 | `i18n/strings.csv` | Reviewer-facing CSV exported from `STRINGS` (built by `scripts/export-strings-csv.js`) |
 | `scripts/build-i18n-variants.js` | Emits localized static HTML for each non-en locale |
 | `scripts/export-strings-csv.js` / `import-strings-csv.js` | CSV round-trip for native-speaker review |
-| `scripts/audit-release.js` | Release-gate audit: 9 mechanical security/quality checks |
+| `scripts/audit-release.js` | Release-gate audit: 14 mechanical security/quality checks |
+| `scripts/build-sitemap.js` | Regenerates `sitemap.xml` with today's `<lastmod>` and the 5 locale roots |
+| `scripts/check-dependency-updates.js` | Quarterly upstream-version checker (used by GitHub Actions only — never runs on the live site) |
 | `scripts/git-hooks/pre-commit` | Versioned pre-commit hook running `audit-release.js` |
+| `.github/workflows/dep-check.yml` | Quarterly GitHub Actions workflow that runs `check-dependency-updates.js` |
 
 ---
 
@@ -487,11 +528,12 @@ This site is optimized for Cloudflare Pages deployment with automatic security h
 
 This application is open source specifically so security researchers can audit it. Key areas to review:
 
-- `index.html` - All application logic (CSP meta tags, JavaScript cryptographic calls, memory clearing, i18n, all 15 tools)
+- `index.html` - All application logic (CSP meta tags, JavaScript cryptographic calls, memory clearing, i18n, all 33 tools)
 - `_headers` - HTTP security headers
 - `openpgp.min.js` - Compare against official OpenPGP.js v5.11.1 release
 - `qrcode.min.js` - Compare against official qrcode-generator v1.4.4 release
 - `secrets.min.js` - Compare against official secrets.js-grempe v2.0.0 release
+- `js-yaml.min.js` - Compare against official js-yaml v4.1.0 release
 - [Manifest](#manifest) section above — SHA-384 manifest for all vendored libraries
 
 A grep-friendly audit invariant: the codebase has **zero `innerHTML =` assignments**. All DOM construction goes through `createElement` / `textContent` / `setAttribute`, eliminating the most common XSS vector even when content is fully controlled by the developer.
