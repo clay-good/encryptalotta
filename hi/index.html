@@ -171,6 +171,20 @@
     <!-- Theme Color -->
     <meta name="theme-color" content="#000000">
 
+    <!-- Apply persisted theme synchronously before paint to avoid a flash of the
+         opposite theme. Reads localStorage('theme'), falls back to OS preference. -->
+    <script>
+        (function () {
+            try {
+                var saved = localStorage.getItem('theme');
+                var theme = saved === 'light' || saved === 'dark'
+                    ? saved
+                    : (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+                if (theme === 'light') document.documentElement.setAttribute('data-theme', 'light');
+            } catch (e) { /* localStorage may be blocked; default to dark */ }
+        })();
+    </script>
+
     <!-- Content Security Policy: Prevents data exfiltration and limits script sources.
          img-src 'blob:' added so user-selected images (Steganography cover/stego inputs,
          EXIF Eraser inputs) can be loaded into <img> via URL.createObjectURL(file).
@@ -219,6 +233,31 @@
             --danger: #ffffff;
             /* Focus styles for accessibility */
             --focus-ring: #4d90fe;
+            --logo-glow: rgba(255, 255, 255, 0.3);
+            --pulse-glow: rgba(255, 255, 255, 0.2);
+            --shadow-strong: rgba(0, 0, 0, 0.35);
+            --shadow-soft: rgba(0, 0, 0, 0.3);
+        }
+
+        :root[data-theme="light"] {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f4f4f4;
+            --bg-tertiary: #e8e8e8;
+            --text-primary: #0a0a0a;
+            --text-secondary: #2a2a2a;
+            --text-muted: #5a5a5a;
+            --border: #d0d0d0;
+            --border-light: #b0b0b0;
+            --accent: #0a0a0a;
+            --accent-hover: #2a2a2a;
+            --success: #0a0a0a;
+            --warning: #0a0a0a;
+            --danger: #0a0a0a;
+            --focus-ring: #1a73e8;
+            --logo-glow: rgba(0, 0, 0, 0.18);
+            --pulse-glow: rgba(0, 0, 0, 0.15);
+            --shadow-strong: rgba(0, 0, 0, 0.12);
+            --shadow-soft: rgba(0, 0, 0, 0.08);
         }
 
         body {
@@ -246,7 +285,7 @@
             height: 120px;
             margin: 0 auto 20px;
             animation: float 3s ease-in-out infinite;
-            filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.3));
+            filter: drop-shadow(0 0 20px var(--logo-glow));
         }
 
         @keyframes float {
@@ -333,6 +372,54 @@
             outline: 2px solid var(--focus-ring);
             outline-offset: 2px;
         }
+
+        /* Theme toggle button (sun/moon) — sits in the topbar next to lang switcher.
+           Shows the moon icon in light mode (click → go dark) and the sun icon in
+           dark mode (click → go light). Persisted to localStorage. */
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 0 0 auto;
+        }
+
+        .theme-toggle {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            width: 36px;
+            height: 34px;
+            padding: 0;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+            font-family: inherit;
+        }
+
+        .theme-toggle:hover { border-color: var(--border-light); }
+
+        .theme-toggle:focus {
+            outline: 2px solid var(--focus-ring);
+            outline-offset: 2px;
+        }
+
+        .theme-toggle svg {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .theme-toggle .icon-sun { display: none; }
+        .theme-toggle .icon-moon { display: inline-block; }
+        :root[data-theme="light"] .theme-toggle .icon-sun { display: inline-block; }
+        :root[data-theme="light"] .theme-toggle .icon-moon { display: none; }
 
         /* ==========================================================
            NAVIGATION (v3): minimalist home grid.
@@ -455,7 +542,7 @@
             border-color: var(--border-light);
             background: var(--bg-tertiary);
             transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+            box-shadow: 0 8px 24px var(--shadow-strong);
         }
 
         .tool-card:hover::after {
@@ -554,7 +641,7 @@
             background: var(--bg-tertiary);
             border-color: var(--border-light);
             transform: translateY(-1px);
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 6px 18px var(--shadow-soft);
         }
 
         .credit-badge:focus { outline: 2px solid var(--focus-ring); outline-offset: 3px; }
@@ -588,7 +675,7 @@
             background: var(--bg-tertiary);
             border-color: var(--border-light);
             transform: translateY(-1px);
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 6px 18px var(--shadow-soft);
         }
 
         .gh-badge:focus { outline: 2px solid var(--focus-ring); outline-offset: 3px; }
@@ -865,8 +952,8 @@
         }
 
         @keyframes pulse-warning {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.2); }
-            50% { box-shadow: 0 0 0 8px rgba(255, 255, 255, 0); }
+            0%, 100% { box-shadow: 0 0 0 0 var(--pulse-glow); }
+            50% { box-shadow: 0 0 0 8px transparent; }
         }
 
         .warning-box h3 {
@@ -1073,14 +1160,23 @@
             <img src="../encryptalotta.png" data-i18n-attr="alt:header.logoAlt" alt="Encrypt A Lot Logo">
             <span>Encrypt A Lotta</span>
         </a>
-        <div class="lang-switcher topbar-spacer">
-            <select id="lang-select" data-i18n-attr="aria-label:lang.label">
-                <option value="en">English</option>
-                <option value="fr">Français</option>
-                <option value="zh-CN">中文</option>
-                <option value="de">Deutsch</option>
-                <option value="hi">हिन्दी</option>
-            </select>
+        <div class="topbar-actions">
+            <button id="theme-toggle" class="theme-toggle" type="button"
+                    aria-label="Toggle dark mode"
+                    title="Toggle dark mode"
+                    data-i18n-attr="aria-label:header.themeToggle,title:header.themeToggle">
+                <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+            </button>
+            <div class="lang-switcher">
+                <select id="lang-select" data-i18n-attr="aria-label:lang.label">
+                    <option value="en">English</option>
+                    <option value="fr">Français</option>
+                    <option value="zh-CN">中文</option>
+                    <option value="de">Deutsch</option>
+                    <option value="hi">हिन्दी</option>
+                </select>
+            </div>
         </div>
     </header>
     <div class="container">
@@ -2655,6 +2751,7 @@
                 'header.logoAlt': 'Encrypt A Lot Logo',
                 'header.subtitle': 'Free, secure, client-side PGP encryption tool for generating keys and encrypting/decrypting files',
                 'header.github': 'Audit and contribute to our code here',
+                'header.themeToggle': 'Toggle dark mode',
                 'lang.label': 'Language',
                 'nav.aria.category': 'Tool category',
                 'nav.aria.selectTool': 'Select tool',
@@ -3515,6 +3612,7 @@
                 'header.logoAlt': 'Logo Encrypt A Lot',
                 'header.subtitle': 'Outil PGP gratuit et sécurisé, exécuté côté client, pour générer des clés et chiffrer/déchiffrer des fichiers',
                 'header.github': 'Auditez et contribuez à notre code ici',
+                'header.themeToggle': 'Basculer le mode sombre',
                 'lang.label': 'Langue',
                 'nav.aria.category': 'Catégorie d’outils',
                 'nav.aria.selectTool': 'Sélectionner un outil',
@@ -4196,6 +4294,7 @@
                 'header.logoAlt': 'Encrypt A Lot 标志',
                 'header.subtitle': '免费、安全、在浏览器本地运行的 PGP 工具，用于生成密钥并加密/解密文件',
                 'header.github': '在此审计代码并参与贡献',
+                'header.themeToggle': '切换深色模式',
                 'lang.label': '语言',
                 'nav.aria.category': '工具分类',
                 'nav.aria.selectTool': '选择工具',
@@ -4877,6 +4976,7 @@
                 'header.logoAlt': 'Encrypt-A-Lot-Logo',
                 'header.subtitle': 'Kostenloses, sicheres PGP-Tool, das vollständig im Browser läuft – zum Erzeugen von Schlüsseln und zum Ver-/Entschlüsseln von Dateien',
                 'header.github': 'Code hier prüfen und beitragen',
+                'header.themeToggle': 'Dunkelmodus umschalten',
                 'lang.label': 'Sprache',
                 'nav.aria.category': 'Werkzeugkategorie',
                 'nav.aria.selectTool': 'Werkzeug auswählen',
@@ -5558,6 +5658,7 @@
                 'header.logoAlt': 'Encrypt A Lot लोगो',
                 'header.subtitle': 'मुफ्त, सुरक्षित, ब्राउज़र में चलने वाला PGP टूल — कुंजियाँ बनाने और फ़ाइलों को एन्क्रिप्ट/डिक्रिप्ट करने के लिए',
                 'header.github': 'यहाँ हमारे कोड का ऑडिट करें और योगदान दें',
+                'header.themeToggle': 'डार्क मोड टॉगल करें',
                 'lang.label': 'भाषा',
                 'nav.aria.category': 'टूल श्रेणी',
                 'nav.aria.selectTool': 'टूल चुनें',
@@ -6615,6 +6716,31 @@
             setLang(e.target.value);
             refreshBreadcrumb();
         });
+
+        // Theme toggle (sun/moon). Pre-paint script in <head> already applied the
+        // saved theme so there's no flash here — this just handles user clicks
+        // and keeps the choice persisted.
+        (function () {
+            const btn = document.getElementById('theme-toggle');
+            if (!btn) return;
+            const meta = document.querySelector('meta[name="theme-color"]');
+            function syncMeta() {
+                if (!meta) return;
+                const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+                meta.setAttribute('content', isLight ? '#ffffff' : '#000000');
+            }
+            syncMeta();
+            btn.addEventListener('click', () => {
+                const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+                if (next === 'light') {
+                    document.documentElement.setAttribute('data-theme', 'light');
+                } else {
+                    document.documentElement.removeAttribute('data-theme');
+                }
+                try { localStorage.setItem('theme', next); } catch (e) { /* ignore */ }
+                syncMeta();
+            });
+        })();
 
         // ==================== Phase 7: per-tool "About" prose blocks ====================
         // SEO + first-time-user help. Built once at boot for every tool in TOOL_ORDER
