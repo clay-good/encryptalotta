@@ -32,7 +32,7 @@ const SRC = path.join(ROOT, 'index.html');
 const HEADERS = path.join(ROOT, '_headers');
 const README = path.join(ROOT, 'README.md');
 
-const VENDORED = ['openpgp.min.js', 'qrcode.min.js', 'secrets.min.js', 'js-yaml.min.js'];
+const VENDORED = ['openpgp.min.js', 'qrcode.js', 'secrets.min.js', 'js-yaml.min.js'];
 const LOCALE_DIRS = { fr: 'fr', 'zh-CN': 'zh', de: 'de', hi: 'hi' };
 const PAGE_WEIGHT_BUDGET_BYTES = 2 * 1024 * 1024;
 

@@ -121,7 +121,10 @@ function buildVariant(srcHtml, strings, variant) {
     );
 
     // Vendored script paths: ./*.js → ../*.js (one level up from /<lang>/).
-    out = out.replace(/src="\.\/(openpgp|qrcode|secrets|js-yaml)\.min\.js"/g, 'src="../$1.min.js"');
+    // qrcode-generator dropped the minified bundle in v2, so it ships as qrcode.js
+    // (no .min suffix). The other three vendored libraries still publish .min.js.
+    out = out.replace(/src="\.\/(openpgp|secrets|js-yaml)\.min\.js"/g, 'src="../$1.min.js"');
+    out = out.replace(/src="\.\/qrcode\.js"/g, 'src="../qrcode.js"');
 
     // Header logo: relative path needs one ../
     out = out.replace(/src="encryptalotta\.png"/g, 'src="../encryptalotta.png"');

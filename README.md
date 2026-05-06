@@ -1,17 +1,17 @@
 # encryptalotta
 
-**Free, client-side privacy and developer toolbox — 33 tools, zero server uploads.**
+**Free, client-side privacy and developer toolbox — 36 tools, zero server uploads.**
 
-A comprehensive single-page web app with **33 cryptographic, encoding, parsing, and developer utilities** that run entirely in your browser. PGP key generation, key inspection, revocation certificates, QR public-key sharing, TLS / X.509 certificate parsing, OpenSSH public key parsing, PEM ↔ DER conversion, file and text encryption / decryption, password-only (symmetric) file encryption, image steganography, digital signing and verification, HMAC, JWT inspection and verification, TOTP / 2FA, password generation, ASCII armor conversion, Shamir's Secret Sharing, EXIF metadata stripping, hashing and checksums (SHA-1 / 256 / 384 / 512), Base64 / Base32 / Base58 / hex encoding, UUID v4 / v7 and ULID generation, Unix timestamp conversion, URL parsing, line-level diff, CSV ↔ JSON ↔ TSV conversion, regex testing, cron decoding, color conversion with WCAG contrast checking, JSON / YAML / XML formatting, and CIDR / IPv4 subnet calculation. Searchable command palette (`⌘K` / `Ctrl+K`), full keyboard navigation, five UI languages. No server uploads, no analytics, no CDN, no tracking.
+A comprehensive single-page web app with **36 cryptographic, encoding, parsing, and developer utilities** that run entirely in your browser. PGP key generation, key inspection, revocation certificates, QR public-key sharing, TLS / X.509 certificate parsing, OpenSSH public key parsing, PEM ↔ DER conversion, BIP39 mnemonic generation and validation, file and text encryption / decryption, password-only (symmetric) file encryption, image steganography, digital signing and verification, HMAC, JWT inspection and verification, PBKDF2 key derivation, TOTP / 2FA, password generation, ASCII armor conversion, Shamir's Secret Sharing, EXIF metadata stripping, hashing and checksums (SHA-1 / 256 / 384 / 512), Base64 / Base32 / Base58 / hex encoding, number base conversion (binary / octal / decimal / hex / any base 2–36), UUID v4 / v7 and ULID generation, Unix timestamp conversion, URL parsing, line-level diff, CSV ↔ JSON ↔ TSV conversion, regex testing, cron decoding, color conversion with WCAG contrast checking, JSON / YAML / XML formatting, and CIDR / IPv4 subnet calculation. Searchable command palette (`⌘K` / `Ctrl+K`), full keyboard navigation, five UI languages. No server uploads, no analytics, no CDN, no tracking.
 
 **Inspired by [Kevin Qiu](https://www.linkedin.com/in/kevinmqiu)**
 
 
 ---
 
-## Features (33 tools)
+## Features (36 tools)
 
-### Keys (7 tools)
+### Keys (8 tools)
 - **Generate PGP Keys** — Create ECC (Curve25519) or RSA 3072 / 4096 key pairs with customizable expiry.
 - **Key Info** — Inspect any PGP public key: fingerprint, user IDs, algorithm, key size, creation and expiration dates.
 - **Revocation Certificate** — Generate a pre-signed certificate to retire a compromised key.
@@ -19,6 +19,7 @@ A comprehensive single-page web app with **33 cryptographic, encoding, parsing, 
 - **TLS Certificate Parser** — Hand-rolled ASN.1 / DER decoder for X.509 certificates: subject, issuer, SAN, validity, public key algorithm, SHA-1 + SHA-256 fingerprints.
 - **SSH Key Parser** — OpenSSH RFC 4253 wire-format parser: key type (rsa / ed25519 / ecdsa-sha2-nistp{256,384,521}), bit size, `SHA256:<base64>` fingerprint, comment.
 - **PEM ↔ DER** — Round-trip between PEM (Base64 with header/footer) and DER (raw binary as hex).
+- **BIP39 Mnemonic** — Generate cryptographically random 12 / 15 / 18 / 21 / 24-word seed phrases (BIP-0039) or validate the checksum of any existing mnemonic. Computes the BIP39 PBKDF2-HMAC-SHA512 seed locally with optional passphrase.
 
 ### Encrypt / Decrypt (5 tools)
 - **Encrypt Files** — Encrypt files with one or more PGP public keys.
@@ -33,7 +34,7 @@ A comprehensive single-page web app with **33 cryptographic, encoding, parsing, 
 - **HMAC** — Sign and verify with HMAC-SHA-1 / 256 / 384 / 512. Constant-time comparison on verify; key buffer zeroized after use.
 - **JWT Inspector** — Decode the three Base64-URL parts; verify HS256/384/512 (shared secret), RS256/384/512 (PEM SPKI public key), or ES256/384/512 (PEM SPKI ECDSA key). Expiry indicator from the `exp` claim.
 
-### Utilities (17 tools)
+### Utilities (19 tools)
 - **Strong Password Generator** — Cryptographically random passwords with customizable charset and length.
 - **ASCII Armor Converter** — Round-trip between PGP binary and ASCII-armored encodings.
 - **Shamir Secret Sharing** — Split a secret into N shares where any K reconstruct it; share format `EAL-SSS/v1/{K}-of-{N}/{rawShare}`.
@@ -51,6 +52,8 @@ A comprehensive single-page web app with **33 cryptographic, encoding, parsing, 
 - **Color Converter** — HEX ↔ RGB ↔ HSL ↔ OKLCH (hand-rolled Oklab matrices). WCAG AA / AAA contrast checker with live preview swatch.
 - **JSON / YAML / XML Formatter** — Pretty-print, minify, and cross-convert JSON ↔ YAML; pretty-print or minify XML standalone. Auto-detect input format. (TOML omitted — no small browser-ready parser exists without a build step.)
 - **CIDR / Subnet Calculator** — IPv4 only; pure 32-bit unsigned arithmetic. Network, broadcast, netmask (with binary view), wildcard, first/last usable host, total + usable counts, address class, RFC 1918 / loopback / link-local tags. Handles `/0`, `/31` (RFC 3021), and `/32` correctly.
+- **PBKDF2 Key Derivation** — RFC 8018 password-based key derivation via Web Crypto. Configurable iterations (1–10,000,000), salt (text or hex), key length (1–512 bytes), and PRF (SHA-1 / 256 / 384 / 512). Reports wall-clock derivation time so you can size iteration counts to a target cost.
+- **Number Base Converter** — Convert integers between binary, octal, decimal, hexadecimal, and any base 2–36 simultaneously. Auto-detects `0x` / `0b` / `0o` prefixes; uses BigInt internally so values aren't capped at 53-bit JS Number precision; preserves negatives sign-and-magnitude.
 
 ### Languages
 
@@ -93,7 +96,7 @@ Encryptalotta was designed from the ground up with security as the primary conce
 
 ### Modern Cryptography
 
-Built on [OpenPGP.js](https://openpgpjs.org/) v5.11.1, a well-audited cryptographic library:
+Built on [OpenPGP.js](https://openpgpjs.org/) v6.3.0, a well-audited cryptographic library:
 
 | Algorithm | Type | Security Level |
 |-----------|------|----------------|
@@ -117,10 +120,10 @@ All third-party JavaScript is vendored directly in the repository with SHA-384 i
 
 | File | Library | Version | License | Source | SHA-384 (base64) |
 |---|---|---|---|---|---|
-| `openpgp.min.js` | OpenPGP.js | 5.11.1 | LGPL-3.0 | <https://github.com/openpgpjs/openpgpjs> | `Mlq9yV9fsqU41CJA7E1LEbuJQx9REDo5S+jqu1+nyQebPFEY2jBD2PHKvhWPYNyT` |
-| `qrcode.min.js` | qrcode-generator | 1.4.4 | MIT | <https://github.com/kazuhikoarase/qrcode-generator> | `lQXOAyZwHXE55JFyrOMB7nY2Wv+m5ZWNtJcHrd1rceRQXAYNLak8ukN5TjBTcIwz` |
+| `openpgp.min.js` | OpenPGP.js | 6.3.0 | LGPL-3.0 | <https://github.com/openpgpjs/openpgpjs> | `Z5tStPoeClmuLPd1gAwdTCU53WcAkUjBNw7mEEvrQumVuNqEl52A9Nx5IhFdKE/c` |
+| `qrcode.js` | qrcode-generator | 2.0.4 | MIT | <https://github.com/kazuhikoarase/qrcode-generator> | `e9EFD6BGC90bkW9aDV5xbbBfzwN7G8YImHao2lfLVKV/hPB0E0go+H3I64h7oHtA` |
 | `secrets.min.js` | secrets.js-grempe | 2.0.0 | MIT | <https://github.com/grempe/secrets.js> | `xfBMbh8fdSIrQ9XbZARwZ5z/Eh9zC7gsgG5vSE331lZSjgXQob1KxM4m7vEdH0e0` |
-| `js-yaml.min.js` | js-yaml | 4.1.0 | MIT | <https://github.com/nodeca/js-yaml> | `+pxiN6T7yvpryuJmE1gM9PX7yQit15auDb+ZwwvJOd/4be2Cie5/IuVXgQb/S9du` |
+| `js-yaml.min.js` | js-yaml | 4.1.1 | MIT | <https://github.com/nodeca/js-yaml> | `ZeqCzuWczURac3RacSufGD7oSbzeaX7xxnnOr3PTcYTLx4Av0qBj0kBq7AeCtHLA` |
 
 Each hash is also recorded inline as an HTML comment beside the corresponding `<script>` tag in [index.html](index.html), so a reader auditing the page source sees the same integrity claim.
 
@@ -141,7 +144,7 @@ If you fork this repo onto a different domain and want to add SRI, replace each 
 
 ```html
 <script src="./openpgp.min.js"
-        integrity="sha384-Mlq9yV9fsqU41CJA7E1LEbuJQx9REDo5S+jqu1+nyQebPFEY2jBD2PHKvhWPYNyT"
+        integrity="sha384-Z5tStPoeClmuLPd1gAwdTCU53WcAkUjBNw7mEEvrQumVuNqEl52A9Nx5IhFdKE/c"
         crossorigin="anonymous"></script>
 ```
 
@@ -157,9 +160,9 @@ This eliminates entire categories of supply chain attacks that have affected oth
 
 Sensitive data is cleared from memory after use:
 
-- **Automatic passphrase clearing** - Passphrase fields are wiped after decryption operations
-- **Page unload protection** - Private keys and sensitive fields are cleared when you close or navigate away from the page
-- **JavaScript variable clearing** - Sensitive string variables are overwritten when no longer needed
+- **Automatic passphrase clearing** — Passphrase fields are wiped after decryption operations.
+- **Page unload protection** — On `beforeunload`, `clearSensitiveFields()` wipes every passphrase, private-key, shared-secret, BIP39 mnemonic, and PBKDF2 password input across all 36 tools, plus the readonly output panes that render decrypted plaintext, derived keys, BIP39 seeds, Shamir secrets, and steganographic payloads. Public keys, signed messages, and signature-verification statuses are left alone (they aren't secrets and clearing them would erase audit context).
+- **JavaScript variable clearing** — Sensitive `Uint8Array` buffers (PBKDF2 password bytes, generated PGP private keys) are zeroized via `.fill(0)` / `secureWipe()` after use. (Note: this is best-effort — JS engines may have already retained internal copies for GC, and `String` values are immutable so we cannot overwrite them in place.)
 
 ### Strict Content Security Policy
 
@@ -243,7 +246,7 @@ If your threat model includes any of: a determined nation-state, a targeted atta
 
 Vendored libraries are pinned by SHA-384 hash, so we don't auto-pull upstream fixes. To compensate:
 
-- **Quarterly review** — at least once a quarter, check for new releases of OpenPGP.js, qrcode-generator, and secrets.js-grempe. Compare the diff against the pinned version, vendor the new minified file, update the SHA-384 hash in two places (HTML comment beside the `<script>` tag, and the [Manifest](#manifest) table above), and re-run `node scripts/audit-release.js`.
+- **Quarterly review** — at least once a quarter, check for new releases of OpenPGP.js, qrcode-generator, secrets.js-grempe, and js-yaml. Compare the diff against the pinned version, vendor the new minified file, update the SHA-384 hash in two places (HTML comment beside the `<script>` tag, and the [Manifest](#manifest) table above), and re-run `node scripts/audit-release.js`.
 - **Immediate response on advisory** — if a CVE or security advisory is published for any vendored library, treat the bump as a P0: vendor the patch within 48 hours, push a release, and note the CVE in the commit message.
 - **Pre-commit hash check** — `scripts/git-hooks/pre-commit` (a versioned hook in this repo) re-hashes every vendored library on every commit and refuses to land changes if the on-disk bytes don't match the recorded hashes. Install on a fresh clone with: `ln -sf ../../scripts/git-hooks/pre-commit .git/hooks/pre-commit`. The hook simply runs `scripts/audit-release.js`, which gates all 14 mechanically-checkable invariants (innerHTML hygiene, STRINGS parity, i18n key resolution, vendored SHA-384 cross-check, CSP integrity, no outbound vectors, page weight, locale-variant sync, robots.txt + sitemap.xml + JSON-LD presence, and Phase-7 SEO prose key coverage).
 - **Automated quarterly reminder** — `.github/workflows/dep-check.yml` runs `scripts/check-dependency-updates.js` on the 1st of each quarter (Jan / Apr / Jul / Oct). The script reads the [Manifest](#manifest), queries each upstream's GitHub Releases API, and exits non-zero if any pinned version is behind upstream. The workflow then opens a tracking issue. The shipped site never makes a network call — this runs in GitHub Actions only. The reminder is informational; the actual vendoring + re-hashing remains manual (steps below).
@@ -264,9 +267,9 @@ The interface is a **home grid + command palette**, designed to stay minimal on 
 
 ## All Features at Your Fingertips
 
-All 33 tools are organized into four groups. Every tool has a deep-link route.
+All 36 tools are organized into four groups. Every tool has a deep-link route.
 
-### Keys (7)
+### Keys (8)
 | Tool | Route | What it does |
 |---|---|---|
 | **Generate Keys** | `#/keys/generate` | Create new PGP key pairs (ECC Curve25519 or RSA 3072 / 4096) |
@@ -276,6 +279,7 @@ All 33 tools are organized into four groups. Every tool has a deep-link route.
 | **TLS Certificate Parser** | `#/keys/tls-cert` | Decode an X.509 cert: subject, SAN, validity, fingerprint |
 | **SSH Key Parser** | `#/keys/ssh-key` | Inspect an OpenSSH public key: type, bits, SHA-256 fingerprint |
 | **PEM ↔ DER** | `#/keys/pem-der` | Convert between PEM (Base64) and DER (binary) encodings |
+| **BIP39 Mnemonic** | `#/keys/bip39` | Generate or validate BIP-0039 mnemonic seed phrases (12 / 15 / 18 / 21 / 24 words) |
 
 ### Encrypt / Decrypt (5)
 | Tool | Route | What it does |
@@ -294,7 +298,7 @@ All 33 tools are organized into four groups. Every tool has a deep-link route.
 | **HMAC** | `#/signing/hmac` | HMAC-SHA-1/256/384/512 sign and verify (constant-time compare) |
 | **JWT Inspector** | `#/signing/jwt` | Decode + verify HS / RS / ES JWTs; surface `exp` claim |
 
-### Utilities (17)
+### Utilities (19)
 | Tool | Route | What it does |
 |---|---|---|
 | **Passwords** | `#/utilities/passwords` | Generate cryptographically strong random passwords |
@@ -314,6 +318,8 @@ All 33 tools are organized into four groups. Every tool has a deep-link route.
 | **Color Converter** | `#/utilities/color` | HEX / RGB / HSL / OKLCH + WCAG contrast checker |
 | **Format / Convert** | `#/utilities/format` | Pretty / minify / convert JSON, YAML, and XML |
 | **CIDR / Subnet** | `#/utilities/cidr` | Decode IPv4 CIDR: network, broadcast, host range, tags |
+| **PBKDF2** | `#/utilities/pbkdf2` | Derive a key from a password (configurable iterations, salt, PRF) |
+| **Number Base** | `#/utilities/base` | Convert integers between binary, octal, decimal, hex, any base 2–36 |
 
 ---
 
@@ -342,15 +348,33 @@ All 33 tools are organized into four groups. Every tool has a deep-link route.
 - Pre-strip detection (informational only) parses JPEG APP1 segments for IFD0 + GPS-IFD tag counts, and PNG `tEXt`/`iTXt`/`zTXt`/`eXIf` chunks. The strip happens regardless of the detection result.
 - **Re-encoding recompresses the image.** For a JPEG with sensitive metadata that you want removed *without* recompression, use a desktop tool. Default quality is 92, adjustable 50–100.
 
+### BIP39 Mnemonic
+- **A BIP39 mnemonic is a wallet master key.** Anyone holding the words can derive every private key in every account derived from it, on every chain. Treat the words like cash, not like an email password.
+- Entropy is generated locally via `crypto.getRandomValues` (the browser's Web Crypto CSPRNG). The official BIP-0039 English wordlist (2048 words) is vendored inline; no network fetch.
+- The seed is computed via `PBKDF2-HMAC-SHA512(mnemonic, "mnemonic" + passphrase, 2048 iterations, 64 bytes)` per the BIP39 spec, using Web Crypto.
+- The mnemonic textarea and passphrase field are both included in `clearSensitiveFields()` and wiped on page unload — but a tab snapshot, browser extension, or screen-recording could capture them in the meantime. **For high-value wallets, generate the mnemonic on an air-gapped machine.**
+- Validation is offline-only (checksum + seed derivation). It does not check whether the mnemonic controls funds on any chain.
+
+### PBKDF2 Key Derivation
+- Web Crypto's `SubtleCrypto.deriveBits` runs the PBKDF2 loop locally; the password buffer is zeroized after the derive call.
+- Iteration count and PRF choice directly govern brute-force cost. **OWASP 2023 guidance**: ≥600,000 iterations for PBKDF2-HMAC-SHA-256, ≥1,300,000 for SHA-1. The default 100,000 is conservative for *test vectors*, not for protecting a real password — bump it before shipping a derived key into production storage.
+- Output length is capped at 512 bytes to avoid pathological inputs; that's well above any standard symmetric-key size.
+- **PBKDF2 is not the strongest password KDF.** For new designs, prefer Argon2id (memory-hard) where the runtime allows it. PBKDF2 is included here because it is the lowest-common-denominator that ships with Web Crypto and matches RFC 8018, the JWE/PKCS#5 ecosystem, and most existing test vectors.
+
+### Number Base Converter
+- Pure JavaScript BigInt — no library — so values aren't capped at 53-bit JS Number precision and there's no `Number.MAX_SAFE_INTEGER` corner case.
+- Negatives are stored sign-and-magnitude: `-0xff` → `-255` decimal → `-11111111` binary. Two's-complement views are not produced; if you need them for a fixed-width register, mask explicitly with the appropriate `2^n - 1`.
+- Underscores in input are stripped as digit-grouping separators (matches Python / Rust literals). Leading `0x` / `0b` / `0o` are recognized when "Auto" is selected.
+
 ---
 
 ## Technology
 
 - Pure HTML, CSS, and JavaScript — no frameworks, no build step at deploy time.
-- [OpenPGP.js](https://openpgpjs.org/) v5.11.1 — PGP key generation, encryption, decryption, signatures (vendored locally).
-- [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) v1.4.4 — QR rendering for the QR Share tool (vendored locally).
+- [OpenPGP.js](https://openpgpjs.org/) v6.3.0 — PGP key generation, encryption, decryption, signatures (vendored locally).
+- [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) v2.0.4 — QR rendering for the QR Share tool (vendored locally).
 - [secrets.js-grempe](https://github.com/grempe/secrets.js) v2.0.0 — Shamir's Secret Sharing math (vendored locally).
-- [js-yaml](https://github.com/nodeca/js-yaml) v4.1.0 — YAML parsing and emitting for the Format / Convert tool (vendored locally).
+- [js-yaml](https://github.com/nodeca/js-yaml) v4.1.1 — YAML parsing and emitting for the Format / Convert tool (vendored locally).
 - **Web Crypto API** (`SubtleCrypto.digest` / `sign` / `verify` / `importKey`) — hashing, HMAC, JWT verification, TOTP, steganography keystream, certificate fingerprints.
 - **Hand-rolled, no library**: ASN.1 / DER decoding (TLS Certificate Parser), OpenSSH wire format (SSH Key Parser), Base32 / Base58 codecs, OKLCH colour matrices, cron parser, CIDR arithmetic, line-level LCS diff, RFC 4180 CSV parser, regex highlighting, percent-encoding helpers — kept hand-rolled rather than vendored to keep total page weight under 0.32 MB gzipped.
 - **Single-file deployment** (`index.html`) plus four vendored libraries — every script pinned with a SHA-384 hash that is cross-checked against the README manifest and the on-disk bytes by `scripts/audit-release.js` on every commit.
@@ -418,7 +442,7 @@ node scripts/build-i18n-variants.js
 node scripts/audit-release.js
 ```
 
-The audit checks: zero `innerHTML =` assignments, STRINGS parity across all 5 locales, every `data-i18n` key resolves, vendored SHA-384 hashes match across HTML comments + the README manifest + on-disk bytes, CSP `connect-src 'none'` on both meta and `_headers`, no outbound network call sites, page weight under 2 MB gzipped, locale variants (`/fr/`, `/zh/`, `/de/`, `/hi/`) in sync with source, `robots.txt` + `sitemap.xml` + JSON-LD presence, and Phase-7 SEO prose key coverage for all 33 tools.
+The audit checks: zero `innerHTML =` assignments, STRINGS parity across all 5 locales, every `data-i18n` key resolves, vendored SHA-384 hashes match across HTML comments + the README manifest + on-disk bytes, CSP `connect-src 'none'` on both meta and `_headers`, no outbound network call sites, page weight under 2 MB gzipped, locale variants (`/fr/`, `/zh/`, `/de/`, `/hi/`) in sync with source, `robots.txt` + `sitemap.xml` + JSON-LD presence, and Phase-7 SEO prose key coverage for all 36 tools.
 
 ### Pre-commit hook (recommended)
 
@@ -434,22 +458,22 @@ To verify that the vendored libraries haven't been tampered with, run:
 
 ```bash
 openssl dgst -sha384 -binary openpgp.min.js  | openssl base64 -A
-# Mlq9yV9fsqU41CJA7E1LEbuJQx9REDo5S+jqu1+nyQebPFEY2jBD2PHKvhWPYNyT
+# Z5tStPoeClmuLPd1gAwdTCU53WcAkUjBNw7mEEvrQumVuNqEl52A9Nx5IhFdKE/c
 
-openssl dgst -sha384 -binary qrcode.min.js   | openssl base64 -A
-# lQXOAyZwHXE55JFyrOMB7nY2Wv+m5ZWNtJcHrd1rceRQXAYNLak8ukN5TjBTcIwz
+openssl dgst -sha384 -binary qrcode.js   | openssl base64 -A
+# e9EFD6BGC90bkW9aDV5xbbBfzwN7G8YImHao2lfLVKV/hPB0E0go+H3I64h7oHtA
 
 openssl dgst -sha384 -binary secrets.min.js  | openssl base64 -A
 # xfBMbh8fdSIrQ9XbZARwZ5z/Eh9zC7gsgG5vSE331lZSjgXQob1KxM4m7vEdH0e0
 
 openssl dgst -sha384 -binary js-yaml.min.js  | openssl base64 -A
-# +pxiN6T7yvpryuJmE1gM9PX7yQit15auDb+ZwwvJOd/4be2Cie5/IuVXgQb/S9du
+# ZeqCzuWczURac3RacSufGD7oSbzeaX7xxnnOr3PTcYTLx4Av0qBj0kBq7AeCtHLA
 ```
 
 Or all at once:
 
 ```bash
-for f in openpgp.min.js qrcode.min.js secrets.min.js js-yaml.min.js; do
+for f in openpgp.min.js qrcode.js secrets.min.js js-yaml.min.js; do
     printf '%-22s %s\n' "$f" "$(openssl dgst -sha384 -binary "$f" | openssl base64 -A)"
 done
 ```
@@ -483,7 +507,7 @@ This site is optimized for Cloudflare Pages deployment with automatic security h
 |------|---------|
 | `index.html` | Main application (single-file, self-contained, includes all UI + i18n strings + tool logic) |
 | `openpgp.min.js` | Vendored OpenPGP.js (key generation, encryption, decryption, signatures) |
-| `qrcode.min.js` | Vendored qrcode-generator (QR Share tool) |
+| `qrcode.js` | Vendored qrcode-generator (QR Share tool) |
 | `secrets.min.js` | Vendored secrets.js-grempe (Shamir Secret Sharing tool) |
 | `js-yaml.min.js` | Vendored js-yaml (Format / Convert tool — YAML parse / emit) |
 | `_headers` | HTTP security headers for Cloudflare Pages |
@@ -528,12 +552,12 @@ This site is optimized for Cloudflare Pages deployment with automatic security h
 
 This application is open source specifically so security researchers can audit it. Key areas to review:
 
-- `index.html` - All application logic (CSP meta tags, JavaScript cryptographic calls, memory clearing, i18n, all 33 tools)
+- `index.html` - All application logic (CSP meta tags, JavaScript cryptographic calls, memory clearing, i18n, all 36 tools)
 - `_headers` - HTTP security headers
-- `openpgp.min.js` - Compare against official OpenPGP.js v5.11.1 release
-- `qrcode.min.js` - Compare against official qrcode-generator v1.4.4 release
+- `openpgp.min.js` - Compare against official OpenPGP.js v6.3.0 release
+- `qrcode.js` - Compare against official qrcode-generator v2.0.4 release
 - `secrets.min.js` - Compare against official secrets.js-grempe v2.0.0 release
-- `js-yaml.min.js` - Compare against official js-yaml v4.1.0 release
+- `js-yaml.min.js` - Compare against official js-yaml v4.1.1 release
 - [Manifest](#manifest) section above — SHA-384 manifest for all vendored libraries
 
 A grep-friendly audit invariant: the codebase has **zero `innerHTML =` assignments**. All DOM construction goes through `createElement` / `textContent` / `setAttribute`, eliminating the most common XSS vector even when content is fully controlled by the developer.

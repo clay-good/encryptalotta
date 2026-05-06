@@ -1,7 +1,7 @@
 {
-  "name": "encryptalotta — 33 free client-side privacy and developer tools",
+  "name": "encryptalotta — 36 free client-side privacy and developer tools",
   "short_name": "encryptalotta",
-  "description": "Free, client-side privacy and developer toolbox with 33 tools that run entirely in your browser: PGP encryption / decryption / signing / verification, TLS and SSH key parsers, HMAC, JWT, TOTP / 2FA, hashing, encoding, UUID / ULID, password generator, QR sharing, Shamir secret sharing, EXIF eraser, steganography, regex, CSV / JSON / YAML / XML, cron, color, CIDR. No server uploads, no analytics, no CDN.",
+  "description": "Free, client-side privacy and developer toolbox with 36 tools that run entirely in your browser: PGP encryption / decryption / signing / verification, TLS and SSH key parsers, BIP39 mnemonic generator, HMAC, JWT, TOTP / 2FA, PBKDF2, hashing, encoding, number base converter, UUID / ULID, password generator, QR sharing, Shamir secret sharing, EXIF eraser, steganography, regex, CSV / JSON / YAML / XML, cron, color, CIDR. No server uploads, no analytics, no CDN.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

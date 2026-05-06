@@ -52,11 +52,15 @@ function main() {
     const html = fs.readFileSync(SRC, 'utf8');
     const S = extractStrings(html);
 
+    // Phase 7 carve-out: per-tool SEO prose (title, metaDescription, about.{what,how,why})
+    // is intentionally English-only; t() falls back to en for non-en locales. Mirrors the
+    // identical exemption in scripts/audit-release.js and scripts/build-i18n-variants.js.
+    const SEO_EN_ONLY_RE = /^tool\.[a-z0-9-]+\.(title|metaDescription|about\.(what|how|why))$/;
     const enKeys = new Set(Object.keys(S.en));
     for (const l of LOCALES) {
         if (!S[l]) throw new Error(`Locale ${l} missing`);
         const lk = new Set(Object.keys(S[l]));
-        const missing = [...enKeys].filter(k => !lk.has(k));
+        const missing = [...enKeys].filter(k => !lk.has(k) && !SEO_EN_ONLY_RE.test(k));
         if (missing.length) throw new Error(`${l} missing keys: ${missing.slice(0,3).join(', ')}...`);
     }
 

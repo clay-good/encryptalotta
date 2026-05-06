@@ -129,9 +129,16 @@ function main() {
     if (missingFromCsv.length) throw new Error(`CSV missing keys: ${missingFromCsv.slice(0,5).join(', ')}`);
     if (extraInCsv.length) throw new Error(`CSV has unknown keys: ${extraInCsv.slice(0,5).join(', ')}`);
 
+    // Phase 7 carve-out: per-tool SEO prose (title, metaDescription, about.{what,how,why})
+    // is intentionally English-only; t() falls back to en for non-en locales. Non-en cells
+    // for these keys are blank in the CSV by design — skip them. If a reviewer fills one
+    // in, warn (we don't currently insert new keys into the locale block on the fly).
+    const SEO_EN_ONLY_RE = /^tool\.[a-z0-9-]+\.(title|metaDescription|about\.(what|how|why))$/;
+
     let literal = html.slice(absStart, absEnd);
     let changed = 0;
     let enDriftWarnings = 0;
+    let enOnlyAttempts = 0;
 
     for (const row of rows) {
         const key = row[colIdx.key];
@@ -139,10 +146,21 @@ function main() {
             console.warn(`warn: en column edited for '${key}' — ignored (en is source of truth, edit index.html)`);
             enDriftWarnings++;
         }
+        const isEnOnly = SEO_EN_ONLY_RE.test(key);
         for (const lang of TARGET_LOCALES) {
             const newVal = row[colIdx[lang]];
             const oldVal = STRINGS[lang][key];
             if (newVal === oldVal) continue;
+            if (isEnOnly) {
+                // oldVal is undefined (key absent from non-en blocks). Empty cells are the
+                // expected state and silently ignored. A non-empty cell means the reviewer
+                // wants a translation — flag it but don't error, so the import completes.
+                if (newVal && newVal.trim()) {
+                    console.warn(`warn: '${key}' is en-only (Phase 7 SEO prose); ${lang} translation '${newVal.slice(0, 40)}…' ignored. Add the key to the ${lang} STRINGS block in index.html manually if you want it shipped.`);
+                    enOnlyAttempts++;
+                }
+                continue;
+            }
             const block = findLocaleBlock(literal, lang);
             const blockText = literal.slice(block.open, block.close + 1);
             const updatedBlock = replaceKeyInBlock(blockText, key, newVal);
@@ -152,7 +170,7 @@ function main() {
     }
 
     if (changed === 0) {
-        console.log(`no changes (${enDriftWarnings} en-drift warnings ignored)`);
+        console.log(`no changes (${enDriftWarnings} en-drift warnings, ${enOnlyAttempts} en-only-translation attempts ignored)`);
         return;
     }
 
@@ -162,12 +180,12 @@ function main() {
     const { obj: roundtrip } = extractStrings(updated);
     for (const l of ['en', ...TARGET_LOCALES]) {
         const lk = new Set(Object.keys(roundtrip[l]));
-        const missing = [...enKeys].filter(k => !lk.has(k));
+        const missing = [...enKeys].filter(k => !lk.has(k) && !SEO_EN_ONLY_RE.test(k));
         if (missing.length) throw new Error(`Post-write parity check failed for ${l}: ${missing.slice(0,3).join(', ')}`);
     }
 
     fs.writeFileSync(SRC, updated, 'utf8');
-    console.log(`wrote ${changed} value updates to index.html (${enDriftWarnings} en-drift warnings ignored)`);
+    console.log(`wrote ${changed} value updates to index.html (${enDriftWarnings} en-drift warnings, ${enOnlyAttempts} en-only-translation attempts ignored)`);
 }
 
 main();

@@ -26,8 +26,9 @@ const README = path.join(__dirname, '..', 'README.md');
 // npm is queried first for these; GitHub is the fallback.
 const NPM_OVERRIDE = {
     'openpgp.min.js': 'openpgp',
-    'qrcode.min.js': 'qrcode-generator',
-    'secrets.min.js': 'secrets.js-grempe'
+    'qrcode.js': 'qrcode-generator',
+    'secrets.min.js': 'secrets.js-grempe',
+    'js-yaml.min.js': 'js-yaml'
 };
 
 function parseManifest(md) {
