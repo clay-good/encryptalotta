@@ -47,3 +47,13 @@ node_modules/
 *.ipr
 *.sublime-project
 *.sublime-workspace
+
+# E2E test harness (Playwright)
+tests/node_modules/
+tests/test-results/
+tests/reports/
+tests/playwright-report/
+
+# Stray Playwright artifact dirs (when run from repo root)
+test-results/
+playwright-report/

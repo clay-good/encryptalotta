@@ -16,9 +16,16 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="manifest" href="/site.webmanifest">
 
-    <!-- Security Headers (meta tag equivalents) -->
+    <!-- Security Headers (meta-tag equivalents).
+         Note: X-Frame-Options is intentionally NOT set here. Per the Fetch spec
+         (https://fetch.spec.whatwg.org/#x-frame-options-header), X-Frame-Options
+         is ONLY honoured as an HTTP response header — when delivered via <meta>
+         the browser ignores it and emits a console warning. Clickjacking is
+         instead enforced by:
+           1. CSP `frame-ancestors 'none'` in the HTTP `_headers` file (also
+              not allowed in <meta> per CSP Level 3 §Restrictions).
+           2. The `X-Frame-Options: DENY` HTTP header in `_headers`. -->
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
-    <meta http-equiv="X-Frame-Options" content="DENY">
     <meta name="referrer" content="no-referrer">
 
     <!-- SEO Meta Tags
@@ -188,13 +195,18 @@
         })();
     </script>
 
-    <!-- Content Security Policy: Prevents data exfiltration and limits script sources.
-         img-src 'blob:' added so user-selected images (Steganography cover/stego inputs,
-         EXIF Eraser inputs) can be loaded into <img> via URL.createObjectURL(file).
-         No blob: URLs are ever fetched from the network — all blobs originate from local
-         File or canvas data and are revoked after use. connect-src 'none' is preserved. -->
+    <!-- Content Security Policy (defense-in-depth meta variant).
+         The authoritative CSP is the HTTP header in /_headers (Cloudflare Pages).
+         This <meta> exists so the same lockdown applies when the site is served
+         from a host that doesn't honour _headers (local file://, GitHub Pages, etc.).
+         img-src 'blob:' is required so user-selected images (Steganography cover/stego
+         inputs, EXIF Eraser inputs) can be loaded into <img> via URL.createObjectURL(file).
+         No blob: URLs are ever fetched from the network. connect-src 'none' is preserved.
+         frame-ancestors / report-uri / report-to / sandbox are intentionally OMITTED here
+         — per CSP Level 3 §Restrictions (https://www.w3.org/TR/CSP3/#meta) those
+         directives are ignored when delivered via <meta>. They are set in /_headers. -->
     <meta http-equiv="Content-Security-Policy"
-          content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://encryptalotta.com; connect-src 'none'; form-action 'self'; base-uri 'self'; frame-ancestors 'none';">
+          content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://encryptalotta.com; connect-src 'none'; form-action 'self'; base-uri 'self'; upgrade-insecure-requests">
 
     <!-- Vendored OpenPGP.js - loaded locally to eliminate CDN supply chain risk -->
     <!-- SHA384 hash: Z5tStPoeClmuLPd1gAwdTCU53WcAkUjBNw7mEEvrQumVuNqEl52A9Nx5IhFdKE/c -->
@@ -261,6 +273,21 @@
             --pulse-glow: rgba(0, 0, 0, 0.15);
             --shadow-strong: rgba(0, 0, 0, 0.12);
             --shadow-soft: rgba(0, 0, 0, 0.08);
+        }
+
+        /* Honour OS-level "Reduce motion" — WCAG 2.3.3 (AAA) and broadly expected by users
+           with vestibular disorders. Decorative animations (fadeInUp, float, pulse, etc.)
+           collapse to ~instant; functional transitions (focus rings, button presses) keep
+           a 1ms transition rather than 0 to avoid Safari/Firefox layout-thrash bugs. */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.001ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.001ms !important;
+                scroll-behavior: auto !important;
+            }
         }
 
         body {
@@ -8681,6 +8708,8 @@
                     3: 'Key is no longer used'
                 };
 
+                // openpgp.revokeKey defaults to format='armored', returning a string for `publicKey`.
+                // Older code expected an object with .armor(); newer openpgp.js returns the string directly.
                 const { publicKey: revokedKey } = await openpgp.revokeKey({
                     key: privateKey,
                     reasonForRevocation: {
@@ -8689,7 +8718,7 @@
                     }
                 });
 
-                const revocationCert = revokedKey.armor();
+                const revocationCert = (typeof revokedKey === 'string') ? revokedKey : revokedKey.armor();
 
                 // Clear and build result
                 while (resultDiv.firstChild) {
@@ -9264,11 +9293,10 @@
         });
 
         // ==================== SHAMIR SECRET SHARING (Phase 3c) ====================
-        // Library: secrets.js-grempe (vendored). Initialized to 256-bit security.
+        // Library: secrets.js-grempe (vendored). Auto-inits to 8-bit GF (max 255 shares),
+        // which exceeds the UI cap of 20. The `bits` param is the finite-field word size
+        // per secrets.js docs, not a security level — it must be 3..20.
         // Share format: "EAL-SSS/v1/{K}-of-{N}/{rawShare}"
-        if (typeof secrets !== 'undefined' && secrets.init) {
-            secrets.init(256);
-        }
         const SHAMIR_PREFIX_RE = /^EAL-SSS\/v1\/(\d+)-of-(\d+)\/(.+)$/;
 
         // Mode toggle
@@ -9731,11 +9759,10 @@
             try {
                 if (file) {
                     bytes = new Uint8Array(await file.arrayBuffer());
-                } else if (text) {
-                    bytes = new TextEncoder().encode(text);
                 } else {
-                    alert(t('err.hashEmpty'));
-                    return;
+                    // Empty text is a valid input — every published hash standard defines
+                    // the "" vector (e.g. SHA-256("") = e3b0c44…b855 per FIPS 180-4 §B.1).
+                    bytes = new TextEncoder().encode(text || '');
                 }
             } catch (e) {
                 alert(t('err.hashRead') + ': ' + e.message);
