@@ -487,6 +487,56 @@ test('gs1: rejects bad check digit', async ({ page }) => {
   await expect(page.locator('#gs1-results')).toContainText(/Checksum failed/i, { timeout: 5_000 });
 });
 
+// Real public-record VAT IDs used in DE's own VIES documentation examples.
+test('vat: DE 136695976 passes mod 11,10 checksum', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'vat');
+  await page.fill('#vat-input', 'DE136695976');
+  await page.click('#btn-vat-validate');
+  await expect(page.locator('#vat-results')).toContainText(/Format and checksum OK|✓/i, { timeout: 5_000 });
+  await expect(page.locator('#vat-results')).toContainText(/Germany/, { timeout: 5_000 });
+});
+
+// FR mod 97: key = (12 + 3*(SIREN mod 97)) mod 97. 40 303265045.
+test('vat: FR 40303265045 passes mod 97 checksum', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'vat');
+  await page.fill('#vat-input', 'FR 40 303 265 045');
+  await page.click('#btn-vat-validate');
+  await expect(page.locator('#vat-results')).toContainText(/Format and checksum OK|✓/i, { timeout: 5_000 });
+  await expect(page.locator('#vat-results')).toContainText(/France/, { timeout: 5_000 });
+});
+
+// IT VAT uses Luhn over 11 digits. 00159560366 is Ferrero's public P.IVA.
+test('vat: IT 00159560366 passes Luhn checksum', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'vat');
+  await page.fill('#vat-input', 'IT00159560366');
+  await page.click('#btn-vat-validate');
+  await expect(page.locator('#vat-results')).toContainText(/Format and checksum OK|✓/i, { timeout: 5_000 });
+});
+
+// NL post-2020 format has no published checksum; tool reports "format only".
+test('vat: NL 123456789B01 reports format-only (no published checksum)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'vat');
+  await page.fill('#vat-input', 'NL123456789B01');
+  await page.click('#btn-vat-validate');
+  await expect(page.locator('#vat-results')).toContainText(/Format OK|no published checksum/i, { timeout: 5_000 });
+});
+
+// Spanish NIF for an individual must be explicitly rejected, not silently failed.
+test('vat: rejects ES individual NIF (PII guardrail)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'vat');
+  await page.fill('#vat-input', '12345678Z');
+  await page.click('#btn-vat-validate');
+  await expect(page.locator('#vat-results')).toContainText(/personal identity|NIF/i, { timeout: 5_000 });
+});
+
+// Flip a digit in the DE example — mod 11,10 should reject.
+test('vat: DE bad checksum is rejected', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'vat');
+  await page.fill('#vat-input', 'DE136695977');
+  await page.click('#btn-vat-validate');
+  await expect(page.locator('#vat-results')).toContainText(/Checksum failed/i, { timeout: 5_000 });
+});
+
 // =============== GLOBAL ===============
 
 test('home grid: every card navigates without uncaught errors', async ({ page }) => {

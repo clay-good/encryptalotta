@@ -1,6 +1,6 @@
 # Spec — International public-good extensions to encryptalotta
 
-Status: draft 2 (Phase 4 partially landed: IBAN, BIC, GS1)
+Status: draft 3 (Phase 4 partially landed: IBAN, BIC, GS1, VAT)
 Audience: maintainers and contributors
 Scope: how to extend encryptalotta.com so it serves an international audience — with a deliberate emphasis on Europe and other regions that lean heavily on open-source — without compromising the site's existing character (single-page, fully client-side, no analytics, no CDN, no tracking, no build step beyond a couple of vendored scripts).
 
@@ -259,9 +259,11 @@ Each tool below follows the existing project pattern: pure browser code, zero ne
 
 **Dependencies:** none.
 
-### 2.3 EU VAT number validator (offline)
+### 2.3 EU VAT number validator (offline) — **✅ shipped (draft 3)**
 
 **Why:** Catches 90% of typos without ever touching VIES.
+
+**Status notes (draft 3):** Landed as the `vat` tool. Format check for all 27 EU member states + GB, NO, CH, XI (Northern Ireland). Checksum implemented for AT, BE, DE, DK, EE, EL, ES (CIF only), FI, FR, HR, HU, IT, LU, MT, PL, PT, SE, SI, SK, CH, NO (≈ 70% of supported set). Countries without a published or stable algorithm (BG, CY, CZ, GB legacy, IE, LT, LV, NL post-2020, RO, XI) report "format only" without claiming more. ES support is intentionally limited to the CIF subset; individual NIF (`12345678Z`-style) and NIE (`X1234567Z`-style) inputs are explicitly rejected with a message pointing at the spec, satisfying the §7.1 tension constraint. en/fr/de translations locked against standard tax terminology (German `USt-IdNr.`, French `TVA`); zh-CN/hi are machine-quality drafts. Functional tests cover real public VAT numbers from DE/FR/IT (Ferrero `IT00159560366`), the NL "format-only" path, the ES NIF rejection, and a DE flipped-digit negative case.
 
 **Spec:**
 - Per-country format and checksum table for all 27 EU member states + GB, NO, CH (close enough to ship together).
@@ -539,7 +541,7 @@ Each phase is independent. Stop after any phase; nothing below requires the next
 
 1. ✅ IBAN validator/generator (§2.1) — landed draft 2.
 2. ✅ BIC/SWIFT checker (§2.2) — landed draft 2.
-3. EU VAT validator (§2.3).
+3. ✅ EU VAT validator (§2.3) — landed draft 3.
 4. ✅ GS1 barcode (§2.13) — landed draft 2.
 5. BLAKE2b / BLAKE3 (§2.12).
 6. Ed25519 / X25519 standalone (§2.10).
@@ -547,6 +549,8 @@ Each phase is independent. Stop after any phase; nothing below requires the next
 All ~1-day implementations. Roughly doubles the site's tool count for a small fraction of the effort.
 
 **Progress (draft 2):** IBAN + BIC + GS1 shipped together. Tool count went from 36 → 39. New functional tests in `tests/specs/01-tools.spec.js` (8 cases) and a11y coverage in `tests/specs/05-a11y.spec.js` (3 views × 2 themes = 6 cases). JSON-LD `featureList` updated to 39 entries; `audit-release.js` passes; full Playwright suite passes (170 tests).
+
+**Progress (draft 3):** EU VAT validator shipped. Tool count 39 → 40. 6 new functional tests (real public VATs for DE/FR/IT + NL format-only + ES NIF rejection + DE bad-checksum). 2 new a11y tests (light + dark). JSON-LD `featureList` updated to 40 entries; STRINGS now 1014 keys × 5 locales; audit passes; full new-tool test suite (22 tests including all of IBAN/BIC/GS1/VAT) passes.
 
 ### Phase 5 — Distribution and sovereignty
 
