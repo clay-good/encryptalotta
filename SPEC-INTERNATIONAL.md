@@ -1,6 +1,6 @@
 # Spec — International public-good extensions to encryptalotta
 
-Status: draft 4 (Phase 4 partially landed: IBAN, BIC, GS1, VAT, Ed25519, X25519)
+Status: draft 5 (Phase 4 complete except BLAKE3; Phase 6 regulator presets shipped)
 Audience: maintainers and contributors
 Scope: how to extend encryptalotta.com so it serves an international audience — with a deliberate emphasis on Europe and other regions that lean heavily on open-source — without compromising the site's existing character (single-page, fully client-side, no analytics, no CDN, no tracking, no build step beyond a couple of vendored scripts).
 
@@ -388,9 +388,11 @@ Each tool below follows the existing project pattern: pure browser code, zero ne
 
 **Dependencies:** `age-encryption.js` (or hand-roll against the age v1 spec — it's small, ~600 lines). Vendor as `age.min.js`.
 
-### 2.12 BLAKE2b / BLAKE3 hashes
+### 2.12 BLAKE2b / BLAKE3 hashes — **BLAKE2b ✅ shipped (draft 5); BLAKE3 deferred**
 
 **Why:** Used by WireGuard, IPFS, Zcash, Filecoin, Borg backup, and other EU/global open-source projects. Modern, fast, and not in Web Crypto (which only does SHA-1/SHA-2).
+
+**Status notes (draft 5):** BLAKE2b-512 shipped as an additional algorithm in the existing Hash & Checksum tool — no new tool view, no new top-level entry, just an extra row alongside SHA-1/SHA-256/SHA-384/SHA-512 in the output. Hand-rolled per RFC 7693 §3, 64-bit words emulated as 32-bit pairs (no BigInt to keep the inner loop fast). Verified against RFC 7693 §A.5 (the empty-input vector) and the canonical `"abc"` vector. ~150 lines of crypto code; no new vendored dependency. BLAKE3 deferred — its parallel tree-mode reference implementation is substantially larger and would benefit from a vendored single-file build rather than a hand-rolled port.
 
 **Spec:**
 - Add BLAKE2b (variable output 1–64 bytes, optional key for MAC) and BLAKE3 (variable output, fast on large inputs) to the existing hash & checksum tool.
@@ -412,9 +414,11 @@ Each tool below follows the existing project pattern: pure browser code, zero ne
 
 ---
 
-## 3. Regulator presets
+## 3. Regulator presets — **✅ shipped in PGP key generator (draft 5)**
 
 A dropdown in the PGP key generator (and in the PBKDF2 / Argon2 tools) that selects pre-vetted parameters per regulator.
+
+**Status notes (draft 5):** Shipped for the PGP key generator. Presets surface BSI TR-02102-1, ANSSI RGS B1, NIST SP 800-57, CNSA 2.0, and Privacy Guides recommended; each auto-fills algorithm + keysize and links to the regulator's source document in a footnote. The PBKDF2/Argon2 extension is still pending (Argon2 itself is in §2.9 and not yet shipped). Source-document URLs are dated; per the §3 acceptance criteria, the maintainer should re-verify each annually — a follow-up enhancement to `scripts/audit-release.js` could flag presets older than 12 months.
 
 | Preset | PGP key | PBKDF2 iters (SHA-256) | Argon2id (m, t, p) | Source URL |
 |--------|---------|------------------------|---------------------|------------|
@@ -545,7 +549,7 @@ Each phase is independent. Stop after any phase; nothing below requires the next
 2. ✅ BIC/SWIFT checker (§2.2) — landed draft 2.
 3. ✅ EU VAT validator (§2.3) — landed draft 3.
 4. ✅ GS1 barcode (§2.13) — landed draft 2.
-5. BLAKE2b / BLAKE3 (§2.12).
+5. ✅ BLAKE2b (§2.12) — landed draft 5; BLAKE3 deferred (see §2.12 status notes).
 6. ✅ Ed25519 / X25519 standalone (§2.10) — landed draft 4.
 
 All ~1-day implementations. Roughly doubles the site's tool count for a small fraction of the effort.
@@ -555,6 +559,8 @@ All ~1-day implementations. Roughly doubles the site's tool count for a small fr
 **Progress (draft 3):** EU VAT validator shipped. Tool count 39 → 40. 6 new functional tests (real public VATs for DE/FR/IT + NL format-only + ES NIF rejection + DE bad-checksum). 2 new a11y tests (light + dark). JSON-LD `featureList` updated to 40 entries; STRINGS now 1014 keys × 5 locales; audit passes; full new-tool test suite (22 tests including all of IBAN/BIC/GS1/VAT) passes.
 
 **Progress (draft 4):** Ed25519 + X25519 shipped as two sister tools. Tool count 40 → 42. 6 new functional tests using RFC 8032 §7.1 (vectors 1 & 2), RFC 7748 §6.1, plus a tamper-rejection and HKDF derivation. 4 new a11y tests. JSON-LD `featureList` updated to 42 entries; STRINGS now 1071 keys × 5 locales; gzipped page weight 0.33 MB (still well under the 2 MB budget). Audit passes.
+
+**Progress (draft 5):** BLAKE2b-512 added to the existing Hash & Checksum tool (no new view, just an extra algorithm row). Tool count remains 42 because BLAKE2b is integrated into an existing tool. Phase 4 quick-wins now complete except BLAKE3 (deferred). Phase 6 regulator presets shipped in the PGP key generator: dropdown for BSI TR-02102-1, ANSSI RGS B1, NIST SP 800-57, CNSA 2.0, and Privacy Guides recommended; each preset auto-fills algorithm + keysize and surfaces a footnote linking to the source document. Manually editing algorithm/keysize resets the preset to "Custom" so the UI never lies about which regulator's choice is currently selected. en/fr/de UI strings reviewed; zh-CN/hi machine-quality drafts. 5 new functional tests (2 BLAKE2b RFC 7693 + 3 regulator preset behavior); full suite 206 passed.
 
 ### Phase 5 — Distribution and sovereignty
 

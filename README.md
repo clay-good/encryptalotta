@@ -12,7 +12,7 @@ A comprehensive single-page web app with **42 cryptographic, encoding, parsing, 
 ## Features (42 tools)
 
 ### Keys (8 tools)
-- **Generate PGP Keys** — Create ECC (Curve25519) or RSA 3072 / 4096 key pairs with customizable expiry.
+- **Generate PGP Keys** — Create ECC (Curve25519) or RSA 3072 / 4096 key pairs with customizable expiry. Optional **regulator presets** (BSI TR-02102-1, ANSSI RGS B1, NIST SP 800-57, CNSA 2.0, Privacy Guides) auto-fill the algorithm + key size from each regulator's published recommendation and link out to the source document.
 - **Key Info** — Inspect any PGP public key: fingerprint, user IDs, algorithm, key size, creation and expiration dates.
 - **Revocation Certificate** — Generate a pre-signed certificate to retire a compromised key.
 - **QR Share** — Encode a PGP public key or encrypted message as one or more scannable QR codes (multi-QR `EAL-QR/v1/{n}/{total}/` for long inputs).
@@ -39,7 +39,7 @@ A comprehensive single-page web app with **42 cryptographic, encoding, parsing, 
 - **ASCII Armor Converter** — Round-trip between PGP binary and ASCII-armored encodings.
 - **Shamir Secret Sharing** — Split a secret into N shares where any K reconstruct it; share format `EAL-SSS/v1/{K}-of-{N}/{rawShare}`.
 - **EXIF Eraser** — Strip GPS, camera serial numbers, timestamps from JPEG / PNG / WebP via canvas re-encode.
-- **Hash & Checksum** — SHA-1 / 256 / 384 / 512 over text or files, with constant-time hash comparison.
+- **Hash & Checksum** — SHA-1 / 256 / 384 / 512 (Web Crypto) and BLAKE2b-512 (RFC 7693, hand-rolled) over text or files, with constant-time hash comparison.
 - **Base64 / 32 / 58 / Hex Encoder** — Cross-convert text ↔ hex ↔ Base64 (standard + URL-safe) ↔ Base32 ↔ Base58 (Bitcoin alphabet).
 - **UUID / ULID Generator** — UUID v4 (random), UUID v7 (RFC 9562 time-ordered), ULID. Bulk generate up to 1000 per click.
 - **Unix Timestamp Converter** — Auto-detect epoch seconds / milliseconds / ISO 8601; render in UTC, local, and relative ("5 minutes ago").

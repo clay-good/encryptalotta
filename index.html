@@ -105,7 +105,7 @@
           },
           "image": "https://encryptalotta.com/encryptalotta.png",
           "featureList": [
-            "PGP key pair generator (ECC Curve25519, RSA 3072, RSA 4096)",
+            "PGP key pair generator (ECC Curve25519, RSA 3072, RSA 4096; regulator presets for BSI TR-02102, ANSSI RGS, NIST SP 800-57, CNSA 2.0, Privacy Guides)",
             "PGP public key inspector (fingerprint, user ID, algorithm, expiry)",
             "PGP revocation certificate generator",
             "QR code sharing for PGP public keys and messages (multi-QR for long inputs)",
@@ -125,7 +125,7 @@
             "ASCII armor converter (PGP binary ↔ armored)",
             "Shamir's Secret Sharing (K-of-N split and reconstruct)",
             "EXIF metadata stripper for JPEG, PNG, and WebP images",
-            "Hash and checksum calculator (SHA-1 / SHA-256 / SHA-384 / SHA-512)",
+            "Hash and checksum calculator (SHA-1 / SHA-256 / SHA-384 / SHA-512 / BLAKE2b-512)",
             "Encoder / decoder for Base64, Base64-URL, Base32, Base58 (Bitcoin), and hex",
             "UUID v4, UUID v7 (RFC 9562), and ULID generator (bulk)",
             "Unix timestamp converter (epoch seconds, milliseconds, ISO 8601, relative time)",
@@ -1455,6 +1455,19 @@
                     <div class="form-group">
                         <label for="comment" data-i18n="label.comment">Comment (Optional)</label>
                         <input type="text" id="comment" placeholder="Work key, Personal key, etc." data-i18n-attr="placeholder:ph.comment">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="regulator-preset" data-i18n="label.regulatorPreset">Regulator Preset</label>
+                        <select id="regulator-preset" aria-describedby="regulator-preset-help">
+                            <option value="custom" selected data-i18n="opt.preset.custom">Custom (choose algorithm and key size below)</option>
+                            <option value="bsi" data-i18n="opt.preset.bsi">BSI TR-02102-1 (German federal)</option>
+                            <option value="anssi" data-i18n="opt.preset.anssi">ANSSI RGS B1 (French federal)</option>
+                            <option value="nist" data-i18n="opt.preset.nist">NIST SP 800-57 (US federal)</option>
+                            <option value="cnsa" data-i18n="opt.preset.cnsa">CNSA 2.0 (US national security)</option>
+                            <option value="privacy-guides" data-i18n="opt.preset.privacyGuides">Privacy Guides recommended</option>
+                        </select>
+                        <p id="regulator-preset-help" class="size-warning hidden" style="color: var(--text-secondary);"></p>
                     </div>
 
                     <div class="grid-2">
@@ -4239,7 +4252,21 @@
                 'tool.x25519.metaDescription': 'Generate X25519 keypairs and derive a shared secret with a peer\'s public key, optionally piped through HKDF-SHA-256 or HKDF-SHA-512 for a symmetric key. Local-only, via Web Crypto.',
                 'tool.x25519.about.what': 'Performs X25519 ECDH key agreement: given your private key and a peer\'s public key, produces the 32-byte shared secret. Optional HKDF (RFC 5869) post-processing yields a 32- or 64-byte uniformly-random key for use with AES, ChaCha20, etc.',
                 'tool.x25519.about.how': 'Native Web Crypto X25519 (Safari 17+, Chrome 123+, Firefox 130+). Keys are exchanged on the wire as the 32-byte clamped scalar (private) or 32-byte u-coordinate (public). HKDF uses an empty salt and the user-supplied "info" context, matching common protocol conventions (X3DH, Noise).',
-                'tool.x25519.about.why': 'Underlies WireGuard, age, the Signal Protocol, the Noise Protocol Framework, OPAQUE, Tor onion services, TLS 1.3, and many other modern systems. A local agreement tool lets you sanity-check protocol implementations or compute fresh keys for fixtures without exposing private scalars to a third-party service.'
+                'tool.x25519.about.why': 'Underlies WireGuard, age, the Signal Protocol, the Noise Protocol Framework, OPAQUE, Tor onion services, TLS 1.3, and many other modern systems. A local agreement tool lets you sanity-check protocol implementations or compute fresh keys for fixtures without exposing private scalars to a third-party service.',
+                // -------- Phase 6 (spec §3): Regulator presets in PGP generator --------
+                'label.regulatorPreset': 'Regulator Preset',
+                'opt.preset.custom': 'Custom (choose algorithm and key size below)',
+                'opt.preset.bsi': 'BSI TR-02102-1 (German federal)',
+                'opt.preset.anssi': 'ANSSI RGS B1 (French federal)',
+                'opt.preset.nist': 'NIST SP 800-57 (US federal)',
+                'opt.preset.cnsa': 'CNSA 2.0 (US national security)',
+                'opt.preset.privacyGuides': 'Privacy Guides recommended',
+                'preset.note.bsi': 'Applies BSI TR-02102-1 recommendations: Curve25519 ECC. Verify parameters against the BSI document.',
+                'preset.note.anssi': 'Applies ANSSI RGS B1 recommendations: Curve25519 ECC. Verify parameters against the ANSSI document.',
+                'preset.note.nist': 'Applies NIST SP 800-57 minimums for new deployments: RSA 3072. Verify parameters against the NIST publication.',
+                'preset.note.cnsa': 'Applies CNSA 2.0 requirements for US national-security systems: RSA 4096. Verify parameters against the NSA advisory.',
+                'preset.note.privacyGuides': 'Applies Privacy Guides recommended choice for activist / journalist threat models: Curve25519 ECC. Verify against the Privacy Guides page.',
+                'preset.note.sourceLink': 'Source document →'
             },
             'fr': {
                 'meta.title': 'encryptalotta — 36 outils gratuits de confidentialité et de développement côté client (PGP, BIP39, TLS, SSH, JWT, PBKDF2, hash, regex, CSV, cron, CIDR, base numérique…)',
@@ -5128,7 +5155,21 @@
                 'err.x25519Generate': 'Impossible de générer la paire de clés X25519',
                 'err.x25519Derive': 'Impossible de dériver le secret partagé',
                 'err.x25519BadPriv': 'La clé privée locale doit être une chaîne hex de 32 octets.',
-                'err.x25519BadPeer': 'La clé publique du pair doit être une chaîne hex de 32 octets.'
+                'err.x25519BadPeer': 'La clé publique du pair doit être une chaîne hex de 32 octets.',
+                // -------- Phase 6: Regulator presets (French) --------
+                'label.regulatorPreset': 'Préréglage régulateur',
+                'opt.preset.custom': 'Personnalisé (choisir l’algorithme et la taille de clé ci-dessous)',
+                'opt.preset.bsi': 'BSI TR-02102-1 (fédéral allemand)',
+                'opt.preset.anssi': 'ANSSI RGS B1 (fédéral français)',
+                'opt.preset.nist': 'NIST SP 800-57 (fédéral américain)',
+                'opt.preset.cnsa': 'CNSA 2.0 (sécurité nationale américaine)',
+                'opt.preset.privacyGuides': 'Recommandation Privacy Guides',
+                'preset.note.bsi': 'Applique les recommandations BSI TR-02102-1 : ECC Curve25519. Vérifiez les paramètres dans le document BSI.',
+                'preset.note.anssi': 'Applique les recommandations ANSSI RGS B1 : ECC Curve25519. Vérifiez les paramètres dans le document ANSSI.',
+                'preset.note.nist': 'Applique les minimums NIST SP 800-57 pour les nouveaux déploiements : RSA 3072. Vérifiez les paramètres dans la publication NIST.',
+                'preset.note.cnsa': 'Applique les exigences CNSA 2.0 pour les systèmes de sécurité nationale américains : RSA 4096. Vérifiez les paramètres dans l’avis NSA.',
+                'preset.note.privacyGuides': 'Applique le choix recommandé par Privacy Guides pour les modèles de menace activiste / journaliste : ECC Curve25519. Vérifiez sur la page Privacy Guides.',
+                'preset.note.sourceLink': 'Document source →'
             },
             'zh-CN': {
                 'meta.title': 'encryptalotta — 36 个免费的浏览器端隐私与开发者工具（PGP、BIP39、TLS、SSH、JWT、PBKDF2、哈希、正则、CSV、cron、CIDR、进制转换 等）',
@@ -6002,7 +6043,21 @@
                 'err.x25519Generate': '无法生成 X25519 密钥对',
                 'err.x25519Derive': '无法派生共享密钥',
                 'err.x25519BadPriv': '本地私钥必须为 32 字节十六进制字符串。',
-                'err.x25519BadPeer': '对端公钥必须为 32 字节十六进制字符串。'
+                'err.x25519BadPeer': '对端公钥必须为 32 字节十六进制字符串。',
+                // -------- Phase 6: Regulator presets (Chinese — machine-quality) --------
+                'label.regulatorPreset': '监管机构预设',
+                'opt.preset.custom': '自定义（在下方选择算法与密钥大小）',
+                'opt.preset.bsi': 'BSI TR-02102-1（德国联邦）',
+                'opt.preset.anssi': 'ANSSI RGS B1（法国联邦）',
+                'opt.preset.nist': 'NIST SP 800-57（美国联邦）',
+                'opt.preset.cnsa': 'CNSA 2.0（美国国家安全）',
+                'opt.preset.privacyGuides': 'Privacy Guides 推荐',
+                'preset.note.bsi': '采用 BSI TR-02102-1 建议：Curve25519 ECC。请对照 BSI 文档核对参数。',
+                'preset.note.anssi': '采用 ANSSI RGS B1 建议：Curve25519 ECC。请对照 ANSSI 文档核对参数。',
+                'preset.note.nist': '采用 NIST SP 800-57 新部署最低标准：RSA 3072。请对照 NIST 出版物核对参数。',
+                'preset.note.cnsa': '采用 CNSA 2.0 对美国国家安全系统的要求：RSA 4096。请对照 NSA 通告核对参数。',
+                'preset.note.privacyGuides': '采用 Privacy Guides 针对活动人士／记者威胁模型的推荐：Curve25519 ECC。请在 Privacy Guides 页面核对。',
+                'preset.note.sourceLink': '源文档 →'
             },
             'de': {
                 'meta.title': 'encryptalotta — 36 kostenlose, browserseitige Datenschutz- und Entwicklerwerkzeuge (PGP, BIP39, TLS, SSH, JWT, PBKDF2, Hash, Regex, CSV, Cron, CIDR, Zahlenbasis …)',
@@ -6891,7 +6946,21 @@
                 'err.x25519Generate': 'X25519-Schlüsselpaar konnte nicht erzeugt werden',
                 'err.x25519Derive': 'Gemeinsames Geheimnis konnte nicht abgeleitet werden',
                 'err.x25519BadPriv': 'Der lokale private Schlüssel muss eine 32-Byte-Hex-Zeichenkette sein.',
-                'err.x25519BadPeer': 'Der öffentliche Schlüssel des Peers muss eine 32-Byte-Hex-Zeichenkette sein.'
+                'err.x25519BadPeer': 'Der öffentliche Schlüssel des Peers muss eine 32-Byte-Hex-Zeichenkette sein.',
+                // -------- Phase 6: Regulator presets (German) --------
+                'label.regulatorPreset': 'Regulator-Voreinstellung',
+                'opt.preset.custom': 'Benutzerdefiniert (Algorithmus und Schlüsselgröße unten wählen)',
+                'opt.preset.bsi': 'BSI TR-02102-1 (deutsche Bundesempfehlung)',
+                'opt.preset.anssi': 'ANSSI RGS B1 (französische Bundesempfehlung)',
+                'opt.preset.nist': 'NIST SP 800-57 (US-Bundesempfehlung)',
+                'opt.preset.cnsa': 'CNSA 2.0 (nationale Sicherheit USA)',
+                'opt.preset.privacyGuides': 'Privacy-Guides-Empfehlung',
+                'preset.note.bsi': 'Wendet die BSI-TR-02102-1-Empfehlungen an: Curve25519 ECC. Parameter im BSI-Dokument verifizieren.',
+                'preset.note.anssi': 'Wendet die ANSSI-RGS-B1-Empfehlungen an: Curve25519 ECC. Parameter im ANSSI-Dokument verifizieren.',
+                'preset.note.nist': 'Wendet die NIST-SP-800-57-Mindestwerte für neue Systeme an: RSA 3072. Parameter in der NIST-Publikation verifizieren.',
+                'preset.note.cnsa': 'Wendet die CNSA-2.0-Anforderungen für US-Systeme nationaler Sicherheit an: RSA 4096. Parameter in der NSA-Empfehlung verifizieren.',
+                'preset.note.privacyGuides': 'Wendet die Privacy-Guides-Empfehlung für Aktivisten- / Journalisten-Bedrohungsmodelle an: Curve25519 ECC. Auf der Privacy-Guides-Seite verifizieren.',
+                'preset.note.sourceLink': 'Quelldokument →'
             },
             'hi': {
                 'meta.title': 'encryptalotta — ब्राउज़र में चलने वाले 36 निःशुल्क गोपनीयता और डेवलपर टूल (PGP, BIP39, TLS, SSH, JWT, PBKDF2, हैश, रेजेक्स, CSV, cron, CIDR, संख्या आधार आदि)',
@@ -7765,7 +7834,21 @@
                 'err.x25519Generate': 'X25519 कुंजी युग्म नहीं बना सका',
                 'err.x25519Derive': 'साझा रहस्य नहीं व्युत्पन्न कर सका',
                 'err.x25519BadPriv': 'स्थानीय निजी कुंजी 32-बाइट हेक्स स्ट्रिंग होनी चाहिए।',
-                'err.x25519BadPeer': 'पीयर सार्वजनिक कुंजी 32-बाइट हेक्स स्ट्रिंग होनी चाहिए।'
+                'err.x25519BadPeer': 'पीयर सार्वजनिक कुंजी 32-बाइट हेक्स स्ट्रिंग होनी चाहिए।',
+                // -------- Phase 6: Regulator presets (Hindi — machine-quality) --------
+                'label.regulatorPreset': 'नियामक प्रीसेट',
+                'opt.preset.custom': 'कस्टम (नीचे एल्गोरिथम और कुंजी आकार चुनें)',
+                'opt.preset.bsi': 'BSI TR-02102-1 (जर्मन संघीय)',
+                'opt.preset.anssi': 'ANSSI RGS B1 (फ़्रेंच संघीय)',
+                'opt.preset.nist': 'NIST SP 800-57 (अमेरिकी संघीय)',
+                'opt.preset.cnsa': 'CNSA 2.0 (अमेरिकी राष्ट्रीय सुरक्षा)',
+                'opt.preset.privacyGuides': 'Privacy Guides अनुशंसित',
+                'preset.note.bsi': 'BSI TR-02102-1 अनुशंसाएँ लागू करता है: Curve25519 ECC। BSI दस्तावेज़ से मापदंडों का सत्यापन करें।',
+                'preset.note.anssi': 'ANSSI RGS B1 अनुशंसाएँ लागू करता है: Curve25519 ECC। ANSSI दस्तावेज़ से मापदंडों का सत्यापन करें।',
+                'preset.note.nist': 'नए परिनियोजन हेतु NIST SP 800-57 न्यूनतम लागू करता है: RSA 3072। NIST प्रकाशन से मापदंडों का सत्यापन करें।',
+                'preset.note.cnsa': 'अमेरिकी राष्ट्रीय सुरक्षा प्रणालियों हेतु CNSA 2.0 आवश्यकताएँ लागू करता है: RSA 4096। NSA परामर्श से मापदंडों का सत्यापन करें।',
+                'preset.note.privacyGuides': 'कार्यकर्ता / पत्रकार खतरा मॉडल हेतु Privacy Guides अनुशंसा लागू करता है: Curve25519 ECC। Privacy Guides पृष्ठ से सत्यापित करें।',
+                'preset.note.sourceLink': 'स्रोत दस्तावेज़ →'
             }
         };
 
@@ -8863,7 +8946,84 @@
         });
 
         // Algorithm change handler
-        document.getElementById('algorithm').addEventListener('change', updateKeySizes);
+        document.getElementById('algorithm').addEventListener('change', () => {
+            updateKeySizes();
+            // Custom algorithm choice clears the preset note (the preset no longer reflects state).
+            const sel = document.getElementById('regulator-preset');
+            if (sel.value !== 'custom') {
+                sel.value = 'custom';
+                const help = document.getElementById('regulator-preset-help');
+                help.classList.add('hidden');
+            }
+        });
+
+        // ==================== Phase 6 (i18n spec §3): Regulator presets ====================
+        // Each preset auto-fills algorithm + keysize and surfaces a footnote linking to the
+        // regulator's published recommendation document — so the choice is auditable and the
+        // user can verify the parameters against the source rather than trusting the tool.
+        //
+        // Dated SOURCE LINKS — re-audit annually per SPEC §3 acceptance criteria. The dates here
+        // reflect the most recent version we verified; the regulator publishes new editions
+        // periodically and a maintainer should refresh both the parameters and these URLs.
+        const REGULATOR_PRESETS = {
+            'bsi': {
+                algorithm: 'ecc', keysize: 'curve25519',
+                noteKey: 'preset.note.bsi',
+                url: 'https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/Publications/TechGuidelines/TG02102/BSI-TR-02102-1.html'
+            },
+            'anssi': {
+                algorithm: 'ecc', keysize: 'curve25519',
+                noteKey: 'preset.note.anssi',
+                url: 'https://cyber.gouv.fr/sites/default/files/document/RGS_v-2-0_B1.pdf'
+            },
+            'nist': {
+                algorithm: 'rsa', keysize: '3072',
+                noteKey: 'preset.note.nist',
+                url: 'https://csrc.nist.gov/pubs/sp/800/57/pt1/r5'
+            },
+            'cnsa': {
+                algorithm: 'rsa', keysize: '4096',
+                noteKey: 'preset.note.cnsa',
+                url: 'https://www.nsa.gov/Press-Room/Press-Releases-Statements/Press-Release-View/Article/3148990/'
+            },
+            'privacy-guides': {
+                algorithm: 'ecc', keysize: 'curve25519',
+                noteKey: 'preset.note.privacyGuides',
+                url: 'https://www.privacyguides.org/en/encryption/'
+            }
+        };
+
+        function applyRegulatorPreset(key) {
+            const help = document.getElementById('regulator-preset-help');
+            while (help.firstChild) help.removeChild(help.firstChild);
+            if (key === 'custom' || !REGULATOR_PRESETS[key]) {
+                help.classList.add('hidden');
+                return;
+            }
+            const cfg = REGULATOR_PRESETS[key];
+            const algoSel = document.getElementById('algorithm');
+            algoSel.value = cfg.algorithm;
+            updateKeySizes();
+            const ksSel = document.getElementById('keysize');
+            ksSel.value = cfg.keysize;
+            // Render the note with a link to the source document.
+            const span = document.createElement('span');
+            span.dataset.i18n = cfg.noteKey;
+            span.textContent = t(cfg.noteKey);
+            help.appendChild(span);
+            help.appendChild(document.createTextNode(' '));
+            const a = document.createElement('a');
+            a.href = cfg.url;
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            a.dataset.i18n = 'preset.note.sourceLink';
+            a.textContent = t('preset.note.sourceLink');
+            help.appendChild(a);
+            help.classList.remove('hidden');
+        }
+        document.getElementById('regulator-preset').addEventListener('change', (e) => {
+            applyRegulatorPreset(e.target.value);
+        });
 
         // ==================== SIGN & VERIFY FEATURES ====================
 
@@ -10773,7 +10933,137 @@
         }
 
         // ==================== Phase 6 Batch A: Hash & Checksum ====================
+        // ---- BLAKE2b (RFC 7693) — hand-rolled, sequential, unkeyed --------------------------------
+        // Web Crypto doesn't ship BLAKE2; the algorithm is widely used in EU-origin software
+        // (WireGuard, age, IPFS, Zcash, Borg, Filecoin) so we vendor a minimal implementation here.
+        // 64-bit words are emulated as [lo, hi] pairs of 32-bit integers since plain JS Numbers
+        // can't represent 64-bit arithmetic without precision loss (BigInt would work but is
+        // measurably slower for the tight inner loop).
+        const BLAKE2B_IV = [
+            [0xf3bcc908, 0x6a09e667], [0x84caa73b, 0xbb67ae85],
+            [0xfe94f82b, 0x3c6ef372], [0x5f1d36f1, 0xa54ff53a],
+            [0xade682d1, 0x510e527f], [0x2b3e6c1f, 0x9b05688c],
+            [0xfb41bd6b, 0x1f83d9ab], [0x137e2179, 0x5be0cd19]
+        ];
+        const BLAKE2B_SIGMA = [
+            [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+            [14, 10, 4, 8, 9, 15, 13, 6, 1, 12, 0, 2, 11, 7, 5, 3],
+            [11, 8, 12, 0, 5, 2, 15, 13, 10, 14, 3, 6, 7, 1, 9, 4],
+            [7, 9, 3, 1, 13, 12, 11, 14, 2, 6, 5, 10, 4, 0, 15, 8],
+            [9, 0, 5, 7, 2, 4, 10, 15, 14, 1, 11, 12, 6, 8, 3, 13],
+            [2, 12, 6, 10, 0, 11, 8, 3, 4, 13, 7, 5, 15, 14, 1, 9],
+            [12, 5, 1, 15, 14, 13, 4, 10, 0, 7, 6, 3, 9, 2, 8, 11],
+            [13, 11, 7, 14, 12, 1, 3, 9, 5, 0, 15, 4, 8, 6, 2, 10],
+            [6, 15, 14, 9, 11, 3, 0, 8, 12, 2, 13, 7, 1, 4, 10, 5],
+            [10, 2, 8, 4, 7, 6, 1, 5, 15, 11, 9, 14, 3, 12, 13, 0],
+            [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+            [14, 10, 4, 8, 9, 15, 13, 6, 1, 12, 0, 2, 11, 7, 5, 3]
+        ];
+        function b2b_ADD(a, b) {
+            const aLo = a[0] >>> 0, bLo = b[0] >>> 0;
+            const loSum = aLo + bLo;
+            const lo = loSum | 0;
+            const carry = loSum > 0xffffffff ? 1 : 0;
+            const hi = (a[1] + b[1] + carry) | 0;
+            return [lo, hi];
+        }
+        function b2b_XOR(a, b) { return [a[0] ^ b[0], a[1] ^ b[1]]; }
+        function b2b_ROTR(w, n) {
+            if (n === 32) return [w[1], w[0]];
+            if (n < 32) {
+                return [(w[0] >>> n) | (w[1] << (32 - n)), (w[1] >>> n) | (w[0] << (32 - n))];
+            }
+            const m = n - 32;
+            if (m === 0) return [w[1], w[0]];
+            return [(w[1] >>> m) | (w[0] << (32 - m)), (w[0] >>> m) | (w[1] << (32 - m))];
+        }
+        function b2b_G(v, a, b, c, d, x, y) {
+            v[a] = b2b_ADD(b2b_ADD(v[a], v[b]), x);
+            v[d] = b2b_ROTR(b2b_XOR(v[d], v[a]), 32);
+            v[c] = b2b_ADD(v[c], v[d]);
+            v[b] = b2b_ROTR(b2b_XOR(v[b], v[c]), 24);
+            v[a] = b2b_ADD(b2b_ADD(v[a], v[b]), y);
+            v[d] = b2b_ROTR(b2b_XOR(v[d], v[a]), 16);
+            v[c] = b2b_ADD(v[c], v[d]);
+            v[b] = b2b_ROTR(b2b_XOR(v[b], v[c]), 63);
+        }
+        function b2b_compress(h, m, t, isLast) {
+            const v = new Array(16);
+            for (let i = 0; i < 8; i++) v[i] = h[i].slice();
+            for (let i = 0; i < 8; i++) v[i + 8] = BLAKE2B_IV[i].slice();
+            v[12] = b2b_XOR(v[12], [t[0], t[1]]);
+            v[13] = b2b_XOR(v[13], [t[2], t[3]]);
+            if (isLast) v[14] = b2b_XOR(v[14], [0xffffffff, 0xffffffff]);
+            for (let r = 0; r < 12; r++) {
+                const s = BLAKE2B_SIGMA[r];
+                b2b_G(v, 0, 4, 8, 12, m[s[0]], m[s[1]]);
+                b2b_G(v, 1, 5, 9, 13, m[s[2]], m[s[3]]);
+                b2b_G(v, 2, 6, 10, 14, m[s[4]], m[s[5]]);
+                b2b_G(v, 3, 7, 11, 15, m[s[6]], m[s[7]]);
+                b2b_G(v, 0, 5, 10, 15, m[s[8]], m[s[9]]);
+                b2b_G(v, 1, 6, 11, 12, m[s[10]], m[s[11]]);
+                b2b_G(v, 2, 7, 8, 13, m[s[12]], m[s[13]]);
+                b2b_G(v, 3, 4, 9, 14, m[s[14]], m[s[15]]);
+            }
+            for (let i = 0; i < 8; i++) h[i] = b2b_XOR(b2b_XOR(h[i], v[i]), v[i + 8]);
+        }
+        function b2b_readBlock(buf, pos) {
+            const m = new Array(16);
+            for (let i = 0; i < 16; i++) {
+                const off = pos + i * 8;
+                const lo = buf[off] | (buf[off + 1] << 8) | (buf[off + 2] << 16) | (buf[off + 3] << 24);
+                const hi = buf[off + 4] | (buf[off + 5] << 8) | (buf[off + 6] << 16) | (buf[off + 7] << 24);
+                m[i] = [lo, hi];
+            }
+            return m;
+        }
+        function b2b_addCounter(t, n) {
+            // 128-bit counter as four 32-bit halves [lo_lo, lo_hi, hi_lo, hi_hi].
+            const sum = (t[0] >>> 0) + n;
+            t[0] = sum | 0;
+            if (sum > 0xffffffff) {
+                const s1 = (t[1] >>> 0) + 1;
+                t[1] = s1 | 0;
+                if (s1 > 0xffffffff) {
+                    const s2 = (t[2] >>> 0) + 1;
+                    t[2] = s2 | 0;
+                    if (s2 > 0xffffffff) t[3] = (t[3] + 1) | 0;
+                }
+            }
+        }
+        function blake2b(input, outLen) {
+            outLen = outLen || 64;
+            if (outLen < 1 || outLen > 64) throw new Error('BLAKE2b output length must be 1..64');
+            const h = BLAKE2B_IV.map(w => w.slice());
+            h[0] = b2b_XOR(h[0], [0x01010000 | outLen, 0]);
+            const t = [0, 0, 0, 0];
+            const BLOCK = 128;
+            let pos = 0;
+            // Compress every block except the last one in non-final mode.
+            while (input.length - pos > BLOCK) {
+                b2b_addCounter(t, BLOCK);
+                b2b_compress(h, b2b_readBlock(input, pos), t, false);
+                pos += BLOCK;
+            }
+            // Final block, padded with zeros.
+            const remaining = input.length - pos;
+            const final = new Uint8Array(BLOCK);
+            for (let i = 0; i < remaining; i++) final[i] = input[pos + i];
+            b2b_addCounter(t, remaining);
+            b2b_compress(h, b2b_readBlock(final, 0), t, true);
+            // Serialize h[0..outLen] little-endian.
+            const out = new Uint8Array(outLen);
+            for (let i = 0; i < outLen; i++) {
+                const word = h[(i / 8) | 0];
+                const inByte = i & 7;
+                const half = inByte < 4 ? word[0] : word[1];
+                out[i] = (half >>> ((inByte & 3) * 8)) & 0xff;
+            }
+            return out;
+        }
+
         async function digestHex(algo, bytes) {
+            if (algo === 'BLAKE2b-512') return bytesToHex(blake2b(bytes, 64));
             const buf = await crypto.subtle.digest(algo, bytes);
             return bytesToHex(new Uint8Array(buf));
         }
@@ -10799,7 +11089,7 @@
                 return;
             }
 
-            const algos = ['SHA-1', 'SHA-256', 'SHA-384', 'SHA-512'];
+            const algos = ['SHA-1', 'SHA-256', 'SHA-384', 'SHA-512', 'BLAKE2b-512'];
             const heading = document.createElement('div');
             heading.style.cssText = 'font-weight:700;margin-bottom:10px;';
             heading.textContent = file
