@@ -140,9 +140,12 @@
             "CIDR / IPv4 subnet calculator (network, broadcast, netmask, host range)",
             "PBKDF2 key derivation (configurable iterations, salt, SHA-1/256/384/512 PRF)",
             "BIP39 mnemonic seed phrase generator and validator (12/15/18/21/24 words)",
-            "Number base converter (binary, octal, decimal, hex, any base 2–36; BigInt)"
+            "Number base converter (binary, octal, decimal, hex, any base 2–36; BigInt)",
+            "IBAN validator and test-data generator (ISO 13616 MOD-97, per-country structure)",
+            "BIC / SWIFT code checker (ISO 9362 format and component decoder)",
+            "GS1 / EAN / GTIN / SSCC barcode checksum (mod-10) and prefix decoder"
           ],
-          "featureList_count": 36,
+          "featureList_count": 39,
           "screenshot": "https://encryptalotta.com/encryptalotta.png",
           "softwareHelp": { "@type": "CreativeWork", "url": "https://github.com/clay-good/encryptalotta/" },
           "license": "https://github.com/clay-good/encryptalotta/blob/main/LICENSE"
@@ -1396,6 +1399,18 @@
                     <button class="tool-card" type="button" data-tool="base">
                         <span class="tc-title" data-i18n="nav.tool.base">Number Base</span>
                         <span class="tc-desc" data-i18n="tool.base.desc">Convert integers between binary, octal, decimal, hex, and any base 2–36.</span>
+                    </button>
+                    <button class="tool-card" type="button" data-tool="iban">
+                        <span class="tc-title" data-i18n="nav.tool.iban">IBAN</span>
+                        <span class="tc-desc" data-i18n="tool.iban.desc">Validate or generate test IBANs with the MOD-97 checksum and per-country structure.</span>
+                    </button>
+                    <button class="tool-card" type="button" data-tool="bic">
+                        <span class="tc-title" data-i18n="nav.tool.bic">BIC / SWIFT</span>
+                        <span class="tc-desc" data-i18n="tool.bic.desc">Check the ISO 9362 format of a BIC / SWIFT code and decode its components.</span>
+                    </button>
+                    <button class="tool-card" type="button" data-tool="gs1">
+                        <span class="tc-title" data-i18n="nav.tool.gs1">GS1 Barcode</span>
+                        <span class="tc-desc" data-i18n="tool.gs1.desc">Verify GS1 / EAN-8 / EAN-13 / UPC-A / GTIN-14 / SSCC checksums and decode the prefix.</span>
                     </button>
                 </div>
             </section>
@@ -2880,6 +2895,80 @@
 
                 <div id="base-results" class="hidden" style="margin-top: 24px;"></div>
             </div>
+
+            <!-- IBAN Validator / Generator View -->
+            <div id="iban-view" class="view" role="tabpanel" aria-labelledby="iban-h2">
+                <h2 id="iban-h2" style="margin-bottom: 25px;" data-i18n="view.iban.h2">IBAN Validator / Generator</h2>
+
+                <div class="alert alert-info">
+                    <strong data-i18n="alert.clientSideTitle">100% Client-Side:</strong> <span data-i18n="alert.clientSideGenericBody">All operations happen locally in your browser. Nothing is uploaded to any server.</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="iban-input" data-i18n="iban.label.input">IBAN</label>
+                    <input type="text" id="iban-input" autocomplete="off" spellcheck="false" data-i18n-attr="placeholder:iban.ph.input" placeholder="DE89 3704 0044 0532 0130 00" dir="ltr">
+                </div>
+
+                <button id="btn-iban-validate" class="btn" data-i18n="btn.ibanValidate">Validate</button>
+
+                <div id="iban-results" class="hidden" style="margin-top: 24px;"></div>
+
+                <hr style="margin: 32px 0 24px; border: 0; border-top: 1px solid var(--border);">
+
+                <h3 style="margin: 0 0 12px; font-size: 1rem;" data-i18n="iban.gen.heading">Generate a test IBAN</h3>
+                <p style="margin: 0 0 16px; font-size: 0.88rem; color: var(--text-secondary);" data-i18n="iban.gen.warning">For test data only. Do not use generated IBANs for real transactions.</p>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="iban-gen-country" data-i18n="iban.label.country">Country</label>
+                        <select id="iban-gen-country"></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="iban-gen-bban" data-i18n="iban.label.bban">BBAN (optional — random if empty)</label>
+                        <input type="text" id="iban-gen-bban" autocomplete="off" spellcheck="false" placeholder="370400440532013000" dir="ltr">
+                    </div>
+                </div>
+
+                <button id="btn-iban-generate" class="btn btn-secondary" data-i18n="btn.ibanGenerate">Generate</button>
+
+                <div id="iban-gen-results" class="hidden" style="margin-top: 24px;"></div>
+            </div>
+
+            <!-- BIC / SWIFT Code View -->
+            <div id="bic-view" class="view" role="tabpanel" aria-labelledby="bic-h2">
+                <h2 id="bic-h2" style="margin-bottom: 25px;" data-i18n="view.bic.h2">BIC / SWIFT Code Checker</h2>
+
+                <div class="alert alert-info">
+                    <strong data-i18n="alert.clientSideTitle">100% Client-Side:</strong> <span data-i18n="alert.clientSideGenericBody">All operations happen locally in your browser. Nothing is uploaded to any server.</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="bic-input" data-i18n="bic.label.input">BIC / SWIFT</label>
+                    <input type="text" id="bic-input" autocomplete="off" spellcheck="false" data-i18n-attr="placeholder:bic.ph.input" placeholder="DEUTDEFFXXX" dir="ltr">
+                </div>
+
+                <button id="btn-bic-validate" class="btn" data-i18n="btn.bicValidate">Check</button>
+
+                <div id="bic-results" class="hidden" style="margin-top: 24px;"></div>
+            </div>
+
+            <!-- GS1 / EAN / GTIN / SSCC Barcode View -->
+            <div id="gs1-view" class="view" role="tabpanel" aria-labelledby="gs1-h2">
+                <h2 id="gs1-h2" style="margin-bottom: 25px;" data-i18n="view.gs1.h2">GS1 Barcode Checksum</h2>
+
+                <div class="alert alert-info">
+                    <strong data-i18n="alert.clientSideTitle">100% Client-Side:</strong> <span data-i18n="alert.clientSideGenericBody">All operations happen locally in your browser. Nothing is uploaded to any server.</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="gs1-input" data-i18n="gs1.label.input">Barcode digits (EAN-8 / EAN-13 / UPC-A / UPC-E / ITF-14 / GTIN-14 / SSCC)</label>
+                    <input type="text" id="gs1-input" autocomplete="off" spellcheck="false" inputmode="numeric" data-i18n-attr="placeholder:gs1.ph.input" placeholder="4006381333931" dir="ltr">
+                </div>
+
+                <button id="btn-gs1-validate" class="btn" data-i18n="btn.gs1Validate">Check</button>
+
+                <div id="gs1-results" class="hidden" style="margin-top: 24px;"></div>
+            </div>
         </main>
     </div>
 
@@ -3836,7 +3925,97 @@
                 'tool.base.metaDescription': 'Convert integers between binary, octal, decimal, hexadecimal, and any base from 2 to 36. Handles negative numbers and arbitrarily large values via BigInt.',
                 'tool.base.about.what': 'Converts an integer between binary, octal, decimal, hexadecimal, and an arbitrary base (2–36) — auto-detecting the input format from common prefixes.',
                 'tool.base.about.how': 'Pure JavaScript BigInt arithmetic, so values aren’t limited to 53-bit JS Number precision. Negative numbers are preserved sign-and-magnitude; the bit length reflects the absolute value.',
-                'tool.base.about.why': 'A reliable base converter is a daily reach for low-level work — bitmask debugging, embedded-systems registers, color values, opcodes — and a local one keeps potentially sensitive constants off third-party servers.'
+                'tool.base.about.why': 'A reliable base converter is a daily reach for low-level work — bitmask debugging, embedded-systems registers, color values, opcodes — and a local one keeps potentially sensitive constants off third-party servers.',
+                // -------- Phase 12 (i18n spec §2.1 / §2.2 / §2.13): IBAN / BIC / GS1 --------
+                'nav.tool.iban': 'IBAN',
+                'tool.iban.desc': 'Validate or generate test IBANs with the MOD-97 checksum and per-country structure.',
+                'view.iban.h2': 'IBAN Validator / Generator',
+                'iban.label.input': 'IBAN',
+                'iban.ph.input': 'DE89 3704 0044 0532 0130 00',
+                'btn.ibanValidate': 'Validate',
+                'btn.ibanGenerate': 'Generate',
+                'iban.gen.heading': 'Generate a test IBAN',
+                'iban.gen.warning': 'For test data only. Do not use generated IBANs for real transactions.',
+                'iban.label.country': 'Country',
+                'iban.label.bban': 'BBAN (optional — random if empty)',
+                'iban.row.status': 'Status',
+                'iban.row.valid': 'Valid (MOD-97 passes)',
+                'iban.row.invalidChecksum': 'Invalid — MOD-97 checksum failed',
+                'iban.row.pretty': 'Formatted',
+                'iban.row.raw': 'Raw',
+                'iban.row.country': 'Country',
+                'iban.row.checkDigits': 'Check digits',
+                'iban.row.length': 'Length',
+                'iban.row.bank': 'Bank code',
+                'iban.row.branch': 'Branch code',
+                'iban.row.acct': 'Account number',
+                'iban.row.bban': 'BBAN',
+                'iban.row.note': 'Note',
+                'iban.row.error': 'Error',
+                'err.ibanEmpty': 'Enter an IBAN.',
+                'err.ibanChars': 'IBAN may only contain letters and digits.',
+                'err.ibanShort': 'IBAN is too short.',
+                'err.ibanCountry': 'Unknown IBAN country code: {cc}.',
+                'err.ibanLength': 'IBAN for {cc} must be {expected} characters; got {actual}.',
+                'err.ibanCheckDigits': 'IBAN check digits must be two digits.',
+                'err.ibanBbanLen': 'BBAN must be {expected} characters; got {actual}.',
+                'err.ibanBbanChars': 'BBAN may only contain letters and digits.',
+                'tool.iban.title': 'IBAN Validator and Test-Data Generator (MOD-97, per-country structure)',
+                'tool.iban.metaDescription': 'Validate any IBAN against its ISO 13616 country length and MOD-97 checksum, or generate a syntactically valid IBAN for testing. Runs locally; no network calls.',
+                'tool.iban.about.what': 'Checks an IBAN for correct length, character set, and MOD-97 checksum — and, when the checksum is good, splits out the bank, branch, and account fields per the country’s BBAN structure. Optional generator side produces a syntactically valid test IBAN.',
+                'tool.iban.about.how': 'ISO 13616 specifies a per-country length and structure. The MOD-97 checksum rearranges the IBAN as BBAN+CC+"00", maps A–Z to 10–35, and confirms (mod 97) === 1. Generation inverts that to compute the two check digits.',
+                'tool.iban.about.why': 'Catches mistyped IBANs without ever sending an account number to a third-party service. The generator produces valid-looking IBANs for QA pipelines, fixtures, and integration tests — never use them for real payments.',
+                'nav.tool.bic': 'BIC / SWIFT',
+                'tool.bic.desc': 'Check the ISO 9362 format of a BIC / SWIFT code and decode its components.',
+                'view.bic.h2': 'BIC / SWIFT Code Checker',
+                'bic.label.input': 'BIC / SWIFT',
+                'bic.ph.input': 'DEUTDEFFXXX',
+                'btn.bicValidate': 'Check',
+                'bic.row.status': 'Status',
+                'bic.row.valid': 'Format OK',
+                'bic.row.pretty': 'Formatted',
+                'bic.row.bank': 'Bank',
+                'bic.row.country': 'Country',
+                'bic.row.location': 'Location',
+                'bic.row.branch': 'Branch',
+                'bic.row.branchNone': '(none — 8-character BIC)',
+                'bic.row.length': 'Length',
+                'bic.row.tags': 'Tags',
+                'bic.row.error': 'Error',
+                'bic.tag.test': 'test BIC (location ends in 0)',
+                'bic.tag.passive': 'passive participant (location ends in 1)',
+                'bic.tag.primary': 'primary branch (XXX)',
+                'err.bicEmpty': 'Enter a BIC / SWIFT code.',
+                'err.bicLength': 'BIC must be 8 or 11 characters; got {actual}.',
+                'err.bicFormat': 'BIC must be 4 letters (bank) + 2 letters (country) + 2 alphanumerics (location) + optional 3 alphanumerics (branch).',
+                'tool.bic.title': 'BIC / SWIFT Code Checker (ISO 9362 format and component decoder)',
+                'tool.bic.metaDescription': 'Check whether a BIC / SWIFT code matches the ISO 9362 format and decode its bank, country, location, and branch components. Local-only — nothing leaves your browser.',
+                'tool.bic.about.what': 'Validates a BIC / SWIFT code against the ISO 9362 layout (4 bank + 2 country + 2 location + optional 3 branch) and flags conventional markers like the trailing 0 on test BICs.',
+                'tool.bic.about.how': 'A regex enforces the character classes and a country-code lookup against the IBAN country table sanity-checks the country segment. BIC has no checksum, so the check is purely structural.',
+                'tool.bic.about.why': 'Quick offline sanity check for SEPA payment files, vendor onboarding forms, and back-office reconciliation work — without exposing the BIC to a third-party validator.',
+                'nav.tool.gs1': 'GS1 Barcode',
+                'tool.gs1.desc': 'Verify GS1 / EAN-8 / EAN-13 / UPC-A / GTIN-14 / SSCC checksums and decode the prefix.',
+                'view.gs1.h2': 'GS1 Barcode Checksum',
+                'gs1.label.input': 'Barcode digits (EAN-8 / EAN-13 / UPC-A / UPC-E / ITF-14 / GTIN-14 / SSCC)',
+                'gs1.ph.input': '4006381333931',
+                'btn.gs1Validate': 'Check',
+                'gs1.row.status': 'Status',
+                'gs1.row.valid': 'Checksum OK',
+                'gs1.row.invalid': 'Checksum failed',
+                'gs1.row.format': 'Format',
+                'gs1.row.length': 'Length',
+                'gs1.row.checkDigit': 'Check digit',
+                'gs1.row.expected': 'expected {expected}',
+                'gs1.row.prefix': 'GS1 prefix',
+                'gs1.row.error': 'Error',
+                'err.gs1Empty': 'Enter a barcode number.',
+                'err.gs1Chars': 'Barcode must contain digits only.',
+                'err.gs1Length': 'Length must be 8, 12, 13, 14, or 18 digits; got {actual}.',
+                'tool.gs1.title': 'GS1 / EAN / GTIN / SSCC Barcode Checksum (mod-10) and Prefix Decoder',
+                'tool.gs1.metaDescription': 'Verify a barcode’s mod-10 weighted check digit (EAN-8, EAN-13, UPC-A, GTIN-14, SSCC) and look up the GS1 country / region prefix locally.',
+                'tool.gs1.about.what': 'Validates the mod-10 weighted checksum on EAN-8, UPC-A, EAN-13 / GTIN-13, ITF-14 / GTIN-14, and SSCC, and looks up the issuing region from the GS1 prefix table.',
+                'tool.gs1.about.how': 'Reading the digits right-to-left (excluding the check digit), alternate weights of 3 and 1, sum, and compute (10 − sum mod 10) mod 10. Compare to the supplied check digit.',
+                'tool.gs1.about.why': 'Useful when you are reconciling product feeds, debugging label printers, or auditing a barcode dataset — without piping product codes through a third-party service.'
             },
             'fr': {
                 'meta.title': 'encryptalotta — 36 outils gratuits de confidentialité et de développement côté client (PGP, BIP39, TLS, SSH, JWT, PBKDF2, hash, regex, CSV, cron, CIDR, base numérique…)',
@@ -4565,7 +4744,97 @@
                 'about.whatHeading': 'Qu’est-ce que c’est ?',
                 'about.howHeading': 'Comment ça fonctionne ?',
                 'about.whyHeading': 'Pourquoi l’utiliser au lieu d’un outil en ligne ?',
-                'related.heading': 'Outils associés'
+                'related.heading': 'Outils associés',
+                // -------- Phase 12: IBAN / BIC / GS1 (French — reviewed against standard FR banking terminology) --------
+                'nav.tool.iban': 'IBAN',
+                'tool.iban.desc': 'Vérifier ou générer un IBAN de test avec la clé MOD-97 et la structure par pays.',
+                'view.iban.h2': 'Validateur / Générateur d’IBAN',
+                'iban.label.input': 'IBAN',
+                'iban.ph.input': 'FR14 2004 1010 0505 0001 3M02 606',
+                'btn.ibanValidate': 'Vérifier',
+                'btn.ibanGenerate': 'Générer',
+                'iban.gen.heading': 'Générer un IBAN de test',
+                'iban.gen.warning': 'Pour données de test uniquement. N’utilisez pas les IBAN générés pour de vraies transactions.',
+                'iban.label.country': 'Pays',
+                'iban.label.bban': 'BBAN (facultatif — aléatoire si vide)',
+                'iban.row.status': 'Statut',
+                'iban.row.valid': 'Valide (clé MOD-97 correcte)',
+                'iban.row.invalidChecksum': 'Invalide — échec de la clé MOD-97',
+                'iban.row.pretty': 'Formaté',
+                'iban.row.raw': 'Brut',
+                'iban.row.country': 'Pays',
+                'iban.row.checkDigits': 'Clé de contrôle',
+                'iban.row.length': 'Longueur',
+                'iban.row.bank': 'Code banque',
+                'iban.row.branch': 'Code guichet',
+                'iban.row.acct': 'Numéro de compte',
+                'iban.row.bban': 'BBAN',
+                'iban.row.note': 'Note',
+                'iban.row.error': 'Erreur',
+                'err.ibanEmpty': 'Saisissez un IBAN.',
+                'err.ibanChars': 'L’IBAN ne peut contenir que des lettres et des chiffres.',
+                'err.ibanShort': 'IBAN trop court.',
+                'err.ibanCountry': 'Code pays IBAN inconnu : {cc}.',
+                'err.ibanLength': 'Un IBAN {cc} doit faire {expected} caractères ; reçu {actual}.',
+                'err.ibanCheckDigits': 'La clé de contrôle IBAN doit comporter deux chiffres.',
+                'err.ibanBbanLen': 'Le BBAN doit faire {expected} caractères ; reçu {actual}.',
+                'err.ibanBbanChars': 'Le BBAN ne peut contenir que des lettres et des chiffres.',
+                'tool.iban.title': 'Validateur d’IBAN et générateur de données de test (MOD-97, structure par pays)',
+                'tool.iban.metaDescription': 'Vérifiez n’importe quel IBAN selon sa longueur ISO 13616 et la clé MOD-97, ou générez un IBAN syntaxiquement valide pour vos tests. Tout est local, aucune requête réseau.',
+                'tool.iban.about.what': 'Contrôle la longueur, les caractères autorisés et la clé MOD-97 d’un IBAN — et, lorsque la clé est correcte, isole les codes banque, guichet et compte selon la structure du BBAN du pays. Le générateur produit un IBAN syntaxiquement valide à des fins de test.',
+                'tool.iban.about.how': 'La norme ISO 13616 fixe une longueur et une structure par pays. La clé MOD-97 réorganise l’IBAN en BBAN+CC+« 00 », mappe A–Z sur 10–35 et vérifie (mod 97) === 1. La génération inverse ce calcul pour produire les deux chiffres de contrôle.',
+                'tool.iban.about.why': 'Détecte les fautes de frappe sans jamais transmettre un numéro de compte à un service tiers. Le générateur produit des IBAN valides pour les fixtures, les tests d’intégration et les pipelines QA — ne jamais s’en servir pour de vrais paiements.',
+                'nav.tool.bic': 'BIC / SWIFT',
+                'tool.bic.desc': 'Contrôler le format ISO 9362 d’un code BIC / SWIFT et en décomposer les éléments.',
+                'view.bic.h2': 'Contrôle de code BIC / SWIFT',
+                'bic.label.input': 'BIC / SWIFT',
+                'bic.ph.input': 'BNPAFRPPXXX',
+                'btn.bicValidate': 'Vérifier',
+                'bic.row.status': 'Statut',
+                'bic.row.valid': 'Format correct',
+                'bic.row.pretty': 'Formaté',
+                'bic.row.bank': 'Banque',
+                'bic.row.country': 'Pays',
+                'bic.row.location': 'Localisation',
+                'bic.row.branch': 'Agence',
+                'bic.row.branchNone': '(aucune — BIC à 8 caractères)',
+                'bic.row.length': 'Longueur',
+                'bic.row.tags': 'Indicateurs',
+                'bic.row.error': 'Erreur',
+                'bic.tag.test': 'BIC de test (localisation se termine par 0)',
+                'bic.tag.passive': 'participant passif (localisation se termine par 1)',
+                'bic.tag.primary': 'agence principale (XXX)',
+                'err.bicEmpty': 'Saisissez un code BIC / SWIFT.',
+                'err.bicLength': 'Le BIC doit faire 8 ou 11 caractères ; reçu {actual}.',
+                'err.bicFormat': 'Le BIC doit comporter 4 lettres (banque) + 2 lettres (pays) + 2 alphanumériques (localisation) + 3 alphanumériques facultatifs (agence).',
+                'tool.bic.title': 'Contrôle de code BIC / SWIFT (format ISO 9362 et décodage des éléments)',
+                'tool.bic.metaDescription': 'Vérifiez qu’un code BIC / SWIFT respecte le format ISO 9362 et décodez ses composantes : banque, pays, localisation, agence. Tout reste dans votre navigateur.',
+                'tool.bic.about.what': 'Valide un code BIC / SWIFT selon la structure ISO 9362 (4 lettres banque + 2 pays + 2 localisation + 3 agence facultatifs) et signale les marqueurs conventionnels comme le 0 final des BIC de test.',
+                'tool.bic.about.how': 'Une expression régulière vérifie les classes de caractères et une recherche dans la table des pays IBAN contrôle le code pays. Le BIC n’a pas de clé de contrôle : la vérification est purement structurelle.',
+                'tool.bic.about.why': 'Contrôle hors-ligne rapide pour les fichiers SEPA, les formulaires d’enregistrement de fournisseurs et la réconciliation back-office — sans exposer le BIC à un validateur tiers.',
+                'nav.tool.gs1': 'Code-barres GS1',
+                'tool.gs1.desc': 'Vérifier les clés EAN-8 / EAN-13 / UPC-A / GTIN-14 / SSCC et décoder le préfixe GS1.',
+                'view.gs1.h2': 'Clé de contrôle de code-barres GS1',
+                'gs1.label.input': 'Chiffres du code-barres (EAN-8 / EAN-13 / UPC-A / UPC-E / ITF-14 / GTIN-14 / SSCC)',
+                'gs1.ph.input': '4006381333931',
+                'btn.gs1Validate': 'Vérifier',
+                'gs1.row.status': 'Statut',
+                'gs1.row.valid': 'Clé de contrôle correcte',
+                'gs1.row.invalid': 'Clé de contrôle incorrecte',
+                'gs1.row.format': 'Format',
+                'gs1.row.length': 'Longueur',
+                'gs1.row.checkDigit': 'Chiffre de contrôle',
+                'gs1.row.expected': 'attendu {expected}',
+                'gs1.row.prefix': 'Préfixe GS1',
+                'gs1.row.error': 'Erreur',
+                'err.gs1Empty': 'Saisissez un numéro de code-barres.',
+                'err.gs1Chars': 'Le code-barres ne doit contenir que des chiffres.',
+                'err.gs1Length': 'La longueur doit être 8, 12, 13, 14 ou 18 chiffres ; reçu {actual}.',
+                'tool.gs1.title': 'Clé de contrôle GS1 / EAN / GTIN / SSCC (mod-10) et décodeur de préfixe',
+                'tool.gs1.metaDescription': 'Vérifiez la clé mod-10 d’un code-barres (EAN-8, EAN-13, UPC-A, GTIN-14, SSCC) et identifiez la région GS1 émettrice — entièrement en local.',
+                'tool.gs1.about.what': 'Valide la clé mod-10 pondérée pour EAN-8, UPC-A, EAN-13 / GTIN-13, ITF-14 / GTIN-14 et SSCC, et identifie la région d’émission depuis la table des préfixes GS1.',
+                'tool.gs1.about.how': 'Les chiffres sont lus de droite à gauche (sans la clé), avec des poids alternés de 3 et 1 ; on additionne, puis on calcule (10 − somme mod 10) mod 10. Le résultat est comparé à la clé fournie.',
+                'tool.gs1.about.why': 'Pratique pour rapprocher des flux produits, déboguer des imprimantes d’étiquettes ou auditer un jeu de codes-barres — sans envoyer de codes produit à un service tiers.'
             },
             'zh-CN': {
                 'meta.title': 'encryptalotta — 36 个免费的浏览器端隐私与开发者工具（PGP、BIP39、TLS、SSH、JWT、PBKDF2、哈希、正则、CSV、cron、CIDR、进制转换 等）',
@@ -5294,7 +5563,82 @@
                 'about.whatHeading': '这是什么？',
                 'about.howHeading': '它如何工作？',
                 'about.whyHeading': '为什么用它而不是在线工具？',
-                'related.heading': '相关工具'
+                'related.heading': '相关工具',
+                // -------- Phase 12: IBAN / BIC / GS1 (Simplified Chinese — machine-quality, awaiting native review) --------
+                'nav.tool.iban': 'IBAN',
+                'tool.iban.desc': '使用 MOD-97 校验和按国家结构验证或生成测试用 IBAN。',
+                'view.iban.h2': 'IBAN 校验与生成器',
+                'iban.label.input': 'IBAN',
+                'iban.ph.input': 'DE89 3704 0044 0532 0130 00',
+                'btn.ibanValidate': '校验',
+                'btn.ibanGenerate': '生成',
+                'iban.gen.heading': '生成测试用 IBAN',
+                'iban.gen.warning': '仅用于测试数据。请勿将生成的 IBAN 用于真实交易。',
+                'iban.label.country': '国家或地区',
+                'iban.label.bban': 'BBAN（可选 — 留空则随机）',
+                'iban.row.status': '状态',
+                'iban.row.valid': '有效（MOD-97 校验通过）',
+                'iban.row.invalidChecksum': '无效 — MOD-97 校验失败',
+                'iban.row.pretty': '格式化',
+                'iban.row.raw': '原始',
+                'iban.row.country': '国家或地区',
+                'iban.row.checkDigits': '校验位',
+                'iban.row.length': '长度',
+                'iban.row.bank': '银行代码',
+                'iban.row.branch': '分行代码',
+                'iban.row.acct': '账号',
+                'iban.row.bban': 'BBAN',
+                'iban.row.note': '提示',
+                'iban.row.error': '错误',
+                'err.ibanEmpty': '请输入 IBAN。',
+                'err.ibanChars': 'IBAN 只能包含字母和数字。',
+                'err.ibanShort': 'IBAN 太短。',
+                'err.ibanCountry': '未知的 IBAN 国家代码：{cc}。',
+                'err.ibanLength': '{cc} 的 IBAN 应为 {expected} 个字符；收到 {actual} 个。',
+                'err.ibanCheckDigits': 'IBAN 校验位必须为两位数字。',
+                'err.ibanBbanLen': 'BBAN 应为 {expected} 个字符；收到 {actual} 个。',
+                'err.ibanBbanChars': 'BBAN 只能包含字母和数字。',
+                'nav.tool.bic': 'BIC / SWIFT',
+                'tool.bic.desc': '校验 BIC / SWIFT 代码的 ISO 9362 格式并解析其组成。',
+                'view.bic.h2': 'BIC / SWIFT 代码校验',
+                'bic.label.input': 'BIC / SWIFT',
+                'bic.ph.input': 'DEUTDEFFXXX',
+                'btn.bicValidate': '校验',
+                'bic.row.status': '状态',
+                'bic.row.valid': '格式正确',
+                'bic.row.pretty': '格式化',
+                'bic.row.bank': '银行',
+                'bic.row.country': '国家或地区',
+                'bic.row.location': '地区代码',
+                'bic.row.branch': '分行',
+                'bic.row.branchNone': '（无 — 8 位 BIC）',
+                'bic.row.length': '长度',
+                'bic.row.tags': '标记',
+                'bic.row.error': '错误',
+                'bic.tag.test': '测试 BIC（地区代码以 0 结尾）',
+                'bic.tag.passive': '被动参与者（地区代码以 1 结尾）',
+                'bic.tag.primary': '总行（XXX）',
+                'err.bicEmpty': '请输入 BIC / SWIFT 代码。',
+                'err.bicLength': 'BIC 必须为 8 或 11 个字符；收到 {actual} 个。',
+                'err.bicFormat': 'BIC 必须为 4 个字母（银行）+ 2 个字母（国家）+ 2 个字母数字（地区）+ 可选 3 个字母数字（分行）。',
+                'nav.tool.gs1': 'GS1 条码',
+                'tool.gs1.desc': '校验 GS1 / EAN-8 / EAN-13 / UPC-A / GTIN-14 / SSCC 校验位并解析前缀。',
+                'view.gs1.h2': 'GS1 条码校验位',
+                'gs1.label.input': '条码数字（EAN-8 / EAN-13 / UPC-A / UPC-E / ITF-14 / GTIN-14 / SSCC）',
+                'gs1.ph.input': '4006381333931',
+                'btn.gs1Validate': '校验',
+                'gs1.row.status': '状态',
+                'gs1.row.valid': '校验位正确',
+                'gs1.row.invalid': '校验位错误',
+                'gs1.row.format': '格式',
+                'gs1.row.length': '长度',
+                'gs1.row.checkDigit': '校验位',
+                'gs1.row.expected': '期望 {expected}',
+                'gs1.row.prefix': 'GS1 前缀',
+                'gs1.row.error': '错误',
+                'err.gs1Empty': '请输入条码号码。',
+                'err.gs1Chars': '条码只能包含数字。',
+                'err.gs1Length': '长度必须为 8、12、13、14 或 18 位；收到 {actual} 位。'
             },
             'de': {
                 'meta.title': 'encryptalotta — 36 kostenlose, browserseitige Datenschutz- und Entwicklerwerkzeuge (PGP, BIP39, TLS, SSH, JWT, PBKDF2, Hash, Regex, CSV, Cron, CIDR, Zahlenbasis …)',
@@ -6023,7 +6367,97 @@
                 'about.whatHeading': 'Was ist das?',
                 'about.howHeading': 'Wie funktioniert es?',
                 'about.whyHeading': 'Warum nicht ein Online-Werkzeug?',
-                'related.heading': 'Verwandte Werkzeuge'
+                'related.heading': 'Verwandte Werkzeuge',
+                // -------- Phase 12: IBAN / BIC / GS1 (German — reviewed against standard DE banking terminology) --------
+                'nav.tool.iban': 'IBAN',
+                'tool.iban.desc': 'IBAN mit MOD-97-Prüfsumme und länderspezifischer Struktur prüfen oder Test-IBAN erzeugen.',
+                'view.iban.h2': 'IBAN-Prüfer / -Generator',
+                'iban.label.input': 'IBAN',
+                'iban.ph.input': 'DE89 3704 0044 0532 0130 00',
+                'btn.ibanValidate': 'Prüfen',
+                'btn.ibanGenerate': 'Erzeugen',
+                'iban.gen.heading': 'Test-IBAN erzeugen',
+                'iban.gen.warning': 'Nur für Testdaten. Erzeugte IBANs nicht für echte Zahlungen verwenden.',
+                'iban.label.country': 'Land',
+                'iban.label.bban': 'BBAN (optional — zufällig, falls leer)',
+                'iban.row.status': 'Status',
+                'iban.row.valid': 'Gültig (MOD-97 stimmt)',
+                'iban.row.invalidChecksum': 'Ungültig — MOD-97-Prüfsumme fehlgeschlagen',
+                'iban.row.pretty': 'Formatiert',
+                'iban.row.raw': 'Roh',
+                'iban.row.country': 'Land',
+                'iban.row.checkDigits': 'Prüfziffern',
+                'iban.row.length': 'Länge',
+                'iban.row.bank': 'Bankleitzahl',
+                'iban.row.branch': 'Filialcode',
+                'iban.row.acct': 'Kontonummer',
+                'iban.row.bban': 'BBAN',
+                'iban.row.note': 'Hinweis',
+                'iban.row.error': 'Fehler',
+                'err.ibanEmpty': 'Bitte eine IBAN eingeben.',
+                'err.ibanChars': 'Die IBAN darf nur Buchstaben und Ziffern enthalten.',
+                'err.ibanShort': 'IBAN ist zu kurz.',
+                'err.ibanCountry': 'Unbekannter IBAN-Ländercode: {cc}.',
+                'err.ibanLength': 'IBAN für {cc} muss {expected} Zeichen lang sein; erhalten: {actual}.',
+                'err.ibanCheckDigits': 'Die IBAN-Prüfziffern müssen aus zwei Ziffern bestehen.',
+                'err.ibanBbanLen': 'BBAN muss {expected} Zeichen lang sein; erhalten: {actual}.',
+                'err.ibanBbanChars': 'BBAN darf nur Buchstaben und Ziffern enthalten.',
+                'tool.iban.title': 'IBAN-Prüfer und Testdaten-Generator (MOD-97, länderspezifische Struktur)',
+                'tool.iban.metaDescription': 'Jede IBAN gegen die ISO-13616-Länderlänge und die MOD-97-Prüfsumme prüfen oder eine syntaktisch gültige Test-IBAN erzeugen. Läuft lokal, keine Netzanfragen.',
+                'tool.iban.about.what': 'Prüft eine IBAN auf richtige Länge, zulässige Zeichen und MOD-97-Prüfsumme — und zerlegt sie bei gültiger Prüfsumme nach der länderspezifischen BBAN-Struktur in Bankleitzahl, Filialcode und Kontonummer. Optional erzeugt der Generator eine syntaktisch gültige Test-IBAN.',
+                'tool.iban.about.how': 'ISO 13616 schreibt Länge und Struktur je Land vor. Die MOD-97-Prüfsumme stellt die IBAN als BBAN+CC+„00“ um, bildet A–Z auf 10–35 ab und prüft (mod 97) === 1. Die Generierung kehrt das um, um die beiden Prüfziffern zu berechnen.',
+                'tool.iban.about.why': 'Erkennt Tippfehler, ohne jemals eine Kontonummer an einen Dritten zu senden. Der Generator liefert valide IBANs für QA-Pipelines, Fixtures und Integrationstests — niemals für echte Zahlungen verwenden.',
+                'nav.tool.bic': 'BIC / SWIFT',
+                'tool.bic.desc': 'ISO-9362-Format eines BIC / SWIFT-Codes prüfen und seine Bestandteile dekodieren.',
+                'view.bic.h2': 'BIC / SWIFT-Prüfung',
+                'bic.label.input': 'BIC / SWIFT',
+                'bic.ph.input': 'DEUTDEFFXXX',
+                'btn.bicValidate': 'Prüfen',
+                'bic.row.status': 'Status',
+                'bic.row.valid': 'Format in Ordnung',
+                'bic.row.pretty': 'Formatiert',
+                'bic.row.bank': 'Bank',
+                'bic.row.country': 'Land',
+                'bic.row.location': 'Ort',
+                'bic.row.branch': 'Filiale',
+                'bic.row.branchNone': '(keine — 8-stelliger BIC)',
+                'bic.row.length': 'Länge',
+                'bic.row.tags': 'Hinweise',
+                'bic.row.error': 'Fehler',
+                'bic.tag.test': 'Test-BIC (Ort endet auf 0)',
+                'bic.tag.passive': 'passiver Teilnehmer (Ort endet auf 1)',
+                'bic.tag.primary': 'Hauptniederlassung (XXX)',
+                'err.bicEmpty': 'Bitte einen BIC / SWIFT-Code eingeben.',
+                'err.bicLength': 'BIC muss 8 oder 11 Zeichen lang sein; erhalten: {actual}.',
+                'err.bicFormat': 'BIC muss aus 4 Buchstaben (Bank) + 2 Buchstaben (Land) + 2 alphanumerischen Zeichen (Ort) + optional 3 alphanumerischen Zeichen (Filiale) bestehen.',
+                'tool.bic.title': 'BIC / SWIFT-Prüfung (ISO-9362-Format und Bestandteil-Dekoder)',
+                'tool.bic.metaDescription': 'Prüft, ob ein BIC / SWIFT-Code dem ISO-9362-Format entspricht, und dekodiert Bank, Land, Ort und Filiale. Rein lokal — nichts verlässt den Browser.',
+                'tool.bic.about.what': 'Validiert einen BIC / SWIFT-Code gegen das ISO-9362-Schema (4 Bank + 2 Land + 2 Ort + optional 3 Filiale) und markiert konventionelle Kennzeichen wie die abschließende 0 bei Test-BICs.',
+                'tool.bic.about.how': 'Eine reguläre Ausdrucksprüfung erzwingt die Zeichenklassen; eine Länderkennung gegen die IBAN-Ländertabelle plausibilisiert das Land. BIC hat keine Prüfsumme, daher ist die Prüfung rein strukturell.',
+                'tool.bic.about.why': 'Schneller Offline-Check für SEPA-Zahlungsdateien, Lieferanten-Onboarding-Formulare und Back-Office-Abgleich — ohne den BIC an einen Drittanbieter weiterzugeben.',
+                'nav.tool.gs1': 'GS1-Barcode',
+                'tool.gs1.desc': 'GS1- / EAN-8- / EAN-13- / UPC-A- / GTIN-14- / SSCC-Prüfziffern prüfen und das Präfix dekodieren.',
+                'view.gs1.h2': 'GS1-Barcode-Prüfziffer',
+                'gs1.label.input': 'Barcode-Ziffern (EAN-8 / EAN-13 / UPC-A / UPC-E / ITF-14 / GTIN-14 / SSCC)',
+                'gs1.ph.input': '4006381333931',
+                'btn.gs1Validate': 'Prüfen',
+                'gs1.row.status': 'Status',
+                'gs1.row.valid': 'Prüfziffer in Ordnung',
+                'gs1.row.invalid': 'Prüfziffer fehlerhaft',
+                'gs1.row.format': 'Format',
+                'gs1.row.length': 'Länge',
+                'gs1.row.checkDigit': 'Prüfziffer',
+                'gs1.row.expected': 'erwartet {expected}',
+                'gs1.row.prefix': 'GS1-Präfix',
+                'gs1.row.error': 'Fehler',
+                'err.gs1Empty': 'Bitte eine Barcode-Nummer eingeben.',
+                'err.gs1Chars': 'Der Barcode darf nur Ziffern enthalten.',
+                'err.gs1Length': 'Länge muss 8, 12, 13, 14 oder 18 Ziffern betragen; erhalten: {actual}.',
+                'tool.gs1.title': 'GS1- / EAN- / GTIN- / SSCC-Prüfziffer (mod-10) und Präfix-Dekoder',
+                'tool.gs1.metaDescription': 'Prüfen Sie die mod-10-gewichtete Prüfziffer eines Barcodes (EAN-8, EAN-13, UPC-A, GTIN-14, SSCC) und ermitteln Sie das GS1-Länder-/Regionspräfix — vollständig lokal.',
+                'tool.gs1.about.what': 'Validiert die mod-10-gewichtete Prüfsumme für EAN-8, UPC-A, EAN-13 / GTIN-13, ITF-14 / GTIN-14 und SSCC und schlägt die ausgebende Region in der GS1-Präfix-Tabelle nach.',
+                'tool.gs1.about.how': 'Die Ziffern werden von rechts nach links (ohne die Prüfziffer) mit alternierenden Gewichten 3 und 1 multipliziert, aufsummiert und über (10 − Summe mod 10) mod 10 in die Prüfziffer überführt.',
+                'tool.gs1.about.why': 'Hilft beim Abgleich von Produktfeeds, beim Debuggen von Etikettendruckern oder beim Audit eines Barcode-Datensatzes — ohne Produktcodes an einen Drittanbieter zu schicken.'
             },
             'hi': {
                 'meta.title': 'encryptalotta — ब्राउज़र में चलने वाले 36 निःशुल्क गोपनीयता और डेवलपर टूल (PGP, BIP39, TLS, SSH, JWT, PBKDF2, हैश, रेजेक्स, CSV, cron, CIDR, संख्या आधार आदि)',
@@ -6752,7 +7186,82 @@
                 'about.whatHeading': 'यह क्या है?',
                 'about.howHeading': 'यह कैसे काम करता है?',
                 'about.whyHeading': 'ऑनलाइन टूल के बजाय इसका उपयोग क्यों करें?',
-                'related.heading': 'संबंधित टूल'
+                'related.heading': 'संबंधित टूल',
+                // -------- Phase 12: IBAN / BIC / GS1 (Hindi — machine-quality, awaiting native review) --------
+                'nav.tool.iban': 'IBAN',
+                'tool.iban.desc': 'MOD-97 चेकसम और देशवार संरचना के साथ IBAN सत्यापित करें या परीक्षण के लिए जनरेट करें।',
+                'view.iban.h2': 'IBAN सत्यापक / जनरेटर',
+                'iban.label.input': 'IBAN',
+                'iban.ph.input': 'DE89 3704 0044 0532 0130 00',
+                'btn.ibanValidate': 'सत्यापित करें',
+                'btn.ibanGenerate': 'जनरेट करें',
+                'iban.gen.heading': 'परीक्षण के लिए IBAN जनरेट करें',
+                'iban.gen.warning': 'केवल परीक्षण डेटा के लिए। जनरेट किए गए IBAN वास्तविक लेन-देन के लिए उपयोग न करें।',
+                'iban.label.country': 'देश',
+                'iban.label.bban': 'BBAN (वैकल्पिक — खाली होने पर रैंडम)',
+                'iban.row.status': 'स्थिति',
+                'iban.row.valid': 'वैध (MOD-97 सफल)',
+                'iban.row.invalidChecksum': 'अमान्य — MOD-97 चेकसम विफल',
+                'iban.row.pretty': 'स्वरूपित',
+                'iban.row.raw': 'कच्चा',
+                'iban.row.country': 'देश',
+                'iban.row.checkDigits': 'चेक अंक',
+                'iban.row.length': 'लंबाई',
+                'iban.row.bank': 'बैंक कोड',
+                'iban.row.branch': 'शाखा कोड',
+                'iban.row.acct': 'खाता संख्या',
+                'iban.row.bban': 'BBAN',
+                'iban.row.note': 'टिप्पणी',
+                'iban.row.error': 'त्रुटि',
+                'err.ibanEmpty': 'कृपया IBAN दर्ज करें।',
+                'err.ibanChars': 'IBAN में केवल अक्षर और अंक हो सकते हैं।',
+                'err.ibanShort': 'IBAN बहुत छोटा है।',
+                'err.ibanCountry': 'अज्ञात IBAN देश कोड: {cc}।',
+                'err.ibanLength': '{cc} के लिए IBAN {expected} वर्णों का होना चाहिए; मिला {actual}।',
+                'err.ibanCheckDigits': 'IBAN चेक अंक दो अंकों के होने चाहिए।',
+                'err.ibanBbanLen': 'BBAN {expected} वर्णों का होना चाहिए; मिला {actual}।',
+                'err.ibanBbanChars': 'BBAN में केवल अक्षर और अंक हो सकते हैं।',
+                'nav.tool.bic': 'BIC / SWIFT',
+                'tool.bic.desc': 'BIC / SWIFT कोड का ISO 9362 स्वरूप जाँचें और घटक डिकोड करें।',
+                'view.bic.h2': 'BIC / SWIFT कोड जाँच',
+                'bic.label.input': 'BIC / SWIFT',
+                'bic.ph.input': 'DEUTDEFFXXX',
+                'btn.bicValidate': 'जाँचें',
+                'bic.row.status': 'स्थिति',
+                'bic.row.valid': 'स्वरूप ठीक है',
+                'bic.row.pretty': 'स्वरूपित',
+                'bic.row.bank': 'बैंक',
+                'bic.row.country': 'देश',
+                'bic.row.location': 'स्थान',
+                'bic.row.branch': 'शाखा',
+                'bic.row.branchNone': '(कोई नहीं — 8-वर्ण BIC)',
+                'bic.row.length': 'लंबाई',
+                'bic.row.tags': 'टैग',
+                'bic.row.error': 'त्रुटि',
+                'bic.tag.test': 'परीक्षण BIC (स्थान 0 पर समाप्त)',
+                'bic.tag.passive': 'निष्क्रिय भागीदार (स्थान 1 पर समाप्त)',
+                'bic.tag.primary': 'मुख्य शाखा (XXX)',
+                'err.bicEmpty': 'कृपया BIC / SWIFT कोड दर्ज करें।',
+                'err.bicLength': 'BIC 8 या 11 वर्णों का होना चाहिए; मिला {actual}।',
+                'err.bicFormat': 'BIC में 4 अक्षर (बैंक) + 2 अक्षर (देश) + 2 अक्षरांकिक (स्थान) + वैकल्पिक 3 अक्षरांकिक (शाखा) होने चाहिए।',
+                'nav.tool.gs1': 'GS1 बारकोड',
+                'tool.gs1.desc': 'GS1 / EAN-8 / EAN-13 / UPC-A / GTIN-14 / SSCC चेकसम सत्यापित करें और उपसर्ग डिकोड करें।',
+                'view.gs1.h2': 'GS1 बारकोड चेकसम',
+                'gs1.label.input': 'बारकोड अंक (EAN-8 / EAN-13 / UPC-A / UPC-E / ITF-14 / GTIN-14 / SSCC)',
+                'gs1.ph.input': '4006381333931',
+                'btn.gs1Validate': 'जाँचें',
+                'gs1.row.status': 'स्थिति',
+                'gs1.row.valid': 'चेकसम सही',
+                'gs1.row.invalid': 'चेकसम गलत',
+                'gs1.row.format': 'स्वरूप',
+                'gs1.row.length': 'लंबाई',
+                'gs1.row.checkDigit': 'चेक अंक',
+                'gs1.row.expected': 'अपेक्षित {expected}',
+                'gs1.row.prefix': 'GS1 उपसर्ग',
+                'gs1.row.error': 'त्रुटि',
+                'err.gs1Empty': 'कृपया बारकोड संख्या दर्ज करें।',
+                'err.gs1Chars': 'बारकोड में केवल अंक होने चाहिए।',
+                'err.gs1Length': 'लंबाई 8, 12, 13, 14 या 18 अंक होनी चाहिए; मिला {actual}।'
             }
         };
 
@@ -7050,7 +7559,10 @@
             'cidr': 'utilities',
             'pbkdf2': 'utilities',
             'bip39': 'keys',
-            'base': 'utilities'
+            'base': 'utilities',
+            'iban': 'utilities',
+            'bic': 'utilities',
+            'gs1': 'utilities'
         };
         const DEFAULT_TOOL = 'generate';
 
@@ -7060,7 +7572,8 @@
             'encrypt', 'decrypt', 'text-crypto', 'password-encrypt', 'stego',
             'sign', 'verify', 'hmac', 'jwt',
             'passwords', 'armor', 'shamir', 'exif',
-            'hash', 'encode', 'uuid', 'timestamp', 'url', 'totp', 'diff', 'csv', 'regex', 'cron', 'color', 'format', 'cidr', 'pbkdf2', 'base'
+            'hash', 'encode', 'uuid', 'timestamp', 'url', 'totp', 'diff', 'csv', 'regex', 'cron', 'color', 'format', 'cidr', 'pbkdf2', 'base',
+            'iban', 'bic', 'gs1'
         ];
 
         function isValidTool(t) { return Object.prototype.hasOwnProperty.call(TOOL_TO_GROUP, t); }
@@ -7300,7 +7813,10 @@
             'cidr':             ['url', 'tls-cert', 'ssh-key'],
             'pbkdf2':           ['hmac', 'hash', 'passwords'],
             'bip39':            ['generate', 'shamir', 'passwords'],
-            'base':             ['encode', 'hash', 'uuid']
+            'base':             ['encode', 'hash', 'uuid'],
+            'iban':             ['bic', 'gs1', 'regex'],
+            'bic':              ['iban', 'gs1', 'regex'],
+            'gs1':              ['iban', 'bic', 'hash']
         };
 
         function injectRelatedTools() {
@@ -11808,6 +12324,478 @@
             } catch (e) {
                 out.classList.remove('hidden');
                 tlsRenderRow(out, t('base.row.error'), e.message);
+            }
+        });
+
+        // ==================== Phase 12 (i18n spec §2.1): IBAN validator / generator ====================
+        // ISO 13616. Per-country IBAN length table. MOD-97 checksum: rearrange CCKK BBAN -> BBAN CCKK,
+        // map A-Z -> 10-35, treat as decimal, expect (mod 97) === 1. The table also carries a coarse
+        // BBAN structure so we can surface bank / branch / account fields where they exist; absent that
+        // detail we just expose the BBAN as-is. No network — VIES-style live lookup is deliberately
+        // out of scope (see SPEC-INTERNATIONAL.md §0).
+        const IBAN_COUNTRIES = {
+            AD: { len: 24, name: 'Andorra',        bank: [4, 4], branch: [8, 4],  acct: [12, 12] },
+            AE: { len: 23, name: 'United Arab Emirates', bank: [4, 3], acct: [7, 16] },
+            AL: { len: 28, name: 'Albania',        bank: [4, 3], branch: [7, 4],  acct: [12, 16] },
+            AT: { len: 20, name: 'Austria',        bank: [4, 5], acct: [9, 11] },
+            AZ: { len: 28, name: 'Azerbaijan',     bank: [4, 4], acct: [8, 20] },
+            BA: { len: 20, name: 'Bosnia and Herzegovina', bank: [4, 3], branch: [7, 3], acct: [10, 10] },
+            BE: { len: 16, name: 'Belgium',        bank: [4, 3], acct: [7, 9] },
+            BG: { len: 22, name: 'Bulgaria',       bank: [4, 4], branch: [8, 4], acct: [16, 6] },
+            BH: { len: 22, name: 'Bahrain',        bank: [4, 4], acct: [8, 14] },
+            BR: { len: 29, name: 'Brazil',         bank: [4, 8], branch: [12, 5], acct: [17, 12] },
+            BY: { len: 28, name: 'Belarus',        bank: [4, 4], acct: [8, 20] },
+            CH: { len: 21, name: 'Switzerland',    bank: [4, 5], acct: [9, 12] },
+            CR: { len: 22, name: 'Costa Rica',     bank: [4, 4], acct: [8, 14] },
+            CY: { len: 28, name: 'Cyprus',         bank: [4, 3], branch: [7, 5], acct: [12, 16] },
+            CZ: { len: 24, name: 'Czechia',        bank: [4, 4], acct: [8, 16] },
+            DE: { len: 22, name: 'Germany',        bank: [4, 8], acct: [12, 10] },
+            DK: { len: 18, name: 'Denmark',        bank: [4, 4], acct: [8, 10] },
+            DO: { len: 28, name: 'Dominican Republic', bank: [4, 4], acct: [8, 20] },
+            EE: { len: 20, name: 'Estonia',        bank: [4, 2], acct: [6, 14] },
+            EG: { len: 29, name: 'Egypt',          bank: [4, 4], branch: [8, 4], acct: [12, 17] },
+            ES: { len: 24, name: 'Spain',          bank: [4, 4], branch: [8, 4], acct: [16, 12] },
+            FI: { len: 18, name: 'Finland',        bank: [4, 3], acct: [7, 11] },
+            FO: { len: 18, name: 'Faroe Islands',  bank: [4, 4], acct: [8, 10] },
+            FR: { len: 27, name: 'France',         bank: [4, 5], branch: [9, 5], acct: [14, 13] },
+            GB: { len: 22, name: 'United Kingdom', bank: [4, 4], branch: [8, 6], acct: [14, 8] },
+            GE: { len: 22, name: 'Georgia',        bank: [4, 2], acct: [6, 16] },
+            GI: { len: 23, name: 'Gibraltar',      bank: [4, 4], acct: [8, 15] },
+            GL: { len: 18, name: 'Greenland',      bank: [4, 4], acct: [8, 10] },
+            GR: { len: 27, name: 'Greece',         bank: [4, 3], branch: [7, 4], acct: [11, 16] },
+            GT: { len: 28, name: 'Guatemala',      bank: [4, 4], acct: [8, 20] },
+            HR: { len: 21, name: 'Croatia',        bank: [4, 7], acct: [11, 10] },
+            HU: { len: 28, name: 'Hungary',        bank: [4, 3], branch: [7, 4], acct: [11, 17] },
+            IE: { len: 22, name: 'Ireland',        bank: [4, 4], branch: [8, 6], acct: [14, 8] },
+            IL: { len: 23, name: 'Israel',         bank: [4, 3], branch: [7, 3], acct: [10, 13] },
+            IS: { len: 26, name: 'Iceland',        bank: [4, 4], acct: [8, 18] },
+            IT: { len: 27, name: 'Italy',          bank: [5, 5], branch: [10, 5], acct: [15, 12] },
+            JO: { len: 30, name: 'Jordan',         bank: [4, 4], branch: [8, 4], acct: [12, 18] },
+            KW: { len: 30, name: 'Kuwait',         bank: [4, 4], acct: [8, 22] },
+            KZ: { len: 20, name: 'Kazakhstan',     bank: [4, 3], acct: [7, 13] },
+            LB: { len: 28, name: 'Lebanon',        bank: [4, 4], acct: [8, 20] },
+            LC: { len: 32, name: 'Saint Lucia',    bank: [4, 4], acct: [8, 24] },
+            LI: { len: 21, name: 'Liechtenstein',  bank: [4, 5], acct: [9, 12] },
+            LT: { len: 20, name: 'Lithuania',      bank: [4, 5], acct: [9, 11] },
+            LU: { len: 20, name: 'Luxembourg',     bank: [4, 3], acct: [7, 13] },
+            LV: { len: 21, name: 'Latvia',         bank: [4, 4], acct: [8, 13] },
+            MC: { len: 27, name: 'Monaco',         bank: [4, 5], branch: [9, 5], acct: [14, 13] },
+            MD: { len: 24, name: 'Moldova',        bank: [4, 2], acct: [6, 18] },
+            ME: { len: 22, name: 'Montenegro',     bank: [4, 3], acct: [7, 15] },
+            MK: { len: 19, name: 'North Macedonia', bank: [4, 3], acct: [7, 12] },
+            MR: { len: 27, name: 'Mauritania',     bank: [4, 5], branch: [9, 5], acct: [14, 13] },
+            MT: { len: 31, name: 'Malta',          bank: [4, 4], branch: [8, 5], acct: [13, 18] },
+            MU: { len: 30, name: 'Mauritius',      bank: [4, 6], branch: [10, 2], acct: [12, 18] },
+            NL: { len: 18, name: 'Netherlands',    bank: [4, 4], acct: [8, 10] },
+            NO: { len: 15, name: 'Norway',         bank: [4, 4], acct: [8, 7] },
+            PK: { len: 24, name: 'Pakistan',       bank: [4, 4], acct: [8, 16] },
+            PL: { len: 28, name: 'Poland',         bank: [4, 3], branch: [7, 4], acct: [11, 16] },
+            PS: { len: 29, name: 'Palestine',      bank: [4, 4], acct: [8, 21] },
+            PT: { len: 25, name: 'Portugal',       bank: [4, 4], branch: [8, 4], acct: [12, 13] },
+            QA: { len: 29, name: 'Qatar',          bank: [4, 4], acct: [8, 21] },
+            RO: { len: 24, name: 'Romania',        bank: [4, 4], acct: [8, 16] },
+            RS: { len: 22, name: 'Serbia',         bank: [4, 3], acct: [7, 15] },
+            SA: { len: 24, name: 'Saudi Arabia',   bank: [4, 2], acct: [6, 18] },
+            SC: { len: 31, name: 'Seychelles',     bank: [4, 4], branch: [8, 4], acct: [12, 19] },
+            SE: { len: 24, name: 'Sweden',         bank: [4, 3], acct: [7, 17] },
+            SI: { len: 19, name: 'Slovenia',       bank: [4, 5], acct: [9, 10] },
+            SK: { len: 24, name: 'Slovakia',       bank: [4, 4], acct: [8, 16] },
+            SM: { len: 27, name: 'San Marino',     bank: [5, 5], branch: [10, 5], acct: [15, 12] },
+            ST: { len: 25, name: 'São Tomé and Príncipe', bank: [4, 4], branch: [8, 4], acct: [12, 13] },
+            SV: { len: 28, name: 'El Salvador',    bank: [4, 4], acct: [8, 20] },
+            TL: { len: 23, name: 'Timor-Leste',    bank: [4, 3], acct: [7, 16] },
+            TN: { len: 24, name: 'Tunisia',        bank: [4, 2], branch: [6, 3], acct: [9, 15] },
+            TR: { len: 26, name: 'Türkiye',        bank: [4, 5], acct: [10, 16] },
+            UA: { len: 29, name: 'Ukraine',        bank: [4, 6], acct: [10, 19] },
+            VA: { len: 22, name: 'Vatican City',   bank: [4, 3], acct: [7, 15] },
+            VG: { len: 24, name: 'British Virgin Islands', bank: [4, 4], acct: [8, 16] },
+            XK: { len: 20, name: 'Kosovo',         bank: [4, 2], branch: [6, 2], acct: [8, 12] }
+        };
+
+        function ibanNormalize(s) {
+            return String(s || '').replace(/[\s\-_]/g, '').toUpperCase();
+        }
+
+        function ibanMod97(rearranged) {
+            // Stream the digit string through mod-97 to avoid BigInt for short strings.
+            let r = 0;
+            for (const ch of rearranged) {
+                const code = ch.charCodeAt(0);
+                let d;
+                if (code >= 48 && code <= 57) d = code - 48;          // 0-9
+                else if (code >= 65 && code <= 90) d = code - 55;     // A=10 .. Z=35
+                else throw new Error('non-alphanumeric character in IBAN');
+                // Each letter expands to two digits (10-35), each digit to one.
+                if (d >= 10) {
+                    r = ((r * 10) + Math.floor(d / 10)) % 97;
+                    r = ((r * 10) + (d % 10)) % 97;
+                } else {
+                    r = ((r * 10) + d) % 97;
+                }
+            }
+            return r;
+        }
+
+        function ibanValidate(raw) {
+            const s = ibanNormalize(raw);
+            if (!s) throw new Error(t('err.ibanEmpty'));
+            if (!/^[A-Z0-9]+$/.test(s)) throw new Error(t('err.ibanChars'));
+            if (s.length < 5) throw new Error(t('err.ibanShort'));
+            const cc = s.slice(0, 2);
+            const meta = IBAN_COUNTRIES[cc];
+            if (!meta) throw new Error(tFormat('err.ibanCountry', { cc }));
+            if (s.length !== meta.len) throw new Error(tFormat('err.ibanLength', { cc, expected: meta.len, actual: s.length }));
+            const rearranged = s.slice(4) + s.slice(0, 4);
+            const mod = ibanMod97(rearranged);
+            const checksumOk = mod === 1;
+            // Sanity: the two check digits should be 02-98 (never 00, 01, 99).
+            const checkDigits = s.slice(2, 4);
+            if (!/^\d{2}$/.test(checkDigits)) throw new Error(t('err.ibanCheckDigits'));
+            const bban = s.slice(4);
+            const fields = {};
+            if (meta.bank)   fields.bank   = s.slice(meta.bank[0], meta.bank[0] + meta.bank[1]);
+            if (meta.branch) fields.branch = s.slice(meta.branch[0], meta.branch[0] + meta.branch[1]);
+            if (meta.acct)   fields.acct   = s.slice(meta.acct[0], meta.acct[0] + meta.acct[1]);
+            return {
+                ok: checksumOk,
+                country: cc,
+                countryName: meta.name,
+                checkDigits,
+                bban,
+                pretty: s.match(/.{1,4}/g).join(' '),
+                fields,
+                length: s.length
+            };
+        }
+
+        function ibanGenerate(country, bbanInput) {
+            const cc = String(country || '').toUpperCase();
+            const meta = IBAN_COUNTRIES[cc];
+            if (!meta) throw new Error(tFormat('err.ibanCountry', { cc }));
+            const bbanLen = meta.len - 4;
+            let bban = ibanNormalize(bbanInput || '');
+            if (!bban) {
+                // Cryptographically random digits, BBAN length.
+                const buf = new Uint32Array(bbanLen);
+                crypto.getRandomValues(buf);
+                bban = '';
+                for (let i = 0; i < bbanLen; i++) bban += (buf[i] % 10).toString();
+            }
+            if (bban.length !== bbanLen) throw new Error(tFormat('err.ibanBbanLen', { expected: bbanLen, actual: bban.length }));
+            if (!/^[A-Z0-9]+$/.test(bban)) throw new Error(t('err.ibanBbanChars'));
+            // Compute the two check digits: 98 - mod97(BBAN + CC + '00').
+            const check = 98 - ibanMod97(bban + cc + '00');
+            const cd = check.toString().padStart(2, '0');
+            const iban = cc + cd + bban;
+            return { iban, pretty: iban.match(/.{1,4}/g).join(' ') };
+        }
+
+        function ibanPopulateCountries() {
+            const sel = document.getElementById('iban-gen-country');
+            if (!sel || sel.options.length) return;
+            const entries = Object.entries(IBAN_COUNTRIES).map(([cc, m]) => [cc, m.name]).sort((a, b) => a[1].localeCompare(b[1]));
+            for (const [cc, name] of entries) {
+                const opt = document.createElement('option');
+                opt.value = cc;
+                opt.textContent = cc + ' — ' + name;
+                if (cc === 'DE') opt.selected = true;
+                sel.appendChild(opt);
+            }
+        }
+        ibanPopulateCountries();
+
+        document.getElementById('btn-iban-validate').addEventListener('click', () => {
+            const out = document.getElementById('iban-results');
+            while (out.firstChild) out.removeChild(out.firstChild);
+            out.classList.remove('hidden');
+            try {
+                const r = ibanValidate(document.getElementById('iban-input').value);
+                tlsRenderRow(out, t('iban.row.status'), r.ok ? '✓ ' + t('iban.row.valid') : '✗ ' + t('iban.row.invalidChecksum'));
+                tlsRenderRow(out, t('iban.row.pretty'), r.pretty);
+                tlsRenderRow(out, t('iban.row.country'), r.country + ' — ' + r.countryName);
+                tlsRenderRow(out, t('iban.row.checkDigits'), r.checkDigits);
+                tlsRenderRow(out, t('iban.row.length'), String(r.length));
+                if (r.fields.bank)   tlsRenderRow(out, t('iban.row.bank'),   r.fields.bank);
+                if (r.fields.branch) tlsRenderRow(out, t('iban.row.branch'), r.fields.branch);
+                if (r.fields.acct)   tlsRenderRow(out, t('iban.row.acct'),   r.fields.acct);
+                tlsRenderRow(out, t('iban.row.bban'), r.bban);
+            } catch (e) {
+                tlsRenderRow(out, t('iban.row.error'), e.message);
+            }
+        });
+
+        document.getElementById('btn-iban-generate').addEventListener('click', () => {
+            const out = document.getElementById('iban-gen-results');
+            while (out.firstChild) out.removeChild(out.firstChild);
+            out.classList.remove('hidden');
+            try {
+                const cc = document.getElementById('iban-gen-country').value;
+                const bban = document.getElementById('iban-gen-bban').value;
+                const r = ibanGenerate(cc, bban);
+                tlsRenderRow(out, t('iban.row.pretty'), r.pretty);
+                tlsRenderRow(out, t('iban.row.raw'), r.iban);
+                tlsRenderRow(out, t('iban.row.note'), t('iban.gen.warning'));
+            } catch (e) {
+                tlsRenderRow(out, t('iban.row.error'), e.message);
+            }
+        });
+
+        // ==================== Phase 12 (i18n spec §2.2): BIC / SWIFT format checker ====================
+        // ISO 9362. Format: BBBB CC LL [XXX]   (4 bank, 2 country, 2 location, optional 3 branch).
+        // Total length is 8 or 11. There is no checksum; the only structural rules are character
+        // classes plus the location-code convention that a trailing '0' marks a test BIC and a
+        // trailing '1' marks a "passive participant" connection.
+        function bicValidate(raw) {
+            const s = String(raw || '').replace(/\s/g, '').toUpperCase();
+            if (!s) throw new Error(t('err.bicEmpty'));
+            if (s.length !== 8 && s.length !== 11) throw new Error(tFormat('err.bicLength', { actual: s.length }));
+            const m = s.match(/^([A-Z]{4})([A-Z]{2})([A-Z0-9]{2})([A-Z0-9]{3})?$/);
+            if (!m) throw new Error(t('err.bicFormat'));
+            const [, bank, cc, loc, branch] = m;
+            const countryMeta = IBAN_COUNTRIES[cc];   // country list is good enough as a sanity check
+            const tags = [];
+            if (loc.endsWith('0')) tags.push(t('bic.tag.test'));
+            if (loc.endsWith('1')) tags.push(t('bic.tag.passive'));
+            if (branch === 'XXX') tags.push(t('bic.tag.primary'));
+            return {
+                ok: true,
+                pretty: bank + ' ' + cc + ' ' + loc + (branch ? ' ' + branch : ''),
+                bank, country: cc,
+                countryName: countryMeta ? countryMeta.name : null,
+                location: loc,
+                branch: branch || null,
+                length: s.length,
+                tags
+            };
+        }
+
+        document.getElementById('btn-bic-validate').addEventListener('click', () => {
+            const out = document.getElementById('bic-results');
+            while (out.firstChild) out.removeChild(out.firstChild);
+            out.classList.remove('hidden');
+            try {
+                const r = bicValidate(document.getElementById('bic-input').value);
+                tlsRenderRow(out, t('bic.row.status'), '✓ ' + t('bic.row.valid'));
+                tlsRenderRow(out, t('bic.row.pretty'), r.pretty);
+                tlsRenderRow(out, t('bic.row.bank'), r.bank);
+                tlsRenderRow(out, t('bic.row.country'), r.country + (r.countryName ? ' — ' + r.countryName : ''));
+                tlsRenderRow(out, t('bic.row.location'), r.location);
+                tlsRenderRow(out, t('bic.row.branch'), r.branch || t('bic.row.branchNone'));
+                tlsRenderRow(out, t('bic.row.length'), String(r.length));
+                if (r.tags.length) tlsRenderRow(out, t('bic.row.tags'), r.tags.join(', '));
+            } catch (e) {
+                tlsRenderRow(out, t('bic.row.error'), e.message);
+            }
+        });
+
+        // ==================== Phase 12 (i18n spec §2.13): GS1 / EAN / GTIN / SSCC checksum ====================
+        // Mod-10 weighted checksum. Reading the digits right-to-left (excluding the check digit),
+        // alternate weights of 3 and 1. Sum, then the check digit is (10 - sum mod 10) mod 10.
+        // Format detected by length:
+        //   8  -> EAN-8
+        //   12 -> UPC-A
+        //   13 -> EAN-13 / GTIN-13
+        //   14 -> ITF-14 / GTIN-14
+        //   18 -> SSCC
+        // UPC-E (8 digits, leading 0 or 1) is detected as a separate variant.
+        const GS1_PREFIXES = [
+            // Sourced from GS1 General Specifications, prefix ranges (subset — covers
+            // the most-asked-about regions; everything else falls through to "unknown").
+            [0,    19,   'USA & Canada (UPC-A)'],
+            [20,   29,   'In-store / restricted'],
+            [30,   39,   'USA drugs (NDC)'],
+            [40,   49,   'In-store / restricted'],
+            [50,   59,   'Coupons'],
+            [60,   139,  'USA & Canada'],
+            [200,  299,  'In-store / restricted'],
+            [300,  379,  'France & Monaco'],
+            [380,  380,  'Bulgaria'],
+            [383,  383,  'Slovenia'],
+            [385,  385,  'Croatia'],
+            [387,  387,  'Bosnia and Herzegovina'],
+            [389,  389,  'Montenegro'],
+            [390,  390,  'Kosovo'],
+            [400,  440,  'Germany'],
+            [450,  459,  'Japan'],
+            [460,  469,  'Russia'],
+            [470,  470,  'Kyrgyzstan'],
+            [471,  471,  'Taiwan'],
+            [474,  474,  'Estonia'],
+            [475,  475,  'Latvia'],
+            [476,  476,  'Azerbaijan'],
+            [477,  477,  'Lithuania'],
+            [478,  478,  'Uzbekistan'],
+            [479,  479,  'Sri Lanka'],
+            [480,  480,  'Philippines'],
+            [481,  481,  'Belarus'],
+            [482,  482,  'Ukraine'],
+            [483,  483,  'Turkmenistan'],
+            [484,  484,  'Moldova'],
+            [485,  485,  'Armenia'],
+            [486,  486,  'Georgia'],
+            [487,  487,  'Kazakhstan'],
+            [488,  488,  'Tajikistan'],
+            [489,  489,  'Hong Kong'],
+            [490,  499,  'Japan'],
+            [500,  509,  'United Kingdom'],
+            [520,  521,  'Greece'],
+            [528,  528,  'Lebanon'],
+            [529,  529,  'Cyprus'],
+            [530,  530,  'Albania'],
+            [531,  531,  'North Macedonia'],
+            [535,  535,  'Malta'],
+            [539,  539,  'Ireland'],
+            [540,  549,  'Belgium & Luxembourg'],
+            [560,  560,  'Portugal'],
+            [569,  569,  'Iceland'],
+            [570,  579,  'Denmark, Faroe Islands & Greenland'],
+            [590,  590,  'Poland'],
+            [594,  594,  'Romania'],
+            [599,  599,  'Hungary'],
+            [600,  601,  'South Africa'],
+            [603,  603,  'Ghana'],
+            [604,  604,  'Senegal'],
+            [608,  608,  'Bahrain'],
+            [609,  609,  'Mauritius'],
+            [611,  611,  'Morocco'],
+            [613,  613,  'Algeria'],
+            [615,  615,  'Nigeria'],
+            [616,  616,  'Kenya'],
+            [618,  618,  'Côte d’Ivoire'],
+            [619,  619,  'Tunisia'],
+            [620,  620,  'Tanzania'],
+            [621,  621,  'Syria'],
+            [622,  622,  'Egypt'],
+            [623,  623,  'Brunei'],
+            [624,  624,  'Libya'],
+            [625,  625,  'Jordan'],
+            [626,  626,  'Iran'],
+            [627,  627,  'Kuwait'],
+            [628,  628,  'Saudi Arabia'],
+            [629,  629,  'United Arab Emirates'],
+            [630,  630,  'Qatar'],
+            [631,  631,  'Namibia'],
+            [640,  649,  'Finland'],
+            [690,  699,  'China'],
+            [700,  709,  'Norway'],
+            [729,  729,  'Israel'],
+            [730,  739,  'Sweden'],
+            [740,  740,  'Guatemala'],
+            [741,  741,  'El Salvador'],
+            [742,  742,  'Honduras'],
+            [743,  743,  'Nicaragua'],
+            [744,  744,  'Costa Rica'],
+            [745,  745,  'Panama'],
+            [746,  746,  'Dominican Republic'],
+            [750,  750,  'Mexico'],
+            [754,  755,  'Canada'],
+            [759,  759,  'Venezuela'],
+            [760,  769,  'Switzerland & Liechtenstein'],
+            [770,  771,  'Colombia'],
+            [773,  773,  'Uruguay'],
+            [775,  775,  'Peru'],
+            [777,  777,  'Bolivia'],
+            [778,  779,  'Argentina'],
+            [780,  780,  'Chile'],
+            [784,  784,  'Paraguay'],
+            [786,  786,  'Ecuador'],
+            [789,  790,  'Brazil'],
+            [800,  839,  'Italy, San Marino & Vatican'],
+            [840,  849,  'Spain & Andorra'],
+            [850,  850,  'Cuba'],
+            [858,  858,  'Slovakia'],
+            [859,  859,  'Czechia'],
+            [860,  860,  'Serbia'],
+            [865,  865,  'Mongolia'],
+            [867,  867,  'North Korea'],
+            [868,  869,  'Türkiye'],
+            [870,  879,  'Netherlands'],
+            [880,  881,  'South Korea'],
+            [883,  883,  'Myanmar'],
+            [884,  884,  'Cambodia'],
+            [885,  885,  'Thailand'],
+            [888,  888,  'Singapore'],
+            [890,  890,  'India'],
+            [893,  893,  'Vietnam'],
+            [896,  896,  'Pakistan'],
+            [899,  899,  'Indonesia'],
+            [900,  919,  'Austria'],
+            [930,  939,  'Australia'],
+            [940,  949,  'New Zealand'],
+            [950,  950,  'GS1 Global Office (GTIN-8)'],
+            [951,  951,  'EPCglobal'],
+            [955,  955,  'Malaysia'],
+            [958,  958,  'Macao'],
+            [960,  969,  'GS1 Global Office (GTIN-8)'],
+            [977,  977,  'Serial publications (ISSN)'],
+            [978,  979,  'Bookland (ISBN)'],
+            [980,  980,  'Refund receipts'],
+            [981,  984,  'Common Currency Coupons'],
+            [990,  999,  'Coupons']
+        ];
+
+        function gs1LookupPrefix(digits) {
+            const n3 = parseInt(digits.slice(0, 3), 10);
+            for (const [lo, hi, label] of GS1_PREFIXES) {
+                if (n3 >= lo && n3 <= hi) return label;
+            }
+            return null;
+        }
+
+        function gs1Mod10(digitsWithoutCheck) {
+            let sum = 0;
+            const arr = digitsWithoutCheck.split('').reverse();
+            for (let i = 0; i < arr.length; i++) {
+                const d = arr[i].charCodeAt(0) - 48;
+                if (d < 0 || d > 9) throw new Error(t('err.gs1Chars'));
+                // Right-to-left, position 0 (rightmost) gets weight 3, then alternate.
+                sum += d * (i % 2 === 0 ? 3 : 1);
+            }
+            return (10 - (sum % 10)) % 10;
+        }
+
+        function gs1Validate(raw) {
+            const s = String(raw || '').replace(/[\s\-]/g, '');
+            if (!s) throw new Error(t('err.gs1Empty'));
+            if (!/^\d+$/.test(s)) throw new Error(t('err.gs1Chars'));
+            const validLengths = { 8: 'EAN-8', 12: 'UPC-A', 13: 'EAN-13 / GTIN-13', 14: 'ITF-14 / GTIN-14', 18: 'SSCC' };
+            const fmt = validLengths[s.length];
+            if (!fmt) throw new Error(tFormat('err.gs1Length', { actual: s.length }));
+            const body = s.slice(0, -1);
+            const claimed = s.charCodeAt(s.length - 1) - 48;
+            const expected = gs1Mod10(body);
+            // GS1 / GTIN prefix lookup is well-defined only for 13- and 14-digit codes (left-padded
+            // to 13 for prefix purposes). For shorter / SSCC codes we still surface the format.
+            let prefix = null;
+            if (s.length === 13 || s.length === 14) {
+                const d13 = s.length === 14 ? s.slice(1, 14) : s;
+                prefix = gs1LookupPrefix(d13);
+            } else if (s.length === 12) {
+                // UPC-A maps to EAN-13 by prepending '0'.
+                prefix = gs1LookupPrefix('0' + s);
+            }
+            return {
+                ok: claimed === expected,
+                format: fmt,
+                length: s.length,
+                claimed, expected,
+                prefix
+            };
+        }
+
+        document.getElementById('btn-gs1-validate').addEventListener('click', () => {
+            const out = document.getElementById('gs1-results');
+            while (out.firstChild) out.removeChild(out.firstChild);
+            out.classList.remove('hidden');
+            try {
+                const r = gs1Validate(document.getElementById('gs1-input').value);
+                tlsRenderRow(out, t('gs1.row.status'), r.ok ? '✓ ' + t('gs1.row.valid') : '✗ ' + t('gs1.row.invalid'));
+                tlsRenderRow(out, t('gs1.row.format'), r.format);
+                tlsRenderRow(out, t('gs1.row.length'), String(r.length));
+                tlsRenderRow(out, t('gs1.row.checkDigit'), String(r.claimed) + (r.ok ? '' : ' (' + tFormat('gs1.row.expected', { expected: r.expected }) + ')'));
+                if (r.prefix) tlsRenderRow(out, t('gs1.row.prefix'), r.prefix);
+            } catch (e) {
+                tlsRenderRow(out, t('gs1.row.error'), e.message);
             }
         });
 

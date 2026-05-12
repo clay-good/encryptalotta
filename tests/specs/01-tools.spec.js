@@ -420,6 +420,73 @@ test('base: 255 (dec) → ff (hex)', async ({ page }) => {
   await expect(page.locator('#base-results')).toContainText(/\bff\b|0xff/i, { timeout: 5_000 });
 });
 
+// ECBS published test IBAN (Deutsche Bank, Frankfurt). Valid MOD-97, length 22.
+test('iban: validates DE89 3704 0044 0532 0130 00', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'iban');
+  await page.fill('#iban-input', 'DE89 3704 0044 0532 0130 00');
+  await page.click('#btn-iban-validate');
+  await expect(page.locator('#iban-results')).toContainText(/Valid \(MOD-97/i, { timeout: 5_000 });
+  await expect(page.locator('#iban-results')).toContainText(/Germany/, { timeout: 5_000 });
+});
+
+// Same IBAN with the last digit flipped should fail the checksum.
+test('iban: rejects a bad checksum', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'iban');
+  await page.fill('#iban-input', 'DE89 3704 0044 0532 0130 01');
+  await page.click('#btn-iban-validate');
+  await expect(page.locator('#iban-results')).toContainText(/Invalid.*MOD-97/i, { timeout: 5_000 });
+});
+
+// Generator round-trip: any IBAN we generate must validate.
+test('iban: generator round-trip (DE)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'iban');
+  await page.selectOption('#iban-gen-country', 'DE');
+  await page.fill('#iban-gen-bban', '');
+  await page.click('#btn-iban-generate');
+  const generated = await page.locator('#iban-gen-results').textContent();
+  const m = generated.match(/DE\d{20}/);
+  expect(m).not.toBeNull();
+  await page.fill('#iban-input', m[0]);
+  await page.click('#btn-iban-validate');
+  await expect(page.locator('#iban-results')).toContainText(/Valid \(MOD-97/i, { timeout: 5_000 });
+});
+
+// Real BIC for Deutsche Bank head office. 11 chars, XXX = primary branch.
+test('bic: validates DEUTDEFFXXX', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'bic');
+  await page.fill('#bic-input', 'DEUTDEFFXXX');
+  await page.click('#btn-bic-validate');
+  await expect(page.locator('#bic-results')).toContainText(/Format OK/i, { timeout: 5_000 });
+  await expect(page.locator('#bic-results')).toContainText(/Germany/, { timeout: 5_000 });
+  await expect(page.locator('#bic-results')).toContainText(/primary branch/i, { timeout: 5_000 });
+});
+
+// 9 chars is not a legal BIC length.
+test('bic: rejects 9-character input', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'bic');
+  await page.fill('#bic-input', 'DEUTDEFF1');
+  await page.click('#btn-bic-validate');
+  await expect(page.locator('#bic-results')).toContainText(/8 or 11/i, { timeout: 5_000 });
+});
+
+// Real EAN-13 (Ferrero / Nutella, EU). Check digit = 1, GS1 prefix 400-440 = Germany.
+test('gs1: validates EAN-13 4006381333931', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'gs1');
+  await page.fill('#gs1-input', '4006381333931');
+  await page.click('#btn-gs1-validate');
+  await expect(page.locator('#gs1-results')).toContainText(/Checksum OK/i, { timeout: 5_000 });
+  await expect(page.locator('#gs1-results')).toContainText(/EAN-13/i, { timeout: 5_000 });
+  await expect(page.locator('#gs1-results')).toContainText(/Germany/, { timeout: 5_000 });
+});
+
+// Flip the last digit; mod-10 should fail.
+test('gs1: rejects bad check digit', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'gs1');
+  await page.fill('#gs1-input', '4006381333932');
+  await page.click('#btn-gs1-validate');
+  await expect(page.locator('#gs1-results')).toContainText(/Checksum failed/i, { timeout: 5_000 });
+});
+
 // =============== GLOBAL ===============
 
 test('home grid: every card navigates without uncaught errors', async ({ page }) => {

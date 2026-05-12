@@ -17,7 +17,8 @@ const TOOLS = [
   'encrypt','decrypt','text-crypto','password-encrypt','stego',
   'sign','verify','hmac','jwt',
   'passwords','armor','shamir','exif',
-  'hash','encode','uuid','timestamp','url','totp','diff','csv','regex','cron','color','format','cidr','pbkdf2','base'
+  'hash','encode','uuid','timestamp','url','totp','diff','csv','regex','cron','color','format','cidr','pbkdf2','base',
+  'iban','bic','gs1'
 ];
 
 async function gotoView(page, view) {

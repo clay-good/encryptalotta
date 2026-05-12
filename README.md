@@ -1,15 +1,15 @@
 # encryptalotta
 
-**Free, client-side privacy and developer toolbox — 36 tools, zero server uploads.**
+**Free, client-side privacy and developer toolbox — 39 tools, zero server uploads.**
 
-A comprehensive single-page web app with **36 cryptographic, encoding, parsing, and developer utilities** that run entirely in your browser. PGP key generation, key inspection, revocation certificates, QR public-key sharing, TLS / X.509 certificate parsing, OpenSSH public key parsing, PEM ↔ DER conversion, BIP39 mnemonic generation and validation, file and text encryption / decryption, password-only (symmetric) file encryption, image steganography, digital signing and verification, HMAC, JWT inspection and verification, PBKDF2 key derivation, TOTP / 2FA, password generation, ASCII armor conversion, Shamir's Secret Sharing, EXIF metadata stripping, hashing and checksums (SHA-1 / 256 / 384 / 512), Base64 / Base32 / Base58 / hex encoding, number base conversion (binary / octal / decimal / hex / any base 2–36), UUID v4 / v7 and ULID generation, Unix timestamp conversion, URL parsing, line-level diff, CSV ↔ JSON ↔ TSV conversion, regex testing, cron decoding, color conversion with WCAG contrast checking, JSON / YAML / XML formatting, and CIDR / IPv4 subnet calculation. Searchable command palette (`⌘K` / `Ctrl+K`), full keyboard navigation, five UI languages. No server uploads, no analytics, no CDN, no tracking.
+A comprehensive single-page web app with **39 cryptographic, encoding, parsing, and developer utilities** that run entirely in your browser. PGP key generation, key inspection, revocation certificates, QR public-key sharing, TLS / X.509 certificate parsing, OpenSSH public key parsing, PEM ↔ DER conversion, BIP39 mnemonic generation and validation, file and text encryption / decryption, password-only (symmetric) file encryption, image steganography, digital signing and verification, HMAC, JWT inspection and verification, PBKDF2 key derivation, TOTP / 2FA, password generation, ASCII armor conversion, Shamir's Secret Sharing, EXIF metadata stripping, hashing and checksums (SHA-1 / 256 / 384 / 512), Base64 / Base32 / Base58 / hex encoding, number base conversion (binary / octal / decimal / hex / any base 2–36), UUID v4 / v7 and ULID generation, Unix timestamp conversion, URL parsing, line-level diff, CSV ↔ JSON ↔ TSV conversion, regex testing, cron decoding, color conversion with WCAG contrast checking, JSON / YAML / XML formatting, and CIDR / IPv4 subnet calculation. Searchable command palette (`⌘K` / `Ctrl+K`), full keyboard navigation, five UI languages. No server uploads, no analytics, no CDN, no tracking.
 
 **Inspired by [Kevin Qiu](https://www.linkedin.com/in/kevinmqiu)**
 
 
 ---
 
-## Features (36 tools)
+## Features (39 tools)
 
 ### Keys (8 tools)
 - **Generate PGP Keys** — Create ECC (Curve25519) or RSA 3072 / 4096 key pairs with customizable expiry.
@@ -34,7 +34,7 @@ A comprehensive single-page web app with **36 cryptographic, encoding, parsing, 
 - **HMAC** — Sign and verify with HMAC-SHA-1 / 256 / 384 / 512. Constant-time comparison on verify; key buffer zeroized after use.
 - **JWT Inspector** — Decode the three Base64-URL parts; verify HS256/384/512 (shared secret), RS256/384/512 (PEM SPKI public key), or ES256/384/512 (PEM SPKI ECDSA key). Expiry indicator from the `exp` claim.
 
-### Utilities (19 tools)
+### Utilities (22 tools)
 - **Strong Password Generator** — Cryptographically random passwords with customizable charset and length.
 - **ASCII Armor Converter** — Round-trip between PGP binary and ASCII-armored encodings.
 - **Shamir Secret Sharing** — Split a secret into N shares where any K reconstruct it; share format `EAL-SSS/v1/{K}-of-{N}/{rawShare}`.
@@ -54,6 +54,9 @@ A comprehensive single-page web app with **36 cryptographic, encoding, parsing, 
 - **CIDR / Subnet Calculator** — IPv4 only; pure 32-bit unsigned arithmetic. Network, broadcast, netmask (with binary view), wildcard, first/last usable host, total + usable counts, address class, RFC 1918 / loopback / link-local tags. Handles `/0`, `/31` (RFC 3021), and `/32` correctly.
 - **PBKDF2 Key Derivation** — RFC 8018 password-based key derivation via Web Crypto. Configurable iterations (1–10,000,000), salt (text or hex), key length (1–512 bytes), and PRF (SHA-1 / 256 / 384 / 512). Reports wall-clock derivation time so you can size iteration counts to a target cost.
 - **Number Base Converter** — Convert integers between binary, octal, decimal, hexadecimal, and any base 2–36 simultaneously. Auto-detects `0x` / `0b` / `0o` prefixes; uses BigInt internally so values aren't capped at 53-bit JS Number precision; preserves negatives sign-and-magnitude.
+- **IBAN Validator / Generator** — ISO 13616 MOD-97 checksum and per-country structure for ~80 IBAN jurisdictions. Splits out bank / branch / account where the registry defines them. Generator side produces a syntactically valid test IBAN (`crypto.getRandomValues` BBAN, computed check digits) for fixtures and integration tests — clearly labeled "test data only."
+- **BIC / SWIFT Code Checker** — ISO 9362 format check for 8- and 11-character BICs. Decodes bank / country / location / branch, cross-checks the country segment against the IBAN country table, flags test BICs (trailing `0`), passive participants (trailing `1`), and primary branches (`XXX`).
+- **GS1 / EAN / GTIN Barcode** — Mod-10 weighted checksum for EAN-8, UPC-A, EAN-13 / GTIN-13, ITF-14 / GTIN-14, and SSCC. Looks up the issuing region from an inline GS1 prefix registry (~130 ranges covering every assigned prefix).
 
 ### Languages
 
@@ -161,7 +164,7 @@ This eliminates entire categories of supply chain attacks that have affected oth
 Sensitive data is cleared from memory after use:
 
 - **Automatic passphrase clearing** — Passphrase fields are wiped after decryption operations.
-- **Page unload protection** — On `beforeunload`, `clearSensitiveFields()` wipes every passphrase, private-key, shared-secret, BIP39 mnemonic, and PBKDF2 password input across all 36 tools, plus the readonly output panes that render decrypted plaintext, derived keys, BIP39 seeds, Shamir secrets, and steganographic payloads. Public keys, signed messages, and signature-verification statuses are left alone (they aren't secrets and clearing them would erase audit context).
+- **Page unload protection** — On `beforeunload`, `clearSensitiveFields()` wipes every passphrase, private-key, shared-secret, BIP39 mnemonic, and PBKDF2 password input across all 39 tools, plus the readonly output panes that render decrypted plaintext, derived keys, BIP39 seeds, Shamir secrets, and steganographic payloads. Public keys, signed messages, and signature-verification statuses are left alone (they aren't secrets and clearing them would erase audit context).
 - **JavaScript variable clearing** — Sensitive `Uint8Array` buffers (PBKDF2 password bytes, generated PGP private keys) are zeroized via `.fill(0)` / `secureWipe()` after use. (Note: this is best-effort — JS engines may have already retained internal copies for GC, and `String` values are immutable so we cannot overwrite them in place.)
 
 ### Strict Content Security Policy
@@ -267,7 +270,7 @@ The interface is a **home grid + command palette**, designed to stay minimal on 
 
 ## All Features at Your Fingertips
 
-All 36 tools are organized into four groups. Every tool has a deep-link route.
+All 39 tools are organized into four groups. Every tool has a deep-link route.
 
 ### Keys (8)
 | Tool | Route | What it does |
@@ -298,7 +301,7 @@ All 36 tools are organized into four groups. Every tool has a deep-link route.
 | **HMAC** | `#/signing/hmac` | HMAC-SHA-1/256/384/512 sign and verify (constant-time compare) |
 | **JWT Inspector** | `#/signing/jwt` | Decode + verify HS / RS / ES JWTs; surface `exp` claim |
 
-### Utilities (19)
+### Utilities (22)
 | Tool | Route | What it does |
 |---|---|---|
 | **Passwords** | `#/utilities/passwords` | Generate cryptographically strong random passwords |
@@ -320,6 +323,9 @@ All 36 tools are organized into four groups. Every tool has a deep-link route.
 | **CIDR / Subnet** | `#/utilities/cidr` | Decode IPv4 CIDR: network, broadcast, host range, tags |
 | **PBKDF2** | `#/utilities/pbkdf2` | Derive a key from a password (configurable iterations, salt, PRF) |
 | **Number Base** | `#/utilities/base` | Convert integers between binary, octal, decimal, hex, any base 2–36 |
+| **IBAN** | `#/utilities/iban` | ISO 13616 MOD-97 validator + test-data generator (per-country structure) |
+| **BIC / SWIFT** | `#/utilities/bic` | ISO 9362 format check + bank / country / location / branch decoder |
+| **GS1 Barcode** | `#/utilities/gs1` | Mod-10 checksum for EAN-8/-13, UPC-A, GTIN-14, SSCC + GS1 prefix lookup |
 
 ---
 
@@ -442,7 +448,7 @@ node scripts/build-i18n-variants.js
 node scripts/audit-release.js
 ```
 
-The audit checks: zero `innerHTML =` assignments, STRINGS parity across all 5 locales, every `data-i18n` key resolves, vendored SHA-384 hashes match across HTML comments + the README manifest + on-disk bytes, CSP `connect-src 'none'` on both meta and `_headers`, no outbound network call sites, page weight under 2 MB gzipped, locale variants (`/fr/`, `/zh/`, `/de/`, `/hi/`) in sync with source, `robots.txt` + `sitemap.xml` + JSON-LD presence, and Phase-7 SEO prose key coverage for all 36 tools.
+The audit checks: zero `innerHTML =` assignments, STRINGS parity across all 5 locales, every `data-i18n` key resolves, vendored SHA-384 hashes match across HTML comments + the README manifest + on-disk bytes, CSP `connect-src 'none'` on both meta and `_headers`, no outbound network call sites, page weight under 2 MB gzipped, locale variants (`/fr/`, `/zh/`, `/de/`, `/hi/`) in sync with source, `robots.txt` + `sitemap.xml` + JSON-LD presence, and Phase-7 SEO prose key coverage for all 39 tools.
 
 ### Pre-commit hook (recommended)
 
@@ -552,7 +558,7 @@ This site is optimized for Cloudflare Pages deployment with automatic security h
 
 This application is open source specifically so security researchers can audit it. Key areas to review:
 
-- `index.html` - All application logic (CSP meta tags, JavaScript cryptographic calls, memory clearing, i18n, all 36 tools)
+- `index.html` - All application logic (CSP meta tags, JavaScript cryptographic calls, memory clearing, i18n, all 39 tools)
 - `_headers` - HTTP security headers
 - `openpgp.min.js` - Compare against official OpenPGP.js v6.3.0 release
 - `qrcode.js` - Compare against official qrcode-generator v2.0.4 release
