@@ -537,6 +537,83 @@ test('vat: DE bad checksum is rejected', async ({ page }) => {
   await expect(page.locator('#vat-results')).toContainText(/Checksum failed/i, { timeout: 5_000 });
 });
 
+// Ed25519: generate → sign → verify round-trip.
+test('ed25519: generate / sign / verify round-trip', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ed25519');
+  // If the browser lacks Ed25519, the unsupported banner is shown — skip cleanly.
+  const unsupported = await page.locator('#ed25519-unsupported').isVisible().catch(() => false);
+  test.skip(unsupported, 'browser does not support Ed25519');
+  await page.click('#btn-ed25519-generate');
+  await page.waitForFunction(() => /^[0-9a-f]{64}$/.test((document.getElementById('ed25519-pub').value || '').trim()), { timeout: 5_000 });
+  await page.fill('#ed25519-msg', 'encryptalotta test message');
+  await page.click('#btn-ed25519-sign');
+  await page.waitForFunction(() => /^[0-9a-f]{128}$/.test((document.getElementById('ed25519-sig').value || '').trim()), { timeout: 5_000 });
+  await page.click('#btn-ed25519-verify');
+  await expect(page.locator('#ed25519-result')).toContainText(/Signature valid/i, { timeout: 5_000 });
+});
+
+// Ed25519: RFC 8032 §7.1 test vector 1 — empty-message signature.
+test('ed25519: verifies RFC 8032 §7.1 test 1 (empty message)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ed25519');
+  const unsupported = await page.locator('#ed25519-unsupported').isVisible().catch(() => false);
+  test.skip(unsupported, 'browser does not support Ed25519');
+  await page.fill('#ed25519-pub', 'd75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a');
+  await page.fill('#ed25519-msg', '0x');
+  await page.fill('#ed25519-sig', 'e5564300c360ac729086e2cc806e828a84877f1eb8e5d974d873e065224901555fb8821590a33bacc61e39701cf9b46bd25bf5f0595bbe24655141438e7a100b');
+  await page.click('#btn-ed25519-verify');
+  await expect(page.locator('#ed25519-result')).toContainText(/Signature valid/i, { timeout: 5_000 });
+});
+
+// Ed25519: RFC 8032 §7.1 test 2 — message = single byte 0x72.
+test('ed25519: verifies RFC 8032 §7.1 test 2 (single-byte message)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ed25519');
+  const unsupported = await page.locator('#ed25519-unsupported').isVisible().catch(() => false);
+  test.skip(unsupported, 'browser does not support Ed25519');
+  await page.fill('#ed25519-pub', '3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c');
+  await page.fill('#ed25519-msg', '0x72');
+  await page.fill('#ed25519-sig', '92a009a9f0d4cab8720e820b5f642540a2b27b5416503f8fb3762223ebdb69da085ac1e43e15996e458f3613d0f11d8c387b2eaeb4302aeeb00d291612bb0c00');
+  await page.click('#btn-ed25519-verify');
+  await expect(page.locator('#ed25519-result')).toContainText(/Signature valid/i, { timeout: 5_000 });
+});
+
+// Ed25519: tamper with the signature → must be rejected.
+test('ed25519: rejects tampered signature', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ed25519');
+  const unsupported = await page.locator('#ed25519-unsupported').isVisible().catch(() => false);
+  test.skip(unsupported, 'browser does not support Ed25519');
+  await page.fill('#ed25519-pub', 'd75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a');
+  await page.fill('#ed25519-msg', '0x');
+  // First byte 0xe5 → 0xe4.
+  await page.fill('#ed25519-sig', 'e4564300c360ac729086e2cc806e828a84877f1eb8e5d974d873e065224901555fb8821590a33bacc61e39701cf9b46bd25bf5f0595bbe24655141438e7a100b');
+  await page.click('#btn-ed25519-verify');
+  await expect(page.locator('#ed25519-result')).toContainText(/Signature invalid/i, { timeout: 5_000 });
+});
+
+// X25519: RFC 7748 §6.1 — Alice's private + Bob's public should yield the canonical shared secret.
+test('x25519: derives RFC 7748 §6.1 shared secret', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'x25519');
+  const unsupported = await page.locator('#x25519-unsupported').isVisible().catch(() => false);
+  test.skip(unsupported, 'browser does not support X25519');
+  await page.fill('#x25519-priv', '77076d0a7318a57d3c16c17251b26645df4c2f87ebc0992ab177fba51db92c2a');
+  await page.fill('#x25519-peer', 'de9edb7d7b7dc1b4d35b61c2ece435373f8343c85b78674dadfc7e146f882b4f');
+  await page.selectOption('#x25519-hkdf', 'none');
+  await page.click('#btn-x25519-derive');
+  await page.waitForFunction(() => (document.getElementById('x25519-shared').value || '').toLowerCase() === '4a5d9d5ba4ce2de1728e3bf480350f25e07e21c947d19e3376f09b3c1e161742', { timeout: 5_000 });
+});
+
+// X25519: HKDF-SHA-256 post-processing produces 32 hex bytes (64 chars).
+test('x25519: HKDF-SHA-256 post-processing produces 32 bytes', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'x25519');
+  const unsupported = await page.locator('#x25519-unsupported').isVisible().catch(() => false);
+  test.skip(unsupported, 'browser does not support X25519');
+  await page.fill('#x25519-priv', '77076d0a7318a57d3c16c17251b26645df4c2f87ebc0992ab177fba51db92c2a');
+  await page.fill('#x25519-peer', 'de9edb7d7b7dc1b4d35b61c2ece435373f8343c85b78674dadfc7e146f882b4f');
+  await page.selectOption('#x25519-hkdf', 'SHA-256');
+  await page.fill('#x25519-info', 'encryptalotta x25519 test');
+  await page.click('#btn-x25519-derive');
+  await page.waitForFunction(() => /^[0-9a-f]{64}$/.test((document.getElementById('x25519-shared').value || '').trim()), { timeout: 5_000 });
+});
+
 // =============== GLOBAL ===============
 
 test('home grid: every card navigates without uncaught errors', async ({ page }) => {

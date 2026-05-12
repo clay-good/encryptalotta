@@ -1,6 +1,6 @@
 # Spec — International public-good extensions to encryptalotta
 
-Status: draft 3 (Phase 4 partially landed: IBAN, BIC, GS1, VAT)
+Status: draft 4 (Phase 4 partially landed: IBAN, BIC, GS1, VAT, Ed25519, X25519)
 Audience: maintainers and contributors
 Scope: how to extend encryptalotta.com so it serves an international audience — with a deliberate emphasis on Europe and other regions that lean heavily on open-source — without compromising the site's existing character (single-page, fully client-side, no analytics, no CDN, no tracking, no build step beyond a couple of vendored scripts).
 
@@ -364,9 +364,11 @@ Each tool below follows the existing project pattern: pure browser code, zero ne
 
 **Recommendation:** ship pure-JS first, label it "slower than native", and revisit WASM only if real users complain.
 
-### 2.10 Ed25519 / X25519 standalone tools
+### 2.10 Ed25519 / X25519 standalone tools — **✅ shipped (draft 4)**
 
 **Why:** Web Crypto now supports Ed25519 and X25519 natively (Safari 17, Chrome 113, Firefox 130). Useful for SSH, age, Signal, Noise, and many EU-origin protocols.
+
+**Status notes (draft 4):** Shipped as two sister tools, `ed25519` and `x25519`. Both use native Web Crypto exclusively — no vendored JS, no WASM. Both detect lack of browser support and show an explicit banner with the minimum browser versions, rather than failing silently. Private keys are surfaced as the 32-byte RFC 8032 §5.1.5 seed (Ed25519) / RFC 7748 scalar (X25519); on import, the tool wraps the seed in the standard PKCS#8 / RFC 8410 envelope that Web Crypto requires. X25519 includes optional HKDF-SHA-256/SHA-512 post-processing with a user-supplied "info" context, matching Noise / X3DH conventions. Functional tests exercise RFC 8032 §7.1 vector 1 (empty message) and vector 2 (single byte `0x72`), a tampered-signature rejection, RFC 7748 §6.1 Alice/Bob shared secret derivation, and a round-trip generate→sign→verify; a11y verified in both themes.
 
 **Spec:**
 - **Ed25519:** generate keypair, sign (text or file), verify. Keys in raw 32-byte hex, OpenSSH format, and PEM (PKCS#8 / SPKI).
@@ -544,13 +546,15 @@ Each phase is independent. Stop after any phase; nothing below requires the next
 3. ✅ EU VAT validator (§2.3) — landed draft 3.
 4. ✅ GS1 barcode (§2.13) — landed draft 2.
 5. BLAKE2b / BLAKE3 (§2.12).
-6. Ed25519 / X25519 standalone (§2.10).
+6. ✅ Ed25519 / X25519 standalone (§2.10) — landed draft 4.
 
 All ~1-day implementations. Roughly doubles the site's tool count for a small fraction of the effort.
 
 **Progress (draft 2):** IBAN + BIC + GS1 shipped together. Tool count went from 36 → 39. New functional tests in `tests/specs/01-tools.spec.js` (8 cases) and a11y coverage in `tests/specs/05-a11y.spec.js` (3 views × 2 themes = 6 cases). JSON-LD `featureList` updated to 39 entries; `audit-release.js` passes; full Playwright suite passes (170 tests).
 
 **Progress (draft 3):** EU VAT validator shipped. Tool count 39 → 40. 6 new functional tests (real public VATs for DE/FR/IT + NL format-only + ES NIF rejection + DE bad-checksum). 2 new a11y tests (light + dark). JSON-LD `featureList` updated to 40 entries; STRINGS now 1014 keys × 5 locales; audit passes; full new-tool test suite (22 tests including all of IBAN/BIC/GS1/VAT) passes.
+
+**Progress (draft 4):** Ed25519 + X25519 shipped as two sister tools. Tool count 40 → 42. 6 new functional tests using RFC 8032 §7.1 (vectors 1 & 2), RFC 7748 §6.1, plus a tamper-rejection and HKDF derivation. 4 new a11y tests. JSON-LD `featureList` updated to 42 entries; STRINGS now 1071 keys × 5 locales; gzipped page weight 0.33 MB (still well under the 2 MB budget). Audit passes.
 
 ### Phase 5 — Distribution and sovereignty
 

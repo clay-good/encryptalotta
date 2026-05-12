@@ -144,9 +144,11 @@
             "IBAN validator and test-data generator (ISO 13616 MOD-97, per-country structure)",
             "BIC / SWIFT code checker (ISO 9362 format and component decoder)",
             "GS1 / EAN / GTIN / SSCC barcode checksum (mod-10) and prefix decoder",
-            "EU VAT number validator — format + checksum (offline, no VIES round-trip)"
+            "EU VAT number validator — format + checksum (offline, no VIES round-trip)",
+            "Ed25519 sign / verify (RFC 8032 via Web Crypto)",
+            "X25519 ECDH key agreement (RFC 7748) with optional HKDF-SHA-256 / SHA-512 post-processing"
           ],
-          "featureList_count": 40,
+          "featureList_count": 42,
           "screenshot": "https://encryptalotta.com/encryptalotta.png",
           "softwareHelp": { "@type": "CreativeWork", "url": "https://github.com/clay-good/encryptalotta/" },
           "license": "https://github.com/clay-good/encryptalotta/blob/main/LICENSE"
@@ -1416,6 +1418,14 @@
                     <button class="tool-card" type="button" data-tool="vat">
                         <span class="tc-title" data-i18n="nav.tool.vat">EU VAT</span>
                         <span class="tc-desc" data-i18n="tool.vat.desc">Check the format and (where defined) checksum of an EU / UK / NO / CH VAT number.</span>
+                    </button>
+                    <button class="tool-card" type="button" data-tool="ed25519">
+                        <span class="tc-title" data-i18n="nav.tool.ed25519">Ed25519</span>
+                        <span class="tc-desc" data-i18n="tool.ed25519.desc">Generate Ed25519 keypairs and produce or verify signatures (RFC 8032 via Web Crypto).</span>
+                    </button>
+                    <button class="tool-card" type="button" data-tool="x25519">
+                        <span class="tc-title" data-i18n="nav.tool.x25519">X25519</span>
+                        <span class="tc-desc" data-i18n="tool.x25519.desc">Generate X25519 keypairs and derive a shared secret (ECDH, RFC 7748) with optional HKDF.</span>
                     </button>
                 </div>
             </section>
@@ -2994,6 +3004,110 @@
 
                 <div id="vat-results" class="hidden" style="margin-top: 24px;"></div>
             </div>
+
+            <!-- Ed25519 Sign / Verify View -->
+            <div id="ed25519-view" class="view" role="tabpanel" aria-labelledby="ed25519-h2">
+                <h2 id="ed25519-h2" style="margin-bottom: 25px;" data-i18n="view.ed25519.h2">Ed25519 — Sign / Verify</h2>
+
+                <div class="alert alert-info">
+                    <strong data-i18n="alert.clientSideTitle">100% Client-Side:</strong> <span data-i18n="alert.clientSideGenericBody">All operations happen locally in your browser. Nothing is uploaded to any server.</span>
+                </div>
+
+                <div id="ed25519-unsupported" class="alert alert-warning hidden" style="margin-bottom: 20px;">
+                    <strong data-i18n="ed25519.unsupported.title">Browser does not support Ed25519 in Web Crypto.</strong>
+                    <span data-i18n="ed25519.unsupported.body">Ed25519 landed in Safari 17, Chrome 113, and Firefox 130. Please upgrade your browser to use this tool.</span>
+                </div>
+
+                <h3 style="margin: 0 0 12px; font-size: 1rem;" data-i18n="ed25519.gen.heading">1. Generate keypair</h3>
+                <button id="btn-ed25519-generate" class="btn" data-i18n="btn.ed25519Generate">Generate</button>
+                <div class="grid-2" style="margin-top: 16px;">
+                    <div class="form-group">
+                        <label for="ed25519-pub" data-i18n="ed25519.label.pub">Public key (32 bytes, hex)</label>
+                        <textarea id="ed25519-pub" rows="2" autocomplete="off" spellcheck="false" style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace;" dir="ltr"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="ed25519-priv" data-i18n="ed25519.label.priv">Private key (32-byte seed, hex)</label>
+                        <textarea id="ed25519-priv" rows="2" autocomplete="off" spellcheck="false" style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace;" dir="ltr"></textarea>
+                    </div>
+                </div>
+
+                <hr style="margin: 28px 0 20px; border: 0; border-top: 1px solid var(--border);">
+
+                <h3 style="margin: 0 0 12px; font-size: 1rem;" data-i18n="ed25519.sign.heading">2. Sign a message</h3>
+                <div class="form-group">
+                    <label for="ed25519-msg" data-i18n="ed25519.label.msg">Message (UTF-8 text or hex with 0x prefix)</label>
+                    <textarea id="ed25519-msg" rows="3" autocomplete="off" spellcheck="false" style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace;" dir="ltr"></textarea>
+                </div>
+                <button id="btn-ed25519-sign" class="btn" data-i18n="btn.ed25519Sign">Sign</button>
+                <div class="form-group" style="margin-top: 16px;">
+                    <label for="ed25519-sig" data-i18n="ed25519.label.sig">Signature (64 bytes, hex)</label>
+                    <textarea id="ed25519-sig" rows="2" autocomplete="off" spellcheck="false" style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace;" dir="ltr"></textarea>
+                </div>
+
+                <hr style="margin: 28px 0 20px; border: 0; border-top: 1px solid var(--border);">
+
+                <h3 style="margin: 0 0 12px; font-size: 1rem;" data-i18n="ed25519.verify.heading">3. Verify a signature</h3>
+                <button id="btn-ed25519-verify" class="btn btn-secondary" data-i18n="btn.ed25519Verify">Verify</button>
+                <div id="ed25519-result" class="hidden" style="margin-top: 18px;"></div>
+            </div>
+
+            <!-- X25519 ECDH View -->
+            <div id="x25519-view" class="view" role="tabpanel" aria-labelledby="x25519-h2">
+                <h2 id="x25519-h2" style="margin-bottom: 25px;" data-i18n="view.x25519.h2">X25519 — Key Agreement (ECDH)</h2>
+
+                <div class="alert alert-info">
+                    <strong data-i18n="alert.clientSideTitle">100% Client-Side:</strong> <span data-i18n="alert.clientSideGenericBody">All operations happen locally in your browser. Nothing is uploaded to any server.</span>
+                </div>
+
+                <div id="x25519-unsupported" class="alert alert-warning hidden" style="margin-bottom: 20px;">
+                    <strong data-i18n="x25519.unsupported.title">Browser does not support X25519 in Web Crypto.</strong>
+                    <span data-i18n="x25519.unsupported.body">X25519 landed in Safari 17, Chrome 123, and Firefox 130. Please upgrade your browser to use this tool.</span>
+                </div>
+
+                <h3 style="margin: 0 0 12px; font-size: 1rem;" data-i18n="x25519.gen.heading">1. Generate local keypair</h3>
+                <button id="btn-x25519-generate" class="btn" data-i18n="btn.x25519Generate">Generate</button>
+                <div class="grid-2" style="margin-top: 16px;">
+                    <div class="form-group">
+                        <label for="x25519-pub" data-i18n="x25519.label.pub">Local public key (32 bytes, hex)</label>
+                        <textarea id="x25519-pub" rows="2" autocomplete="off" spellcheck="false" style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace;" dir="ltr"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="x25519-priv" data-i18n="x25519.label.priv">Local private key (32 bytes, hex)</label>
+                        <textarea id="x25519-priv" rows="2" autocomplete="off" spellcheck="false" style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace;" dir="ltr"></textarea>
+                    </div>
+                </div>
+
+                <hr style="margin: 28px 0 20px; border: 0; border-top: 1px solid var(--border);">
+
+                <h3 style="margin: 0 0 12px; font-size: 1rem;" data-i18n="x25519.peer.heading">2. Peer public key</h3>
+                <div class="form-group">
+                    <label for="x25519-peer" data-i18n="x25519.label.peer">Peer public key (32 bytes, hex)</label>
+                    <textarea id="x25519-peer" rows="2" autocomplete="off" spellcheck="false" style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace;" dir="ltr"></textarea>
+                </div>
+
+                <hr style="margin: 28px 0 20px; border: 0; border-top: 1px solid var(--border);">
+
+                <h3 style="margin: 0 0 12px; font-size: 1rem;" data-i18n="x25519.derive.heading">3. Derive shared secret</h3>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="x25519-hkdf" data-i18n="x25519.label.hkdf">HKDF post-processing</label>
+                        <select id="x25519-hkdf">
+                            <option value="none" data-i18n="x25519.opt.hkdfNone">None (raw 32-byte shared secret)</option>
+                            <option value="SHA-256" selected>HKDF-SHA-256 → 32 bytes</option>
+                            <option value="SHA-512">HKDF-SHA-512 → 64 bytes</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="x25519-info" data-i18n="x25519.label.info">HKDF "info" context (optional, UTF-8)</label>
+                        <input type="text" id="x25519-info" autocomplete="off" spellcheck="false" placeholder="encryptalotta x25519 demo" dir="ltr">
+                    </div>
+                </div>
+                <button id="btn-x25519-derive" class="btn" data-i18n="btn.x25519Derive">Derive</button>
+                <div class="form-group" style="margin-top: 16px;">
+                    <label for="x25519-shared" data-i18n="x25519.label.shared">Shared secret (hex)</label>
+                    <textarea id="x25519-shared" rows="2" autocomplete="off" spellcheck="false" readonly style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace;" dir="ltr"></textarea>
+                </div>
+            </div>
         </main>
     </div>
 
@@ -4067,7 +4181,65 @@
                 'tool.vat.metaDescription': 'Validate an EU, UK, Norwegian, or Swiss VAT number against its national format and (where one exists) checksum. Runs entirely in your browser — no network call, no VIES lookup, no tracking.',
                 'tool.vat.about.what': 'Checks a VAT number against its per-country format and computes the published checksum where one exists (DE, FR, IT, BE, AT, NL format-only, ES CIF, etc.). Personal-identity numbers (ES NIF/NIE, IT Codice Fiscale) are explicitly rejected by design.',
                 'tool.vat.about.how': 'Per-country regex enforces the structural rules. For countries with a published checksum (about 70% of the supported set), the algorithm is implemented locally — mod-11 weighted for most, Luhn for IT/SE, MOD 11,10 for HR/DE, mod-97 for BE, mod-89 for LU. The rest report "format only" without claiming more.',
-                'tool.vat.about.why': 'Catches the vast majority of typos in supplier onboarding, invoice review, and SEPA payment files without sending a VAT number to a third-party API. To confirm a number is actively registered, the EU Commission’s VIES service at ec.europa.eu/taxation_customs/vies is the authoritative source.'
+                'tool.vat.about.why': 'Catches the vast majority of typos in supplier onboarding, invoice review, and SEPA payment files without sending a VAT number to a third-party API. To confirm a number is actively registered, the EU Commission’s VIES service at ec.europa.eu/taxation_customs/vies is the authoritative source.',
+                // -------- Phase 12 (i18n spec §2.10): Ed25519 + X25519 --------
+                'nav.tool.ed25519': 'Ed25519',
+                'tool.ed25519.desc': 'Generate Ed25519 keypairs and produce or verify signatures (RFC 8032 via Web Crypto).',
+                'view.ed25519.h2': 'Ed25519 — Sign / Verify',
+                'ed25519.unsupported.title': 'Browser does not support Ed25519 in Web Crypto.',
+                'ed25519.unsupported.body': 'Ed25519 landed in Safari 17, Chrome 113, and Firefox 130. Please upgrade your browser to use this tool.',
+                'ed25519.gen.heading': '1. Generate keypair',
+                'ed25519.sign.heading': '2. Sign a message',
+                'ed25519.verify.heading': '3. Verify a signature',
+                'ed25519.label.pub': 'Public key (32 bytes, hex)',
+                'ed25519.label.priv': 'Private key (32-byte seed, hex)',
+                'ed25519.label.msg': 'Message (UTF-8 text or hex with 0x prefix)',
+                'ed25519.label.sig': 'Signature (64 bytes, hex)',
+                'btn.ed25519Generate': 'Generate',
+                'btn.ed25519Sign': 'Sign',
+                'btn.ed25519Verify': 'Verify',
+                'ed25519.row.status': 'Status',
+                'ed25519.row.valid': 'Signature valid',
+                'ed25519.row.invalid': 'Signature invalid',
+                'ed25519.row.error': 'Error',
+                'err.ed25519Generate': 'Could not generate Ed25519 keypair',
+                'err.ed25519Sign': 'Could not sign',
+                'err.ed25519NeedKey': 'Generate or paste a private-key seed first.',
+                'err.ed25519NeedPub': 'Paste or generate a public key first.',
+                'err.ed25519BadSeed': 'Private key must be a 32-byte hex string.',
+                'err.ed25519BadPub': 'Public key must be a 32-byte hex string.',
+                'err.ed25519BadSig': 'Signature must be a 64-byte hex string.',
+                'tool.ed25519.title': 'Ed25519 Signer & Verifier (RFC 8032 via Web Crypto)',
+                'tool.ed25519.metaDescription': 'Generate Ed25519 keypairs and create or verify signatures locally in your browser using Web Crypto. RFC 8032 conformant. No network calls, no key material leaves the device.',
+                'tool.ed25519.about.what': 'Generates a fresh Ed25519 keypair, signs a message with the private seed, and verifies signatures against a public key. Same primitive used by SSH ed25519 keys, age, Signal, Noise, and most modern signing schemes outside the X.509 / PGP world.',
+                'tool.ed25519.about.how': 'Web Crypto\'s native Ed25519 implementation (Safari 17+, Chrome 113+, Firefox 130+). Private key is the 32-byte seed defined in RFC 8032 §5.1.5; this tool wraps it in a PKCS#8 envelope (RFC 8410) so Web Crypto can import it, then surfaces only the seed in the UI for round-tripping with other Ed25519 implementations.',
+                'tool.ed25519.about.why': 'Lower-level than PGP and saner than RSA + SHA-1 for new deployments. Useful for inspecting SSH ed25519 keys, verifying release signatures from projects that publish raw Ed25519 sigs (sigstore, age recipients, many EU-origin tools), or just experimenting with the primitive.',
+                'nav.tool.x25519': 'X25519',
+                'tool.x25519.desc': 'Generate X25519 keypairs and derive a shared secret (ECDH, RFC 7748) with optional HKDF.',
+                'view.x25519.h2': 'X25519 — Key Agreement (ECDH)',
+                'x25519.unsupported.title': 'Browser does not support X25519 in Web Crypto.',
+                'x25519.unsupported.body': 'X25519 landed in Safari 17, Chrome 123, and Firefox 130. Please upgrade your browser to use this tool.',
+                'x25519.gen.heading': '1. Generate local keypair',
+                'x25519.peer.heading': '2. Peer public key',
+                'x25519.derive.heading': '3. Derive shared secret',
+                'x25519.label.pub': 'Local public key (32 bytes, hex)',
+                'x25519.label.priv': 'Local private key (32 bytes, hex)',
+                'x25519.label.peer': 'Peer public key (32 bytes, hex)',
+                'x25519.label.hkdf': 'HKDF post-processing',
+                'x25519.label.info': 'HKDF "info" context (optional, UTF-8)',
+                'x25519.label.shared': 'Shared secret (hex)',
+                'x25519.opt.hkdfNone': 'None (raw 32-byte shared secret)',
+                'btn.x25519Generate': 'Generate',
+                'btn.x25519Derive': 'Derive',
+                'err.x25519Generate': 'Could not generate X25519 keypair',
+                'err.x25519Derive': 'Could not derive shared secret',
+                'err.x25519BadPriv': 'Local private key must be a 32-byte hex string.',
+                'err.x25519BadPeer': 'Peer public key must be a 32-byte hex string.',
+                'tool.x25519.title': 'X25519 ECDH Key Agreement (RFC 7748) with HKDF Post-Processing',
+                'tool.x25519.metaDescription': 'Generate X25519 keypairs and derive a shared secret with a peer\'s public key, optionally piped through HKDF-SHA-256 or HKDF-SHA-512 for a symmetric key. Local-only, via Web Crypto.',
+                'tool.x25519.about.what': 'Performs X25519 ECDH key agreement: given your private key and a peer\'s public key, produces the 32-byte shared secret. Optional HKDF (RFC 5869) post-processing yields a 32- or 64-byte uniformly-random key for use with AES, ChaCha20, etc.',
+                'tool.x25519.about.how': 'Native Web Crypto X25519 (Safari 17+, Chrome 123+, Firefox 130+). Keys are exchanged on the wire as the 32-byte clamped scalar (private) or 32-byte u-coordinate (public). HKDF uses an empty salt and the user-supplied "info" context, matching common protocol conventions (X3DH, Noise).',
+                'tool.x25519.about.why': 'Underlies WireGuard, age, the Signal Protocol, the Noise Protocol Framework, OPAQUE, Tor onion services, TLS 1.3, and many other modern systems. A local agreement tool lets you sanity-check protocol implementations or compute fresh keys for fixtures without exposing private scalars to a third-party service.'
             },
             'fr': {
                 'meta.title': 'encryptalotta — 36 outils gratuits de confidentialité et de développement côté client (PGP, BIP39, TLS, SSH, JWT, PBKDF2, hash, regex, CSV, cron, CIDR, base numérique…)',
@@ -4908,7 +5080,55 @@
                 'err.vatEmpty': 'Saisissez un numéro de TVA.',
                 'err.vatNoCountry': 'Préfixe pays inconnu. Préfixez avec le code pays à deux lettres (par ex. FR, DE, IT).',
                 'err.vatFormat': 'Le format ne correspond pas au schéma {cc}. Exemple : {cc}{example}.',
-                'err.vatPersonalIdRejected': 'Cela ressemble à un numéro d’identité espagnol (NIF/NIE), pas à un numéro de TVA. Par conception, cet outil ne valide pas d’identifiant personnel — voir la spécification.'
+                'err.vatPersonalIdRejected': 'Cela ressemble à un numéro d’identité espagnol (NIF/NIE), pas à un numéro de TVA. Par conception, cet outil ne valide pas d’identifiant personnel — voir la spécification.',
+                // -------- Phase 12: Ed25519 + X25519 (French) --------
+                'nav.tool.ed25519': 'Ed25519',
+                'tool.ed25519.desc': 'Générer des paires de clés Ed25519 et signer ou vérifier (RFC 8032 via Web Crypto).',
+                'view.ed25519.h2': 'Ed25519 — Signature / Vérification',
+                'ed25519.unsupported.title': 'Le navigateur ne prend pas en charge Ed25519 dans Web Crypto.',
+                'ed25519.unsupported.body': 'Ed25519 est disponible depuis Safari 17, Chrome 113 et Firefox 130. Mettez votre navigateur à jour pour utiliser cet outil.',
+                'ed25519.gen.heading': '1. Générer une paire de clés',
+                'ed25519.sign.heading': '2. Signer un message',
+                'ed25519.verify.heading': '3. Vérifier une signature',
+                'ed25519.label.pub': 'Clé publique (32 octets, hex)',
+                'ed25519.label.priv': 'Clé privée (graine 32 octets, hex)',
+                'ed25519.label.msg': 'Message (texte UTF-8 ou hex préfixé par 0x)',
+                'ed25519.label.sig': 'Signature (64 octets, hex)',
+                'btn.ed25519Generate': 'Générer',
+                'btn.ed25519Sign': 'Signer',
+                'btn.ed25519Verify': 'Vérifier',
+                'ed25519.row.status': 'Statut',
+                'ed25519.row.valid': 'Signature valide',
+                'ed25519.row.invalid': 'Signature invalide',
+                'ed25519.row.error': 'Erreur',
+                'err.ed25519Generate': 'Impossible de générer la paire de clés Ed25519',
+                'err.ed25519Sign': 'Impossible de signer',
+                'err.ed25519NeedKey': 'Générez ou collez d’abord une graine de clé privée.',
+                'err.ed25519NeedPub': 'Collez ou générez d’abord une clé publique.',
+                'err.ed25519BadSeed': 'La clé privée doit être une chaîne hex de 32 octets.',
+                'err.ed25519BadPub': 'La clé publique doit être une chaîne hex de 32 octets.',
+                'err.ed25519BadSig': 'La signature doit être une chaîne hex de 64 octets.',
+                'nav.tool.x25519': 'X25519',
+                'tool.x25519.desc': 'Générer des paires de clés X25519 et dériver un secret partagé (ECDH, RFC 7748) avec HKDF en option.',
+                'view.x25519.h2': 'X25519 — Accord de clés (ECDH)',
+                'x25519.unsupported.title': 'Le navigateur ne prend pas en charge X25519 dans Web Crypto.',
+                'x25519.unsupported.body': 'X25519 est disponible depuis Safari 17, Chrome 123 et Firefox 130. Mettez votre navigateur à jour pour utiliser cet outil.',
+                'x25519.gen.heading': '1. Générer la paire de clés locale',
+                'x25519.peer.heading': '2. Clé publique du pair',
+                'x25519.derive.heading': '3. Dériver le secret partagé',
+                'x25519.label.pub': 'Clé publique locale (32 octets, hex)',
+                'x25519.label.priv': 'Clé privée locale (32 octets, hex)',
+                'x25519.label.peer': 'Clé publique du pair (32 octets, hex)',
+                'x25519.label.hkdf': 'Post-traitement HKDF',
+                'x25519.label.info': 'Contexte « info » HKDF (optionnel, UTF-8)',
+                'x25519.label.shared': 'Secret partagé (hex)',
+                'x25519.opt.hkdfNone': 'Aucun (secret partagé brut de 32 octets)',
+                'btn.x25519Generate': 'Générer',
+                'btn.x25519Derive': 'Dériver',
+                'err.x25519Generate': 'Impossible de générer la paire de clés X25519',
+                'err.x25519Derive': 'Impossible de dériver le secret partagé',
+                'err.x25519BadPriv': 'La clé privée locale doit être une chaîne hex de 32 octets.',
+                'err.x25519BadPeer': 'La clé publique du pair doit être une chaîne hex de 32 octets.'
             },
             'zh-CN': {
                 'meta.title': 'encryptalotta — 36 个免费的浏览器端隐私与开发者工具（PGP、BIP39、TLS、SSH、JWT、PBKDF2、哈希、正则、CSV、cron、CIDR、进制转换 等）',
@@ -5734,7 +5954,55 @@
                 'err.vatEmpty': '请输入增值税号。',
                 'err.vatNoCountry': '未识别的国家前缀。请在前面加上两位字母国家代码（如 DE、FR、IT）。',
                 'err.vatFormat': '格式与 {cc} 的版式不符。示例：{cc}{example}。',
-                'err.vatPersonalIdRejected': '这看起来像西班牙个人身份号（NIF/NIE），而非增值税号。本工具按设计不校验个人身份号 — 详见规范。'
+                'err.vatPersonalIdRejected': '这看起来像西班牙个人身份号（NIF/NIE），而非增值税号。本工具按设计不校验个人身份号 — 详见规范。',
+                // -------- Phase 12: Ed25519 + X25519 (Simplified Chinese — machine-quality) --------
+                'nav.tool.ed25519': 'Ed25519',
+                'tool.ed25519.desc': '生成 Ed25519 密钥对，并签名或验证（RFC 8032，基于 Web Crypto）。',
+                'view.ed25519.h2': 'Ed25519 — 签名 / 验证',
+                'ed25519.unsupported.title': '当前浏览器不支持 Web Crypto 中的 Ed25519。',
+                'ed25519.unsupported.body': 'Ed25519 已在 Safari 17、Chrome 113 与 Firefox 130 中可用。请升级浏览器以使用此工具。',
+                'ed25519.gen.heading': '1. 生成密钥对',
+                'ed25519.sign.heading': '2. 签署消息',
+                'ed25519.verify.heading': '3. 验证签名',
+                'ed25519.label.pub': '公钥（32 字节，十六进制）',
+                'ed25519.label.priv': '私钥（32 字节种子，十六进制）',
+                'ed25519.label.msg': '消息（UTF-8 文本或以 0x 开头的十六进制）',
+                'ed25519.label.sig': '签名（64 字节，十六进制）',
+                'btn.ed25519Generate': '生成',
+                'btn.ed25519Sign': '签名',
+                'btn.ed25519Verify': '验证',
+                'ed25519.row.status': '状态',
+                'ed25519.row.valid': '签名有效',
+                'ed25519.row.invalid': '签名无效',
+                'ed25519.row.error': '错误',
+                'err.ed25519Generate': '无法生成 Ed25519 密钥对',
+                'err.ed25519Sign': '签名失败',
+                'err.ed25519NeedKey': '请先生成或粘贴私钥种子。',
+                'err.ed25519NeedPub': '请先粘贴或生成公钥。',
+                'err.ed25519BadSeed': '私钥必须为 32 字节十六进制字符串。',
+                'err.ed25519BadPub': '公钥必须为 32 字节十六进制字符串。',
+                'err.ed25519BadSig': '签名必须为 64 字节十六进制字符串。',
+                'nav.tool.x25519': 'X25519',
+                'tool.x25519.desc': '生成 X25519 密钥对，并派生共享密钥（ECDH，RFC 7748），可选 HKDF 后处理。',
+                'view.x25519.h2': 'X25519 — 密钥协商（ECDH）',
+                'x25519.unsupported.title': '当前浏览器不支持 Web Crypto 中的 X25519。',
+                'x25519.unsupported.body': 'X25519 已在 Safari 17、Chrome 123 与 Firefox 130 中可用。请升级浏览器以使用此工具。',
+                'x25519.gen.heading': '1. 生成本地密钥对',
+                'x25519.peer.heading': '2. 对端公钥',
+                'x25519.derive.heading': '3. 派生共享密钥',
+                'x25519.label.pub': '本地公钥（32 字节，十六进制）',
+                'x25519.label.priv': '本地私钥（32 字节，十六进制）',
+                'x25519.label.peer': '对端公钥（32 字节，十六进制）',
+                'x25519.label.hkdf': 'HKDF 后处理',
+                'x25519.label.info': 'HKDF "info" 上下文（可选，UTF-8）',
+                'x25519.label.shared': '共享密钥（十六进制）',
+                'x25519.opt.hkdfNone': '无（原始 32 字节共享密钥）',
+                'btn.x25519Generate': '生成',
+                'btn.x25519Derive': '派生',
+                'err.x25519Generate': '无法生成 X25519 密钥对',
+                'err.x25519Derive': '无法派生共享密钥',
+                'err.x25519BadPriv': '本地私钥必须为 32 字节十六进制字符串。',
+                'err.x25519BadPeer': '对端公钥必须为 32 字节十六进制字符串。'
             },
             'de': {
                 'meta.title': 'encryptalotta — 36 kostenlose, browserseitige Datenschutz- und Entwicklerwerkzeuge (PGP, BIP39, TLS, SSH, JWT, PBKDF2, Hash, Regex, CSV, Cron, CIDR, Zahlenbasis …)',
@@ -6575,7 +6843,55 @@
                 'err.vatEmpty': 'Bitte eine USt-IdNr. eingeben.',
                 'err.vatNoCountry': 'Unbekanntes Länderpräfix. Bitte den zweistelligen Ländercode voranstellen (z. B. DE, FR, IT).',
                 'err.vatFormat': 'Format entspricht nicht dem Schema für {cc}. Beispiel: {cc}{example}.',
-                'err.vatPersonalIdRejected': 'Das sieht nach einer spanischen Personenkennung (NIF/NIE) aus, nicht nach einer USt-IdNr. Dieses Werkzeug validiert per Design keine persönlichen IDs — siehe die Spezifikation.'
+                'err.vatPersonalIdRejected': 'Das sieht nach einer spanischen Personenkennung (NIF/NIE) aus, nicht nach einer USt-IdNr. Dieses Werkzeug validiert per Design keine persönlichen IDs — siehe die Spezifikation.',
+                // -------- Phase 12: Ed25519 + X25519 (German) --------
+                'nav.tool.ed25519': 'Ed25519',
+                'tool.ed25519.desc': 'Ed25519-Schlüsselpaare erzeugen und signieren bzw. verifizieren (RFC 8032 via Web Crypto).',
+                'view.ed25519.h2': 'Ed25519 — Signieren / Verifizieren',
+                'ed25519.unsupported.title': 'Der Browser unterstützt Ed25519 in Web Crypto nicht.',
+                'ed25519.unsupported.body': 'Ed25519 ist in Safari 17, Chrome 113 und Firefox 130 verfügbar. Bitte aktualisieren Sie Ihren Browser, um dieses Werkzeug zu verwenden.',
+                'ed25519.gen.heading': '1. Schlüsselpaar erzeugen',
+                'ed25519.sign.heading': '2. Nachricht signieren',
+                'ed25519.verify.heading': '3. Signatur verifizieren',
+                'ed25519.label.pub': 'Öffentlicher Schlüssel (32 Byte, hex)',
+                'ed25519.label.priv': 'Privater Schlüssel (32-Byte-Seed, hex)',
+                'ed25519.label.msg': 'Nachricht (UTF-8-Text oder hex mit 0x-Präfix)',
+                'ed25519.label.sig': 'Signatur (64 Byte, hex)',
+                'btn.ed25519Generate': 'Erzeugen',
+                'btn.ed25519Sign': 'Signieren',
+                'btn.ed25519Verify': 'Verifizieren',
+                'ed25519.row.status': 'Status',
+                'ed25519.row.valid': 'Signatur gültig',
+                'ed25519.row.invalid': 'Signatur ungültig',
+                'ed25519.row.error': 'Fehler',
+                'err.ed25519Generate': 'Ed25519-Schlüsselpaar konnte nicht erzeugt werden',
+                'err.ed25519Sign': 'Signieren fehlgeschlagen',
+                'err.ed25519NeedKey': 'Bitte zuerst einen Private-Key-Seed erzeugen oder einfügen.',
+                'err.ed25519NeedPub': 'Bitte zuerst einen öffentlichen Schlüssel einfügen oder erzeugen.',
+                'err.ed25519BadSeed': 'Der private Schlüssel muss eine 32-Byte-Hex-Zeichenkette sein.',
+                'err.ed25519BadPub': 'Der öffentliche Schlüssel muss eine 32-Byte-Hex-Zeichenkette sein.',
+                'err.ed25519BadSig': 'Die Signatur muss eine 64-Byte-Hex-Zeichenkette sein.',
+                'nav.tool.x25519': 'X25519',
+                'tool.x25519.desc': 'X25519-Schlüsselpaare erzeugen und ein gemeinsames Geheimnis ableiten (ECDH, RFC 7748) — optional mit HKDF.',
+                'view.x25519.h2': 'X25519 — Schlüsselvereinbarung (ECDH)',
+                'x25519.unsupported.title': 'Der Browser unterstützt X25519 in Web Crypto nicht.',
+                'x25519.unsupported.body': 'X25519 ist in Safari 17, Chrome 123 und Firefox 130 verfügbar. Bitte aktualisieren Sie Ihren Browser, um dieses Werkzeug zu verwenden.',
+                'x25519.gen.heading': '1. Lokales Schlüsselpaar erzeugen',
+                'x25519.peer.heading': '2. Öffentlicher Schlüssel des Peers',
+                'x25519.derive.heading': '3. Gemeinsames Geheimnis ableiten',
+                'x25519.label.pub': 'Lokaler öffentlicher Schlüssel (32 Byte, hex)',
+                'x25519.label.priv': 'Lokaler privater Schlüssel (32 Byte, hex)',
+                'x25519.label.peer': 'Öffentlicher Schlüssel des Peers (32 Byte, hex)',
+                'x25519.label.hkdf': 'HKDF-Nachverarbeitung',
+                'x25519.label.info': 'HKDF-„info“-Kontext (optional, UTF-8)',
+                'x25519.label.shared': 'Gemeinsames Geheimnis (hex)',
+                'x25519.opt.hkdfNone': 'Keine (rohes 32-Byte-Geheimnis)',
+                'btn.x25519Generate': 'Erzeugen',
+                'btn.x25519Derive': 'Ableiten',
+                'err.x25519Generate': 'X25519-Schlüsselpaar konnte nicht erzeugt werden',
+                'err.x25519Derive': 'Gemeinsames Geheimnis konnte nicht abgeleitet werden',
+                'err.x25519BadPriv': 'Der lokale private Schlüssel muss eine 32-Byte-Hex-Zeichenkette sein.',
+                'err.x25519BadPeer': 'Der öffentliche Schlüssel des Peers muss eine 32-Byte-Hex-Zeichenkette sein.'
             },
             'hi': {
                 'meta.title': 'encryptalotta — ब्राउज़र में चलने वाले 36 निःशुल्क गोपनीयता और डेवलपर टूल (PGP, BIP39, TLS, SSH, JWT, PBKDF2, हैश, रेजेक्स, CSV, cron, CIDR, संख्या आधार आदि)',
@@ -7401,7 +7717,55 @@
                 'err.vatEmpty': 'कृपया VAT संख्या दर्ज करें।',
                 'err.vatNoCountry': 'अज्ञात देश उपसर्ग। कृपया 2-अक्षर देश कोड लगाएँ (जैसे DE, FR, IT)।',
                 'err.vatFormat': 'स्वरूप {cc} के लेआउट से मेल नहीं खाता। उदाहरण: {cc}{example}।',
-                'err.vatPersonalIdRejected': 'यह स्पेनिश व्यक्तिगत पहचान संख्या (NIF/NIE) जैसी दिखती है, VAT संख्या नहीं। यह टूल डिज़ाइन के अनुसार व्यक्तिगत IDs को सत्यापित नहीं करता — स्पेसिफ़िकेशन देखें।'
+                'err.vatPersonalIdRejected': 'यह स्पेनिश व्यक्तिगत पहचान संख्या (NIF/NIE) जैसी दिखती है, VAT संख्या नहीं। यह टूल डिज़ाइन के अनुसार व्यक्तिगत IDs को सत्यापित नहीं करता — स्पेसिफ़िकेशन देखें।',
+                // -------- Phase 12: Ed25519 + X25519 (Hindi — machine-quality) --------
+                'nav.tool.ed25519': 'Ed25519',
+                'tool.ed25519.desc': 'Ed25519 कुंजी युग्म बनाएँ और हस्ताक्षर करें या सत्यापित करें (RFC 8032, Web Crypto के ज़रिए)।',
+                'view.ed25519.h2': 'Ed25519 — हस्ताक्षर / सत्यापन',
+                'ed25519.unsupported.title': 'यह ब्राउज़र Web Crypto में Ed25519 का समर्थन नहीं करता।',
+                'ed25519.unsupported.body': 'Ed25519 Safari 17, Chrome 113 और Firefox 130 में उपलब्ध है। इस टूल का उपयोग करने के लिए ब्राउज़र अपडेट करें।',
+                'ed25519.gen.heading': '1. कुंजी युग्म बनाएँ',
+                'ed25519.sign.heading': '2. संदेश पर हस्ताक्षर करें',
+                'ed25519.verify.heading': '3. हस्ताक्षर सत्यापित करें',
+                'ed25519.label.pub': 'सार्वजनिक कुंजी (32 बाइट, हेक्स)',
+                'ed25519.label.priv': 'निजी कुंजी (32-बाइट सीड, हेक्स)',
+                'ed25519.label.msg': 'संदेश (UTF-8 पाठ या 0x उपसर्ग के साथ हेक्स)',
+                'ed25519.label.sig': 'हस्ताक्षर (64 बाइट, हेक्स)',
+                'btn.ed25519Generate': 'बनाएँ',
+                'btn.ed25519Sign': 'हस्ताक्षर करें',
+                'btn.ed25519Verify': 'सत्यापित करें',
+                'ed25519.row.status': 'स्थिति',
+                'ed25519.row.valid': 'हस्ताक्षर वैध',
+                'ed25519.row.invalid': 'हस्ताक्षर अवैध',
+                'ed25519.row.error': 'त्रुटि',
+                'err.ed25519Generate': 'Ed25519 कुंजी युग्म नहीं बना सका',
+                'err.ed25519Sign': 'हस्ताक्षर नहीं कर सका',
+                'err.ed25519NeedKey': 'कृपया पहले निजी-कुंजी सीड बनाएँ या पेस्ट करें।',
+                'err.ed25519NeedPub': 'कृपया पहले सार्वजनिक कुंजी पेस्ट करें या बनाएँ।',
+                'err.ed25519BadSeed': 'निजी कुंजी 32-बाइट हेक्स स्ट्रिंग होनी चाहिए।',
+                'err.ed25519BadPub': 'सार्वजनिक कुंजी 32-बाइट हेक्स स्ट्रिंग होनी चाहिए।',
+                'err.ed25519BadSig': 'हस्ताक्षर 64-बाइट हेक्स स्ट्रिंग होना चाहिए।',
+                'nav.tool.x25519': 'X25519',
+                'tool.x25519.desc': 'X25519 कुंजी युग्म बनाएँ और साझा रहस्य व्युत्पन्न करें (ECDH, RFC 7748), वैकल्पिक HKDF के साथ।',
+                'view.x25519.h2': 'X25519 — कुंजी समझौता (ECDH)',
+                'x25519.unsupported.title': 'यह ब्राउज़र Web Crypto में X25519 का समर्थन नहीं करता।',
+                'x25519.unsupported.body': 'X25519 Safari 17, Chrome 123 और Firefox 130 में उपलब्ध है। इस टूल का उपयोग करने के लिए ब्राउज़र अपडेट करें।',
+                'x25519.gen.heading': '1. स्थानीय कुंजी युग्म बनाएँ',
+                'x25519.peer.heading': '2. पीयर सार्वजनिक कुंजी',
+                'x25519.derive.heading': '3. साझा रहस्य व्युत्पन्न करें',
+                'x25519.label.pub': 'स्थानीय सार्वजनिक कुंजी (32 बाइट, हेक्स)',
+                'x25519.label.priv': 'स्थानीय निजी कुंजी (32 बाइट, हेक्स)',
+                'x25519.label.peer': 'पीयर सार्वजनिक कुंजी (32 बाइट, हेक्स)',
+                'x25519.label.hkdf': 'HKDF पोस्ट-प्रोसेसिंग',
+                'x25519.label.info': 'HKDF "info" संदर्भ (वैकल्पिक, UTF-8)',
+                'x25519.label.shared': 'साझा रहस्य (हेक्स)',
+                'x25519.opt.hkdfNone': 'कोई नहीं (कच्चा 32-बाइट साझा रहस्य)',
+                'btn.x25519Generate': 'बनाएँ',
+                'btn.x25519Derive': 'व्युत्पन्न करें',
+                'err.x25519Generate': 'X25519 कुंजी युग्म नहीं बना सका',
+                'err.x25519Derive': 'साझा रहस्य नहीं व्युत्पन्न कर सका',
+                'err.x25519BadPriv': 'स्थानीय निजी कुंजी 32-बाइट हेक्स स्ट्रिंग होनी चाहिए।',
+                'err.x25519BadPeer': 'पीयर सार्वजनिक कुंजी 32-बाइट हेक्स स्ट्रिंग होनी चाहिए।'
             }
         };
 
@@ -7703,7 +8067,9 @@
             'iban': 'utilities',
             'bic': 'utilities',
             'gs1': 'utilities',
-            'vat': 'utilities'
+            'vat': 'utilities',
+            'ed25519': 'utilities',
+            'x25519': 'utilities'
         };
         const DEFAULT_TOOL = 'generate';
 
@@ -7714,7 +8080,8 @@
             'sign', 'verify', 'hmac', 'jwt',
             'passwords', 'armor', 'shamir', 'exif',
             'hash', 'encode', 'uuid', 'timestamp', 'url', 'totp', 'diff', 'csv', 'regex', 'cron', 'color', 'format', 'cidr', 'pbkdf2', 'base',
-            'iban', 'bic', 'gs1', 'vat'
+            'iban', 'bic', 'gs1', 'vat',
+            'ed25519', 'x25519'
         ];
 
         function isValidTool(t) { return Object.prototype.hasOwnProperty.call(TOOL_TO_GROUP, t); }
@@ -7958,7 +8325,9 @@
             'iban':             ['bic', 'vat', 'gs1'],
             'bic':              ['iban', 'vat', 'gs1'],
             'gs1':              ['iban', 'bic', 'vat'],
-            'vat':              ['iban', 'bic', 'regex']
+            'vat':              ['iban', 'bic', 'regex'],
+            'ed25519':          ['x25519', 'sign', 'verify'],
+            'x25519':           ['ed25519', 'pbkdf2', 'hmac']
         };
 
         function injectRelatedTools() {
@@ -13377,6 +13746,174 @@
                 tlsRenderRow(out, t('vat.row.note'), t('vat.row.viesNote'));
             } catch (e) {
                 tlsRenderRow(out, t('vat.row.error'), e.message);
+            }
+        });
+
+        // ==================== Phase 12 (i18n spec §2.10): Ed25519 sign / verify (RFC 8032) ====================
+        // Uses Web Crypto's native Ed25519 (Safari 17, Chrome 113, Firefox 130). On unsupported
+        // browsers we show a banner and disable the action buttons rather than ship a fallback —
+        // shipping a pure-JS Ed25519 would mean vendoring another dependency.
+        //
+        // Key format on the wire:
+        //   - Private key: 32-byte seed (RFC 8032 §5.1.5). Web Crypto stores it inside a PKCS#8
+        //     wrapper; we round-trip via PKCS#8 import/export and surface only the seed in the UI.
+        //   - Public key: 32-byte compressed Edwards point. SPKI wrapper for export/import.
+
+        function hexToBytes(s) {
+            const clean = s.replace(/^0x/i, '').replace(/\s+/g, '');
+            if (clean.length === 0) return new Uint8Array(0);
+            if (clean.length % 2) throw new Error('odd-length hex string');
+            if (!/^[0-9a-fA-F]+$/.test(clean)) throw new Error('non-hex characters');
+            const out = new Uint8Array(clean.length / 2);
+            for (let i = 0; i < out.length; i++) out[i] = parseInt(clean.substr(i * 2, 2), 16);
+            return out;
+        }
+        function bytesToHex(b) {
+            let s = '';
+            for (let i = 0; i < b.length; i++) s += b[i].toString(16).padStart(2, '0');
+            return s;
+        }
+        function parseMsgInput(s) {
+            // Accept "0x..." as hex; otherwise treat as UTF-8 text.
+            if (/^0x[0-9a-fA-F]*$/.test(s.trim())) return hexToBytes(s.trim());
+            return new TextEncoder().encode(s);
+        }
+
+        // PKCS#8 wrapper for an Ed25519 seed: SEQUENCE { INTEGER 0, AlgorithmIdentifier(1.3.101.112), OCTET STRING(OCTET STRING(seed)) }
+        // Total fixed prefix is 16 bytes for the seed-only PKCS#8 form. RFC 8410.
+        const ED25519_PKCS8_PREFIX = new Uint8Array([
+            0x30, 0x2e, 0x02, 0x01, 0x00,
+            0x30, 0x05, 0x06, 0x03, 0x2b, 0x65, 0x70,
+            0x04, 0x22, 0x04, 0x20
+        ]);
+        const X25519_PKCS8_PREFIX = new Uint8Array([
+            0x30, 0x2e, 0x02, 0x01, 0x00,
+            0x30, 0x05, 0x06, 0x03, 0x2b, 0x65, 0x6e,
+            0x04, 0x22, 0x04, 0x20
+        ]);
+        function seedToPkcs8(seed, isX) {
+            const prefix = isX ? X25519_PKCS8_PREFIX : ED25519_PKCS8_PREFIX;
+            const out = new Uint8Array(prefix.length + 32);
+            out.set(prefix, 0);
+            out.set(seed, prefix.length);
+            return out;
+        }
+        function pkcs8ToSeed(der) {
+            // Last 32 bytes are the seed in the standard prefix form.
+            if (der.length < 48) throw new Error('PKCS#8 too short');
+            return der.slice(der.length - 32);
+        }
+
+        async function checkCurve25519Support(curve) {
+            try {
+                await crypto.subtle.generateKey({ name: curve }, true, curve === 'X25519' ? ['deriveBits'] : ['sign']);
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        let ED25519_OK = null, X25519_OK = null;
+        (async () => {
+            ED25519_OK = await checkCurve25519Support('Ed25519');
+            if (!ED25519_OK) document.getElementById('ed25519-unsupported').classList.remove('hidden');
+            X25519_OK = await checkCurve25519Support('X25519');
+            if (!X25519_OK) document.getElementById('x25519-unsupported').classList.remove('hidden');
+        })();
+
+        document.getElementById('btn-ed25519-generate').addEventListener('click', async () => {
+            try {
+                const kp = await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
+                const pubRaw = new Uint8Array(await crypto.subtle.exportKey('raw', kp.publicKey));
+                const privPkcs8 = new Uint8Array(await crypto.subtle.exportKey('pkcs8', kp.privateKey));
+                document.getElementById('ed25519-pub').value = bytesToHex(pubRaw);
+                document.getElementById('ed25519-priv').value = bytesToHex(pkcs8ToSeed(privPkcs8));
+                document.getElementById('ed25519-sig').value = '';
+                const r = document.getElementById('ed25519-result');
+                r.classList.add('hidden');
+                while (r.firstChild) r.removeChild(r.firstChild);
+            } catch (e) {
+                alert(t('err.ed25519Generate') + ': ' + (e.message || e));
+            }
+        });
+
+        document.getElementById('btn-ed25519-sign').addEventListener('click', async () => {
+            try {
+                const seedHex = document.getElementById('ed25519-priv').value.trim();
+                if (!seedHex) throw new Error(t('err.ed25519NeedKey'));
+                const seed = hexToBytes(seedHex);
+                if (seed.length !== 32) throw new Error(t('err.ed25519BadSeed'));
+                const pkcs8 = seedToPkcs8(seed, false);
+                const privKey = await crypto.subtle.importKey('pkcs8', pkcs8, { name: 'Ed25519' }, false, ['sign']);
+                const msg = parseMsgInput(document.getElementById('ed25519-msg').value);
+                const sig = new Uint8Array(await crypto.subtle.sign({ name: 'Ed25519' }, privKey, msg));
+                document.getElementById('ed25519-sig').value = bytesToHex(sig);
+            } catch (e) {
+                alert(t('err.ed25519Sign') + ': ' + (e.message || e));
+            }
+        });
+
+        document.getElementById('btn-ed25519-verify').addEventListener('click', async () => {
+            const out = document.getElementById('ed25519-result');
+            while (out.firstChild) out.removeChild(out.firstChild);
+            out.classList.remove('hidden');
+            try {
+                const pubHex = document.getElementById('ed25519-pub').value.trim();
+                if (!pubHex) throw new Error(t('err.ed25519NeedPub'));
+                const pubRaw = hexToBytes(pubHex);
+                if (pubRaw.length !== 32) throw new Error(t('err.ed25519BadPub'));
+                const sig = hexToBytes(document.getElementById('ed25519-sig').value.trim());
+                if (sig.length !== 64) throw new Error(t('err.ed25519BadSig'));
+                const msg = parseMsgInput(document.getElementById('ed25519-msg').value);
+                const pubKey = await crypto.subtle.importKey('raw', pubRaw, { name: 'Ed25519' }, false, ['verify']);
+                const ok = await crypto.subtle.verify({ name: 'Ed25519' }, pubKey, sig, msg);
+                tlsRenderRow(out, t('ed25519.row.status'), ok ? '✓ ' + t('ed25519.row.valid') : '✗ ' + t('ed25519.row.invalid'));
+            } catch (e) {
+                tlsRenderRow(out, t('ed25519.row.error'), e.message);
+            }
+        });
+
+        // ==================== Phase 12 (i18n spec §2.10): X25519 ECDH key agreement (RFC 7748) ====================
+
+        document.getElementById('btn-x25519-generate').addEventListener('click', async () => {
+            try {
+                const kp = await crypto.subtle.generateKey({ name: 'X25519' }, true, ['deriveBits']);
+                const pubRaw = new Uint8Array(await crypto.subtle.exportKey('raw', kp.publicKey));
+                const privPkcs8 = new Uint8Array(await crypto.subtle.exportKey('pkcs8', kp.privateKey));
+                document.getElementById('x25519-pub').value = bytesToHex(pubRaw);
+                document.getElementById('x25519-priv').value = bytesToHex(pkcs8ToSeed(privPkcs8));
+                document.getElementById('x25519-shared').value = '';
+            } catch (e) {
+                alert(t('err.x25519Generate') + ': ' + (e.message || e));
+            }
+        });
+
+        document.getElementById('btn-x25519-derive').addEventListener('click', async () => {
+            try {
+                const privSeed = hexToBytes(document.getElementById('x25519-priv').value.trim());
+                if (privSeed.length !== 32) throw new Error(t('err.x25519BadPriv'));
+                const peerRaw = hexToBytes(document.getElementById('x25519-peer').value.trim());
+                if (peerRaw.length !== 32) throw new Error(t('err.x25519BadPeer'));
+                const privKey = await crypto.subtle.importKey('pkcs8', seedToPkcs8(privSeed, true), { name: 'X25519' }, false, ['deriveBits']);
+                const peerKey = await crypto.subtle.importKey('raw', peerRaw, { name: 'X25519' }, false, []);
+                const sharedBits = new Uint8Array(await crypto.subtle.deriveBits({ name: 'X25519', public: peerKey }, privKey, 256));
+                const mode = document.getElementById('x25519-hkdf').value;
+                let final;
+                if (mode === 'none') {
+                    final = sharedBits;
+                } else {
+                    // HKDF-Extract+Expand via Web Crypto. Salt is empty (per X3DH / Noise convention
+                    // when no out-of-band salt is agreed); info comes from the UI input.
+                    const ikm = await crypto.subtle.importKey('raw', sharedBits, 'HKDF', false, ['deriveBits']);
+                    const info = new TextEncoder().encode(document.getElementById('x25519-info').value || '');
+                    const outBits = mode === 'SHA-512' ? 512 : 256;
+                    final = new Uint8Array(await crypto.subtle.deriveBits({
+                        name: 'HKDF', hash: mode, salt: new Uint8Array(0), info
+                    }, ikm, outBits));
+                }
+                document.getElementById('x25519-shared').value = bytesToHex(final);
+            } catch (e) {
+                alert(t('err.x25519Derive') + ': ' + (e.message || e));
             }
         });
 
