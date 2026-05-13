@@ -1,6 +1,6 @@
 # Spec — International public-good extensions to encryptalotta
 
-Status: draft 5 (Phase 4 complete except BLAKE3; Phase 6 regulator presets shipped)
+Status: draft 6 (Phase 4 complete except BLAKE3; Phase 5 distribution scripts shipped; Phase 6 regulator presets shipped)
 Audience: maintainers and contributors
 Scope: how to extend encryptalotta.com so it serves an international audience — with a deliberate emphasis on Europe and other regions that lean heavily on open-source — without compromising the site's existing character (single-page, fully client-side, no analytics, no CDN, no tracking, no build step beyond a couple of vendored scripts).
 
@@ -450,16 +450,20 @@ Codeberg is an EU-based (Germany), non-profit Forgejo instance. Many EU public-s
 - Add a `git remote` so pushes go to both GitHub and Codeberg.
 - Mention both URLs in README and footer.
 
-### 4.2 Reproducible release manifest
+### 4.2 Reproducible release manifest — **✅ generator shipped (draft 6); signing deferred**
 
 - Each tagged release publishes a `RELEASES.md` line with the SHA-256 of every shipped file (or a single SHA-256 of a deterministic tarball).
 - Sign the manifest with a project minisign or sigstore key. Publish the public key in `SECURITY.md` and in the README.
 - The build is essentially "copy files + run `build-i18n-variants.js` + run `build-sitemap.js`"; reproducibility is trivial.
 
-### 4.3 Software Bill of Materials (SBOM)
+**Status notes (draft 6):** `scripts/build-release-manifest.js` shipped. Generates an append-only `RELEASES.md` with the SHA-256 of every shipped file (index.html, the four locale variants, the four vendored .js libraries, all icons, sitemap.xml, robots.txt, _headers, site.webmanifest, plus optional artifacts encryptalotta-portable.html and sbom.json). Each entry records the git commit, tag (if any), working-tree cleanliness flag, and a manifest-fingerprint SHA-256 of all per-file hashes. RELEASES.md itself is *not* committed in this round — maintainers will regenerate at tagged-release time when the working tree is clean and the fingerprint is meaningful. Signing the manifest with minisign/sigstore is still deferred.
+
+### 4.3 Software Bill of Materials (SBOM) — **✅ shipped (draft 6)**
 
 - Publish a CycloneDX 1.5 JSON SBOM listing the vendored dependencies (`openpgp.min.js`, `qrcode.js`, `js-yaml.min.js`, `secrets.min.js`, and any new vendored deps from §2).
 - The EU Cyber Resilience Act and NIS2 are pushing public-sector procurement toward requiring SBOMs. Having one available — even for a free static site — is a credibility signal.
+
+**Status notes (draft 6):** `scripts/build-sbom.js` shipped. Output is `sbom.json` at the repo root, CycloneDX 1.5, listing all four vendored libraries with name + version + license + PURL + SHA-256/384/512 hashes + VCS URL + on-disk file path. The serial number is derived from the on-disk dep hashes, so re-running on unchanged inputs produces byte-identical output. The audit script (`scripts/audit-release.js`) cross-checks the SBOM's SHA-384 against the README manifest and the on-disk bytes — if a maintainer updates a vendored library without regenerating the SBOM, audit fails before the commit lands.
 
 ### 4.4 Tor onion mirror
 
@@ -473,11 +477,13 @@ Codeberg is an EU-based (Germany), non-profit Forgejo instance. Many EU public-s
 - Add a minimal service worker that precaches the shell. Strict CSP — service worker scope must match.
 - This makes the site genuinely "downloadable" on Android and desktop: users in censored or low-bandwidth regions can install once and use forever.
 
-### 4.6 Single-file portable build
+### 4.6 Single-file portable build — **✅ shipped (draft 6)**
 
 - A script that produces `encryptalotta.html` — the entire site as a single HTML file with all JS/CSS/icons inlined as `data:` URIs.
 - Audience: journalists in transit, USB-stick distribution, hostile-network environments.
 - Output: hosted as a downloadable on the site itself.
+
+**Status notes (draft 6):** `scripts/build-portable.js` shipped. Output is `encryptalotta-portable.html` at the repo root, ~1.3 MB self-contained. Inlines the four vendored .js libraries and the three favicons (apple-touch + 16x16 + 32x32 as base64 data URIs). Strips OpenGraph / Twitter card / canonical / hreflang metadata and the PWA manifest link (none of those are meaningful from `file://`). Banner timestamp is derived from the newest input mtime so successive builds with unchanged inputs produce byte-identical output (reproducibility-friendly). Verified end-to-end via Playwright smoke test loading from `file://` and exercising hash (BLAKE2b + SHA-256), IBAN MOD-97 validation, and the QR view (which proves the vendored qrcode.js inlined correctly). Audit script verifies no `<script src=>` references remain.
 
 ### 4.7 Submission to public-good registries
 
@@ -562,12 +568,22 @@ All ~1-day implementations. Roughly doubles the site's tool count for a small fr
 
 **Progress (draft 5):** BLAKE2b-512 added to the existing Hash & Checksum tool (no new view, just an extra algorithm row). Tool count remains 42 because BLAKE2b is integrated into an existing tool. Phase 4 quick-wins now complete except BLAKE3 (deferred). Phase 6 regulator presets shipped in the PGP key generator: dropdown for BSI TR-02102-1, ANSSI RGS B1, NIST SP 800-57, CNSA 2.0, and Privacy Guides recommended; each preset auto-fills algorithm + keysize and surfaces a footnote linking to the source document. Manually editing algorithm/keysize resets the preset to "Custom" so the UI never lies about which regulator's choice is currently selected. en/fr/de UI strings reviewed; zh-CN/hi machine-quality drafts. 5 new functional tests (2 BLAKE2b RFC 7693 + 3 regulator preset behavior); full suite 206 passed.
 
+**Progress (draft 6):** Phase 5 distribution scripts shipped. Three new generators, all deterministic, all audit-cross-checked:
+
+- `scripts/build-portable.js` → `encryptalotta-portable.html` (~1.3 MB single-file build, vendored .js + favicons inlined, social-card / canonical / PWA metadata stripped). Banner timestamp derived from input mtimes so builds are byte-reproducible. Smoke-tested via Playwright loading from `file://`.
+- `scripts/build-sbom.js` → `sbom.json` (CycloneDX 1.5, four library components with SHA-256/384/512 + PURL + license + VCS URL). Deterministic serial number derived from input hashes — same inputs produce byte-identical output.
+- `scripts/build-release-manifest.js` → `RELEASES.md` (append-only, one section per snapshot, SHA-256 of every shipped file plus a manifest-fingerprint hash, captures git commit + tag + working-tree cleanliness). Not committed in this round — maintainers will regenerate at tagged-release time when the tree is clean.
+
+`scripts/audit-release.js` extended to validate both artifacts: SBOM hashes are cross-checked against on-disk vendored bytes; the portable build is verified to contain zero `<script src=>` references. Both checks are soft — they only fire if the artifact is present, so contributors aren't forced to regenerate on every commit.
+
+No runtime changes; full Playwright suite still 206 passed.
+
 ### Phase 5 — Distribution and sovereignty
 
 1. Codeberg mirror (§4.1).
-2. Reproducible release manifest (§4.2).
-3. SBOM (§4.3).
-4. Single-file portable build (§4.6).
+2. ✅ Reproducible release manifest (§4.2) — generator shipped draft 6; signing deferred.
+3. ✅ SBOM (§4.3) — shipped draft 6.
+4. ✅ Single-file portable build (§4.6) — shipped draft 6.
 5. PWA precache (§4.5).
 6. Tor onion mirror (§4.4).
 7. Submissions to public-good registries (§4.7).

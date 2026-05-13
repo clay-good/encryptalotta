@@ -288,6 +288,49 @@ const isSeoEnOnly = (k) => SEO_EN_ONLY_RE.test(k);
     }
 }
 
+// 10. Optional artifacts (don't fail if absent, but if present they must be consistent
+//     with the vendored bytes on disk).
+{
+    const sbomPath = path.join(ROOT, 'sbom.json');
+    if (fs.existsSync(sbomPath)) {
+        try {
+            const sbom = JSON.parse(fs.readFileSync(sbomPath, 'utf8'));
+            const byFile = new Map(
+                (sbom.components || []).map(c => [
+                    (c.properties || []).find(p => p.name === 'encryptalotta:vendored-path')?.value,
+                    c.hashes || []
+                ])
+            );
+            let ok = true;
+            for (const v of VENDORED) {
+                const hashes = byFile.get(v);
+                if (!hashes) { fail('sbom.json', `missing component for ${v}`); ok = false; continue; }
+                const sha384Hex = hashes.find(h => h.alg === 'SHA-384')?.content;
+                if (!sha384Hex) { fail('sbom.json', `${v}: no SHA-384 entry`); ok = false; continue; }
+                const onDiskB64 = require('crypto').createHash('sha384').update(fs.readFileSync(path.join(ROOT, v))).digest('base64');
+                const sbomB64 = Buffer.from(sha384Hex, 'hex').toString('base64');
+                if (sbomB64 !== onDiskB64) {
+                    fail('sbom.json', `${v}: SBOM SHA-384 disagrees with on-disk bytes — re-run scripts/build-sbom.js`);
+                    ok = false;
+                }
+            }
+            if (ok) pass('sbom.json', `CycloneDX ${sbom.specVersion} with ${(sbom.components || []).length} components, hashes match on-disk bytes`);
+        } catch (e) {
+            fail('sbom.json', 'present but unparseable: ' + e.message);
+        }
+    }
+    const portablePath = path.join(ROOT, 'encryptalotta-portable.html');
+    if (fs.existsSync(portablePath)) {
+        const text = fs.readFileSync(portablePath, 'utf8');
+        // Quick sanity: portable build must have no <script src= refs (everything inlined).
+        if (/<script\s+src=/.test(text)) {
+            fail('encryptalotta-portable.html', 'still contains <script src=> tags — re-run scripts/build-portable.js');
+        } else {
+            pass('encryptalotta-portable.html', `${(fs.statSync(portablePath).size / 1024).toFixed(1)} KB self-contained build`);
+        }
+    }
+}
+
 console.log('');
 if (failed > 0) {
     console.log(`AUDIT FAILED — ${failed} error(s)${warned ? ', ' + warned + ' warning(s)' : ''}.`);

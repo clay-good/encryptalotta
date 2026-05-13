@@ -1,0 +1,244 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "serialNumber": "urn:uuid:d2070299-d75d-5c9b-9892-84cffcd9677a",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2026-05-06T20:41:25.039Z",
+    "tools": {
+      "components": [
+        {
+          "type": "application",
+          "name": "build-sbom.js",
+          "version": "1.0.0",
+          "description": "encryptalotta SBOM generator (scripts/build-sbom.js)"
+        }
+      ]
+    },
+    "component": {
+      "type": "application",
+      "bom-ref": "pkg:generic/encryptalotta",
+      "name": "encryptalotta",
+      "description": "Free, client-side privacy and developer toolbox — 42 tools, zero server uploads.",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "website",
+          "url": "https://encryptalotta.com"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/clay-good/encryptalotta"
+        }
+      ]
+    }
+  },
+  "components": [
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/openpgp@6.3.0",
+      "name": "openpgpjs",
+      "version": "6.3.0",
+      "description": "OpenPGP.js — JavaScript implementation of the OpenPGP protocol.",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "LGPL-3.0-or-later"
+          }
+        }
+      ],
+      "purl": "pkg:npm/openpgp@6.3.0",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "46d3e5b6bfe4f0d19b44fd3aa826ac1c67174e95a97be082a3982160b6caae4e"
+        },
+        {
+          "alg": "SHA-384",
+          "content": "679b52b4fa1e0a59ae2cf775800c1d4c2539dd67009148c1370ee6104beb42e995b8da84979d80f4dc7922115d284fdc"
+        },
+        {
+          "alg": "SHA-512",
+          "content": "35546cb84fde2aa79f3889b9c780632ae40620206e75176c7a95aabe504aa6d050b72dd8e97792ff29c406c4aaf673c5a285e3c53fb651b6766c51af98be10ee"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/openpgpjs/openpgpjs"
+        },
+        {
+          "type": "website",
+          "url": "https://github.com/openpgpjs/openpgpjs"
+        }
+      ],
+      "properties": [
+        {
+          "name": "encryptalotta:vendored-path",
+          "value": "openpgp.min.js"
+        },
+        {
+          "name": "encryptalotta:file-size-bytes",
+          "value": "393474"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/qrcode-generator@2.0.4",
+      "name": "qrcode-generator",
+      "version": "2.0.4",
+      "description": "qrcode-generator — pure-JS QR code rendering.",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "purl": "pkg:npm/qrcode-generator@2.0.4",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "79ec86f82856005b1c887905cfccfcfbec3821ca61c7fd5a952faa5f778f791c"
+        },
+        {
+          "alg": "SHA-384",
+          "content": "7bd1050fa0460bdd1b916f5a0d5e716db05fcf037b1bc6089876a8da57cb54a57f84f074134828f87dc8eb887ba07b40"
+        },
+        {
+          "alg": "SHA-512",
+          "content": "2b4958aeccf468492952ebc58255174132d2ccae4e393e0730ee45008c862bf10722e3281920ddecd62b2eb027a7f222ad81792d39d1d912c8d08a572c21114d"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/kazuhikoarase/qrcode-generator"
+        },
+        {
+          "type": "website",
+          "url": "https://github.com/kazuhikoarase/qrcode-generator"
+        }
+      ],
+      "properties": [
+        {
+          "name": "encryptalotta:vendored-path",
+          "value": "qrcode.js"
+        },
+        {
+          "name": "encryptalotta:file-size-bytes",
+          "value": "56694"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/secrets.js-grempe@2.0.0",
+      "name": "secrets.js-grempe",
+      "version": "2.0.0",
+      "description": "secrets.js-grempe — Shamir Secret Sharing in JavaScript.",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "purl": "pkg:npm/secrets.js-grempe@2.0.0",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "21d0a557e512703eaf7a0ae51b80eb31347a63917a914f8c20079278f4a415c2"
+        },
+        {
+          "alg": "SHA-384",
+          "content": "c5f04c6e1f1f75222b43d5db640470679cff121f730bb82c806e6f484df7d656528e05d0a1bd4ac4ce26eef11d1f47b4"
+        },
+        {
+          "alg": "SHA-512",
+          "content": "fe14108fd5379c8206c70831de9e70923bc50726c8bba9e4d2c5aa6317b85a7d201a121d2a5e327e218e5ba409905504bce17e0843f5a4f268fdfa4a2c49225a"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/grempe/secrets.js"
+        },
+        {
+          "type": "website",
+          "url": "https://github.com/grempe/secrets.js"
+        }
+      ],
+      "properties": [
+        {
+          "name": "encryptalotta:vendored-path",
+          "value": "secrets.min.js"
+        },
+        {
+          "name": "encryptalotta:file-size-bytes",
+          "value": "9072"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/js-yaml@4.1.1",
+      "name": "js-yaml",
+      "version": "4.1.1",
+      "description": "js-yaml — YAML parse / stringify.",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "purl": "pkg:npm/js-yaml@4.1.1",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "0de3dec92d20eab9e0b46a5d928cd45ec025d73e348ddf458dbfb01da00cb473"
+        },
+        {
+          "alg": "SHA-384",
+          "content": "65ea82cee59ccd445a73745a712b9f183ee849bcde697ef1c679ceaf73d37184cbc7802fd2a063d2406aec0782b472c0"
+        },
+        {
+          "alg": "SHA-512",
+          "content": "09cbdaf6d6633dfc910cc328b004c16849c02af5fe7816c37c7327afed0b8536be34ca8a471500a0318fa2d6fc6e2c3343ac677f8218b8368f897c35d0361a34"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/nodeca/js-yaml"
+        },
+        {
+          "type": "website",
+          "url": "https://github.com/nodeca/js-yaml"
+        }
+      ],
+      "properties": [
+        {
+          "name": "encryptalotta:vendored-path",
+          "value": "js-yaml.min.js"
+        },
+        {
+          "name": "encryptalotta:file-size-bytes",
+          "value": "39513"
+        }
+      ]
+    }
+  ]
+}

@@ -450,11 +450,26 @@ cd encryptalotta
 # Regenerate /fr/, /zh/, /de/, /hi/ from the source STRINGS table.
 node scripts/build-i18n-variants.js
 
-# Run all 14 mechanical security/quality gates. Exits non-zero on first failure.
+# Run all mechanical security/quality gates. Exits non-zero on first failure.
 node scripts/audit-release.js
 ```
 
-The audit checks: zero `innerHTML =` assignments, STRINGS parity across all 5 locales, every `data-i18n` key resolves, vendored SHA-384 hashes match across HTML comments + the README manifest + on-disk bytes, CSP `connect-src 'none'` on both meta and `_headers`, no outbound network call sites, page weight under 2 MB gzipped, locale variants (`/fr/`, `/zh/`, `/de/`, `/hi/`) in sync with source, `robots.txt` + `sitemap.xml` + JSON-LD presence, and Phase-7 SEO prose key coverage for all 42 tools.
+The audit checks: zero `innerHTML =` assignments, STRINGS parity across all 5 locales, every `data-i18n` key resolves, vendored SHA-384 hashes match across HTML comments + the README manifest + on-disk bytes, CSP `connect-src 'none'` on both meta and `_headers`, no outbound network call sites, page weight under 2 MB gzipped, locale variants (`/fr/`, `/zh/`, `/de/`, `/hi/`) in sync with source, `robots.txt` + `sitemap.xml` + JSON-LD presence, Phase-7 SEO prose key coverage for all 42 tools, and (if present) `sbom.json` hash consistency and `encryptalotta-portable.html` having no `<script src=>` references.
+
+### Build artifacts (for distribution / audit, optional)
+
+```bash
+# Generate a self-contained single-file build for USB / file:// / portable use.
+node scripts/build-portable.js          # → encryptalotta-portable.html (~1.3 MB)
+
+# Emit a CycloneDX 1.5 SBOM listing all vendored deps with SHA-256/384/512 hashes.
+node scripts/build-sbom.js              # → sbom.json
+
+# Append a SHA-256 manifest section for the current working tree (use at tagged releases).
+node scripts/build-release-manifest.js  # → RELEASES.md (append-only)
+```
+
+All three scripts are deterministic: re-running with unchanged inputs produces byte-identical output, so they're safe to wire into a release pipeline. The audit cross-checks `sbom.json` hashes against the on-disk vendored bytes — if you update a vendored library and forget to regenerate the SBOM, the next commit's audit will fail.
 
 ### Pre-commit hook (recommended)
 
