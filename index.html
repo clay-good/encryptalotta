@@ -4266,7 +4266,8 @@
                 'preset.note.nist': 'Applies NIST SP 800-57 minimums for new deployments: RSA 3072. Verify parameters against the NIST publication.',
                 'preset.note.cnsa': 'Applies CNSA 2.0 requirements for US national-security systems: RSA 4096. Verify parameters against the NSA advisory.',
                 'preset.note.privacyGuides': 'Applies Privacy Guides recommended choice for activist / journalist threat models: Curve25519 ECC. Verify against the Privacy Guides page.',
-                'preset.note.sourceLink': 'Source document →'
+                'preset.note.sourceLink': 'Source document →',
+                'preset.note.verifiedPrefix': 'parameters verified'
             },
             'fr': {
                 'meta.title': 'encryptalotta — 36 outils gratuits de confidentialité et de développement côté client (PGP, BIP39, TLS, SSH, JWT, PBKDF2, hash, regex, CSV, cron, CIDR, base numérique…)',
@@ -5169,7 +5170,8 @@
                 'preset.note.nist': 'Applique les minimums NIST SP 800-57 pour les nouveaux déploiements : RSA 3072. Vérifiez les paramètres dans la publication NIST.',
                 'preset.note.cnsa': 'Applique les exigences CNSA 2.0 pour les systèmes de sécurité nationale américains : RSA 4096. Vérifiez les paramètres dans l’avis NSA.',
                 'preset.note.privacyGuides': 'Applique le choix recommandé par Privacy Guides pour les modèles de menace activiste / journaliste : ECC Curve25519. Vérifiez sur la page Privacy Guides.',
-                'preset.note.sourceLink': 'Document source →'
+                'preset.note.sourceLink': 'Document source →',
+                'preset.note.verifiedPrefix': 'paramètres vérifiés'
             },
             'zh-CN': {
                 'meta.title': 'encryptalotta — 36 个免费的浏览器端隐私与开发者工具（PGP、BIP39、TLS、SSH、JWT、PBKDF2、哈希、正则、CSV、cron、CIDR、进制转换 等）',
@@ -6057,7 +6059,8 @@
                 'preset.note.nist': '采用 NIST SP 800-57 新部署最低标准：RSA 3072。请对照 NIST 出版物核对参数。',
                 'preset.note.cnsa': '采用 CNSA 2.0 对美国国家安全系统的要求：RSA 4096。请对照 NSA 通告核对参数。',
                 'preset.note.privacyGuides': '采用 Privacy Guides 针对活动人士／记者威胁模型的推荐：Curve25519 ECC。请在 Privacy Guides 页面核对。',
-                'preset.note.sourceLink': '源文档 →'
+                'preset.note.sourceLink': '源文档 →',
+                'preset.note.verifiedPrefix': '参数已验证'
             },
             'de': {
                 'meta.title': 'encryptalotta — 36 kostenlose, browserseitige Datenschutz- und Entwicklerwerkzeuge (PGP, BIP39, TLS, SSH, JWT, PBKDF2, Hash, Regex, CSV, Cron, CIDR, Zahlenbasis …)',
@@ -6960,7 +6963,8 @@
                 'preset.note.nist': 'Wendet die NIST-SP-800-57-Mindestwerte für neue Systeme an: RSA 3072. Parameter in der NIST-Publikation verifizieren.',
                 'preset.note.cnsa': 'Wendet die CNSA-2.0-Anforderungen für US-Systeme nationaler Sicherheit an: RSA 4096. Parameter in der NSA-Empfehlung verifizieren.',
                 'preset.note.privacyGuides': 'Wendet die Privacy-Guides-Empfehlung für Aktivisten- / Journalisten-Bedrohungsmodelle an: Curve25519 ECC. Auf der Privacy-Guides-Seite verifizieren.',
-                'preset.note.sourceLink': 'Quelldokument →'
+                'preset.note.sourceLink': 'Quelldokument →',
+                'preset.note.verifiedPrefix': 'Parameter geprüft'
             },
             'hi': {
                 'meta.title': 'encryptalotta — ब्राउज़र में चलने वाले 36 निःशुल्क गोपनीयता और डेवलपर टूल (PGP, BIP39, TLS, SSH, JWT, PBKDF2, हैश, रेजेक्स, CSV, cron, CIDR, संख्या आधार आदि)',
@@ -7848,7 +7852,8 @@
                 'preset.note.nist': 'नए परिनियोजन हेतु NIST SP 800-57 न्यूनतम लागू करता है: RSA 3072। NIST प्रकाशन से मापदंडों का सत्यापन करें।',
                 'preset.note.cnsa': 'अमेरिकी राष्ट्रीय सुरक्षा प्रणालियों हेतु CNSA 2.0 आवश्यकताएँ लागू करता है: RSA 4096। NSA परामर्श से मापदंडों का सत्यापन करें।',
                 'preset.note.privacyGuides': 'कार्यकर्ता / पत्रकार खतरा मॉडल हेतु Privacy Guides अनुशंसा लागू करता है: Curve25519 ECC। Privacy Guides पृष्ठ से सत्यापित करें।',
-                'preset.note.sourceLink': 'स्रोत दस्तावेज़ →'
+                'preset.note.sourceLink': 'स्रोत दस्तावेज़ →',
+                'preset.note.verifiedPrefix': 'पैरामीटर सत्यापित'
             }
         };
 
@@ -8965,31 +8970,39 @@
         // Dated SOURCE LINKS — re-audit annually per SPEC §3 acceptance criteria. The dates here
         // reflect the most recent version we verified; the regulator publishes new editions
         // periodically and a maintainer should refresh both the parameters and these URLs.
+        // Each preset's `asOf` is the date a maintainer last cross-checked the parameters
+        // against the upstream document. SPEC §3 requires annual re-verification —
+        // scripts/audit-release.js warns when any preset's asOf is more than 12 months old.
         const REGULATOR_PRESETS = {
             'bsi': {
                 algorithm: 'ecc', keysize: 'curve25519',
                 noteKey: 'preset.note.bsi',
-                url: 'https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/Publications/TechGuidelines/TG02102/BSI-TR-02102-1.html'
+                url: 'https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/Publications/TechGuidelines/TG02102/BSI-TR-02102-1.html',
+                asOf: '2026-05-13'
             },
             'anssi': {
                 algorithm: 'ecc', keysize: 'curve25519',
                 noteKey: 'preset.note.anssi',
-                url: 'https://cyber.gouv.fr/sites/default/files/document/RGS_v-2-0_B1.pdf'
+                url: 'https://cyber.gouv.fr/sites/default/files/document/RGS_v-2-0_B1.pdf',
+                asOf: '2026-05-13'
             },
             'nist': {
                 algorithm: 'rsa', keysize: '3072',
                 noteKey: 'preset.note.nist',
-                url: 'https://csrc.nist.gov/pubs/sp/800/57/pt1/r5'
+                url: 'https://csrc.nist.gov/pubs/sp/800/57/pt1/r5',
+                asOf: '2026-05-13'
             },
             'cnsa': {
                 algorithm: 'rsa', keysize: '4096',
                 noteKey: 'preset.note.cnsa',
-                url: 'https://www.nsa.gov/Press-Room/Press-Releases-Statements/Press-Release-View/Article/3148990/'
+                url: 'https://www.nsa.gov/Press-Room/Press-Releases-Statements/Press-Release-View/Article/3148990/',
+                asOf: '2026-05-13'
             },
             'privacy-guides': {
                 algorithm: 'ecc', keysize: 'curve25519',
                 noteKey: 'preset.note.privacyGuides',
-                url: 'https://www.privacyguides.org/en/encryption/'
+                url: 'https://www.privacyguides.org/en/encryption/',
+                asOf: '2026-05-13'
             }
         };
 
@@ -9019,6 +9032,13 @@
             a.dataset.i18n = 'preset.note.sourceLink';
             a.textContent = t('preset.note.sourceLink');
             help.appendChild(a);
+            if (cfg.asOf) {
+                const verified = document.createElement('span');
+                verified.style.color = 'var(--text-secondary)';
+                verified.style.marginInlineStart = '0.5em';
+                verified.textContent = '(' + t('preset.note.verifiedPrefix') + ' ' + cfg.asOf + ')';
+                help.appendChild(verified);
+            }
             help.classList.remove('hidden');
         }
         document.getElementById('regulator-preset').addEventListener('change', (e) => {

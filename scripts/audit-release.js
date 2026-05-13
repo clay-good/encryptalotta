@@ -331,6 +331,36 @@ const isSeoEnOnly = (k) => SEO_EN_ONLY_RE.test(k);
     }
 }
 
+// 11. Regulator presets: SPEC §3 requires each preset's parameters to be re-verified
+//     against the upstream document at least once per year. Every entry in the
+//     REGULATOR_PRESETS object carries an `asOf: 'YYYY-MM-DD'` stamp; warn if any
+//     are more than 12 months old. Warn, not fail — a stale preset is still safer
+//     than no preset, but the audit surfaces it so a release can't quietly ship
+//     with year-old recommendations.
+{
+    const presetMatch = html.match(/const\s+REGULATOR_PRESETS\s*=\s*\{([\s\S]*?)\n\s*\};/);
+    if (!presetMatch) {
+        warn('regulator presets', 'REGULATOR_PRESETS literal not found — skipping age check');
+    } else {
+        const body = presetMatch[1];
+        const asOfMatches = [...body.matchAll(/['"]([a-z][\w-]*)['"]\s*:\s*\{[\s\S]*?asOf:\s*'(\d{4}-\d{2}-\d{2})'/g)];
+        const keyMatches = [...body.matchAll(/^\s*['"]([a-z][\w-]*)['"]\s*:\s*\{/gm)];
+        const now = Date.now();
+        const STALE_MS = 365 * 24 * 60 * 60 * 1000;
+        const stale = [];
+        const seen = new Set();
+        for (const m of asOfMatches) {
+            seen.add(m[1]);
+            const age = now - Date.parse(m[2] + 'T00:00:00Z');
+            if (age > STALE_MS) stale.push(`${m[1]} (${m[2]})`);
+        }
+        const missing = keyMatches.map(m => m[1]).filter(k => !seen.has(k));
+        if (missing.length) fail('regulator presets', `missing asOf: ${missing.join(', ')}`);
+        else if (stale.length) warn('regulator presets', `stale (>12 months): ${stale.join(', ')} — re-verify against the source document`);
+        else pass('regulator presets', `${asOfMatches.length} presets, all within the last 12 months`);
+    }
+}
+
 console.log('');
 if (failed > 0) {
     console.log(`AUDIT FAILED — ${failed} error(s)${warned ? ', ' + warned + ' warning(s)' : ''}.`);

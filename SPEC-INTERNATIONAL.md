@@ -1,6 +1,6 @@
 # Spec — International public-good extensions to encryptalotta
 
-Status: draft 6 (Phase 4 complete except BLAKE3; Phase 5 distribution scripts shipped; Phase 6 regulator presets shipped)
+Status: draft 7 (Phase 4 complete except BLAKE3; Phase 5 distribution scripts shipped; Phase 6 regulator presets shipped + annual freshness audit; SECURITY.md + THREAT-MODEL.md published)
 Audience: maintainers and contributors
 Scope: how to extend encryptalotta.com so it serves an international audience — with a deliberate emphasis on Europe and other regions that lean heavily on open-source — without compromising the site's existing character (single-page, fully client-side, no analytics, no CDN, no tracking, no build step beyond a couple of vendored scripts).
 
@@ -418,7 +418,9 @@ Each tool below follows the existing project pattern: pure browser code, zero ne
 
 A dropdown in the PGP key generator (and in the PBKDF2 / Argon2 tools) that selects pre-vetted parameters per regulator.
 
-**Status notes (draft 5):** Shipped for the PGP key generator. Presets surface BSI TR-02102-1, ANSSI RGS B1, NIST SP 800-57, CNSA 2.0, and Privacy Guides recommended; each auto-fills algorithm + keysize and links to the regulator's source document in a footnote. The PBKDF2/Argon2 extension is still pending (Argon2 itself is in §2.9 and not yet shipped). Source-document URLs are dated; per the §3 acceptance criteria, the maintainer should re-verify each annually — a follow-up enhancement to `scripts/audit-release.js` could flag presets older than 12 months.
+**Status notes (draft 5):** Shipped for the PGP key generator. Presets surface BSI TR-02102-1, ANSSI RGS B1, NIST SP 800-57, CNSA 2.0, and Privacy Guides recommended; each auto-fills algorithm + keysize and links to the regulator's source document in a footnote. The PBKDF2/Argon2 extension is still pending (Argon2 itself is in §2.9 and not yet shipped).
+
+**Status notes (draft 7):** Each preset now carries an `asOf: 'YYYY-MM-DD'` field tracking the most recent re-verification against the upstream document. The preset's help footnote surfaces this date inline (e.g. "parameters verified 2026-05-13") so the user can see at a glance how fresh the recommendation is. `scripts/audit-release.js` parses the literal and warns (does not fail) when any preset's stamp is more than 12 months old — a release can still ship, but the staleness is visible. Verified prefix translated for en/fr/de/zh-CN/hi.
 
 | Preset | PGP key | PBKDF2 iters (SHA-256) | Argon2id (m, t, p) | Source URL |
 |--------|---------|------------------------|---------------------|------------|
@@ -506,10 +508,12 @@ Targets, in order of fit:
 
 A `/privacy` page (and translations) that states, in plain language: *no data ever leaves your browser; no cookies; no analytics; no CDN; no fonts loaded from third parties; nothing is stored server-side because there is no server.* This is trivially true for this site and is exactly what EU procurement and compliance teams literally search for. Same content per locale.
 
-### 5.2 Security and threat-model documents
+### 5.2 Security and threat-model documents — **✅ shipped (draft 7)**
 
 - `SECURITY.md` — disclosure policy, contact (PGP-encrypted preferred), supported versions, known-not-applicable threat classes.
 - `THREAT-MODEL.md` — what the tool does and does not protect against. Important caveat against overclaiming: *the site cannot protect you from a compromised browser, a compromised device, a malicious browser extension, or a network adversary that can MITM the site's load (mitigated by HTTPS but not eliminated).*
+
+**Status notes (draft 7):** Both files shipped at the repo root. SECURITY.md covers the disclosure email (PGP-preferred), realistic single-maintainer response timelines, what counts as in-scope vs out-of-scope, and the release-verification chain (RELEASES.md, sbom.json, portable build, audit script). THREAT-MODEL.md is structured around four sections: what the site is, what it protects against, what it does not (with explicit mitigations for high-risk users), and recommendations by user type. Both documents avoid the security-marketing register — they are conservative on purpose so users don't decide what to type into the tool based on overclaimed guarantees.
 
 ### 5.3 Regional `hreflang` aliases
 
@@ -577,6 +581,12 @@ All ~1-day implementations. Roughly doubles the site's tool count for a small fr
 `scripts/audit-release.js` extended to validate both artifacts: SBOM hashes are cross-checked against on-disk vendored bytes; the portable build is verified to contain zero `<script src=>` references. Both checks are soft — they only fire if the artifact is present, so contributors aren't forced to regenerate on every commit.
 
 No runtime changes; full Playwright suite still 206 passed.
+
+**Progress (draft 7):** Regulator-preset annual freshness audit + framing docs shipped.
+
+- Each entry in `REGULATOR_PRESETS` now carries an `asOf: 'YYYY-MM-DD'` stamp; the PGP key generator surfaces it inline in the preset's help footnote ("parameters verified 2026-05-13"). New string `preset.note.verifiedPrefix` translated for en/fr/de/zh-CN/hi.
+- `scripts/audit-release.js` gains an 11th check that warns when any preset is more than 12 months old. Warn rather than fail — staleness is visible but does not block a release.
+- `SECURITY.md` (disclosure policy, response SLAs, in/out-of-scope threat classes, build-verification chain) and `THREAT-MODEL.md` (what protects, what does not, recommendations by user type) shipped at the repo root, fulfilling §5.2.
 
 ### Phase 5 — Distribution and sovereignty
 
