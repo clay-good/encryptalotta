@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0a0a0a">
+
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta name="referrer" content="no-referrer">
+
+    <title>Privacy — encryptalotta</title>
+    <meta name="description" content="encryptalotta is a free, client-side privacy and developer toolbox. No server uploads, no analytics, no cookies, no fonts loaded from third parties, no CDN, no tracking. Nothing is stored server-side because there is no server. GDPR-by-design.">
+    <meta name="robots" content="index, follow, max-snippet:-1">
+    <link rel="canonical" href="https://encryptalotta.com/privacy.html">
+    <link rel="alternate" hreflang="en" href="https://encryptalotta.com/privacy.html">
+    <link rel="alternate" hreflang="x-default" href="https://encryptalotta.com/privacy.html">
+
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Privacy — encryptalotta">
+    <meta property="og:description" content="No server uploads, no analytics, no cookies, no third-party fonts, no CDN, no tracking. Nothing is stored server-side because there is no server.">
+    <meta property="og:url" content="https://encryptalotta.com/privacy.html">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Privacy — encryptalotta">
+    <meta name="twitter:description" content="No server uploads, no analytics, no cookies, no third-party fonts, no CDN, no tracking. Nothing is stored server-side because there is no server.">
+
+    <style>
+        :root {
+            color-scheme: light dark;
+            --bg: #fafafa;
+            --bg-elev: #ffffff;
+            --text: #0a0a0a;
+            --text-secondary: #4a4a4a;
+            --border: #e5e5e5;
+            --accent: #2563eb;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0a0a0a;
+                --bg-elev: #141414;
+                --text: #f5f5f5;
+                --text-secondary: #a3a3a3;
+                --border: #262626;
+                --accent: #60a5fa;
+            }
+        }
+        * { box-sizing: border-box; }
+        html, body {
+            margin: 0;
+            padding: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+        main {
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 48px 24px 96px;
+        }
+        h1 { font-size: 2.25rem; margin: 0 0 8px; letter-spacing: -0.02em; }
+        h2 { font-size: 1.25rem; margin: 40px 0 12px; letter-spacing: -0.01em; }
+        p, ul, ol { margin: 0 0 16px; }
+        ul, ol { padding-inline-start: 24px; }
+        li { margin-bottom: 6px; }
+        a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+        a:hover { text-decoration: none; }
+        code {
+            font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+            font-size: 0.9em;
+            padding: 1px 6px;
+            background: var(--bg-elev);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+        }
+        .summary {
+            background: var(--bg-elev);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px 24px;
+            margin: 24px 0 32px;
+        }
+        .summary p { margin: 0; }
+        .summary strong { color: var(--text); }
+        .small { color: var(--text-secondary); font-size: 0.9rem; }
+        nav.top {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        nav.top a { font-weight: 500; }
+        footer {
+            margin-top: 64px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        @media print { nav.top a, footer a { color: var(--text); } }
+    </style>
+</head>
+<body>
+<main>
+    <nav class="top" aria-label="Site">
+        <a href="/" rel="home">← encryptalotta</a>
+        <span class="small">Last reviewed 2026-05-13</span>
+    </nav>
+
+    <h1>Privacy</h1>
+
+    <div class="summary">
+        <p><strong>No data ever leaves your browser.</strong> No cookies. No analytics. No CDN. No fonts loaded from third parties. No tracking. Nothing is stored server-side because there is no server.</p>
+    </div>
+
+    <p>encryptalotta is a single-page web application. Every tool — PGP key generation, encryption, signing, hashing, KDFs, parsers, encoders, IBAN/VAT/BIC checks, and the rest — runs entirely in your browser as JavaScript inside the page you loaded. The site has no backend that could collect, log, or process your inputs because there is no backend.</p>
+
+    <h2>What the site never does</h2>
+    <ul>
+        <li><strong>No file uploads.</strong> When you select a file, the browser hands it to the JavaScript in the page. The bytes never reach any network.</li>
+        <li><strong>No remote API calls.</strong> The page's Content Security Policy is set to <code>connect-src 'none'</code>. The browser will refuse any outbound <code>fetch</code>, <code>XMLHttpRequest</code>, <code>WebSocket</code>, <code>EventSource</code>, or <code>navigator.sendBeacon</code> initiated from the page.</li>
+        <li><strong>No analytics.</strong> No Google Analytics, no Plausible, no Fathom, no Cloudflare Web Analytics, no custom telemetry — not even "anonymous usage metrics."</li>
+        <li><strong>No cookies.</strong> The page sets none and reads none.</li>
+        <li><strong>No CDN.</strong> All JavaScript, fonts, and images come from the same origin that serves the page.</li>
+        <li><strong>No third-party fonts.</strong> The interface uses the system font stack — what's already installed on your device.</li>
+        <li><strong>No fingerprinting.</strong> The language is detected from <code>navigator.language</code> on the first visit and your choice is stored in <code>localStorage</code> on your device. Country is never inferred — no IP geolocation, no timezone-based country guessing. The same site is served to everyone.</li>
+        <li><strong>No accounts.</strong> There is nothing to sign up for. There is nowhere to sign up to.</li>
+    </ul>
+
+    <h2>What is stored on your device</h2>
+    <p>The page uses <code>localStorage</code> on your device — not a server — for two narrow things:</p>
+    <ul>
+        <li>Your chosen language and theme (light / dark), so the next visit looks the way you left it.</li>
+        <li>Nothing else. No tool ever writes your inputs, keys, passphrases, or outputs to <code>localStorage</code>, <code>sessionStorage</code>, <code>IndexedDB</code>, or any other browser-side persistent store.</li>
+    </ul>
+    <p>You can clear this at any time from your browser's site-data controls. The site will behave correctly afterwards — it will just detect your language again from <code>navigator.language</code>.</p>
+
+    <h2>What the static host sees</h2>
+    <p>The site is served as static files from a static host. When you load the page, the host's web server records the same minimum information any web server records — the IP address that made the request, the time, the User-Agent, the URL requested. encryptalotta has no admin access to those logs and does not use them. The host's own privacy policy is the relevant document for that retention. The site is hosted on Cloudflare Pages; <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener noreferrer">Cloudflare's policy</a> applies to that traffic.</p>
+    <p>Nothing about which tool you used, what you typed, or what the tool produced ever reaches the host. The host only sees that some browser somewhere asked for the page.</p>
+
+    <h2>GDPR, CCPA, and similar regulations</h2>
+    <p>encryptalotta does not collect or process personal data. There is no data subject access request to file because there is no data to access. There is no data processing agreement to sign because there is no processor. This is not a legal opinion — it's a structural observation about a site that has no server-side state.</p>
+    <p>If you are a procurement or compliance reviewer evaluating whether this site is suitable for use in your organization:</p>
+    <ul>
+        <li>Read the <a href="https://github.com/clay-good/encryptalotta/blob/main/SECURITY.md">security disclosure policy</a>.</li>
+        <li>Read the <a href="https://github.com/clay-good/encryptalotta/blob/main/THREAT-MODEL.md">threat model</a>.</li>
+        <li>The full <a href="https://github.com/clay-good/encryptalotta/blob/main/sbom.json">SBOM</a> is published in CycloneDX 1.5 format.</li>
+        <li>Source is on <a href="https://github.com/clay-good/encryptalotta">GitHub</a>; audit it.</li>
+    </ul>
+
+    <h2>For high-risk users</h2>
+    <p>If your threat model includes a network adversary capable of substituting page bytes during loading, see <a href="https://github.com/clay-good/encryptalotta/blob/main/THREAT-MODEL.md">THREAT-MODEL.md</a>. The recommended posture is to download the single-file portable build (<code>encryptalotta-portable.html</code>) once, verify its SHA-256, and run it from <code>file://</code> on a freshly-installed OS with no non-essential browser extensions.</p>
+
+    <h2>Changes to this policy</h2>
+    <p>The site's privacy posture is enforced by the code, not the document. If the code's privacy posture changes, the change ships on <a href="https://github.com/clay-good/encryptalotta">GitHub</a> first, this page is updated to describe the new posture, and the date at the top of this page bumps. Any change that would reduce privacy guarantees would also have to relax the CSP — which would surface in the audit script, and in the diff against the prior release manifest.</p>
+
+    <h2>Contact</h2>
+    <p>For privacy questions or a vulnerability report, see <a href="https://github.com/clay-good/encryptalotta/blob/main/SECURITY.md">SECURITY.md</a>.</p>
+
+    <footer>
+        <p>encryptalotta — free, client-side privacy and developer toolbox. <a href="/">Return to the site</a>.</p>
+    </footer>
+</main>
+</body>
+</html>

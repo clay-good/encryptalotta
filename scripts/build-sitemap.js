@@ -29,6 +29,11 @@ const VARIANTS = [
     { hreflang: 'hi',    pathSeg: 'hi/',     priority: '0.8' }
 ];
 
+// Regional English aliases (SPEC §5.3): same content, dialect-specific hreflang.
+// Listed in every <url> block's alternate set so Google routes en-GB / en-IN /
+// en-AU searches to the canonical English page.
+const REGIONAL_EN_ALIASES = ['en-GB', 'en-IE', 'en-AU', 'en-NZ', 'en-ZA', 'en-IN'];
+
 function urlFor(seg) { return `${SITE}/${seg}`; }
 function today() { return new Date().toISOString().slice(0, 10); }
 
@@ -47,9 +52,21 @@ function buildXml() {
         for (const alt of VARIANTS) {
             lines.push(`    <xhtml:link rel="alternate" hreflang="${alt.hreflang}" href="${urlFor(alt.pathSeg)}"/>`);
         }
+        for (const alias of REGIONAL_EN_ALIASES) {
+            lines.push(`    <xhtml:link rel="alternate" hreflang="${alias}" href="${urlFor('')}"/>`);
+        }
         lines.push(`    <xhtml:link rel="alternate" hreflang="x-default" href="${urlFor('')}"/>`);
         lines.push('  </url>');
     }
+    // GDPR-by-design privacy surface (SPEC §5.1). English-only static page; no
+    // locale variants yet — translations are deferred per the spec's "translation
+    // quality > breadth" rule.
+    lines.push('  <url>');
+    lines.push(`    <loc>${SITE}/privacy.html</loc>`);
+    lines.push(`    <lastmod>${lastmod}</lastmod>`);
+    lines.push('    <changefreq>yearly</changefreq>');
+    lines.push('    <priority>0.5</priority>');
+    lines.push('  </url>');
     lines.push('</urlset>');
     return lines.join('\n') + '\n';
 }

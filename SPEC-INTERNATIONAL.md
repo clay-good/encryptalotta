@@ -1,6 +1,6 @@
 # Spec — International public-good extensions to encryptalotta
 
-Status: draft 7 (Phase 4 complete except BLAKE3; Phase 5 distribution scripts shipped; Phase 6 regulator presets shipped + annual freshness audit; SECURITY.md + THREAT-MODEL.md published)
+Status: draft 8 (Phase 4 complete except BLAKE3; Phase 5 distribution scripts shipped; Phase 6 regulator presets shipped + annual freshness audit; SECURITY.md + THREAT-MODEL.md published; GDPR-by-design /privacy.html published; regional hreflang aliases)
 Audience: maintainers and contributors
 Scope: how to extend encryptalotta.com so it serves an international audience — with a deliberate emphasis on Europe and other regions that lean heavily on open-source — without compromising the site's existing character (single-page, fully client-side, no analytics, no CDN, no tracking, no build step beyond a couple of vendored scripts).
 
@@ -504,9 +504,11 @@ Targets, in order of fit:
 
 ## 5. Framing and discoverability
 
-### 5.1 GDPR-by-design page
+### 5.1 GDPR-by-design page — **✅ shipped English-only (draft 8); localizations deferred**
 
 A `/privacy` page (and translations) that states, in plain language: *no data ever leaves your browser; no cookies; no analytics; no CDN; no fonts loaded from third parties; nothing is stored server-side because there is no server.* This is trivially true for this site and is exactly what EU procurement and compliance teams literally search for. Same content per locale.
+
+**Status notes (draft 8):** Shipped as a standalone static page at `/privacy.html` (English). The page is intentionally minimal: ~200 lines of self-contained HTML + inline CSS, no JavaScript, light/dark via `prefers-color-scheme`, no external assets. Content is structured around what the site does not do, what is stored on the device, what the static host sees, GDPR/CCPA framing, and recommendations for high-risk users — with links out to SECURITY.md / THREAT-MODEL.md / the SBOM / the GitHub repo. Footer link added to the SPA with the i18n key `footer.privacy` translated for all five locales (en/fr/de/zh-CN/hi); the linked page itself is English-only for v1, with localized variants deferred per the §0.6 "translation quality > breadth" rule. Sitemap updated with a single `/privacy.html` entry at priority 0.5 / yearly changefreq.
 
 ### 5.2 Security and threat-model documents — **✅ shipped (draft 7)**
 
@@ -515,7 +517,7 @@ A `/privacy` page (and translations) that states, in plain language: *no data ev
 
 **Status notes (draft 7):** Both files shipped at the repo root. SECURITY.md covers the disclosure email (PGP-preferred), realistic single-maintainer response timelines, what counts as in-scope vs out-of-scope, and the release-verification chain (RELEASES.md, sbom.json, portable build, audit script). THREAT-MODEL.md is structured around four sections: what the site is, what it protects against, what it does not (with explicit mitigations for high-risk users), and recommendations by user type. Both documents avoid the security-marketing register — they are conservative on purpose so users don't decide what to type into the tool based on overclaimed guarantees.
 
-### 5.3 Regional `hreflang` aliases
+### 5.3 Regional `hreflang` aliases — **✅ shipped for English (draft 8); Spanish/Portuguese/Chinese deferred until those locales ship**
 
 For locales that have meaningful regional splits in date/number conventions, add `hreflang` entries pointing at the same content:
 
@@ -523,6 +525,8 @@ For locales that have meaningful regional splits in date/number conventions, add
 - `pt-BR` → `/pt-br/`, `pt-PT` → `/pt-pt/`
 - `es-ES` → `/es/`, `es-MX` → `/es/`, `es-AR` → `/es/` (until separate variants ship)
 - `zh-CN` → `/zh/`, `zh-TW` → `/zh-tw/` (when it ships)
+
+**Status notes (draft 8):** Six regional English aliases (`en-GB`, `en-IE`, `en-AU`, `en-NZ`, `en-ZA`, `en-IN`) added to `<link rel="alternate" hreflang>` in `index.html` and to each `<url>` block in `sitemap.xml` via `scripts/build-sitemap.js`. All six point to the canonical English root. Variants inherit the same hreflang block via `build-i18n-variants.js`. Spanish and Portuguese regional aliases are deferred until the `es` / `pt-BR` / `pt-PT` locales themselves ship (Tier 1 roadmap, §1.2); `zh-TW` deferred per the same logic.
 
 ### 5.4 Localized OpenGraph and Twitter cards
 
@@ -581,6 +585,11 @@ All ~1-day implementations. Roughly doubles the site's tool count for a small fr
 `scripts/audit-release.js` extended to validate both artifacts: SBOM hashes are cross-checked against on-disk vendored bytes; the portable build is verified to contain zero `<script src=>` references. Both checks are soft — they only fire if the artifact is present, so contributors aren't forced to regenerate on every commit.
 
 No runtime changes; full Playwright suite still 206 passed.
+
+**Progress (draft 8):** GDPR-by-design surface + regional SEO aliases shipped.
+
+- `/privacy.html` (§5.1) — self-contained ~200-line static page, light/dark via `prefers-color-scheme`, no JS, no external assets. Footer link added to the SPA with `footer.privacy` / `footer.privacyAria` translated for en/fr/de/zh-CN/hi. Localized privacy variants deferred (translation-quality bar).
+- Regional English hreflang aliases (§5.3) — `en-GB`, `en-IE`, `en-AU`, `en-NZ`, `en-ZA`, `en-IN` added to `index.html` and to every `<url>` block in the sitemap via `scripts/build-sitemap.js`. Locale variants inherit the aliases via `build-i18n-variants.js`.
 
 **Progress (draft 7):** Regulator-preset annual freshness audit + framing docs shipped.
 
