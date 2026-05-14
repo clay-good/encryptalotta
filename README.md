@@ -83,7 +83,7 @@ Language is auto-detected from `navigator.language` on first visit, persisted in
 - **100% Client-Side** - All operations happen in your browser
 - **No Server Uploads** - Your files and keys never leave your device
 - **Open Source** - Audit the code yourself
-- **Works Offline** - Download and use without internet connection
+- **Works Offline** - Download and use without internet connection. A minimal service worker (`sw.js`) precaches the shell on first visit so subsequent loads work offline straight from the cache.
 
 ---
 

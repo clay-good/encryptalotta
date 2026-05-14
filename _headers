@@ -35,3 +35,13 @@
   Cross-Origin-Opener-Policy: same-origin
   Cross-Origin-Embedder-Policy: require-corp
   Cross-Origin-Resource-Policy: same-origin
+
+# Path-scoped CSP override for the service worker. The SW only needs to fetch
+# same-origin shell URLs during install — connect-src 'self' enables that while
+# every other connection stays denied. The document-level CSP above (with
+# connect-src 'none') is unchanged and continues to govern index.html, so the
+# page itself cannot make any network call.
+/sw.js
+  Content-Security-Policy: default-src 'self'; script-src 'self'; connect-src 'self'; img-src 'self' data:; base-uri 'none'; frame-ancestors 'none'
+  Service-Worker-Allowed: /
+  Cache-Control: no-cache

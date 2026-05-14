@@ -1,6 +1,6 @@
 # Spec — International public-good extensions to encryptalotta
 
-Status: draft 8 (Phase 4 complete except BLAKE3; Phase 5 distribution scripts shipped; Phase 6 regulator presets shipped + annual freshness audit; SECURITY.md + THREAT-MODEL.md published; GDPR-by-design /privacy.html published; regional hreflang aliases)
+Status: draft 9 (Phase 4 complete except BLAKE3; Phase 5 distribution scripts + PWA precache service worker shipped; Phase 6 regulator presets shipped + annual freshness audit; SECURITY.md + THREAT-MODEL.md published; GDPR-by-design /privacy.html published; regional hreflang aliases)
 Audience: maintainers and contributors
 Scope: how to extend encryptalotta.com so it serves an international audience — with a deliberate emphasis on Europe and other regions that lean heavily on open-source — without compromising the site's existing character (single-page, fully client-side, no analytics, no CDN, no tracking, no build step beyond a couple of vendored scripts).
 
@@ -473,11 +473,13 @@ Codeberg is an EU-based (Germany), non-profit Forgejo instance. Many EU public-s
 - Add the onion address to `SECURITY.md` and the footer.
 - This is high signal for the journalist/activist audience the site implicitly serves.
 
-### 4.5 PWA installability and offline-precaching
+### 4.5 PWA installability and offline-precaching — **✅ shipped (draft 9)**
 
 - Confirm the manifest at `site.webmanifest` declares `display: standalone` and the install icons.
 - Add a minimal service worker that precaches the shell. Strict CSP — service worker scope must match.
 - This makes the site genuinely "downloadable" on Android and desktop: users in censored or low-bandwidth regions can install once and use forever.
+
+**Status notes (draft 9):** `sw.js` shipped at the repo root. ~60 lines, no dependencies. Precaches a 20-entry shell on install (the four locale roots + `/index.html` + `/privacy.html` + the four vendored libraries + the three favicons + `favicon.ico` + `site.webmanifest`) using `cache.addAll` with `cache: 'reload'` so the SW never installs a stale snapshot mid-flight. Cache-first on `fetch` for same-origin GETs only; cross-origin requests pass straight through (defense in depth — even though the site has no cross-origin scripts). Cache name is versioned (`encryptalotta-shell-v1`); bump at release time to invalidate. `activate` claims clients and drops old caches. Registration in `index.html` is HTTPS-gated and silent on failure (no UI prompt). The document CSP is unchanged — `connect-src 'none'` still applies to the page itself; a path-scoped `_headers` override grants `/sw.js` `connect-src 'self'` so install-time precache fetches resolve. The grant is narrow on purpose: the SW has no logic that would dial out elsewhere. Audit's CSP check still inspects the default (document) rule and continues to enforce `connect-src 'none'` on the page surface.
 
 ### 4.6 Single-file portable build — **✅ shipped (draft 6)**
 
@@ -586,6 +588,8 @@ All ~1-day implementations. Roughly doubles the site's tool count for a small fr
 
 No runtime changes; full Playwright suite still 206 passed.
 
+**Progress (draft 9):** PWA precache service worker shipped (§4.5). `sw.js` precaches the static shell (locale variants, vendored libs, icons, manifest, privacy page) on install and serves cache-first thereafter. Registration is HTTPS-gated, scope `/`, silent on failure. The document CSP keeps `connect-src 'none'`; a narrow path-scoped `_headers` override grants the SW response `connect-src 'self'` (needed for the install-time precache fetches and nothing else). No new vendored dependencies, no innerHTML, no behavior change for non-PWA users. Audit (`scripts/audit-release.js`) still passes — CSP regex matches the default document rule, which is unchanged.
+
 **Progress (draft 8):** GDPR-by-design surface + regional SEO aliases shipped.
 
 - `/privacy.html` (§5.1) — self-contained ~200-line static page, light/dark via `prefers-color-scheme`, no JS, no external assets. Footer link added to the SPA with `footer.privacy` / `footer.privacyAria` translated for en/fr/de/zh-CN/hi. Localized privacy variants deferred (translation-quality bar).
@@ -603,7 +607,7 @@ No runtime changes; full Playwright suite still 206 passed.
 2. ✅ Reproducible release manifest (§4.2) — generator shipped draft 6; signing deferred.
 3. ✅ SBOM (§4.3) — shipped draft 6.
 4. ✅ Single-file portable build (§4.6) — shipped draft 6.
-5. PWA precache (§4.5).
+5. ✅ PWA precache (§4.5) — shipped draft 9.
 6. Tor onion mirror (§4.4).
 7. Submissions to public-good registries (§4.7).
 

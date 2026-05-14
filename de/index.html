@@ -8480,6 +8480,15 @@
         setLang(detectInitialLang());
         navigateTo(resolveInitialTool(), { skipHash: !!parseHash() });
 
+        // PWA: register the service worker that precaches the shell so the site
+        // works offline after first visit. Same-origin only; never reaches the
+        // network outside this origin. See sw.js and SPEC-INTERNATIONAL.md §4.5.
+        if ('serviceWorker' in navigator && location.protocol === 'https:') {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(() => { /* ignore */ });
+            });
+        }
+
         // Backwards-compat alias for any older callers
         function switchView(view) { navigateTo(view); }
 
