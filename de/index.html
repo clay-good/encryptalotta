@@ -543,7 +543,7 @@
             letter-spacing: 0.18em;
             color: var(--text-muted);
             margin: 0 0 20px;
-            padding-left: 4px;
+            padding-inline-start: 4px;
         }
 
         .home-grid {
@@ -558,7 +558,7 @@
             border-radius: 14px;
             padding: 24px 22px;
             cursor: pointer;
-            text-align: left;
+            text-align: start;
             color: var(--text-primary);
             transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
             display: flex;
@@ -573,7 +573,7 @@
             content: "→";
             position: absolute;
             top: 22px;
-            right: 22px;
+            inset-inline-end: 22px;
             color: var(--text-muted);
             font-size: 1.1rem;
             opacity: 0;
@@ -902,19 +902,19 @@
         }
 
         .alert-warning {
-            border-left: 3px solid var(--text-primary);
+            border-inline-start: 3px solid var(--text-primary);
         }
 
         .alert-danger {
-            border-left: 3px solid var(--text-primary);
+            border-inline-start: 3px solid var(--text-primary);
         }
 
         .alert-success {
-            border-left: 3px solid var(--text-primary);
+            border-inline-start: 3px solid var(--text-primary);
         }
 
         .alert-info {
-            border-left: 3px solid var(--text-primary);
+            border-inline-start: 3px solid var(--text-primary);
         }
 
         .file-upload {
@@ -1009,7 +1009,7 @@
         }
 
         .warning-box ul {
-            margin-left: 20px;
+            margin-inline-start: 20px;
             color: var(--text-secondary);
         }
 
@@ -1126,7 +1126,7 @@
         .key-info-table th,
         .key-info-table td {
             padding: 12px;
-            text-align: left;
+            text-align: start;
             border-bottom: 1px solid var(--border);
         }
 
@@ -2312,7 +2312,7 @@
                 </div>
 
                 <button id="btn-encode-convert" class="btn" data-i18n="btn.encodeConvert">Convert</button>
-                <button id="btn-encode-swap" class="btn btn-secondary" data-i18n="btn.encodeSwap" style="margin-left: 8px;">Swap From ↔ To</button>
+                <button id="btn-encode-swap" class="btn btn-secondary" data-i18n="btn.encodeSwap" style="margin-inline-start: 8px;">Swap From ↔ To</button>
 
                 <div class="form-group" style="margin-top: 24px;">
                     <label for="encode-output" data-i18n="encode.label.output">Output:</label>
@@ -2364,7 +2364,7 @@
                 </div>
 
                 <button id="btn-ts-now" class="btn btn-secondary" data-i18n="btn.tsNow">Use current time</button>
-                <button id="btn-ts-convert" class="btn" data-i18n="btn.tsConvert" style="margin-left: 8px;">Convert</button>
+                <button id="btn-ts-convert" class="btn" data-i18n="btn.tsConvert" style="margin-inline-start: 8px;">Convert</button>
 
                 <div id="ts-results" class="hidden" style="margin-top: 24px;"></div>
             </div>
@@ -2383,8 +2383,8 @@
                 </div>
 
                 <button id="btn-url-parse" class="btn" data-i18n="btn.urlParse">Parse</button>
-                <button id="btn-url-encode" class="btn btn-secondary" data-i18n="btn.urlEncode" style="margin-left: 8px;">Percent-encode</button>
-                <button id="btn-url-decode" class="btn btn-secondary" data-i18n="btn.urlDecode" style="margin-left: 8px;">Percent-decode</button>
+                <button id="btn-url-encode" class="btn btn-secondary" data-i18n="btn.urlEncode" style="margin-inline-start: 8px;">Percent-encode</button>
+                <button id="btn-url-decode" class="btn btn-secondary" data-i18n="btn.urlDecode" style="margin-inline-start: 8px;">Percent-decode</button>
 
                 <div id="url-results" class="hidden" style="margin-top: 24px;"></div>
 
@@ -2466,7 +2466,7 @@
                 </div>
 
                 <button id="btn-totp-start" class="btn" data-i18n="btn.totpStart">Start</button>
-                <button id="btn-totp-stop" class="btn btn-secondary" data-i18n="btn.totpStop" style="margin-left: 8px;" disabled>Stop</button>
+                <button id="btn-totp-stop" class="btn btn-secondary" data-i18n="btn.totpStop" style="margin-inline-start: 8px;" disabled>Stop</button>
 
                 <div id="totp-display" class="hidden" style="margin-top: 24px;">
                     <div id="totp-issuer" style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 6px;"></div>
@@ -2507,7 +2507,7 @@
                 </div>
 
                 <button id="btn-diff-compute" class="btn" data-i18n="btn.diffCompute">Compare</button>
-                <button id="btn-diff-swap" class="btn btn-secondary" data-i18n="btn.diffSwap" style="margin-left: 8px;">Swap A ↔ B</button>
+                <button id="btn-diff-swap" class="btn btn-secondary" data-i18n="btn.diffSwap" style="margin-inline-start: 8px;">Swap A ↔ B</button>
 
                 <div id="diff-summary" style="margin-top: 18px; font-size: 0.9rem; color: var(--text-secondary);"></div>
                 <div id="diff-results" class="hidden" style="margin-top: 12px; background: var(--bg-tertiary); padding: 14px; border-radius: 8px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.85rem; white-space: pre-wrap; overflow-x: auto;"></div>
@@ -2552,7 +2552,7 @@
                 <br>
 
                 <button id="btn-csv-convert" class="btn" data-i18n="btn.csvConvert">Convert</button>
-                <button id="btn-csv-swap" class="btn btn-secondary" data-i18n="btn.csvSwap" style="margin-left: 8px;">Use output as input</button>
+                <button id="btn-csv-swap" class="btn btn-secondary" data-i18n="btn.csvSwap" style="margin-inline-start: 8px;">Use output as input</button>
 
                 <div id="csv-summary" style="margin-top: 18px; font-size: 0.9rem; color: var(--text-secondary);"></div>
 
@@ -2658,7 +2658,7 @@
                 </div>
 
                 <button id="btn-pem-to-der" class="btn" data-i18n="btn.pemToDer">PEM → DER</button>
-                <button id="btn-der-to-pem" class="btn" data-i18n="btn.derToPem" style="margin-left: 8px;">DER → PEM</button>
+                <button id="btn-der-to-pem" class="btn" data-i18n="btn.derToPem" style="margin-inline-start: 8px;">DER → PEM</button>
 
                 <div id="pem-der-summary" style="margin-top: 18px; font-size: 0.9rem; color: var(--text-secondary);"></div>
 
@@ -2775,7 +2775,7 @@
                 </div>
 
                 <button id="btn-format-run" class="btn" data-i18n="btn.formatRun">Convert</button>
-                <button id="btn-format-swap" class="btn btn-secondary" data-i18n="btn.formatSwap" style="margin-left: 8px;">Use output as input</button>
+                <button id="btn-format-swap" class="btn btn-secondary" data-i18n="btn.formatSwap" style="margin-inline-start: 8px;">Use output as input</button>
 
                 <div id="format-status" style="margin-top: 18px; font-size: 0.9rem;"></div>
 

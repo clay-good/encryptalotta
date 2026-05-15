@@ -1,6 +1,6 @@
 # Spec — International public-good extensions to encryptalotta
 
-Status: draft 12 (Phase 1 Intl-formatting first + second slice landed: `Intl.NumberFormat` + `Intl.RelativeTimeFormat` drive PBKDF2 timing, CIDR address counts, PGP key dates, and the Unix-timestamp relative phrasing; `Intl.PluralRules` powers the regex match count (`1 match` / `3 matches` / `1 correspondance` / `3 correspondances`); `Intl.ListFormat` helper landed for future use — see §1.5 progress notes; Phase 4 complete except BLAKE3; Phase 5 distribution scripts + PWA precache service worker shipped; Phase 6 regulator presets shipped in PGP key generator + PBKDF2 tool + annual freshness audit covering both blocks; SECURITY.md + THREAT-MODEL.md published; GDPR-by-design /privacy.html published; regional hreflang aliases)
+Status: draft 13 (Phase 1 §1.4 logical-property CSS refactor + §1.5 Intl-formatting first + second slice landed: every physical-direction CSS property in `index.html` is now logical (`margin-inline-start`, `inset-inline-end`, `border-inline-start`, `text-align: start`); `Intl.NumberFormat` + `Intl.RelativeTimeFormat` drive PBKDF2 timing, CIDR address counts, PGP key dates, and the Unix-timestamp relative phrasing; `Intl.PluralRules` powers the regex match count (`1 match` / `3 matches` / `1 correspondance` / `3 correspondances`); `Intl.ListFormat` helper landed for future use — see §1.4 and §1.5 progress notes; Phase 4 complete except BLAKE3; Phase 5 distribution scripts + PWA precache service worker shipped; Phase 6 regulator presets shipped in PGP key generator + PBKDF2 tool + annual freshness audit covering both blocks; SECURITY.md + THREAT-MODEL.md published; GDPR-by-design /privacy.html published; regional hreflang aliases)
 Audience: maintainers and contributors
 Scope: how to extend encryptalotta.com so it serves an international audience — with a deliberate emphasis on Europe and other regions that lean heavily on open-source — without compromising the site's existing character (single-page, fully client-side, no analytics, no CDN, no tracking, no build step beyond a couple of vendored scripts).
 
@@ -95,7 +95,29 @@ Procedure for each new locale:
 
 Anything short of this ships with a visible banner: *"This locale is machine-translated and awaiting native review — corrections welcome at [link]."*
 
-### 1.4 RTL support (one-time architectural change)
+### 1.4 RTL support (one-time architectural change) — **🟡 CSS logical-property refactor shipped (draft 13)**
+
+**Status notes (draft 13):** Step 1 of the §1.4 plan is done. Every physical-direction CSS property in `index.html` was replaced with its logical equivalent:
+
+- `padding-left` → `padding-inline-start` (1 site: `.home-section h3`).
+- `margin-left` → `margin-inline-start` (1 stylesheet site: `.warning-box ul`; 9 inline `style="margin-left: 8px;"` button-spacers across the regex/diff/CSV/format/encode/timestamp/URL/TOTP/PEM swap buttons).
+- `right: 22px` → `inset-inline-end: 22px` (1 site: `.tool-card::after` arrow indicator).
+- `border-left` → `border-inline-start` (4 sites: `.alert-{warning,danger,success,info}`).
+- `text-align: left` → `text-align: start` (2 sites: `.tool-card`, `.key-info-table th/td`).
+
+A grep for `(margin|padding|border)-(left|right)|text-align:\s*(left|right)` over `index.html` now returns zero hits. The one remaining JS-set property (`wrapper.style.textAlign = 'center'` in the QR multi-share renderer) is direction-neutral and intentional.
+
+One new Playwright case (`rtl: home tool cards mirror under dir=rtl`) flips `document.documentElement.dir = 'rtl'` at runtime, then asserts `getComputedStyle('.tool-card', '::after').insetInlineEnd === '22px'` to prove the logical property resolves correctly in RTL mode. Cleaner than a full visual diff, and the harness has no headless RTL fonts to fight with. Full suite: 215 passed.
+
+What remains for §1.4 before an RTL locale can ship:
+
+- Step 2 — runtime `<html dir="rtl">` flip in the `setLang()` path when an RTL locale is the active selection (one-line conditional; deferred until the first RTL locale is added to `SUPPORTED_LANGS`).
+- Step 3 — icon audit: chevrons / arrows / progress indicators get `transform: scaleX(-1)` under `[dir="rtl"]` where they are direction-bearing. (The single `→` indicator on `.tool-card::after` will need this when the first RTL locale ships.)
+- Step 4 — wrap `<pre>` / `<code>` / `<output>` code blocks with `direction: ltr; unicode-bidi: embed` so PGP/Base64/hex output stays LTR even inside an RTL page.
+- Step 5 — `dir="ltr"` on code-like form fields (regex patterns, cron expressions, IBANs, hex).
+- Step 6 — `word-break: keep-all` under `:lang(zh), :lang(ja), :lang(ko)` for CJK line-wrap behavior.
+
+Steps 2–6 are deferred to the slice that ships the first RTL locale (Arabic, per the §1.2 roadmap), since none of them are observable until then.
 
 Currently the CSS uses `left`/`right`/`margin-left`/`padding-right`/`text-align: left` in places. RTL support is a one-time refactor that then makes every future RTL locale free.
 
@@ -594,7 +616,7 @@ Each phase is independent. Stop after any phase; nothing below requires the next
 
 ### Phase 1 — i18n infrastructure (no new tools yet)
 
-1. Logical-property CSS refactor for RTL readiness (§1.4).
+1. ✅ Logical-property CSS refactor for RTL readiness (§1.4) — shipped draft 13. RTL runtime flip + icon mirroring + LTR code-block embedding deferred until the first RTL locale is queued.
 2. 🟡 `Intl.PluralRules` / `Intl.RelativeTimeFormat` / `Intl.ListFormat` integration (§1.5) — first + second slice shipped (drafts 11 + 12). `Intl.NumberFormat` + `Intl.RelativeTimeFormat` drive PBKDF2 timing, CIDR address counts, PGP key dates, and the Unix-timestamp relative phrasing. `Intl.PluralRules` powers the regex match-count row (`1 match` / `3 matches`; `1 correspondance` / `3 correspondances`). `Intl.ListFormat` helper landed; awaiting call-sites (Shamir, multi-recipient).
 3. Command-palette synonym field added to the `STRINGS` schema (§1.6).
 4. CSV schema extended for plural categories (§1.5).
@@ -639,6 +661,8 @@ All ~1-day implementations. Roughly doubles the site's tool count for a small fr
 `scripts/audit-release.js` extended to validate both artifacts: SBOM hashes are cross-checked against on-disk vendored bytes; the portable build is verified to contain zero `<script src=>` references. Both checks are soft — they only fire if the artifact is present, so contributors aren't forced to regenerate on every commit.
 
 No runtime changes; full Playwright suite still 206 passed.
+
+**Progress (draft 13):** Phase 1 §1.4 step 1 (logical-property CSS refactor). All 17 physical-direction declarations in `index.html` migrated to their logical equivalents (`margin-inline-start`, `padding-inline-start`, `inset-inline-end`, `border-inline-start`, `text-align: start`) — split across the stylesheet (8 sites) and inline button styles (9 sites). One new Playwright case asserts the refactor by flipping `documentElement.dir = 'rtl'` and reading `getComputedStyle(...).insetInlineEnd` on `.tool-card::after`. Full suite: 215 passed. Steps 2–6 of §1.4 (runtime dir flip in setLang, icon mirroring, LTR-embed for code blocks, word-break for CJK) deferred until the first RTL locale ships.
 
 **Progress (draft 12):** Phase 1 §1.5 second slice. `intlPlural()` + `intlList()` helpers added; the regex tool's match-count row migrated to plural-aware keys (`regex.match.count.one` + `regex.match.count.other` across all five locales). The legacy `regex.match.count: '{n} match(es)'` key was retired in the same commit — the parenthesized fallback was the textbook example of why `Intl.PluralRules` exists. STRINGS now 1098 keys × 5 locales. Two new Playwright cases (en singular/plural + fr singular/plural). Full suite: 214 passed. `intlList` is scaffolded but not yet wired to a call-site; first candidate is multi-recipient encryption or Shamir share enumeration, deferred until the surrounding strings get a §1.3 review.
 

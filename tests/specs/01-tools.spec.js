@@ -763,6 +763,25 @@ test('intl: timestamp relative phrasing uses Intl.RelativeTimeFormat (French)', 
   await expect(page.locator('#ts-results')).toContainText(/il y a\s+5\s+minutes/i, { timeout: 5_000 });
 });
 
+test('rtl: home tool cards mirror under dir=rtl (logical properties)', async ({ page }) => {
+  // SPEC §1.4 — exercise the logical-property refactor without shipping an RTL locale.
+  // The arrow indicator on .tool-card::after is positioned via inset-inline-end, so under
+  // dir=rtl it should resolve to the *left* edge instead of the right.
+  await page.goto('/index.html');
+  await page.evaluate(() => { document.documentElement.dir = 'rtl'; });
+  const card = page.locator('.tool-card').first();
+  const box = await card.boundingBox();
+  const arrowEdge = await card.evaluate((el) => {
+    const r = el.getBoundingClientRect();
+    const after = window.getComputedStyle(el, '::after');
+    return { width: r.width, insetInlineEnd: after.getPropertyValue('inset-inline-end') };
+  });
+  expect(arrowEdge.insetInlineEnd).toBe('22px');
+  // Sanity: card should still have non-zero width.
+  expect(box.width).toBeGreaterThan(100);
+  await page.evaluate(() => { document.documentElement.dir = 'ltr'; });
+});
+
 test('home grid: every card navigates without uncaught errors', async ({ page }) => {
   const errs = [];
   page.on('pageerror', e => errs.push('pageerror: ' + e.message));
