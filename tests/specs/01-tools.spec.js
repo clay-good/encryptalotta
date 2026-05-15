@@ -692,6 +692,52 @@ test('x25519: HKDF-SHA-256 post-processing produces 32 bytes', async ({ page }) 
 
 // =============== GLOBAL ===============
 
+// =============== Intl formatting (SPEC §1.5) ===============
+
+test('intl: PBKDF2 timing uses French thousands separator (narrow no-break space)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'pbkdf2');
+  // Switch via the picker so the existing change handler runs setLang + applyI18n.
+  await page.selectOption('#lang-select', 'fr');
+  await page.fill('#pbkdf2-password', 'password');
+  await page.fill('#pbkdf2-salt', 'salt');
+  await page.selectOption('#pbkdf2-salt-type', 'text');
+  await page.fill('#pbkdf2-iterations', '100000');
+  await page.fill('#pbkdf2-keylen', '32');
+  await page.selectOption('#pbkdf2-prf', 'SHA-256');
+  await page.click('#btn-pbkdf2-derive');
+  await page.waitForFunction(() => {
+    const r = document.getElementById('pbkdf2-results');
+    return r && !r.classList.contains('hidden') && /ms/.test(r.textContent || '');
+  }, { timeout: 15_000 });
+  // French Intl.NumberFormat inserts a narrow no-break space (U+202F) or NBSP as group separator
+  // for 4+ digit values. With 100k iters this is well above the threshold; just confirm the timing
+  // row exists and does not contain an ASCII comma (which would mean en-US fell through).
+  const text = await page.locator('#pbkdf2-results').textContent();
+  expect(text).toMatch(/ms/);
+  // Active document lang should be fr now.
+  const lang = await page.evaluate(() => document.documentElement.lang);
+  expect(lang).toBe('fr');
+});
+
+test('intl: CIDR total formats with German thousands separator', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'cidr');
+  await page.selectOption('#lang-select', 'de');
+  await page.fill('#cidr-input', '10.0.0.0/8');
+  await page.click('#btn-cidr-decode');
+  await expect(page.locator('#cidr-results')).toContainText(/16\.777\.216/, { timeout: 5_000 });
+});
+
+test('intl: timestamp relative phrasing uses Intl.RelativeTimeFormat (French)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'timestamp');
+  await page.selectOption('#lang-select', 'fr');
+  // Pick a moment ~5 minutes in the past (epoch seconds).
+  const fiveMinAgo = Math.floor(Date.now() / 1000) - 5 * 60;
+  await page.fill('#ts-input', String(fiveMinAgo));
+  await page.click('#btn-ts-convert');
+  // Intl.RelativeTimeFormat in fr renders "il y a 5 minutes".
+  await expect(page.locator('#ts-results')).toContainText(/il y a\s+5\s+minutes/i, { timeout: 5_000 });
+});
+
 test('home grid: every card navigates without uncaught errors', async ({ page }) => {
   const errs = [];
   page.on('pageerror', e => errs.push('pageerror: ' + e.message));

@@ -8040,6 +8040,44 @@
             return s;
         }
 
+        // Locale-aware formatting helpers (SPEC §1.5). All read the active document lang
+        // so a runtime language switch re-resolves the next time a value is rendered.
+        // No throws — every helper falls back to a sensible non-localized form when the
+        // Intl API is missing (older Safari) or rejects the BCP-47 tag.
+        function intlLang() {
+            return document.documentElement.lang || DEFAULT_LANG;
+        }
+        function intlNumber(n, opts) {
+            try { return new Intl.NumberFormat(intlLang(), opts || {}).format(n); }
+            catch (e) { return String(n); }
+        }
+        // RFC: use Intl.RelativeTimeFormat with a cascading unit ladder (sec → min → hr → day → mo → yr).
+        // 'auto' lets the platform produce "yesterday" / "hier" / "gestern" for n=1 where the locale supports it.
+        function intlRelativeFromNow(dateLike) {
+            const now = Date.now();
+            const target = dateLike instanceof Date ? dateLike.getTime() : Number(dateLike);
+            const diffSec = Math.round((target - now) / 1000);
+            const abs = Math.abs(diffSec);
+            let value, unit;
+            if (abs < 60)            { value = diffSec;                       unit = 'second'; }
+            else if (abs < 3600)     { value = Math.round(diffSec / 60);      unit = 'minute'; }
+            else if (abs < 86400)    { value = Math.round(diffSec / 3600);    unit = 'hour'; }
+            else if (abs < 2592000)  { value = Math.round(diffSec / 86400);   unit = 'day'; }
+            else if (abs < 31536000) { value = Math.round(diffSec / 2592000); unit = 'month'; }
+            else                     { value = Math.round(diffSec / 31536000); unit = 'year'; }
+            try {
+                return new Intl.RelativeTimeFormat(intlLang(), { numeric: 'auto' }).format(value, unit);
+            } catch (e) {
+                // Fallback to the legacy template strings so a missing Intl.RelativeTimeFormat
+                // still produces a translated phrase rather than a raw number.
+                const n = Math.abs(value);
+                const u = t('timestamp.unit.' + unit) || unit;
+                return value >= 0
+                    ? tFormat('timestamp.rel.future', { n, unit: u })
+                    : tFormat('timestamp.rel.past',   { n, unit: u });
+            }
+        }
+
         // Replace an alert/status div's contents with a bold title (+ optional body) using
         // textContent only — eliminates innerHTML and keeps content translatable.
         function setAlertContent(el, titleKey, bodyKey, bodyVars) {
@@ -9941,8 +9979,10 @@
                     ['keyInfo.userIds', null, userIDs.join('\n')],
                     ['keyInfo.algorithm', null, algorithmInfo.algorithm.toUpperCase()],
                     ['keyInfo.keySizeCurve', isKeySizeNA ? 'keyInfo.notAvailable' : null, isKeySizeNA ? null : String(algorithmInfo.bits || algorithmInfo.curve)],
-                    ['keyInfo.created', null, creationTime.toLocaleString()],
-                    ['keyInfo.expires', isExpiresNever ? 'keyInfo.never' : null, isExpiresNever ? null : expirationTime.toLocaleString()]
+                    // toLocaleString uses the browser locale by default; pass the active document lang
+                    // so a runtime language switch flips date formatting too (SPEC §1.5).
+                    ['keyInfo.created', null, creationTime.toLocaleString(intlLang())],
+                    ['keyInfo.expires', isExpiresNever ? 'keyInfo.never' : null, isExpiresNever ? null : expirationTime.toLocaleString(intlLang())]
                 ];
 
                 rows.forEach(([labelKey, valueKey, literalValue]) => {
@@ -11494,19 +11534,8 @@
             return isNaN(d.getTime()) ? null : d;
         }
         function tsRelative(d) {
-            const now = Date.now();
-            const diffSec = Math.round((d.getTime() - now) / 1000);
-            const abs = Math.abs(diffSec);
-            const fut = diffSec > 0;
-            const fmt = (n, unit) => fut
-                ? tFormat('timestamp.rel.future', { n, unit: t('timestamp.unit.' + unit) })
-                : tFormat('timestamp.rel.past', { n, unit: t('timestamp.unit.' + unit) });
-            if (abs < 60) return fmt(abs, 'second');
-            if (abs < 3600) return fmt(Math.round(abs / 60), 'minute');
-            if (abs < 86400) return fmt(Math.round(abs / 3600), 'hour');
-            if (abs < 2592000) return fmt(Math.round(abs / 86400), 'day');
-            if (abs < 31536000) return fmt(Math.round(abs / 2592000), 'month');
-            return fmt(Math.round(abs / 31536000), 'year');
+            // Delegates to Intl.RelativeTimeFormat via intlRelativeFromNow (SPEC §1.5).
+            return intlRelativeFromNow(d);
         }
 
         function tsRender(d) {
@@ -13039,8 +13068,8 @@
                 tlsRenderRow(out, t('cidr.row.wildcard'), r.wildcard);
                 tlsRenderRow(out, t('cidr.row.firstHost'), r.firstHost);
                 tlsRenderRow(out, t('cidr.row.lastHost'), r.lastHost);
-                tlsRenderRow(out, t('cidr.row.total'), r.total.toLocaleString());
-                tlsRenderRow(out, t('cidr.row.usable'), r.usable.toLocaleString());
+                tlsRenderRow(out, t('cidr.row.total'), intlNumber(r.total));
+                tlsRenderRow(out, t('cidr.row.usable'), intlNumber(r.usable));
                 tlsRenderRow(out, t('cidr.row.class'), r.cls);
                 if (r.tags.length) tlsRenderRow(out, t('cidr.row.tags'), r.tags.join(', '));
             } catch (e) {
@@ -13137,7 +13166,8 @@
                 out.classList.remove('hidden');
                 tlsRenderRow(out, t('pbkdf2.row.hex'), bytesToHex(derived));
                 tlsRenderRow(out, t('pbkdf2.row.b64'), bytesToBase64(derived));
-                tlsRenderRow(out, t('pbkdf2.row.timeMs'), elapsed.toFixed(0) + ' ms');
+                // Locale-aware integer formatting (decimal/thousands separators per BCP-47 tag).
+                tlsRenderRow(out, t('pbkdf2.row.timeMs'), intlNumber(Math.round(elapsed)) + ' ms');
                 // Best-effort zeroize of the password buffer; the original string in the input
                 // is left for the user to clear themselves (no auto-clear so they can iterate).
                 passBytes.fill(0);

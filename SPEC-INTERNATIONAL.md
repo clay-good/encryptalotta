@@ -1,6 +1,6 @@
 # Spec — International public-good extensions to encryptalotta
 
-Status: draft 10 (Phase 4 complete except BLAKE3; Phase 5 distribution scripts + PWA precache service worker shipped; Phase 6 regulator presets shipped in PGP key generator + PBKDF2 tool + annual freshness audit covering both blocks; SECURITY.md + THREAT-MODEL.md published; GDPR-by-design /privacy.html published; regional hreflang aliases)
+Status: draft 11 (Phase 1 Intl-formatting first slice landed: `Intl.NumberFormat` + `Intl.RelativeTimeFormat` now drive PBKDF2 timing, CIDR address counts, PGP key dates, and the Unix-timestamp relative phrasing — see §1.5 progress note; Phase 4 complete except BLAKE3; Phase 5 distribution scripts + PWA precache service worker shipped; Phase 6 regulator presets shipped in PGP key generator + PBKDF2 tool + annual freshness audit covering both blocks; SECURITY.md + THREAT-MODEL.md published; GDPR-by-design /privacy.html published; regional hreflang aliases)
 Audience: maintainers and contributors
 Scope: how to extend encryptalotta.com so it serves an international audience — with a deliberate emphasis on Europe and other regions that lean heavily on open-source — without compromising the site's existing character (single-page, fully client-side, no analytics, no CDN, no tracking, no build step beyond a couple of vendored scripts).
 
@@ -117,7 +117,31 @@ Concrete changes:
 
 Acceptance: the existing site rendered in `dir="rtl"` looks intentional, not mirrored-by-accident. Tested with at least Arabic and Hebrew before either locale ships.
 
-### 1.5 Locale-aware formatting via `Intl`
+### 1.5 Locale-aware formatting via `Intl` — **🟡 first slice shipped (draft 11)**
+
+**Status notes (draft 11):** Two small helpers landed alongside `t()` / `tFormat()`:
+
+- `intlNumber(n, opts?)` — wraps `Intl.NumberFormat` against `document.documentElement.lang`. Falls back to `String(n)` if Intl throws on an unknown tag.
+- `intlRelativeFromNow(date)` — cascades through second/minute/hour/day/month/year buckets, then renders via `Intl.RelativeTimeFormat` with `{numeric: 'auto'}` so locales that have "yesterday"/"hier"/"gestern" surface them. Falls back to the legacy `timestamp.rel.{past,future}` template strings when `Intl.RelativeTimeFormat` is unavailable.
+
+Four call-sites converted in this slice:
+
+1. PBKDF2 derivation time (`elapsed.toFixed(0) + ' ms'` → `intlNumber(...) + ' ms'`) — French/German thousands separators now apply once derivation crosses 1 000 ms.
+2. CIDR `Total addresses` / `Usable hosts` (`r.total.toLocaleString()` → `intlNumber(r.total)`) — the prior `toLocaleString()` used the browser locale; the new path uses the active document lang, so a runtime language switch immediately re-formats.
+3. PGP key info `Created` / `Expires` rows now pass the explicit document lang to `Date.prototype.toLocaleString(intlLang())`.
+4. Unix-timestamp `tsRelative()` now delegates to `intlRelativeFromNow()`, so a French user sees `il y a 5 minutes` and a German user sees `vor 5 Minuten` without per-locale template strings.
+
+The legacy `timestamp.rel.{past,future}` + `timestamp.unit.*` strings are kept as the fallback path; they are no longer the primary render but still cover Safari versions that pre-date `Intl.RelativeTimeFormat` (2018). Removing them is a follow-up once the fallback is no longer needed.
+
+Three new Playwright cases cover the slice (`tests/specs/01-tools.spec.js`):
+
+- PBKDF2 in French — derivation completes, document lang flips to `fr`.
+- CIDR `10.0.0.0/8` in German — total renders as `16.777.216`.
+- Timestamp tool in French — relative phrasing matches `/il y a\s+5\s+minutes/i`.
+
+Full Playwright suite: 212 passed.
+
+Remaining §1.5 work (deferred to a future slice): `Intl.PluralRules` integration for `{n} shares` / `{n} matches`-style strings (needs the CSV schema extension below), `Intl.ListFormat` for Shamir / multi-recipient phrasing, and `Intl.Collator` for any palette sort that lands with §1.6.
 
 The browser's `Intl` namespace handles this without dependencies. Touch points:
 
@@ -545,7 +569,7 @@ Each phase is independent. Stop after any phase; nothing below requires the next
 ### Phase 1 — i18n infrastructure (no new tools yet)
 
 1. Logical-property CSS refactor for RTL readiness (§1.4).
-2. `Intl.PluralRules` / `Intl.RelativeTimeFormat` / `Intl.ListFormat` integration (§1.5).
+2. 🟡 `Intl.PluralRules` / `Intl.RelativeTimeFormat` / `Intl.ListFormat` integration (§1.5) — first slice shipped draft 11: `Intl.NumberFormat` + `Intl.RelativeTimeFormat` drive PBKDF2 timing, CIDR address counts, PGP key dates, and the Unix-timestamp relative phrasing. `PluralRules` / `ListFormat` deferred to a follow-up.
 3. Command-palette synonym field added to the `STRINGS` schema (§1.6).
 4. CSV schema extended for plural categories (§1.5).
 
@@ -589,6 +613,8 @@ All ~1-day implementations. Roughly doubles the site's tool count for a small fr
 `scripts/audit-release.js` extended to validate both artifacts: SBOM hashes are cross-checked against on-disk vendored bytes; the portable build is verified to contain zero `<script src=>` references. Both checks are soft — they only fire if the artifact is present, so contributors aren't forced to regenerate on every commit.
 
 No runtime changes; full Playwright suite still 206 passed.
+
+**Progress (draft 11):** Phase 1 §1.5 first slice. `intlNumber()` + `intlRelativeFromNow()` helpers added next to `t()` / `tFormat()`; four call-sites converted (PBKDF2 timing, CIDR `Total`/`Usable`, PGP key `Created`/`Expires`, Unix-timestamp `Relative`). Legacy `timestamp.rel.*` template strings kept as fallback for browsers that pre-date `Intl.RelativeTimeFormat`. Three new Playwright cases (fr PBKDF2, de CIDR, fr relative phrasing). Full suite: 212 passed. No new vendored deps; no CSP change; no new top-level strings. `PluralRules` / `ListFormat` deferred.
 
 **Progress (draft 9):** PWA precache service worker shipped (§4.5). `sw.js` precaches the static shell (locale variants, vendored libs, icons, manifest, privacy page) on install and serves cache-first thereafter. Registration is HTTPS-gated, scope `/`, silent on failure. The document CSP keeps `connect-src 'none'`; a narrow path-scoped `_headers` override grants the SW response `connect-src 'self'` (needed for the install-time precache fetches and nothing else). No new vendored dependencies, no innerHTML, no behavior change for non-PWA users. Audit (`scripts/audit-release.js`) still passes — CSP regex matches the default document rule, which is unchanged.
 
