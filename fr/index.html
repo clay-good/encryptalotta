@@ -3720,7 +3720,8 @@
                 'regex.ph.replace': '$1, $&, named groups, …',
                 'regex.label.groups': 'Capture groups:',
                 'regex.label.replaced': 'Replaced output:',
-                'regex.match.count': '{n} match(es)',
+                'regex.match.count.one':   '{n} match',
+                'regex.match.count.other': '{n} matches',
                 'regex.match.none': 'No matches.',
                 'btn.regexRun': 'Run',
                 'err.regexInvalid': 'Invalid regex',
@@ -4832,7 +4833,8 @@
                 'regex.ph.replace': '$1, $&, groupes nommés, …',
                 'regex.label.groups': 'Groupes de capture :',
                 'regex.label.replaced': 'Sortie remplacée :',
-                'regex.match.count': '{n} correspondance(s)',
+                'regex.match.count.one':   '{n} correspondance',
+                'regex.match.count.other': '{n} correspondances',
                 'regex.match.none': 'Aucune correspondance.',
                 'btn.regexRun': 'Exécuter',
                 'err.regexInvalid': 'Regex invalide',
@@ -5748,7 +5750,8 @@
                 'regex.ph.replace': '$1、$&、命名分组…',
                 'regex.label.groups': '捕获分组：',
                 'regex.label.replaced': '替换后的输出：',
-                'regex.match.count': '{n} 个匹配',
+                'regex.match.count.one':   '{n} 个匹配',
+                'regex.match.count.other': '{n} 个匹配',
                 'regex.match.none': '没有匹配。',
                 'btn.regexRun': '运行',
                 'err.regexInvalid': '正则无效',
@@ -6649,7 +6652,8 @@
                 'regex.ph.replace': '$1, $&, benannte Gruppen, …',
                 'regex.label.groups': 'Erfasste Gruppen:',
                 'regex.label.replaced': 'Ersetzte Ausgabe:',
-                'regex.match.count': '{n} Treffer',
+                'regex.match.count.one':   '{n} Treffer',
+                'regex.match.count.other': '{n} Treffer',
                 'regex.match.none': 'Keine Treffer.',
                 'btn.regexRun': 'Ausführen',
                 'err.regexInvalid': 'Ungültiger Regex',
@@ -7565,7 +7569,8 @@
                 'regex.ph.replace': '$1, $&, नामित समूह…',
                 'regex.label.groups': 'कैप्चर समूह:',
                 'regex.label.replaced': 'प्रतिस्थापित आउटपुट:',
-                'regex.match.count': '{n} मिलान',
+                'regex.match.count.one':   '{n} मिलान',
+                'regex.match.count.other': '{n} मिलान',
                 'regex.match.none': 'कोई मिलान नहीं।',
                 'btn.regexRun': 'चलाएँ',
                 'err.regexInvalid': 'अमान्य रेजेक्स',
@@ -8076,6 +8081,32 @@
                     ? tFormat('timestamp.rel.future', { n, unit: u })
                     : tFormat('timestamp.rel.past',   { n, unit: u });
             }
+        }
+
+        // Locale-aware pluralization (SPEC §1.5). Looks up `<baseKey>.<rule>` where rule comes
+        // from Intl.PluralRules; falls back through `.other` then the bare baseKey so the helper
+        // remains safe to call even on keys that don't yet have plural forms. `n` is auto-injected
+        // as `{n}` (locale-formatted via intlNumber) so callers don't have to pass it twice.
+        function intlPlural(baseKey, n, vars) {
+            let rule = 'other';
+            try { rule = new Intl.PluralRules(intlLang()).select(n); }
+            catch (e) { rule = n === 1 ? 'one' : 'other'; }
+            const merged = Object.assign({ n: intlNumber(n) }, vars || {});
+            const lang = intlLang();
+            const has = k => (STRINGS[lang] && Object.prototype.hasOwnProperty.call(STRINGS[lang], k))
+                          || Object.prototype.hasOwnProperty.call(STRINGS[DEFAULT_LANG], k);
+            const candidates = [baseKey + '.' + rule, baseKey + '.other', baseKey];
+            for (const k of candidates) if (has(k)) return tFormat(k, merged);
+            return tFormat(baseKey, merged);
+        }
+
+        // Locale-aware list formatting (SPEC §1.5) — wraps Intl.ListFormat with a sensible default
+        // (type=conjunction, style=long → "A, B, and C" / "A, B et C" / "A、B und C"). Falls back to
+        // a plain `, `-join on older engines or invalid tags.
+        function intlList(items, opts) {
+            const arr = Array.isArray(items) ? items.map(String) : [];
+            try { return new Intl.ListFormat(intlLang(), Object.assign({ type: 'conjunction', style: 'long' }, opts || {})).format(arr); }
+            catch (e) { return arr.join(', '); }
         }
 
         // Replace an alert/status div's contents with a bold title (+ optional body) using
@@ -12242,7 +12273,7 @@
                     status.textContent = t('regex.match.none');
                     status.style.color = 'var(--text-muted)';
                 } else {
-                    status.textContent = tFormat('regex.match.count', { n: matches.length });
+                    status.textContent = intlPlural('regex.match.count', matches.length);
                     status.style.color = 'var(--success)';
                 }
                 regexRenderGroups(matches);

@@ -1,6 +1,6 @@
 # Spec — International public-good extensions to encryptalotta
 
-Status: draft 11 (Phase 1 Intl-formatting first slice landed: `Intl.NumberFormat` + `Intl.RelativeTimeFormat` now drive PBKDF2 timing, CIDR address counts, PGP key dates, and the Unix-timestamp relative phrasing — see §1.5 progress note; Phase 4 complete except BLAKE3; Phase 5 distribution scripts + PWA precache service worker shipped; Phase 6 regulator presets shipped in PGP key generator + PBKDF2 tool + annual freshness audit covering both blocks; SECURITY.md + THREAT-MODEL.md published; GDPR-by-design /privacy.html published; regional hreflang aliases)
+Status: draft 12 (Phase 1 Intl-formatting first + second slice landed: `Intl.NumberFormat` + `Intl.RelativeTimeFormat` drive PBKDF2 timing, CIDR address counts, PGP key dates, and the Unix-timestamp relative phrasing; `Intl.PluralRules` powers the regex match count (`1 match` / `3 matches` / `1 correspondance` / `3 correspondances`); `Intl.ListFormat` helper landed for future use — see §1.5 progress notes; Phase 4 complete except BLAKE3; Phase 5 distribution scripts + PWA precache service worker shipped; Phase 6 regulator presets shipped in PGP key generator + PBKDF2 tool + annual freshness audit covering both blocks; SECURITY.md + THREAT-MODEL.md published; GDPR-by-design /privacy.html published; regional hreflang aliases)
 Audience: maintainers and contributors
 Scope: how to extend encryptalotta.com so it serves an international audience — with a deliberate emphasis on Europe and other regions that lean heavily on open-source — without compromising the site's existing character (single-page, fully client-side, no analytics, no CDN, no tracking, no build step beyond a couple of vendored scripts).
 
@@ -117,7 +117,33 @@ Concrete changes:
 
 Acceptance: the existing site rendered in `dir="rtl"` looks intentional, not mirrored-by-accident. Tested with at least Arabic and Hebrew before either locale ships.
 
-### 1.5 Locale-aware formatting via `Intl` — **🟡 first slice shipped (draft 11)**
+### 1.5 Locale-aware formatting via `Intl` — **🟡 first + second slice shipped (draft 11, draft 12)**
+
+**Status notes (draft 12):** Plural + list helpers landed.
+
+- `intlPlural(baseKey, n, vars?)` — picks `<baseKey>.<rule>` via `Intl.PluralRules` against the active document lang, falling back through `<baseKey>.other` and then the bare `baseKey`. `n` is auto-injected as `{n}` already formatted via `intlNumber()`, so callers don't pass it twice. Engine-side fallback (`n === 1 ? 'one' : 'other'`) keeps the helper safe if Intl.PluralRules rejects the tag.
+- `intlList(items, opts?)` — wraps `Intl.ListFormat` with `{type: 'conjunction', style: 'long'}` defaults. No call-sites converted in this slice — landed as scaffolding for future Shamir / multi-recipient phrasing. Falls back to a plain `, `-join on older engines.
+
+First plural call-site: the regex tool's match-count status row. The legacy `regex.match.count: '{n} match(es)'` key (with its awkward parenthesized form) was removed across all five locales and replaced with `regex.match.count.one` / `regex.match.count.other` pairs:
+
+- en: `1 match` / `{n} matches`
+- fr: `1 correspondance` / `{n} correspondances`
+- de: `{n} Treffer` (invariant — German uses the same form for both)
+- zh-CN: `{n} 个匹配` (no plural distinction)
+- hi: `{n} मिलान` (no plural distinction)
+
+The call-site now reads `intlPlural('regex.match.count', matches.length)` — one argument, no manual `{n}` injection, no parenthesized fallback. Strings table grew from 1097 → 1098 keys × 5 locales (one net addition because the old single key was removed and two replacements added).
+
+Two new Playwright cases cover the slice:
+
+- English regex: `cat` → `1 match`; `cat cat cat` → `3 matches`.
+- French regex: `chat` → `1 correspondance`; `chat chat chat` → `3 correspondances`.
+
+Full Playwright suite: 214 passed.
+
+---
+
+**Status notes (draft 11):** Two small helpers landed alongside `t()` / `tFormat()`:
 
 **Status notes (draft 11):** Two small helpers landed alongside `t()` / `tFormat()`:
 
@@ -569,7 +595,7 @@ Each phase is independent. Stop after any phase; nothing below requires the next
 ### Phase 1 — i18n infrastructure (no new tools yet)
 
 1. Logical-property CSS refactor for RTL readiness (§1.4).
-2. 🟡 `Intl.PluralRules` / `Intl.RelativeTimeFormat` / `Intl.ListFormat` integration (§1.5) — first slice shipped draft 11: `Intl.NumberFormat` + `Intl.RelativeTimeFormat` drive PBKDF2 timing, CIDR address counts, PGP key dates, and the Unix-timestamp relative phrasing. `PluralRules` / `ListFormat` deferred to a follow-up.
+2. 🟡 `Intl.PluralRules` / `Intl.RelativeTimeFormat` / `Intl.ListFormat` integration (§1.5) — first + second slice shipped (drafts 11 + 12). `Intl.NumberFormat` + `Intl.RelativeTimeFormat` drive PBKDF2 timing, CIDR address counts, PGP key dates, and the Unix-timestamp relative phrasing. `Intl.PluralRules` powers the regex match-count row (`1 match` / `3 matches`; `1 correspondance` / `3 correspondances`). `Intl.ListFormat` helper landed; awaiting call-sites (Shamir, multi-recipient).
 3. Command-palette synonym field added to the `STRINGS` schema (§1.6).
 4. CSV schema extended for plural categories (§1.5).
 
@@ -613,6 +639,8 @@ All ~1-day implementations. Roughly doubles the site's tool count for a small fr
 `scripts/audit-release.js` extended to validate both artifacts: SBOM hashes are cross-checked against on-disk vendored bytes; the portable build is verified to contain zero `<script src=>` references. Both checks are soft — they only fire if the artifact is present, so contributors aren't forced to regenerate on every commit.
 
 No runtime changes; full Playwright suite still 206 passed.
+
+**Progress (draft 12):** Phase 1 §1.5 second slice. `intlPlural()` + `intlList()` helpers added; the regex tool's match-count row migrated to plural-aware keys (`regex.match.count.one` + `regex.match.count.other` across all five locales). The legacy `regex.match.count: '{n} match(es)'` key was retired in the same commit — the parenthesized fallback was the textbook example of why `Intl.PluralRules` exists. STRINGS now 1098 keys × 5 locales. Two new Playwright cases (en singular/plural + fr singular/plural). Full suite: 214 passed. `intlList` is scaffolded but not yet wired to a call-site; first candidate is multi-recipient encryption or Shamir share enumeration, deferred until the surrounding strings get a §1.3 review.
 
 **Progress (draft 11):** Phase 1 §1.5 first slice. `intlNumber()` + `intlRelativeFromNow()` helpers added next to `t()` / `tFormat()`; four call-sites converted (PBKDF2 timing, CIDR `Total`/`Usable`, PGP key `Created`/`Expires`, Unix-timestamp `Relative`). Legacy `timestamp.rel.*` template strings kept as fallback for browsers that pre-date `Intl.RelativeTimeFormat`. Three new Playwright cases (fr PBKDF2, de CIDR, fr relative phrasing). Full suite: 212 passed. No new vendored deps; no CSP change; no new top-level strings. `PluralRules` / `ListFormat` deferred.
 

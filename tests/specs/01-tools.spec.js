@@ -727,6 +727,31 @@ test('intl: CIDR total formats with German thousands separator', async ({ page }
   await expect(page.locator('#cidr-results')).toContainText(/16\.777\.216/, { timeout: 5_000 });
 });
 
+test('intl: regex match count pluralizes (English singular vs plural)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'regex');
+  await page.fill('#regex-pattern', '\\bcat\\b');
+  await page.fill('#regex-flags', 'g');
+  await page.fill('#regex-input', 'cat');
+  await page.click('#btn-regex-run');
+  await expect(page.locator('#regex-status')).toHaveText(/^\s*1\s+match\s*$/, { timeout: 5_000 });
+  await page.fill('#regex-input', 'cat cat cat');
+  await page.click('#btn-regex-run');
+  await expect(page.locator('#regex-status')).toHaveText(/^\s*3\s+matches\s*$/, { timeout: 5_000 });
+});
+
+test('intl: regex match count uses French plural form', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'regex');
+  await page.selectOption('#lang-select', 'fr');
+  await page.fill('#regex-pattern', '\\bchat\\b');
+  await page.fill('#regex-flags', 'g');
+  await page.fill('#regex-input', 'chat');
+  await page.click('#btn-regex-run');
+  await expect(page.locator('#regex-status')).toHaveText(/^\s*1\s+correspondance\s*$/, { timeout: 5_000 });
+  await page.fill('#regex-input', 'chat chat chat');
+  await page.click('#btn-regex-run');
+  await expect(page.locator('#regex-status')).toHaveText(/^\s*3\s+correspondances\s*$/, { timeout: 5_000 });
+});
+
 test('intl: timestamp relative phrasing uses Intl.RelativeTimeFormat (French)', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'timestamp');
   await page.selectOption('#lang-select', 'fr');
