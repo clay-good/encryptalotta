@@ -370,6 +370,7 @@ All 42 tools are organized into four groups. Every tool has a deep-link route.
 ### PBKDF2 Key Derivation
 - Web Crypto's `SubtleCrypto.deriveBits` runs the PBKDF2 loop locally; the password buffer is zeroized after the derive call.
 - Iteration count and PRF choice directly govern brute-force cost. **OWASP 2023 guidance**: ≥600,000 iterations for PBKDF2-HMAC-SHA-256, ≥1,300,000 for SHA-1. The default 100,000 is conservative for *test vectors*, not for protecting a real password — bump it before shipping a derived key into production storage.
+- Optional **regulator presets** (BSI TR-02102-1, ANSSI RGS B1, NIST SP 800-132 / OWASP minimum, Privacy Guides) auto-fill `iterations` + PRF from each authority's published recommendation and link out to the source document. Manually editing iterations or PRF resets the dropdown to "Custom" so the UI never claims a regulator's recommendation when the user has diverged from it.
 - Output length is capped at 512 bytes to avoid pathological inputs; that's well above any standard symmetric-key size.
 - **PBKDF2 is not the strongest password KDF.** For new designs, prefer Argon2id (memory-hard) where the runtime allows it. PBKDF2 is included here because it is the lowest-common-denominator that ships with Web Crypto and matches RFC 8018, the JWE/PKCS#5 ecosystem, and most existing test vectors.
 

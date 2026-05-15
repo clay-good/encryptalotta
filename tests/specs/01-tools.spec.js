@@ -628,6 +628,33 @@ test('generate: manual algorithm change resets preset to custom', async ({ page 
   await expect(page.locator('#regulator-preset-help')).toBeHidden();
 });
 
+// PBKDF2 regulator preset: BSI sets iterations=1,000,000 + SHA-256 + shows BSI source link.
+test('pbkdf2: BSI regulator preset sets iterations + PRF', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'pbkdf2');
+  await page.selectOption('#pbkdf2-regulator-preset', 'bsi');
+  await expect(page.locator('#pbkdf2-iterations')).toHaveValue('1000000');
+  await expect(page.locator('#pbkdf2-prf')).toHaveValue('SHA-256');
+  await expect(page.locator('#pbkdf2-regulator-preset-help')).toContainText(/BSI TR-02102-1/);
+  await expect(page.locator('#pbkdf2-regulator-preset-help a')).toHaveAttribute('href', /bsi\.bund\.de/);
+});
+
+// PBKDF2 regulator preset: ANSSI/OWASP-NIST share the 600,000 floor.
+test('pbkdf2: ANSSI regulator preset sets 600k iterations', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'pbkdf2');
+  await page.selectOption('#pbkdf2-regulator-preset', 'anssi');
+  await expect(page.locator('#pbkdf2-iterations')).toHaveValue('600000');
+  await expect(page.locator('#pbkdf2-prf')).toHaveValue('SHA-256');
+});
+
+// Manually editing iterations resets the PBKDF2 preset back to "custom".
+test('pbkdf2: manual iteration change resets preset to custom', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'pbkdf2');
+  await page.selectOption('#pbkdf2-regulator-preset', 'bsi');
+  await page.fill('#pbkdf2-iterations', '50000');
+  await expect(page.locator('#pbkdf2-regulator-preset')).toHaveValue('custom');
+  await expect(page.locator('#pbkdf2-regulator-preset-help')).toBeHidden();
+});
+
 // BLAKE2b-512 of empty string — RFC 7693 §A.5.
 test('hash: BLAKE2b-512 of "" matches RFC 7693', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'hash');

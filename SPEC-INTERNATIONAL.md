@@ -1,6 +1,6 @@
 # Spec — International public-good extensions to encryptalotta
 
-Status: draft 9 (Phase 4 complete except BLAKE3; Phase 5 distribution scripts + PWA precache service worker shipped; Phase 6 regulator presets shipped + annual freshness audit; SECURITY.md + THREAT-MODEL.md published; GDPR-by-design /privacy.html published; regional hreflang aliases)
+Status: draft 10 (Phase 4 complete except BLAKE3; Phase 5 distribution scripts + PWA precache service worker shipped; Phase 6 regulator presets shipped in PGP key generator + PBKDF2 tool + annual freshness audit covering both blocks; SECURITY.md + THREAT-MODEL.md published; GDPR-by-design /privacy.html published; regional hreflang aliases)
 Audience: maintainers and contributors
 Scope: how to extend encryptalotta.com so it serves an international audience — with a deliberate emphasis on Europe and other regions that lean heavily on open-source — without compromising the site's existing character (single-page, fully client-side, no analytics, no CDN, no tracking, no build step beyond a couple of vendored scripts).
 
@@ -414,13 +414,15 @@ Each tool below follows the existing project pattern: pure browser code, zero ne
 
 ---
 
-## 3. Regulator presets — **✅ shipped in PGP key generator (draft 5)**
+## 3. Regulator presets — **✅ shipped in PGP key generator (draft 5) + PBKDF2 tool (draft 10); Argon2 deferred with §2.9**
 
 A dropdown in the PGP key generator (and in the PBKDF2 / Argon2 tools) that selects pre-vetted parameters per regulator.
 
 **Status notes (draft 5):** Shipped for the PGP key generator. Presets surface BSI TR-02102-1, ANSSI RGS B1, NIST SP 800-57, CNSA 2.0, and Privacy Guides recommended; each auto-fills algorithm + keysize and links to the regulator's source document in a footnote. The PBKDF2/Argon2 extension is still pending (Argon2 itself is in §2.9 and not yet shipped).
 
 **Status notes (draft 7):** Each preset now carries an `asOf: 'YYYY-MM-DD'` field tracking the most recent re-verification against the upstream document. The preset's help footnote surfaces this date inline (e.g. "parameters verified 2026-05-13") so the user can see at a glance how fresh the recommendation is. `scripts/audit-release.js` parses the literal and warns (does not fail) when any preset's stamp is more than 12 months old — a release can still ship, but the staleness is visible. Verified prefix translated for en/fr/de/zh-CN/hi.
+
+**Status notes (draft 10):** Regulator-preset dropdown extended to the PBKDF2 tool. Four presets ship: BSI TR-02102-1 (1,000,000 iterations, SHA-256), ANSSI RGS B1 (600,000, SHA-256), NIST SP 800-132 / OWASP minimum (600,000, SHA-256 — the OWASP Password Storage Cheat Sheet floor is the most widely-cited interoperable minimum for SP 800-132 deployments and is what the preset cites), and Privacy Guides recommended (1,000,000, SHA-256). CNSA 2.0 is intentionally absent — KDF parameters fall outside CNSA scope, and the NSA explicitly defers to SP 800-132. Manually editing the iteration count or the PRF resets the dropdown back to "Custom" so the UI never claims a regulator's recommendation once the user has diverged. Each PBKDF2 preset carries the same `asOf: 'YYYY-MM-DD'` stamp + source link + help footnote as the PGP presets. `scripts/audit-release.js` was generalized to scan every `*REGULATOR_PRESETS*` literal (not just one), so the freshness check now covers both blocks (9 entries total) without per-block changes. Six new strings (`pbkdf2.label.regulatorPreset`, `pbkdf2.opt.preset.{custom,bsi,anssi,nistOwasp,privacyGuides}`, plus four `pbkdf2.preset.note.*` keys) translated for en/fr/de/zh-CN/hi (zh-CN/hi machine-quality drafts pending native review, consistent with the rest of those locales). Three new functional tests (BSI sets iterations + PRF; ANSSI 600k floor; manual edit resets to custom). Full Playwright suite: 209 passed.
 
 | Preset | PGP key | PBKDF2 iters (SHA-256) | Argon2id (m, t, p) | Source URL |
 |--------|---------|------------------------|---------------------|------------|
@@ -613,8 +615,9 @@ No runtime changes; full Playwright suite still 206 passed.
 
 ### Phase 6 — Regulator presets
 
-1. Implement the dropdown + JSON config (§3).
-2. First sources: BSI TR-02102, ANSSI RGS, NIST SP 800-57, Privacy Guides.
+1. ✅ Implement the dropdown + JSON config (§3) — shipped draft 5 (PGP key generator) and draft 10 (PBKDF2 tool).
+2. ✅ First sources: BSI TR-02102, ANSSI RGS, NIST SP 800-57 / SP 800-132, Privacy Guides — all four regulators surfaced in both tools.
+3. Argon2id presets pending §2.9 (the Argon2id tool itself is deferred to Phase 7).
 
 ### Phase 7 — Larger tool builds
 

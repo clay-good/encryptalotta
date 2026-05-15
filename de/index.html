@@ -2830,6 +2830,18 @@
                     </div>
                 </div>
 
+                <div class="form-group">
+                    <label for="pbkdf2-regulator-preset" data-i18n="pbkdf2.label.regulatorPreset">Regulator Preset</label>
+                    <select id="pbkdf2-regulator-preset" aria-describedby="pbkdf2-regulator-preset-help">
+                        <option value="custom" selected data-i18n="pbkdf2.opt.preset.custom">Custom (set iterations and PRF below)</option>
+                        <option value="bsi" data-i18n="pbkdf2.opt.preset.bsi">BSI TR-02102-1 (German federal)</option>
+                        <option value="anssi" data-i18n="pbkdf2.opt.preset.anssi">ANSSI RGS B1 (French federal)</option>
+                        <option value="nist-owasp" data-i18n="pbkdf2.opt.preset.nistOwasp">NIST SP 800-132 / OWASP minimum</option>
+                        <option value="privacy-guides" data-i18n="pbkdf2.opt.preset.privacyGuides">Privacy Guides recommended</option>
+                    </select>
+                    <p id="pbkdf2-regulator-preset-help" class="size-warning hidden" style="color: var(--text-secondary);"></p>
+                </div>
+
                 <div class="grid-2">
                     <div class="form-group">
                         <label for="pbkdf2-iterations" data-i18n="pbkdf2.label.iterations">Iterations</label>
@@ -4279,7 +4291,17 @@
                 'preset.note.cnsa': 'Applies CNSA 2.0 requirements for US national-security systems: RSA 4096. Verify parameters against the NSA advisory.',
                 'preset.note.privacyGuides': 'Applies Privacy Guides recommended choice for activist / journalist threat models: Curve25519 ECC. Verify against the Privacy Guides page.',
                 'preset.note.sourceLink': 'Source document →',
-                'preset.note.verifiedPrefix': 'parameters verified'
+                'preset.note.verifiedPrefix': 'parameters verified',
+                'pbkdf2.label.regulatorPreset': 'Regulator Preset',
+                'pbkdf2.opt.preset.custom': 'Custom (set iterations and PRF below)',
+                'pbkdf2.opt.preset.bsi': 'BSI TR-02102-1 (German federal)',
+                'pbkdf2.opt.preset.anssi': 'ANSSI RGS B1 (French federal)',
+                'pbkdf2.opt.preset.nistOwasp': 'NIST SP 800-132 / OWASP minimum',
+                'pbkdf2.opt.preset.privacyGuides': 'Privacy Guides recommended',
+                'pbkdf2.preset.note.bsi': 'Applies BSI TR-02102-1 PBKDF2 recommendations: 1,000,000 iterations with SHA-256. Verify parameters against the BSI document.',
+                'pbkdf2.preset.note.anssi': 'Applies ANSSI RGS B1 PBKDF2 recommendations: 600,000 iterations with SHA-256. Verify parameters against the ANSSI document.',
+                'pbkdf2.preset.note.nistOwasp': 'Applies the OWASP Password Storage minimum for PBKDF2-SHA-256 (the most widely-cited interoperable floor for NIST SP 800-132 deployments): 600,000 iterations. Verify against the OWASP Cheat Sheet.',
+                'pbkdf2.preset.note.privacyGuides': 'Applies Privacy Guides recommended PBKDF2 settings for activist / journalist threat models: 1,000,000 iterations with SHA-256. Verify against the Privacy Guides page.'
             },
             'fr': {
                 'meta.title': 'encryptalotta — 36 outils gratuits de confidentialité et de développement côté client (PGP, BIP39, TLS, SSH, JWT, PBKDF2, hash, regex, CSV, cron, CIDR, base numérique…)',
@@ -5185,7 +5207,17 @@
                 'preset.note.cnsa': 'Applique les exigences CNSA 2.0 pour les systèmes de sécurité nationale américains : RSA 4096. Vérifiez les paramètres dans l’avis NSA.',
                 'preset.note.privacyGuides': 'Applique le choix recommandé par Privacy Guides pour les modèles de menace activiste / journaliste : ECC Curve25519. Vérifiez sur la page Privacy Guides.',
                 'preset.note.sourceLink': 'Document source →',
-                'preset.note.verifiedPrefix': 'paramètres vérifiés'
+                'preset.note.verifiedPrefix': 'paramètres vérifiés',
+                'pbkdf2.label.regulatorPreset': 'Préréglage régulateur',
+                'pbkdf2.opt.preset.custom': 'Personnalisé (définir les itérations et la PRF ci-dessous)',
+                'pbkdf2.opt.preset.bsi': 'BSI TR-02102-1 (fédéral allemand)',
+                'pbkdf2.opt.preset.anssi': 'ANSSI RGS B1 (fédéral français)',
+                'pbkdf2.opt.preset.nistOwasp': 'NIST SP 800-132 / minimum OWASP',
+                'pbkdf2.opt.preset.privacyGuides': 'Recommandation Privacy Guides',
+                'pbkdf2.preset.note.bsi': 'Applique les recommandations BSI TR-02102-1 pour PBKDF2 : 1 000 000 itérations avec SHA-256. Vérifiez les paramètres dans le document BSI.',
+                'pbkdf2.preset.note.anssi': 'Applique les recommandations ANSSI RGS B1 pour PBKDF2 : 600 000 itérations avec SHA-256. Vérifiez les paramètres dans le document ANSSI.',
+                'pbkdf2.preset.note.nistOwasp': 'Applique le minimum OWASP Password Storage pour PBKDF2-SHA-256 (le plancher interopérable le plus cité pour les déploiements NIST SP 800-132) : 600 000 itérations. Vérifiez via la fiche OWASP.',
+                'pbkdf2.preset.note.privacyGuides': 'Applique les paramètres PBKDF2 recommandés par Privacy Guides pour les modèles de menace activiste / journaliste : 1 000 000 itérations avec SHA-256. Vérifiez sur la page Privacy Guides.'
             },
             'zh-CN': {
                 'meta.title': 'encryptalotta — 36 个免费的浏览器端隐私与开发者工具（PGP、BIP39、TLS、SSH、JWT、PBKDF2、哈希、正则、CSV、cron、CIDR、进制转换 等）',
@@ -6076,7 +6108,17 @@
                 'preset.note.cnsa': '采用 CNSA 2.0 对美国国家安全系统的要求：RSA 4096。请对照 NSA 通告核对参数。',
                 'preset.note.privacyGuides': '采用 Privacy Guides 针对活动人士／记者威胁模型的推荐：Curve25519 ECC。请在 Privacy Guides 页面核对。',
                 'preset.note.sourceLink': '源文档 →',
-                'preset.note.verifiedPrefix': '参数已验证'
+                'preset.note.verifiedPrefix': '参数已验证',
+                'pbkdf2.label.regulatorPreset': '监管机构预设',
+                'pbkdf2.opt.preset.custom': '自定义（在下方设置迭代次数与 PRF）',
+                'pbkdf2.opt.preset.bsi': 'BSI TR-02102-1（德国联邦）',
+                'pbkdf2.opt.preset.anssi': 'ANSSI RGS B1（法国联邦）',
+                'pbkdf2.opt.preset.nistOwasp': 'NIST SP 800-132 / OWASP 最低要求',
+                'pbkdf2.opt.preset.privacyGuides': 'Privacy Guides 推荐',
+                'pbkdf2.preset.note.bsi': '采用 BSI TR-02102-1 对 PBKDF2 的建议：使用 SHA-256，迭代 1,000,000 次。请对照 BSI 文档核对参数。',
+                'pbkdf2.preset.note.anssi': '采用 ANSSI RGS B1 对 PBKDF2 的建议：使用 SHA-256，迭代 600,000 次。请对照 ANSSI 文档核对参数。',
+                'pbkdf2.preset.note.nistOwasp': '采用 OWASP 密码存储指南中针对 PBKDF2-SHA-256 的最低要求（也是 NIST SP 800-132 部署中最常引用的互操作下限）：迭代 600,000 次。请对照 OWASP Cheat Sheet 核对。',
+                'pbkdf2.preset.note.privacyGuides': '采用 Privacy Guides 针对活动人士／记者威胁模型推荐的 PBKDF2 设置：使用 SHA-256，迭代 1,000,000 次。请在 Privacy Guides 页面核对。'
             },
             'de': {
                 'meta.title': 'encryptalotta — 36 kostenlose, browserseitige Datenschutz- und Entwicklerwerkzeuge (PGP, BIP39, TLS, SSH, JWT, PBKDF2, Hash, Regex, CSV, Cron, CIDR, Zahlenbasis …)',
@@ -6982,7 +7024,17 @@
                 'preset.note.cnsa': 'Wendet die CNSA-2.0-Anforderungen für US-Systeme nationaler Sicherheit an: RSA 4096. Parameter in der NSA-Empfehlung verifizieren.',
                 'preset.note.privacyGuides': 'Wendet die Privacy-Guides-Empfehlung für Aktivisten- / Journalisten-Bedrohungsmodelle an: Curve25519 ECC. Auf der Privacy-Guides-Seite verifizieren.',
                 'preset.note.sourceLink': 'Quelldokument →',
-                'preset.note.verifiedPrefix': 'Parameter geprüft'
+                'preset.note.verifiedPrefix': 'Parameter geprüft',
+                'pbkdf2.label.regulatorPreset': 'Regulator-Voreinstellung',
+                'pbkdf2.opt.preset.custom': 'Benutzerdefiniert (Iterationen und PRF unten festlegen)',
+                'pbkdf2.opt.preset.bsi': 'BSI TR-02102-1 (deutsche Bundesempfehlung)',
+                'pbkdf2.opt.preset.anssi': 'ANSSI RGS B1 (französische Bundesempfehlung)',
+                'pbkdf2.opt.preset.nistOwasp': 'NIST SP 800-132 / OWASP-Mindestwert',
+                'pbkdf2.opt.preset.privacyGuides': 'Privacy-Guides-Empfehlung',
+                'pbkdf2.preset.note.bsi': 'Wendet die BSI-TR-02102-1-Empfehlungen für PBKDF2 an: 1.000.000 Iterationen mit SHA-256. Parameter im BSI-Dokument verifizieren.',
+                'pbkdf2.preset.note.anssi': 'Wendet die ANSSI-RGS-B1-Empfehlungen für PBKDF2 an: 600.000 Iterationen mit SHA-256. Parameter im ANSSI-Dokument verifizieren.',
+                'pbkdf2.preset.note.nistOwasp': 'Wendet das OWASP-Password-Storage-Minimum für PBKDF2-SHA-256 an (die meistzitierte interoperable Untergrenze für NIST-SP-800-132-Bereitstellungen): 600.000 Iterationen. Im OWASP Cheat Sheet verifizieren.',
+                'pbkdf2.preset.note.privacyGuides': 'Wendet die von Privacy Guides empfohlenen PBKDF2-Einstellungen für Aktivisten- / Journalisten-Bedrohungsmodelle an: 1.000.000 Iterationen mit SHA-256. Auf der Privacy-Guides-Seite verifizieren.'
             },
             'hi': {
                 'meta.title': 'encryptalotta — ब्राउज़र में चलने वाले 36 निःशुल्क गोपनीयता और डेवलपर टूल (PGP, BIP39, TLS, SSH, JWT, PBKDF2, हैश, रेजेक्स, CSV, cron, CIDR, संख्या आधार आदि)',
@@ -7873,7 +7925,17 @@
                 'preset.note.cnsa': 'अमेरिकी राष्ट्रीय सुरक्षा प्रणालियों हेतु CNSA 2.0 आवश्यकताएँ लागू करता है: RSA 4096। NSA परामर्श से मापदंडों का सत्यापन करें।',
                 'preset.note.privacyGuides': 'कार्यकर्ता / पत्रकार खतरा मॉडल हेतु Privacy Guides अनुशंसा लागू करता है: Curve25519 ECC। Privacy Guides पृष्ठ से सत्यापित करें।',
                 'preset.note.sourceLink': 'स्रोत दस्तावेज़ →',
-                'preset.note.verifiedPrefix': 'पैरामीटर सत्यापित'
+                'preset.note.verifiedPrefix': 'पैरामीटर सत्यापित',
+                'pbkdf2.label.regulatorPreset': 'नियामक प्रीसेट',
+                'pbkdf2.opt.preset.custom': 'कस्टम (नीचे इटरेशन और PRF सेट करें)',
+                'pbkdf2.opt.preset.bsi': 'BSI TR-02102-1 (जर्मन संघीय)',
+                'pbkdf2.opt.preset.anssi': 'ANSSI RGS B1 (फ़्रेंच संघीय)',
+                'pbkdf2.opt.preset.nistOwasp': 'NIST SP 800-132 / OWASP न्यूनतम',
+                'pbkdf2.opt.preset.privacyGuides': 'Privacy Guides अनुशंसा',
+                'pbkdf2.preset.note.bsi': 'PBKDF2 हेतु BSI TR-02102-1 अनुशंसाएँ लागू करता है: SHA-256 के साथ 1,000,000 इटरेशन। BSI दस्तावेज़ से मापदंडों का सत्यापन करें।',
+                'pbkdf2.preset.note.anssi': 'PBKDF2 हेतु ANSSI RGS B1 अनुशंसाएँ लागू करता है: SHA-256 के साथ 600,000 इटरेशन। ANSSI दस्तावेज़ से मापदंडों का सत्यापन करें।',
+                'pbkdf2.preset.note.nistOwasp': 'PBKDF2-SHA-256 हेतु OWASP पासवर्ड भंडारण न्यूनतम लागू करता है (NIST SP 800-132 परिनियोजनों के लिए सर्वाधिक उद्धृत अंतःक्रियात्मक न्यूनतम): 600,000 इटरेशन। OWASP Cheat Sheet से सत्यापित करें।',
+                'pbkdf2.preset.note.privacyGuides': 'कार्यकर्ता / पत्रकार खतरा मॉडल हेतु Privacy Guides अनुशंसित PBKDF2 सेटिंग्स लागू करता है: SHA-256 के साथ 1,000,000 इटरेशन। Privacy Guides पृष्ठ से सत्यापित करें।'
             }
         };
 
@@ -9072,6 +9134,90 @@
         }
         document.getElementById('regulator-preset').addEventListener('change', (e) => {
             applyRegulatorPreset(e.target.value);
+        });
+
+        // ==================== Phase 6 (i18n spec §3): PBKDF2 regulator presets ====================
+        // Sister structure to REGULATOR_PRESETS above, scoped to PBKDF2 iteration counts.
+        // Each preset auto-fills `iterations` + `prf` and surfaces an audit-friendly footnote
+        // linking to the regulator's published recommendation. CNSA 2.0 is intentionally absent
+        // (KDF parameters are out of scope of CNSA — the NSA defers to SP 800-132). NIST has no
+        // hard iteration count of its own either; the OWASP Password Storage Cheat Sheet's
+        // ≥600,000 iteration / SHA-256 floor is the most widely-cited interoperable minimum
+        // for SP 800-132-compliant deployments and is what we ship under the `nist-owasp` key.
+        // Audit (`scripts/audit-release.js`) cross-checks each preset's `asOf` literal.
+        const PBKDF2_REGULATOR_PRESETS = {
+            'bsi': {
+                iterations: 1000000, prf: 'SHA-256',
+                noteKey: 'pbkdf2.preset.note.bsi',
+                url: 'https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/Publications/TechGuidelines/TG02102/BSI-TR-02102-1.html',
+                asOf: '2026-05-14'
+            },
+            'anssi': {
+                iterations: 600000, prf: 'SHA-256',
+                noteKey: 'pbkdf2.preset.note.anssi',
+                url: 'https://cyber.gouv.fr/sites/default/files/document/RGS_v-2-0_B1.pdf',
+                asOf: '2026-05-14'
+            },
+            'nist-owasp': {
+                iterations: 600000, prf: 'SHA-256',
+                noteKey: 'pbkdf2.preset.note.nistOwasp',
+                url: 'https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html',
+                asOf: '2026-05-14'
+            },
+            'privacy-guides': {
+                iterations: 1000000, prf: 'SHA-256',
+                noteKey: 'pbkdf2.preset.note.privacyGuides',
+                url: 'https://www.privacyguides.org/en/basics/passwords-overview/',
+                asOf: '2026-05-14'
+            }
+        };
+
+        function applyPbkdf2RegulatorPreset(key) {
+            const help = document.getElementById('pbkdf2-regulator-preset-help');
+            while (help.firstChild) help.removeChild(help.firstChild);
+            if (key === 'custom' || !PBKDF2_REGULATOR_PRESETS[key]) {
+                help.classList.add('hidden');
+                return;
+            }
+            const cfg = PBKDF2_REGULATOR_PRESETS[key];
+            document.getElementById('pbkdf2-iterations').value = String(cfg.iterations);
+            document.getElementById('pbkdf2-prf').value = cfg.prf;
+            const span = document.createElement('span');
+            span.dataset.i18n = cfg.noteKey;
+            span.textContent = t(cfg.noteKey);
+            help.appendChild(span);
+            help.appendChild(document.createTextNode(' '));
+            const a = document.createElement('a');
+            a.href = cfg.url;
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            a.dataset.i18n = 'preset.note.sourceLink';
+            a.textContent = t('preset.note.sourceLink');
+            help.appendChild(a);
+            if (cfg.asOf) {
+                const verified = document.createElement('span');
+                verified.style.color = 'var(--text-secondary)';
+                verified.style.marginInlineStart = '0.5em';
+                verified.textContent = '(' + t('preset.note.verifiedPrefix') + ' ' + cfg.asOf + ')';
+                help.appendChild(verified);
+            }
+            help.classList.remove('hidden');
+        }
+        document.getElementById('pbkdf2-regulator-preset').addEventListener('change', (e) => {
+            applyPbkdf2RegulatorPreset(e.target.value);
+        });
+        // Manually editing iterations or PRF resets the preset to "custom" so the UI never
+        // claims a regulator's recommendation when the user has diverged from it.
+        ['pbkdf2-iterations', 'pbkdf2-prf'].forEach(id => {
+            document.getElementById(id).addEventListener('input', () => {
+                const sel = document.getElementById('pbkdf2-regulator-preset');
+                if (sel.value !== 'custom') {
+                    sel.value = 'custom';
+                    const help = document.getElementById('pbkdf2-regulator-preset-help');
+                    while (help.firstChild) help.removeChild(help.firstChild);
+                    help.classList.add('hidden');
+                }
+            });
         });
 
         // ==================== SIGN & VERIFY FEATURES ====================

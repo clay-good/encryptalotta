@@ -338,26 +338,38 @@ const isSeoEnOnly = (k) => SEO_EN_ONLY_RE.test(k);
 //     than no preset, but the audit surfaces it so a release can't quietly ship
 //     with year-old recommendations.
 {
-    const presetMatch = html.match(/const\s+REGULATOR_PRESETS\s*=\s*\{([\s\S]*?)\n\s*\};/);
-    if (!presetMatch) {
-        warn('regulator presets', 'REGULATOR_PRESETS literal not found — skipping age check');
+    // Scan every `const <…>REGULATOR_PRESETS<…> = { … };` block — there can be more than one
+    // (PGP key generator, PBKDF2, future Argon2 …). Each block must have an asOf on every entry,
+    // and every entry must be within the 12-month freshness window.
+    const blockRe = /const\s+(\w*REGULATOR_PRESETS\w*)\s*=\s*\{([\s\S]*?)\n\s*\};/g;
+    const blocks = [...html.matchAll(blockRe)];
+    if (blocks.length === 0) {
+        warn('regulator presets', 'no *REGULATOR_PRESETS* literal found — skipping age check');
     } else {
-        const body = presetMatch[1];
-        const asOfMatches = [...body.matchAll(/['"]([a-z][\w-]*)['"]\s*:\s*\{[\s\S]*?asOf:\s*'(\d{4}-\d{2}-\d{2})'/g)];
-        const keyMatches = [...body.matchAll(/^\s*['"]([a-z][\w-]*)['"]\s*:\s*\{/gm)];
         const now = Date.now();
         const STALE_MS = 365 * 24 * 60 * 60 * 1000;
         const stale = [];
-        const seen = new Set();
-        for (const m of asOfMatches) {
-            seen.add(m[1]);
-            const age = now - Date.parse(m[2] + 'T00:00:00Z');
-            if (age > STALE_MS) stale.push(`${m[1]} (${m[2]})`);
+        const missing = [];
+        let totalEntries = 0;
+        for (const block of blocks) {
+            const blockName = block[1];
+            const body = block[2];
+            const asOfMatches = [...body.matchAll(/['"]([a-z][\w-]*)['"]\s*:\s*\{[\s\S]*?asOf:\s*'(\d{4}-\d{2}-\d{2})'/g)];
+            const keyMatches = [...body.matchAll(/^\s*['"]([a-z][\w-]*)['"]\s*:\s*\{/gm)];
+            const seen = new Set();
+            for (const m of asOfMatches) {
+                seen.add(m[1]);
+                totalEntries++;
+                const age = now - Date.parse(m[2] + 'T00:00:00Z');
+                if (age > STALE_MS) stale.push(`${blockName}.${m[1]} (${m[2]})`);
+            }
+            for (const m of keyMatches) {
+                if (!seen.has(m[1])) missing.push(`${blockName}.${m[1]}`);
+            }
         }
-        const missing = keyMatches.map(m => m[1]).filter(k => !seen.has(k));
         if (missing.length) fail('regulator presets', `missing asOf: ${missing.join(', ')}`);
         else if (stale.length) warn('regulator presets', `stale (>12 months): ${stale.join(', ')} — re-verify against the source document`);
-        else pass('regulator presets', `${asOfMatches.length} presets, all within the last 12 months`);
+        else pass('regulator presets', `${totalEntries} presets across ${blocks.length} block(s), all within the last 12 months`);
     }
 }
 
