@@ -968,6 +968,109 @@ test('lotl: rejects non-trust-list XML', async ({ page }) => {
   await expect(page.locator('#lotl-results')).toContainText(/TrustServiceStatusList/i, { timeout: 5_000 });
 });
 
+// =============== PEPPOL / UBL invoice inspector (SPEC §2.7) ===============
+// Minimal but realistic PEPPOL BIS Billing 3.0 invoice — header, supplier, customer,
+// one line item, one VAT bracket, the four LegalMonetaryTotal amounts.
+const UBL_INVOICE = `<?xml version="1.0" encoding="UTF-8"?>
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+         xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+         xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+  <cbc:CustomizationID>urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0</cbc:CustomizationID>
+  <cbc:ProfileID>urn:fdc:peppol.eu:2017:poacc:billing:01:1.0</cbc:ProfileID>
+  <cbc:ID>INV-2024-042</cbc:ID>
+  <cbc:IssueDate>2024-04-01</cbc:IssueDate>
+  <cbc:DueDate>2024-05-01</cbc:DueDate>
+  <cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
+  <cac:AccountingSupplierParty>
+    <cac:Party>
+      <cac:PartyName><cbc:Name>ACME Widgets GmbH</cbc:Name></cac:PartyName>
+      <cac:PartyLegalEntity><cbc:RegistrationName>ACME Widgets GmbH</cbc:RegistrationName></cac:PartyLegalEntity>
+    </cac:Party>
+  </cac:AccountingSupplierParty>
+  <cac:AccountingCustomerParty>
+    <cac:Party>
+      <cac:PartyName><cbc:Name>Beispiel SARL</cbc:Name></cac:PartyName>
+    </cac:Party>
+  </cac:AccountingCustomerParty>
+  <cac:TaxTotal>
+    <cbc:TaxAmount currencyID="EUR">19.00</cbc:TaxAmount>
+    <cac:TaxSubtotal>
+      <cbc:TaxableAmount currencyID="EUR">100.00</cbc:TaxableAmount>
+      <cbc:TaxAmount currencyID="EUR">19.00</cbc:TaxAmount>
+      <cac:TaxCategory>
+        <cbc:ID>S</cbc:ID>
+        <cbc:Percent>19</cbc:Percent>
+        <cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme>
+      </cac:TaxCategory>
+    </cac:TaxSubtotal>
+  </cac:TaxTotal>
+  <cac:LegalMonetaryTotal>
+    <cbc:LineExtensionAmount currencyID="EUR">100.00</cbc:LineExtensionAmount>
+    <cbc:TaxExclusiveAmount currencyID="EUR">100.00</cbc:TaxExclusiveAmount>
+    <cbc:TaxInclusiveAmount currencyID="EUR">119.00</cbc:TaxInclusiveAmount>
+    <cbc:PayableAmount currencyID="EUR">119.00</cbc:PayableAmount>
+  </cac:LegalMonetaryTotal>
+  <cac:InvoiceLine>
+    <cbc:ID>1</cbc:ID>
+    <cbc:InvoicedQuantity unitCode="C62">2</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="EUR">100.00</cbc:LineExtensionAmount>
+    <cac:Item><cbc:Name>Widget Pro</cbc:Name></cac:Item>
+    <cac:Price><cbc:PriceAmount currencyID="EUR">50.00</cbc:PriceAmount></cac:Price>
+  </cac:InvoiceLine>
+</Invoice>`;
+
+const UBL_CREDIT_NOTE = `<?xml version="1.0" encoding="UTF-8"?>
+<CreditNote xmlns="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2"
+            xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+            xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+  <cbc:ID>CN-2024-007</cbc:ID>
+  <cbc:IssueDate>2024-04-10</cbc:IssueDate>
+  <cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
+  <cac:LegalMonetaryTotal>
+    <cbc:PayableAmount currencyID="EUR">50.00</cbc:PayableAmount>
+  </cac:LegalMonetaryTotal>
+  <cac:CreditNoteLine>
+    <cbc:ID>1</cbc:ID>
+    <cbc:CreditedQuantity unitCode="C62">1</cbc:CreditedQuantity>
+    <cbc:LineExtensionAmount currencyID="EUR">50.00</cbc:LineExtensionAmount>
+    <cac:Item><cbc:Name>Refunded Widget</cbc:Name></cac:Item>
+    <cac:Price><cbc:PriceAmount currencyID="EUR">50.00</cbc:PriceAmount></cac:Price>
+  </cac:CreditNoteLine>
+</CreditNote>`;
+
+test('ubl: Invoice parses header, totals, line items, and tax breakdown', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/UBL 2\.1 Invoice/i, { timeout: 5_000 });
+  await expect(page.locator('#ubl-results')).toContainText('INV-2024-042');
+  await expect(page.locator('#ubl-results')).toContainText('ACME Widgets GmbH');
+  await expect(page.locator('#ubl-results')).toContainText('Beispiel SARL');
+  await expect(page.locator('#ubl-results')).toContainText('100.00 EUR');
+  await expect(page.locator('#ubl-results')).toContainText('119.00 EUR');
+  await expect(page.locator('#ubl-results')).toContainText('Widget Pro');
+  await expect(page.locator('#ubl-results')).toContainText('2 C62');
+  await expect(page.locator('#ubl-results')).toContainText('19 %');
+  await expect(page.locator('#ubl-results')).toContainText(/S\s*\(VAT\)/);
+});
+
+test('ubl: CreditNote parses CreditNoteLine and payable amount', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', UBL_CREDIT_NOTE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/UBL 2\.1 CreditNote/i, { timeout: 5_000 });
+  await expect(page.locator('#ubl-results')).toContainText('CN-2024-007');
+  await expect(page.locator('#ubl-results')).toContainText('Refunded Widget');
+  await expect(page.locator('#ubl-results')).toContainText('50.00 EUR');
+});
+
+test('ubl: rejects non-UBL XML', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', '<?xml version="1.0"?><Document/>');
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/<Invoice> or <CreditNote>/i, { timeout: 5_000 });
+});
+
 // =============== Command palette (SPEC §1.6) ===============
 
 test('palette: Ctrl+K opens, Esc closes', async ({ page }) => {
