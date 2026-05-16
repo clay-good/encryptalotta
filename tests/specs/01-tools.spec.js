@@ -763,6 +763,16 @@ test('intl: timestamp relative phrasing uses Intl.RelativeTimeFormat (French)', 
   await expect(page.locator('#ts-results')).toContainText(/il y a\s+5\s+minutes/i, { timeout: 5_000 });
 });
 
+test('intl: BIC multi-tag list uses German "und" joiner via Intl.ListFormat', async ({ page }) => {
+  // SPEC §1.5 — first Intl.ListFormat call-site. AAAADEB0XXX has two tags (location ends in 0 → test;
+  // branch is XXX → primary), so the renderer joins them with the locale's natural final connector.
+  await page.goto('/index.html'); await gotoTool(page, 'bic');
+  await page.selectOption('#lang-select', 'de');
+  await page.fill('#bic-input', 'AAAADEB0XXX');
+  await page.click('#btn-bic-validate');
+  await expect(page.locator('#bic-results')).toContainText(/Test-BIC.*und.*Hauptniederlassung/i, { timeout: 5_000 });
+});
+
 test('rtl: home tool cards mirror under dir=rtl (logical properties)', async ({ page }) => {
   // SPEC §1.4 — exercise the logical-property refactor without shipping an RTL locale.
   // The arrow indicator on .tool-card::after is positioned via inset-inline-end, so under

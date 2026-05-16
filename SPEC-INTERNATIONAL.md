@@ -1,6 +1,6 @@
 # Spec — International public-good extensions to encryptalotta
 
-Status: draft 13 (Phase 1 §1.4 logical-property CSS refactor + §1.5 Intl-formatting first + second slice landed: every physical-direction CSS property in `index.html` is now logical (`margin-inline-start`, `inset-inline-end`, `border-inline-start`, `text-align: start`); `Intl.NumberFormat` + `Intl.RelativeTimeFormat` drive PBKDF2 timing, CIDR address counts, PGP key dates, and the Unix-timestamp relative phrasing; `Intl.PluralRules` powers the regex match count (`1 match` / `3 matches` / `1 correspondance` / `3 correspondances`); `Intl.ListFormat` helper landed for future use — see §1.4 and §1.5 progress notes; Phase 4 complete except BLAKE3; Phase 5 distribution scripts + PWA precache service worker shipped; Phase 6 regulator presets shipped in PGP key generator + PBKDF2 tool + annual freshness audit covering both blocks; SECURITY.md + THREAT-MODEL.md published; GDPR-by-design /privacy.html published; regional hreflang aliases)
+Status: draft 14 (Phase 1 §1.4 logical-property CSS refactor + §1.5 full Intl coverage landed: every physical-direction CSS property in `index.html` is now logical; `Intl.NumberFormat` + `Intl.RelativeTimeFormat` + `Intl.PluralRules` + `Intl.ListFormat` are all wired — the last via the BIC validator's multi-tag row, which now joins prose tags with the locale's natural final connector ("test BIC and primary branch" / "Test-BIC und Hauptniederlassung" / "BIC de test et agence principale" / "测试 BIC和总行"); see §1.4 and §1.5 progress notes; Phase 4 complete except BLAKE3; Phase 5 distribution scripts + PWA precache service worker shipped; Phase 6 regulator presets shipped in PGP key generator + PBKDF2 tool + annual freshness audit covering both blocks; SECURITY.md + THREAT-MODEL.md published; GDPR-by-design /privacy.html published; regional hreflang aliases)
 Audience: maintainers and contributors
 Scope: how to extend encryptalotta.com so it serves an international audience — with a deliberate emphasis on Europe and other regions that lean heavily on open-source — without compromising the site's existing character (single-page, fully client-side, no analytics, no CDN, no tracking, no build step beyond a couple of vendored scripts).
 
@@ -139,7 +139,17 @@ Concrete changes:
 
 Acceptance: the existing site rendered in `dir="rtl"` looks intentional, not mirrored-by-accident. Tested with at least Arabic and Hebrew before either locale ships.
 
-### 1.5 Locale-aware formatting via `Intl` — **🟡 first + second slice shipped (draft 11, draft 12)**
+### 1.5 Locale-aware formatting via `Intl` — **🟡 three slices shipped (drafts 11, 12, 14)**
+
+**Status notes (draft 14):** First `Intl.ListFormat` call-site. The BIC validator's `tags` row (which surfaces "test BIC", "passive participant", "primary branch" as per-locale prose) now renders via `intlList(r.tags)` instead of `r.tags.join(', ')`. For a multi-tag BIC like `AAAADEB0XXX` (location ends in 0 → test; branch is XXX → primary) the German output becomes `Test-BIC (Ort endet auf 0) und Hauptniederlassung (XXX)` instead of `Test-BIC (Ort endet auf 0), Hauptniederlassung (XXX)`. One new Playwright case asserts the `und` connector in the de variant.
+
+The other `.join(', ')` sites in `index.html` were considered and intentionally left alone: TLS SAN lists, CIDR / cron internal fields, and the X.509 DN parts are technical lists where a "and" / "und" final-joiner would feel wrong (they are tokens, not prose). The passphrase-strength dialog joins issue phrases that are still hardcoded English; wiring `intlList` there is a follow-up bundled with translating the issue strings themselves.
+
+Full Playwright suite: 216 passed.
+
+---
+
+**Status notes (drafts 11, 12 — superseded heading kept here for diffability):**
 
 **Status notes (draft 12):** Plural + list helpers landed.
 
@@ -617,7 +627,7 @@ Each phase is independent. Stop after any phase; nothing below requires the next
 ### Phase 1 — i18n infrastructure (no new tools yet)
 
 1. ✅ Logical-property CSS refactor for RTL readiness (§1.4) — shipped draft 13. RTL runtime flip + icon mirroring + LTR code-block embedding deferred until the first RTL locale is queued.
-2. 🟡 `Intl.PluralRules` / `Intl.RelativeTimeFormat` / `Intl.ListFormat` integration (§1.5) — first + second slice shipped (drafts 11 + 12). `Intl.NumberFormat` + `Intl.RelativeTimeFormat` drive PBKDF2 timing, CIDR address counts, PGP key dates, and the Unix-timestamp relative phrasing. `Intl.PluralRules` powers the regex match-count row (`1 match` / `3 matches`; `1 correspondance` / `3 correspondances`). `Intl.ListFormat` helper landed; awaiting call-sites (Shamir, multi-recipient).
+2. ✅ `Intl.PluralRules` / `Intl.RelativeTimeFormat` / `Intl.ListFormat` integration (§1.5) — three slices shipped (drafts 11, 12, 14). `Intl.NumberFormat` + `Intl.RelativeTimeFormat` drive PBKDF2 timing, CIDR address counts, PGP key dates, and the Unix-timestamp relative phrasing. `Intl.PluralRules` powers the regex match-count row. `Intl.ListFormat` powers the BIC multi-tag row. Remaining `.join(', ')` sites are technical lists where the locale's "and" / "und" / "et" final-joiner would feel wrong; the passphrase-strength prose case is deferred until its issue strings are translated.
 3. Command-palette synonym field added to the `STRINGS` schema (§1.6).
 4. CSV schema extended for plural categories (§1.5).
 
@@ -661,6 +671,8 @@ All ~1-day implementations. Roughly doubles the site's tool count for a small fr
 `scripts/audit-release.js` extended to validate both artifacts: SBOM hashes are cross-checked against on-disk vendored bytes; the portable build is verified to contain zero `<script src=>` references. Both checks are soft — they only fire if the artifact is present, so contributors aren't forced to regenerate on every commit.
 
 No runtime changes; full Playwright suite still 206 passed.
+
+**Progress (draft 14):** Phase 1 §1.5 third slice — first `Intl.ListFormat` call-site. The BIC validator's multi-tag row now reads `intlList(r.tags)` instead of `r.tags.join(', ')`, so a German-locale BIC with location ending in `0` and branch `XXX` renders as `Test-BIC (Ort endet auf 0) und Hauptniederlassung (XXX)`. Other `.join(', ')` sites (TLS SANs, CIDR / cron internal fields, X.509 DN parts) intentionally left alone because they are technical token lists, not prose. One new Playwright case asserts the German `und` connector. Full suite: 216 passed. With this slice, all four `Intl.*` helpers (`NumberFormat`, `RelativeTimeFormat`, `PluralRules`, `ListFormat`) have at least one production call-site; §1.5 is closed for Phase 1.
 
 **Progress (draft 13):** Phase 1 §1.4 step 1 (logical-property CSS refactor). All 17 physical-direction declarations in `index.html` migrated to their logical equivalents (`margin-inline-start`, `padding-inline-start`, `inset-inline-end`, `border-inline-start`, `text-align: start`) — split across the stylesheet (8 sites) and inline button styles (9 sites). One new Playwright case asserts the refactor by flipping `documentElement.dir = 'rtl'` and reading `getComputedStyle(...).insetInlineEnd` on `.tool-card::after`. Full suite: 215 passed. Steps 2–6 of §1.4 (runtime dir flip in setLang, icon mirroring, LTR-embed for code blocks, word-break for CJK) deferred until the first RTL locale ships.
 

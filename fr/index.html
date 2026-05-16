@@ -13639,7 +13639,9 @@
                 tlsRenderRow(out, t('bic.row.location'), r.location);
                 tlsRenderRow(out, t('bic.row.branch'), r.branch || t('bic.row.branchNone'));
                 tlsRenderRow(out, t('bic.row.length'), String(r.length));
-                if (r.tags.length) tlsRenderRow(out, t('bic.row.tags'), r.tags.join(', '));
+                // Tag phrases are prose (per-locale strings from bic.tag.*); use Intl.ListFormat
+                // so the final joiner reads "X and Y" / "X et Y" / "X und Y" / "X 和 Y" (SPEC §1.5).
+                if (r.tags.length) tlsRenderRow(out, t('bic.row.tags'), intlList(r.tags));
             } catch (e) {
                 tlsRenderRow(out, t('bic.row.error'), e.message);
             }

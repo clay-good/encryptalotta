@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <!--
   encryptalotta — single-file portable build
-  Source mtime: 2026-05-15T12:43:13.096Z
-  Source: index.html (SHA-256: cc4de247c452f7ecbd44806aa5b9c3294662b3386c7100b1001fd59f8b4a5a69)
+  Source mtime: 2026-05-16T13:34:39.551Z
+  Source: index.html (SHA-256: f618a5d6c2666d3d6e3852592570ade04856679e6d890d2b4e3ea024472e6761)
   All vendored JavaScript inlined; favicons inlined as data: URIs.
   Identical functionality to the live site at https://encryptalotta.com.
   Runs from file://, USB stick, chat attachment, anywhere. No network calls.
@@ -15950,7 +15950,9 @@ var qrcode = function() {
                 tlsRenderRow(out, t('bic.row.location'), r.location);
                 tlsRenderRow(out, t('bic.row.branch'), r.branch || t('bic.row.branchNone'));
                 tlsRenderRow(out, t('bic.row.length'), String(r.length));
-                if (r.tags.length) tlsRenderRow(out, t('bic.row.tags'), r.tags.join(', '));
+                // Tag phrases are prose (per-locale strings from bic.tag.*); use Intl.ListFormat
+                // so the final joiner reads "X and Y" / "X et Y" / "X und Y" / "X 和 Y" (SPEC §1.5).
+                if (r.tags.length) tlsRenderRow(out, t('bic.row.tags'), intlList(r.tags));
             } catch (e) {
                 tlsRenderRow(out, t('bic.row.error'), e.message);
             }
