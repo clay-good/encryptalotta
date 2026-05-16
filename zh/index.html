@@ -4339,6 +4339,7 @@
                 'sepa.row.openingBal': 'Opening balance',
                 'sepa.row.closingBal': 'Closing balance',
                 'sepa.tx.heading': 'Transactions',
+                'sepa.tx.instrId': 'Instruction ID',
                 'sepa.tx.endToEnd': 'End-to-end ID',
                 'sepa.tx.amount': 'Amount',
                 'sepa.tx.debtor': 'Debtor',
@@ -5390,6 +5391,7 @@
                 'sepa.row.openingBal': 'Solde initial',
                 'sepa.row.closingBal': 'Solde final',
                 'sepa.tx.heading': 'Transactions',
+                'sepa.tx.instrId': 'ID d’instruction',
                 'sepa.tx.endToEnd': 'Identifiant de bout en bout',
                 'sepa.tx.amount': 'Montant',
                 'sepa.tx.debtor': 'Débiteur',
@@ -6401,6 +6403,7 @@
                 'sepa.row.openingBal': '期初余额',
                 'sepa.row.closingBal': '期末余额',
                 'sepa.tx.heading': '交易',
+                'sepa.tx.instrId': '指令 ID',
                 'sepa.tx.endToEnd': '端到端 ID',
                 'sepa.tx.amount': '金额',
                 'sepa.tx.debtor': '付款人',
@@ -7427,6 +7430,7 @@
                 'sepa.row.openingBal': 'Anfangssaldo',
                 'sepa.row.closingBal': 'Endsaldo',
                 'sepa.tx.heading': 'Transaktionen',
+                'sepa.tx.instrId': 'Instruktions-ID',
                 'sepa.tx.endToEnd': 'End-to-End-ID',
                 'sepa.tx.amount': 'Betrag',
                 'sepa.tx.debtor': 'Zahlungspflichtiger',
@@ -8438,6 +8442,7 @@
                 'sepa.row.openingBal': 'प्रारंभिक शेष',
                 'sepa.row.closingBal': 'अंतिम शेष',
                 'sepa.tx.heading': 'लेन-देन',
+                'sepa.tx.instrId': 'निर्देश ID',
                 'sepa.tx.endToEnd': 'एंड-टू-एंड ID',
                 'sepa.tx.amount': 'राशि',
                 'sepa.tx.debtor': 'देनदार',
@@ -15156,11 +15161,18 @@
             const inner = docRoot.firstElementChild;
             if (!inner) return null;
             const ln = inner.localName;
+            // ISO 20022 namespace URIs end in `<msg>.<variant>.<version>` (e.g.
+            // `urn:iso:std:iso:20022:tech:xsd:pain.001.001.03`). The terminal segment
+            // identifies the exact schema revision; surface it next to the friendly label
+            // so users can tell pain.001.001.03 from .09 at a glance.
+            const ns = (docRoot.namespaceURI || inner.namespaceURI || '').toString();
+            const verMatch = ns.match(/(pain\.\d{3}\.\d{3}\.\d{2}|camt\.\d{3}\.\d{3}\.\d{2})/i);
+            const schemaVer = verMatch ? verMatch[1] : '';
             // Map known wrappers to the spec's standard mnemonic.
-            if (ln === 'CstmrCdtTrfInitn') return { type: 'pain.001', wrapper: inner, label: 'pain.001 (customer credit-transfer initiation)' };
-            if (ln === 'CstmrDrctDbtInitn') return { type: 'pain.008', wrapper: inner, label: 'pain.008 (customer direct-debit initiation)' };
-            if (ln === 'BkToCstmrStmt') return { type: 'camt.053', wrapper: inner, label: 'camt.053 (bank-to-customer statement)' };
-            return { type: 'unknown', wrapper: inner, label: ln };
+            if (ln === 'CstmrCdtTrfInitn') return { type: 'pain.001', wrapper: inner, schemaVer, label: (schemaVer || 'pain.001') + ' (customer credit-transfer initiation)' };
+            if (ln === 'CstmrDrctDbtInitn') return { type: 'pain.008', wrapper: inner, schemaVer, label: (schemaVer || 'pain.008') + ' (customer direct-debit initiation)' };
+            if (ln === 'BkToCstmrStmt') return { type: 'camt.053', wrapper: inner, schemaVer, label: (schemaVer || 'camt.053') + ' (bank-to-customer statement)' };
+            return { type: 'unknown', wrapper: inner, schemaVer, label: ln };
         }
 
         function sepaParse(xmlText) {
@@ -15194,7 +15206,9 @@
         }
 
         function sepaTxRender(out, tx) {
-            const e2e = sepaTextOf(sepaFirst(tx, 'PmtId') || tx, 'EndToEndId');
+            const pmtId = sepaFirst(tx, 'PmtId') || tx;
+            const instrId = sepaTextOf(pmtId, 'InstrId');
+            const e2e = sepaTextOf(pmtId, 'EndToEndId');
             const amtEl = sepaFirst(tx, 'InstdAmt') || sepaFirst(tx, 'Amt');
             const amt = amtEl ? ((amtEl.textContent || '').trim() + ' ' + (amtEl.getAttribute('Ccy') || '')).trim() : '';
             const dbtr = sepaTextOf(sepaFirst(tx, 'Dbtr') || tx, 'Nm');
@@ -15202,6 +15216,7 @@
             const rmt  = sepaTextOf(sepaFirst(tx, 'RmtInf') || tx, 'Ustrd');
             const cdtrIban = sepaTextOf(sepaFirst(tx, 'CdtrAcct') || tx, 'IBAN');
             const dbtrIban = sepaTextOf(sepaFirst(tx, 'DbtrAcct') || tx, 'IBAN');
+            if (instrId) tlsRenderRow(out, t('sepa.tx.instrId'), instrId);
             if (e2e)  tlsRenderRow(out, t('sepa.tx.endToEnd'),   e2e);
             if (amt)  tlsRenderRow(out, t('sepa.tx.amount'),     amt);
             if (dbtr) tlsRenderRow(out, t('sepa.tx.debtor'),     dbtr + (dbtrIban ? '  (' + dbtrIban + ')' : ''));

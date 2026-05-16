@@ -867,6 +867,25 @@ test('sepa: flags an IBAN that fails MOD-97', async ({ page }) => {
   await expect(page.locator('#sepa-results')).toContainText(/MOD-97.*failed.*DE89370400440532013001/i, { timeout: 5_000 });
 });
 
+test('sepa: surfaces schema version (pain.001.001.03) in document banner', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  await page.fill('#sepa-input', SEPA_PAIN001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText('pain.001.001.03', { timeout: 5_000 });
+});
+
+test('sepa: surfaces per-transaction InstrId alongside EndToEndId', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  const withInstrId = SEPA_PAIN001.replace(
+    '<PmtId><EndToEndId>E2E-001</EndToEndId></PmtId>',
+    '<PmtId><InstrId>INSTR-XYZ-42</InstrId><EndToEndId>E2E-001</EndToEndId></PmtId>'
+  );
+  await page.fill('#sepa-input', withInstrId);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText('INSTR-XYZ-42', { timeout: 5_000 });
+  await expect(page.locator('#sepa-results')).toContainText('E2E-001');
+});
+
 test('sepa: rejects non-ISO 20022 XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'sepa');
   await page.fill('#sepa-input', '<?xml version="1.0"?><foo><bar/></foo>');
