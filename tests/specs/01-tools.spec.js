@@ -311,6 +311,68 @@ test('sd-jwt: renders cleartext reconstructed payload with disclosed claims merg
   expect(parsed._sd_alg).toBeUndefined();
 });
 
+// Build a real ES256-signed KB-JWT bound to an SD-JWT via cnf.jwk + sd_hash.
+function buildSdJwtWithSignedKb(disclosuresJson, kbExtraPayload = {}) {
+  const { privateKey, publicKey } = nodeCrypto.generateKeyPairSync('ec', { namedCurve: 'prime256v1' });
+  // Web Crypto wants a JWK with crv 'P-256' (node uses the same crv name).
+  const cnfJwk = publicKey.export({ format: 'jwk' });
+  // Strip private-half fields just in case (export of a public key won't include `d`,
+  // but be explicit).
+  delete cnfJwk.d;
+  const encoded = disclosuresJson.map(d => b64url(JSON.stringify(d)));
+  const digests = encoded.map(e => b64url(nodeCrypto.createHash('sha256').update(e, 'ascii').digest()));
+  const header = b64url(JSON.stringify({ typ: 'vc+sd-jwt', alg: 'HS256' }));
+  const payload = b64url(JSON.stringify({
+    iss: 'https://issuer.example',
+    _sd_alg: 'sha-256',
+    _sd: digests,
+    cnf: { jwk: cnfJwk },
+  }));
+  const issuerSig = b64url(Buffer.from('issuer-sig-placeholder'));
+  const issuerJwt = `${header}.${payload}.${issuerSig}`;
+  const presentation = issuerJwt + '~' + (encoded.length ? encoded.join('~') + '~' : '');
+  const sdHash = b64url(nodeCrypto.createHash('sha256').update(presentation, 'utf8').digest());
+  const kbHeader = b64url(JSON.stringify({ typ: 'kb+jwt', alg: 'ES256' }));
+  const kbPayload = b64url(JSON.stringify({
+    aud: 'https://verifier.example',
+    nonce: 'nonce-42',
+    iat: 1700000000,
+    sd_hash: sdHash,
+    ...kbExtraPayload,
+  }));
+  // ECDSA over SHA-256, raw (r||s) signature — what JWS expects.
+  const kbSig = nodeCrypto.sign('sha256', Buffer.from(kbHeader + '.' + kbPayload, 'utf8'), { key: privateKey, dsaEncoding: 'ieee-p1363' });
+  return presentation + `${kbHeader}.${kbPayload}.${b64url(kbSig)}`;
+}
+
+test('sd-jwt: KB-JWT signature verifies against cnf.jwk (ES256)', async ({ page }) => {
+  const errs=[]; autoDismissDialogs(page, errs);
+  await page.goto('/index.html'); await gotoTool(page, 'jwt');
+  const sdjwt = buildSdJwtWithSignedKb([['s', 'given_name', 'Eve']]);
+  await page.fill('#jwt-input', sdjwt);
+  await page.click('#btn-jwt-decode');
+  await expect(page.locator('#jwt-results')).toContainText(/KB-JWT signature/i, { timeout: 5_000 });
+  await expect(page.locator('#jwt-results')).toContainText(/verified with cnf\.jwk \(ES256\)/i);
+  await expect(page.locator('#jwt-results')).toContainText(/sd_hash binding/i);
+  await expect(page.locator('#jwt-results')).toContainText(/matches SHA-256 of the presentation/i);
+});
+
+test('sd-jwt: KB-JWT verification flags a tampered KB-JWT signature', async ({ page }) => {
+  const errs=[]; autoDismissDialogs(page, errs);
+  await page.goto('/index.html'); await gotoTool(page, 'jwt');
+  const sdjwt = buildSdJwtWithSignedKb([['s', 'given_name', 'Eve']]);
+  // Stomp 4 chars near the start of the KB-JWT signature so the verify must fail.
+  // (Flipping the last char only changes the trailing bits that base64 drops in
+  // a 64-byte ECDSA signature, so it can leave the decoded bytes intact.)
+  const dotIdx = sdjwt.lastIndexOf('.');
+  const stompAt = dotIdx + 5;
+  const tampered = sdjwt.slice(0, stompAt) + 'AAAA' + sdjwt.slice(stompAt + 4);
+  await page.fill('#jwt-input', tampered);
+  await page.click('#btn-jwt-decode');
+  await expect(page.locator('#jwt-results')).toContainText(/KB-JWT signature/i, { timeout: 5_000 });
+  await expect(page.locator('#jwt-results')).toContainText(/signature does not verify/i);
+});
+
 test('sd-jwt: surfaces a key-binding JWT when present', async ({ page }) => {
   const errs=[]; autoDismissDialogs(page, errs);
   await page.goto('/index.html'); await gotoTool(page, 'jwt');

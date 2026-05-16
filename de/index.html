@@ -3465,6 +3465,13 @@
                 'jwt.sdjwt.kbJwt': 'Key-binding JWT (KB-JWT)',
                 'jwt.sdjwt.parseErr': 'Parse error',
                 'jwt.sdjwt.reconstructed': 'Disclosed payload (reconstructed)',
+                'jwt.sdjwt.kbSig': 'KB-JWT signature',
+                'jwt.sdjwt.kbSigOk': 'verified with cnf.jwk ({alg})',
+                'jwt.sdjwt.kbSigFail': 'signature does not verify',
+                'jwt.sdjwt.kbNoCnf': 'no cnf.jwk in issuer-signed payload — cannot verify',
+                'jwt.sdjwt.sdHash': 'sd_hash binding',
+                'jwt.sdjwt.sdHashOk': 'matches SHA-256 of the presentation',
+                'jwt.sdjwt.sdHashFail': 'does not match — disclosures or KB-JWT may have been substituted',
                 'btn.jwtDecode': 'Decode',
                 'btn.jwtVerify': 'Verify Signature',
                 'err.jwtEmpty': 'Paste a JWT first',
@@ -4732,6 +4739,13 @@
                 'jwt.sdjwt.kbJwt': 'JWT de liaison de clé (KB-JWT)',
                 'jwt.sdjwt.parseErr': 'Erreur d’analyse',
                 'jwt.sdjwt.reconstructed': 'Charge utile divulguée (reconstruite)',
+                'jwt.sdjwt.kbSig': 'Signature KB-JWT',
+                'jwt.sdjwt.kbSigOk': 'vérifiée avec cnf.jwk ({alg})',
+                'jwt.sdjwt.kbSigFail': 'signature non vérifiée',
+                'jwt.sdjwt.kbNoCnf': 'pas de cnf.jwk dans la charge utile de l’émetteur — vérification impossible',
+                'jwt.sdjwt.sdHash': 'Liaison sd_hash',
+                'jwt.sdjwt.sdHashOk': 'correspond au SHA-256 de la présentation',
+                'jwt.sdjwt.sdHashFail': 'ne correspond pas — les divulgations ou le KB-JWT peuvent avoir été substitués',
                 'btn.jwtDecode': 'Décoder',
                 'btn.jwtVerify': 'Vérifier la signature',
                 'err.jwtEmpty': 'Collez un JWT',
@@ -5775,6 +5789,13 @@
                 'jwt.sdjwt.kbJwt': '密钥绑定 JWT (KB-JWT)',
                 'jwt.sdjwt.parseErr': '解析错误',
                 'jwt.sdjwt.reconstructed': '披露后的 payload（重建）',
+                'jwt.sdjwt.kbSig': 'KB-JWT 签名',
+                'jwt.sdjwt.kbSigOk': '已使用 cnf.jwk 验证（{alg}）',
+                'jwt.sdjwt.kbSigFail': '签名未通过验证',
+                'jwt.sdjwt.kbNoCnf': '发行方签名 payload 中未包含 cnf.jwk — 无法验证',
+                'jwt.sdjwt.sdHash': 'sd_hash 绑定',
+                'jwt.sdjwt.sdHashOk': '与该呈现的 SHA-256 匹配',
+                'jwt.sdjwt.sdHashFail': '不匹配 — 披露项或 KB-JWT 可能已被替换',
                 'btn.jwtDecode': '解码',
                 'btn.jwtVerify': '验证签名',
                 'err.jwtEmpty': '请先粘贴 JWT',
@@ -6803,6 +6824,13 @@
                 'jwt.sdjwt.kbJwt': 'Key-Binding-JWT (KB-JWT)',
                 'jwt.sdjwt.parseErr': 'Analysefehler',
                 'jwt.sdjwt.reconstructed': 'Offengelegte Payload (rekonstruiert)',
+                'jwt.sdjwt.kbSig': 'KB-JWT-Signatur',
+                'jwt.sdjwt.kbSigOk': 'mit cnf.jwk verifiziert ({alg})',
+                'jwt.sdjwt.kbSigFail': 'Signatur konnte nicht verifiziert werden',
+                'jwt.sdjwt.kbNoCnf': 'kein cnf.jwk in der ausstellerseitigen Payload — Verifikation nicht möglich',
+                'jwt.sdjwt.sdHash': 'sd_hash-Bindung',
+                'jwt.sdjwt.sdHashOk': 'stimmt mit SHA-256 der Präsentation überein',
+                'jwt.sdjwt.sdHashFail': 'stimmt nicht überein — Disclosures oder KB-JWT wurden möglicherweise ersetzt',
                 'btn.jwtDecode': 'Dekodieren',
                 'btn.jwtVerify': 'Signatur verifizieren',
                 'err.jwtEmpty': 'JWT zuerst einfügen',
@@ -7846,6 +7874,13 @@
                 'jwt.sdjwt.kbJwt': 'की-बाइंडिंग JWT (KB-JWT)',
                 'jwt.sdjwt.parseErr': 'पार्स त्रुटि',
                 'jwt.sdjwt.reconstructed': 'प्रकट किया गया पेलोड (पुनर्निर्मित)',
+                'jwt.sdjwt.kbSig': 'KB-JWT हस्ताक्षर',
+                'jwt.sdjwt.kbSigOk': 'cnf.jwk से सत्यापित ({alg})',
+                'jwt.sdjwt.kbSigFail': 'हस्ताक्षर सत्यापित नहीं हुआ',
+                'jwt.sdjwt.kbNoCnf': 'जारीकर्ता पेलोड में cnf.jwk नहीं — सत्यापित नहीं किया जा सकता',
+                'jwt.sdjwt.sdHash': 'sd_hash बाइंडिंग',
+                'jwt.sdjwt.sdHashOk': 'प्रस्तुति के SHA-256 से मेल खाता है',
+                'jwt.sdjwt.sdHashFail': 'मेल नहीं खाता — खुलासे या KB-JWT बदले गए हो सकते हैं',
                 'btn.jwtDecode': 'डिकोड',
                 'btn.jwtVerify': 'हस्ताक्षर सत्यापित करें',
                 'err.jwtEmpty': 'पहले JWT पेस्ट करें',
@@ -12633,7 +12668,32 @@
             return { jwt, disclosures: rest, kbJwt };
         }
 
-        async function sdJwtRender(disclosures, kbJwt, payload, resultsEl) {
+        // Map JWS alg + JWK kty/crv onto a Web Crypto verify-spec.
+        // Limited to the algorithms the SD-JWT draft lists as required-or-recommended
+        // (ES256 + EdDSA) plus RS256 for legacy issuers. Anything else throws so the
+        // UI shows an explicit `Unsupported alg` row rather than a silent skip.
+        async function sdJwtImportJwk(jwk, alg) {
+            if (jwk.kty === 'EC' && jwk.crv === 'P-256' && (alg === 'ES256' || !alg)) {
+                return { key: await crypto.subtle.importKey('jwk', jwk, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['verify']),
+                         params: { name: 'ECDSA', hash: 'SHA-256' } };
+            }
+            if (jwk.kty === 'EC' && jwk.crv === 'P-384' && (alg === 'ES384' || !alg)) {
+                return { key: await crypto.subtle.importKey('jwk', jwk, { name: 'ECDSA', namedCurve: 'P-384' }, false, ['verify']),
+                         params: { name: 'ECDSA', hash: 'SHA-384' } };
+            }
+            if (jwk.kty === 'OKP' && jwk.crv === 'Ed25519' && (alg === 'EdDSA' || !alg)) {
+                return { key: await crypto.subtle.importKey('jwk', jwk, { name: 'Ed25519' }, false, ['verify']),
+                         params: { name: 'Ed25519' } };
+            }
+            if (jwk.kty === 'RSA' && /^RS(256|384|512)$/.test(alg || 'RS256')) {
+                const hash = 'SHA-' + (alg || 'RS256').slice(2);
+                return { key: await crypto.subtle.importKey('jwk', jwk, { name: 'RSASSA-PKCS1-v1_5', hash }, false, ['verify']),
+                         params: { name: 'RSASSA-PKCS1-v1_5' } };
+            }
+            throw new Error('Unsupported JWK/alg: kty=' + jwk.kty + ' crv=' + (jwk.crv || '') + ' alg=' + (alg || ''));
+        }
+
+        async function sdJwtRender(disclosures, kbJwt, payload, resultsEl, jwt) {
             if (!disclosures.length && !kbJwt) return;
             // _sd_alg defaults to sha-256 per draft §5.1; the only other algorithm
             // currently allowed is sha-256 (the spec deliberately keeps the surface tiny).
@@ -12761,16 +12821,52 @@
                 kbHead.textContent = t('jwt.sdjwt.kbJwt');
                 wrap.appendChild(kbHead);
                 // Decode the KB-JWT inline (same envelope as a regular JWT).
+                let kbHeader = null, kbPayload = null, kbParts = null;
                 try {
-                    const kbParts = kbJwt.split('.');
-                    const kbHeader = JSON.parse(new TextDecoder().decode(base64ToBytes(kbParts[0], true)));
-                    const kbPayload = JSON.parse(new TextDecoder().decode(base64ToBytes(kbParts[1], true)));
+                    kbParts = kbJwt.split('.');
+                    kbHeader = JSON.parse(new TextDecoder().decode(base64ToBytes(kbParts[0], true)));
+                    kbPayload = JSON.parse(new TextDecoder().decode(base64ToBytes(kbParts[1], true)));
                     const pre = document.createElement('pre');
                     pre.style.cssText = 'background: var(--bg-tertiary); padding: 12px 14px; border-radius: 8px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.82rem; white-space: pre-wrap; word-break: break-all; margin: 6px 0 0; color: var(--text-primary);';
                     pre.textContent = JSON.stringify({ header: kbHeader, payload: kbPayload }, null, 2);
                     wrap.appendChild(pre);
                 } catch (e) {
                     tlsRenderRow(wrap, t('jwt.sdjwt.parseErr'), e.message);
+                }
+
+                // KB-JWT cryptographic binding checks (SD-JWT draft §4.3):
+                //   1. Signature over <kb-header>.<kb-payload> verified with the JWK
+                //      declared in the issuer-signed payload's `cnf.jwk` claim.
+                //   2. The KB-JWT payload's `sd_hash` claim must equal
+                //      base64url(SHA-256(<jwt>~<disc1>~...~<discN>~)) — the literal
+                //      bytes of the presentation up to and including the final tilde,
+                //      but excluding the KB-JWT itself.
+                if (kbHeader && kbPayload && kbParts) {
+                    const cnfJwk = payload && payload.cnf && payload.cnf.jwk;
+                    if (!cnfJwk) {
+                        tlsRenderRow(wrap, t('jwt.sdjwt.kbSig'), t('jwt.sdjwt.kbNoCnf'));
+                    } else {
+                        try {
+                            const imported = await sdJwtImportJwk(cnfJwk, kbHeader.alg);
+                            const signingInput = enc.encode(kbParts[0] + '.' + kbParts[1]);
+                            const sigBytes = base64ToBytes(kbParts[2], true);
+                            const ok = await crypto.subtle.verify(imported.params, imported.key, sigBytes, signingInput);
+                            tlsRenderRow(wrap, t('jwt.sdjwt.kbSig'),
+                                (ok ? '✓ ' : '✗ ') + (ok ? tFormat('jwt.sdjwt.kbSigOk', { alg: String(kbHeader.alg || '?') })
+                                                          : t('jwt.sdjwt.kbSigFail')));
+                        } catch (e) {
+                            tlsRenderRow(wrap, t('jwt.sdjwt.kbSig'), '✗ ' + e.message);
+                        }
+                    }
+
+                    if (typeof kbPayload.sd_hash === 'string' && jwt) {
+                        // Presentation = JWT + ~ + each disclosure + ~ (trailing tilde, no KB-JWT).
+                        const presentation = jwt + '~' + (disclosures.length ? disclosures.join('~') + '~' : '');
+                        const presBytes = new Uint8Array(await crypto.subtle.digest('SHA-256', enc.encode(presentation)));
+                        const computed = bytesToBase64(presBytes, true);
+                        const ok = computed === kbPayload.sd_hash;
+                        tlsRenderRow(wrap, t('jwt.sdjwt.sdHash'), (ok ? '✓ ' : '✗ ') + (ok ? t('jwt.sdjwt.sdHashOk') : t('jwt.sdjwt.sdHashFail')));
+                    }
                 }
             }
             resultsEl.appendChild(wrap);
@@ -12835,7 +12931,7 @@
             try {
                 const decoded = jwtRender(token);
                 if (decoded.sdJwt && (decoded.sdJwt.disclosures.length || decoded.sdJwt.kbJwt)) {
-                    await sdJwtRender(decoded.sdJwt.disclosures, decoded.sdJwt.kbJwt, decoded.payload, document.getElementById('jwt-results'));
+                    await sdJwtRender(decoded.sdJwt.disclosures, decoded.sdJwt.kbJwt, decoded.payload, document.getElementById('jwt-results'), decoded.sdJwt.jwt);
                 }
             }
             catch (e) { alert(t('err.jwtDecode') + ': ' + e.message); }
