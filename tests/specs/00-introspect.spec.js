@@ -8,7 +8,7 @@ const TOOLS = [
   'sign','verify','hmac','jwt',
   'passwords','armor','shamir','exif',
   'hash','encode','uuid','timestamp','url','totp','diff','csv','regex','cron','color','format','cidr','pbkdf2','base',
-  'iban','bic','gs1','vat','sepa','ed25519','x25519'
+  'iban','bic','gs1','vat','sepa','lotl','ed25519','x25519'
 ];
 
 test('introspect all tool views', async ({ page }) => {

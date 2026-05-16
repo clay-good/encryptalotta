@@ -1,6 +1,6 @@
 # Spec — International public-good extensions to encryptalotta
 
-Status: draft 16 (Phase 1 substantially complete; Phase 7 §2.4 SEPA ISO 20022 inspector landed as the first larger Phase-7 tool, tool count 42 → 43. §1.4 logical-property CSS refactor + §1.5 full Intl coverage + §1.6 command palette landed. Every physical-direction CSS property in `index.html` is logical; `Intl.NumberFormat` + `Intl.RelativeTimeFormat` + `Intl.PluralRules` + `Intl.ListFormat` are all wired (PBKDF2 timing, CIDR / PGP key dates / relative timestamp / regex plurals / BIC multi-tag prose). The ⌘K / Ctrl+K command palette ships with 42 English synonym blocks + localized `palette.{title,placeholder,empty}` strings across all five locales; locale-specific synonyms deferred until §1.3 native reviewers are sourced — polyglot fallback ensures English synonyms always match. See §1.4, §1.5, §1.6 progress notes; Phase 4 complete except BLAKE3; Phase 5 distribution scripts + PWA precache service worker shipped; Phase 6 regulator presets shipped in PGP key generator + PBKDF2 tool + annual freshness audit covering both blocks; SECURITY.md + THREAT-MODEL.md published; GDPR-by-design /privacy.html published; regional hreflang aliases)
+Status: draft 17 (Phase 1 substantially complete; Phase 7 §2.4 SEPA ISO 20022 inspector + §2.6 eIDAS LOTL / TSL viewer landed, tool count 42 → 44. §1.4 logical-property CSS refactor + §1.5 full Intl coverage + §1.6 command palette landed. Every physical-direction CSS property in `index.html` is logical; `Intl.NumberFormat` + `Intl.RelativeTimeFormat` + `Intl.PluralRules` + `Intl.ListFormat` are all wired (PBKDF2 timing, CIDR / PGP key dates / relative timestamp / regex plurals / BIC multi-tag prose). The ⌘K / Ctrl+K command palette ships with 42 English synonym blocks + localized `palette.{title,placeholder,empty}` strings across all five locales; locale-specific synonyms deferred until §1.3 native reviewers are sourced — polyglot fallback ensures English synonyms always match. See §1.4, §1.5, §1.6 progress notes; Phase 4 complete except BLAKE3; Phase 5 distribution scripts + PWA precache service worker shipped; Phase 6 regulator presets shipped in PGP key generator + PBKDF2 tool + annual freshness audit covering both blocks; SECURITY.md + THREAT-MODEL.md published; GDPR-by-design /privacy.html published; regional hreflang aliases)
 Audience: maintainers and contributors
 Scope: how to extend encryptalotta.com so it serves an international audience — with a deliberate emphasis on Europe and other regions that lean heavily on open-source — without compromising the site's existing character (single-page, fully client-side, no analytics, no CDN, no tracking, no build step beyond a couple of vendored scripts).
 
@@ -439,7 +439,24 @@ Full Playwright suite: 227 passed. Tool count 42 → 43; JSON-LD `featureList_co
 
 **This is the largest tool in this spec. Plan ~1,500 lines and a multi-week effort.**
 
-### 2.6 EU LOTL trust list viewer
+### 2.6 EU LOTL trust list viewer — **✅ shipped (draft 17)**
+
+**Status notes (draft 17):** Landed as the `lotl` tool. The parser walks ETSI TS 119 612 XML by `localName` only, so the same code handles every minor revision (v2.1.1, v2.2.1, ...) without per-version branching.
+
+- **LOTL mode** (`TSLType` ends in `EUlistofthelists`): renders the scheme operator + name + territory + issue/next-update dates, then one section per `<OtherTSLPointer>` with the country code (mined from `OtherInformation/SchemeTerritory`) and the `<TSLLocation>` URL.
+- **TSL mode** (`TSLType` ends in `schemes/...`): renders the scheme metadata, then one section per `<TrustServiceProvider>` showing the TSP name, followed by each `<TSPService>` with type identifier (e.g. `Svctype/CA/QC`), status (e.g. `Svcstatus/granted`), and status starting time. Embedded `<X509Certificate>` blocks are acknowledged as present with their base64 byte count, but not parsed inline — the TLS Certificate Parser tool handles that if the user wants details.
+- **Multi-language `<Name>` blocks**: ETSI lists carry `xml:lang`-tagged `<Name>` children inside `<SchemeName>`, `<SchemeOperatorName>`, `<TSPName>`, etc. The viewer prefers `xml:lang="en"` and falls back to the first child if no English variant is present.
+- **No fetching**: the §0.2 / §2.6 "no network" rule is preserved — every parse run appends a footer note pointing the user to `ec.europa.eu` for the official LOTL file. No automatic resolution of `<TSLLocation>` URLs.
+
+UI mirrors the SEPA tool layout (textarea + Parse button). ~190 lines of parser + render JS, ~25 new UI strings × 5 locales (en + fr + de reviewed against standard PKI/eIDAS terminology; zh-CN + hi machine-quality drafts pending native review per the project pattern). 5 SEO prose keys en-only via the existing Phase 7 carve-out.
+
+Three new Playwright cases:
+
+1. LOTL mode — both German and French pointer URLs surface, both country codes appear.
+2. TSL mode — Bundesnetzagentur (scheme operator), D-TRUST GmbH (TSP), CA/QC service type, "granted" status, and the embedded X.509 acknowledgement row.
+3. Non-trust-list XML (a bare `<Document/>`) gets rejected with a `TrustServiceStatusList` mention in the error.
+
+Full Playwright suite: 230 passed. Tool count 43 → 44; JSON-LD featureList + featureList_count, meta / og / twitter descriptions, and README updated.
 
 **Why:** EU publishes a "List of Trusted Lists" — a master XML pointing to each member state's trust list of qualified certificate authorities. Useful to anyone debugging eIDAS-signed documents. Almost no free tool surfaces this nicely.
 
@@ -718,6 +735,8 @@ All ~1-day implementations. Roughly doubles the site's tool count for a small fr
 
 No runtime changes; full Playwright suite still 206 passed.
 
+**Progress (draft 17):** Phase 7 §2.6 eIDAS LOTL / TSL viewer shipped. Same namespace-blind `DOMParser` pattern as the SEPA inspector (§2.4): walk by `localName`, prefer `xml:lang="en"` for multi-language `<Name>` blocks. Two modes — LOTL renders the per-country `<OtherTSLPointer>` entries with their `<TSLLocation>` URLs; TSL renders per-`<TrustServiceProvider>` services with type / status / starting time and acknowledges embedded `<X509Certificate>` blocks without parsing them inline (defers to the TLS Certificate Parser). The §0.2 / §2.6 "no fetching" rule is honored — a footer note on every parse points the user to `ec.europa.eu` for the official LOTL file. No vendored deps. ~190 lines of parser + render JS, ~25 new UI strings × 5 locales (en/fr/de reviewed; zh-CN/hi machine-quality drafts), 5 SEO prose keys en-only. Tool count 43 → 44 — JSON-LD featureList + count, meta / og / twitter descriptions, README updated. Three new Playwright cases (LOTL mode happy path, TSL mode happy path, non-trust-list XML rejected). Full suite: 230 passed.
+
 **Progress (draft 16):** Phase 7 §2.4 SEPA ISO 20022 XML inspector shipped — first larger Phase-7 tool. Namespace-blind `DOMParser` walk by `localName` handles pain.001 (credit-transfer initiation, all minor revisions), camt.053 (bank-to-customer statement), and pain.008 (direct-debit, inherits the pain.001 renderer). Every `<IBAN>` element is cross-checked against the existing `ibanValidate()` MOD-97 implementation and bad checksums surface inline as warning rows. UI mirrors the IBAN / BIC / VAT layout (textarea + Parse button). No vendored deps. ~200 lines of parser + render JS, ~12 new UI strings × 5 locales (en/fr/de reviewed, zh-CN/hi machine-quality drafts per project pattern), 5 SEO prose keys en-only via the existing Phase 7 carve-out. Tool count 42 → 43 — JSON-LD `featureList` + `featureList_count`, meta/og/twitter descriptions, and README all updated. Four new Playwright cases (pain.001 happy path, camt.053 happy path, MOD-97 failure flagged, non-ISO-20022 XML rejected). Full suite: 227 passed.
 
 **Progress (draft 15):** Phase 1 §1.6 command palette shipped end-to-end. Modal dialog (~14 lines of CSS, 13 lines of HTML) with `role="dialog"` / `aria-modal` / `aria-labelledby` + `role="listbox"` results, triggered by `⌘K` / `Ctrl+K`, closes on `Esc` / overlay-click. Filter haystack = tool-id + localized label + English synonyms, locale-folded via `toLocaleLowerCase(lang)`; multi-term queries AND'd. `TOOL_SYNONYMS` ships English-only (42 entries) per the §1.6 directive to defer locale-specific synonyms until §1.3 native review — polyglot fallback ensures English queries always match in any locale. Three new UI strings (`palette.title`, `palette.placeholder`, `palette.empty`) translated for all five locales; STRINGS now 1101 keys × 5 locales. Seven new Playwright cases (Ctrl+K open/Esc close, "swift" → BIC, "epoch" → timestamp, multi-term "ed signature" → Ed25519, ArrowDown+Enter, empty state, fr + en-query polyglot invariant). Full suite: 223 passed.
@@ -763,7 +782,7 @@ No runtime changes; full Playwright suite still 206 passed.
 
 1. 🟡 SEPA XML inspector (§2.4) — pain.001 + camt.053 shipped draft 16; pain.008 inherits the pain.001 renderer; XAdES-signed files deferred to §2.5.
 2. eIDAS signature inspector — PAdES/CAdES/XAdES (§2.5).
-3. EU LOTL viewer (§2.6).
+3. ✅ EU LOTL viewer (§2.6) — shipped draft 17.
 4. Factur-X / ZUGFeRD / PEPPOL inspector (§2.7).
 5. EUDI Wallet credential decoder (§2.8).
 6. Argon2id (§2.9).

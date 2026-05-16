@@ -874,6 +874,100 @@ test('sepa: rejects non-ISO 20022 XML', async ({ page }) => {
   await expect(page.locator('#sepa-results')).toContainText(/No <Document>/i, { timeout: 5_000 });
 });
 
+// =============== eIDAS LOTL / TSL viewer (SPEC §2.6) ===============
+
+const LOTL_LIST = `<?xml version="1.0" encoding="UTF-8"?>
+<TrustServiceStatusList xmlns="http://uri.etsi.org/02231/v2#">
+  <SchemeInformation>
+    <TSLVersionIdentifier>5</TSLVersionIdentifier>
+    <TSLSequenceNumber>338</TSLSequenceNumber>
+    <TSLType>http://uri.etsi.org/TrstSvc/TrustedList/TSLType/EUlistofthelists</TSLType>
+    <SchemeOperatorName><Name xml:lang="en">European Commission</Name></SchemeOperatorName>
+    <SchemeName><Name xml:lang="en">EU List of the Lists</Name></SchemeName>
+    <SchemeTerritory>EU</SchemeTerritory>
+    <ListIssueDateTime>2024-01-15T00:00:00Z</ListIssueDateTime>
+    <NextUpdate><dateTime>2024-07-15T00:00:00Z</dateTime></NextUpdate>
+  </SchemeInformation>
+  <PointersToOtherTSL>
+    <OtherTSLPointer>
+      <TSLLocation>https://example.de/tsl-de.xml</TSLLocation>
+      <AdditionalInformation>
+        <OtherInformation><SchemeTerritory>DE</SchemeTerritory></OtherInformation>
+      </AdditionalInformation>
+    </OtherTSLPointer>
+    <OtherTSLPointer>
+      <TSLLocation>https://example.fr/tsl-fr.xml</TSLLocation>
+      <AdditionalInformation>
+        <OtherInformation><SchemeTerritory>FR</SchemeTerritory></OtherInformation>
+      </AdditionalInformation>
+    </OtherTSLPointer>
+  </PointersToOtherTSL>
+</TrustServiceStatusList>`;
+
+const LOTL_TSL = `<?xml version="1.0" encoding="UTF-8"?>
+<TrustServiceStatusList xmlns="http://uri.etsi.org/02231/v2#">
+  <SchemeInformation>
+    <TSLType>http://uri.etsi.org/TrstSvc/TrustedList/TSLType/schemes/DE</TSLType>
+    <SchemeOperatorName><Name xml:lang="en">Bundesnetzagentur</Name></SchemeOperatorName>
+    <SchemeName><Name xml:lang="en">German Trusted List</Name></SchemeName>
+    <SchemeTerritory>DE</SchemeTerritory>
+    <ListIssueDateTime>2024-02-01T00:00:00Z</ListIssueDateTime>
+  </SchemeInformation>
+  <TrustServiceProviderList>
+    <TrustServiceProvider>
+      <TSPInformation>
+        <TSPName><Name xml:lang="en">D-TRUST GmbH</Name></TSPName>
+      </TSPInformation>
+      <TSPServices>
+        <TSPService>
+          <ServiceInformation>
+            <ServiceTypeIdentifier>http://uri.etsi.org/TrstSvc/Svctype/CA/QC</ServiceTypeIdentifier>
+            <ServiceName><Name xml:lang="en">D-TRUST CA 3-1 2016</Name></ServiceName>
+            <ServiceDigitalIdentity>
+              <DigitalId><X509Certificate>MIIE3jCCBMagAwIBAgIDB9234B</X509Certificate></DigitalId>
+            </ServiceDigitalIdentity>
+            <ServiceStatus>http://uri.etsi.org/TrstSvc/TrustedList/Svcstatus/granted</ServiceStatus>
+            <StatusStartingTime>2017-01-01T00:00:00Z</StatusStartingTime>
+          </ServiceInformation>
+        </TSPService>
+      </TSPServices>
+    </TrustServiceProvider>
+  </TrustServiceProviderList>
+</TrustServiceStatusList>`;
+
+test('lotl: LOTL mode renders per-country pointers', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'lotl');
+  await page.fill('#lotl-input', LOTL_LIST);
+  await page.click('#btn-lotl-parse');
+  await expect(page.locator('#lotl-results')).toContainText(/LOTL/i, { timeout: 5_000 });
+  await expect(page.locator('#lotl-results')).toContainText('European Commission');
+  await expect(page.locator('#lotl-results')).toContainText('EU List of the Lists');
+  // Both country pointers should appear.
+  await expect(page.locator('#lotl-results')).toContainText('https://example.de/tsl-de.xml');
+  await expect(page.locator('#lotl-results')).toContainText('https://example.fr/tsl-fr.xml');
+  await expect(page.locator('#lotl-results')).toContainText('DE');
+  await expect(page.locator('#lotl-results')).toContainText('FR');
+});
+
+test('lotl: TSL mode renders TSP and services', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'lotl');
+  await page.fill('#lotl-input', LOTL_TSL);
+  await page.click('#btn-lotl-parse');
+  await expect(page.locator('#lotl-results')).toContainText(/TSL/i, { timeout: 5_000 });
+  await expect(page.locator('#lotl-results')).toContainText('Bundesnetzagentur');
+  await expect(page.locator('#lotl-results')).toContainText('D-TRUST GmbH');
+  await expect(page.locator('#lotl-results')).toContainText('CA/QC');
+  await expect(page.locator('#lotl-results')).toContainText(/granted/);
+  await expect(page.locator('#lotl-results')).toContainText(/Embedded X\.509/i);
+});
+
+test('lotl: rejects non-trust-list XML', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'lotl');
+  await page.fill('#lotl-input', '<?xml version="1.0"?><Document/>');
+  await page.click('#btn-lotl-parse');
+  await expect(page.locator('#lotl-results')).toContainText(/TrustServiceStatusList/i, { timeout: 5_000 });
+});
+
 // =============== Command palette (SPEC §1.6) ===============
 
 test('palette: Ctrl+K opens, Esc closes', async ({ page }) => {
