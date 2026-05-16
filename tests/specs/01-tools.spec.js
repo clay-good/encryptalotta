@@ -773,6 +773,80 @@ test('intl: BIC multi-tag list uses German "und" joiner via Intl.ListFormat', as
   await expect(page.locator('#bic-results')).toContainText(/Test-BIC.*und.*Hauptniederlassung/i, { timeout: 5_000 });
 });
 
+// =============== Command palette (SPEC §1.6) ===============
+
+test('palette: Ctrl+K opens, Esc closes', async ({ page }) => {
+  await page.goto('/index.html');
+  await expect(page.locator('#palette')).toBeHidden();
+  await page.keyboard.press('Control+k');
+  await expect(page.locator('#palette')).toBeVisible();
+  await expect(page.locator('#palette-input')).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#palette')).toBeHidden();
+});
+
+test('palette: synonym match — typing "swift" finds the BIC tool', async ({ page }) => {
+  await page.goto('/index.html');
+  await page.keyboard.press('Control+k');
+  await page.fill('#palette-input', 'swift');
+  // BIC's label is "BIC / SWIFT Code" in en — but the test is meaningful precisely because
+  // "swift" is registered as a synonym (a non-label search term).
+  const items = await page.locator('#palette-results li').allTextContents();
+  expect(items.length).toBeGreaterThan(0);
+  expect(items.some(t => /bic/i.test(t))).toBe(true);
+  // Enter navigates to the first match.
+  await page.keyboard.press('Enter');
+  await page.waitForFunction(() => location.hash === '#bic');
+  await expect(page.locator('#bic-view')).toBeVisible();
+});
+
+test('palette: synonym match — typing "epoch" finds the timestamp tool', async ({ page }) => {
+  await page.goto('/index.html');
+  await page.keyboard.press('Control+k');
+  await page.fill('#palette-input', 'epoch');
+  const items = await page.locator('#palette-results li').allTextContents();
+  expect(items.some(t => /timestamp|unix/i.test(t))).toBe(true);
+});
+
+test('palette: multi-term match — "ed key" finds the Ed25519 generator', async ({ page }) => {
+  // Multiple whitespace-separated terms are AND'd against the haystack.
+  await page.goto('/index.html');
+  await page.keyboard.press('Control+k');
+  await page.fill('#palette-input', 'ed signature');
+  const items = await page.locator('#palette-results li').allTextContents();
+  expect(items.some(t => /ed25519/i.test(t))).toBe(true);
+});
+
+test('palette: ArrowDown then Enter selects second match', async ({ page }) => {
+  await page.goto('/index.html');
+  await page.keyboard.press('Control+k');
+  await page.fill('#palette-input', 'key');
+  await page.locator('#palette-results li').first().waitFor();
+  const second = await page.locator('#palette-results li').nth(1).getAttribute('data-tool');
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('Enter');
+  await page.waitForFunction((t) => location.hash === '#' + t, second);
+});
+
+test('palette: empty state when nothing matches', async ({ page }) => {
+  await page.goto('/index.html');
+  await page.keyboard.press('Control+k');
+  await page.fill('#palette-input', 'zzzzznotarealtool');
+  await expect(page.locator('#palette-empty')).toBeVisible();
+  await expect(page.locator('#palette-results li')).toHaveCount(0);
+});
+
+test('palette: French locale label still matches French synonyms via fallback to English', async ({ page }) => {
+  // Synonyms are en-only by design (SPEC §1.6 — defer locale-specific synonyms until §1.3
+  // native review). A French user typing the English term "swift" should still find the BIC
+  // tool. The localized label is what they see in the result row.
+  await page.goto('/index.html');
+  await page.selectOption('#lang-select', 'fr');
+  await page.keyboard.press('Control+k');
+  await page.fill('#palette-input', 'swift');
+  await expect(page.locator('#palette-results li').first()).toContainText(/BIC/i);
+});
+
 test('rtl: home tool cards mirror under dir=rtl (logical properties)', async ({ page }) => {
   // SPEC §1.4 — exercise the logical-property refactor without shipping an RTL locale.
   // The arrow indicator on .tool-card::after is positioned via inset-inline-end, so under

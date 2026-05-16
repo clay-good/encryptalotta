@@ -1,6 +1,6 @@
 # Spec — International public-good extensions to encryptalotta
 
-Status: draft 14 (Phase 1 §1.4 logical-property CSS refactor + §1.5 full Intl coverage landed: every physical-direction CSS property in `index.html` is now logical; `Intl.NumberFormat` + `Intl.RelativeTimeFormat` + `Intl.PluralRules` + `Intl.ListFormat` are all wired — the last via the BIC validator's multi-tag row, which now joins prose tags with the locale's natural final connector ("test BIC and primary branch" / "Test-BIC und Hauptniederlassung" / "BIC de test et agence principale" / "测试 BIC和总行"); see §1.4 and §1.5 progress notes; Phase 4 complete except BLAKE3; Phase 5 distribution scripts + PWA precache service worker shipped; Phase 6 regulator presets shipped in PGP key generator + PBKDF2 tool + annual freshness audit covering both blocks; SECURITY.md + THREAT-MODEL.md published; GDPR-by-design /privacy.html published; regional hreflang aliases)
+Status: draft 15 (Phase 1 substantially complete: §1.4 logical-property CSS refactor + §1.5 full Intl coverage + §1.6 command palette landed. Every physical-direction CSS property in `index.html` is logical; `Intl.NumberFormat` + `Intl.RelativeTimeFormat` + `Intl.PluralRules` + `Intl.ListFormat` are all wired (PBKDF2 timing, CIDR / PGP key dates / relative timestamp / regex plurals / BIC multi-tag prose). The ⌘K / Ctrl+K command palette ships with 42 English synonym blocks + localized `palette.{title,placeholder,empty}` strings across all five locales; locale-specific synonyms deferred until §1.3 native reviewers are sourced — polyglot fallback ensures English synonyms always match. See §1.4, §1.5, §1.6 progress notes; Phase 4 complete except BLAKE3; Phase 5 distribution scripts + PWA precache service worker shipped; Phase 6 regulator presets shipped in PGP key generator + PBKDF2 tool + annual freshness audit covering both blocks; SECURITY.md + THREAT-MODEL.md published; GDPR-by-design /privacy.html published; regional hreflang aliases)
 Audience: maintainers and contributors
 Scope: how to extend encryptalotta.com so it serves an international audience — with a deliberate emphasis on Europe and other regions that lean heavily on open-source — without compromising the site's existing character (single-page, fully client-side, no analytics, no CDN, no tracking, no build step beyond a couple of vendored scripts).
 
@@ -221,7 +221,33 @@ The browser's `Intl` namespace handles this without dependencies. Touch points:
 - **`Intl.ListFormat`** — "share A, share B, and share C" / "share A, share B y share C". Surfaces in Shamir, QR multi-part output, multi-recipient encryption.
 - **`Intl.Collator`** — If the command palette ever sorts strings alphabetically per locale (German ß, Swedish å, Czech č all sort differently), use `Collator`. Not urgent.
 
-### 1.6 Command-palette synonyms
+### 1.6 Command-palette synonyms — **🟡 palette + en synonyms shipped (draft 15); locale-specific synonyms deferred**
+
+**Status notes (draft 15):** The command palette landed end-to-end:
+
+- **UI** — a modal dialog (`#palette` / `#palette-overlay`) with overlay, accessible title (`role="dialog"`, `aria-modal="true"`, `aria-labelledby`), search input, and a `role="listbox"` results list. Hidden by default; CSS uses logical properties (`inset-inline`, `margin-inline: auto`) so RTL just works once an RTL locale ships. ~14 lines of CSS, ~13 lines of HTML.
+- **Trigger** — `⌘K` on macOS, `Ctrl+K` elsewhere. The document-level `keydown` listener skips when `e.isComposing` so multibyte IME composition (Chinese / Japanese / Korean) isn't stolen.
+- **Filter** — for each entry in `TOOL_ORDER`, the haystack is `tool-id + localized-label + English-synonyms`, all run through `toLocaleLowerCase(lang)` for locale-correct case folding (Turkish dotted i, German ß, etc.). Multiple whitespace-separated query terms are AND'd against the haystack.
+- **Keyboard** — `ArrowDown` / `ArrowUp` cycle the active result; `Enter` navigates via `location.hash`; `Esc` closes; click on the overlay closes; mouse hover updates the highlight via CSS.
+- **Synonyms** — `TOOL_SYNONYMS` is a flat JS object keyed by tool id, 42 entries, English only. Whitespace-separated tokens so the source reads like search keywords, not prose. The spec is emphatic that locale-specific synonyms (`chiffrer` / `cifrar` / `verschlüsseln` / `암호화` / etc.) are the single most error-prone localization gap and should ship en-only first — and that polyglot users typing English should always work in every locale. Both invariants are preserved.
+- **Strings** — three new UI strings (`palette.title`, `palette.placeholder`, `palette.empty`) added to all five locales (en/fr/de/zh-CN/hi). Locked against the §1.7 glossary where the terms apply (German `Befehlspalette` / `Werkzeuge`; French `palette de commandes` / `outils`). STRINGS now 1101 keys × 5 locales (up from 1098).
+
+Seven new Playwright cases cover the slice:
+
+1. `Ctrl+K` opens; `Esc` closes; input is focused.
+2. Synonym `"swift"` finds the BIC tool; `Enter` navigates.
+3. Synonym `"epoch"` finds the timestamp tool.
+4. Multi-term `"ed signature"` finds Ed25519.
+5. `ArrowDown` then `Enter` selects the second match.
+6. `"zzzzznotarealtool"` shows the empty state.
+7. French locale + English query (`"swift"`) still matches via the en-synonym fallback (proves the polyglot invariant).
+
+Full Playwright suite: 223 passed.
+
+**Deferred to a follow-up:**
+
+- **Per-locale synonyms.** The spec lists illustrative French / German / Spanish / Polish / Arabic / Japanese / Russian / Portuguese examples per tool. Implementing these is gated on §1.3 native review per locale — the failure mode (`crypter` as a French synonym for `encrypt` when `chiffrer` is the actual term used by French cryptographers; `cifrar` vs. `encriptar` for Spanish) is exactly the textbook MT failure the spec warns against. Will be added incrementally as native reviewers come online per locale.
+- **Synonym schema in the CSV.** Locale-specific synonyms, when they arrive, will plug into the existing STRINGS table with a `nav.tool.<id>.synonyms` key. The audit script's en-only carve-out (currently scoped to `tool.<id>.{title,metaDescription,about.{what,how,why}}`) will be extended to allow synonyms to drop to en-only when a locale hasn't been reviewed yet — same pattern as the existing SEO prose carve-out.
 
 The `⌘K` command palette currently matches against English tool names. A French user typing "chiffrer" finds nothing. Fix:
 
@@ -628,7 +654,7 @@ Each phase is independent. Stop after any phase; nothing below requires the next
 
 1. ✅ Logical-property CSS refactor for RTL readiness (§1.4) — shipped draft 13. RTL runtime flip + icon mirroring + LTR code-block embedding deferred until the first RTL locale is queued.
 2. ✅ `Intl.PluralRules` / `Intl.RelativeTimeFormat` / `Intl.ListFormat` integration (§1.5) — three slices shipped (drafts 11, 12, 14). `Intl.NumberFormat` + `Intl.RelativeTimeFormat` drive PBKDF2 timing, CIDR address counts, PGP key dates, and the Unix-timestamp relative phrasing. `Intl.PluralRules` powers the regex match-count row. `Intl.ListFormat` powers the BIC multi-tag row. Remaining `.join(', ')` sites are technical lists where the locale's "and" / "und" / "et" final-joiner would feel wrong; the passphrase-strength prose case is deferred until its issue strings are translated.
-3. Command-palette synonym field added to the `STRINGS` schema (§1.6).
+3. 🟡 Command-palette synonym field added to the `STRINGS` schema (§1.6) — palette + 42 English synonym blocks + 3 localized UI strings × 5 locales shipped draft 15. Locale-specific synonyms (`chiffrer` / `cifrar` / etc.) deferred until §1.3 native reviewers are sourced.
 4. CSV schema extended for plural categories (§1.5).
 
 ### Phase 2 — Tier 1 locales
@@ -671,6 +697,8 @@ All ~1-day implementations. Roughly doubles the site's tool count for a small fr
 `scripts/audit-release.js` extended to validate both artifacts: SBOM hashes are cross-checked against on-disk vendored bytes; the portable build is verified to contain zero `<script src=>` references. Both checks are soft — they only fire if the artifact is present, so contributors aren't forced to regenerate on every commit.
 
 No runtime changes; full Playwright suite still 206 passed.
+
+**Progress (draft 15):** Phase 1 §1.6 command palette shipped end-to-end. Modal dialog (~14 lines of CSS, 13 lines of HTML) with `role="dialog"` / `aria-modal` / `aria-labelledby` + `role="listbox"` results, triggered by `⌘K` / `Ctrl+K`, closes on `Esc` / overlay-click. Filter haystack = tool-id + localized label + English synonyms, locale-folded via `toLocaleLowerCase(lang)`; multi-term queries AND'd. `TOOL_SYNONYMS` ships English-only (42 entries) per the §1.6 directive to defer locale-specific synonyms until §1.3 native review — polyglot fallback ensures English queries always match in any locale. Three new UI strings (`palette.title`, `palette.placeholder`, `palette.empty`) translated for all five locales; STRINGS now 1101 keys × 5 locales. Seven new Playwright cases (Ctrl+K open/Esc close, "swift" → BIC, "epoch" → timestamp, multi-term "ed signature" → Ed25519, ArrowDown+Enter, empty state, fr + en-query polyglot invariant). Full suite: 223 passed.
 
 **Progress (draft 14):** Phase 1 §1.5 third slice — first `Intl.ListFormat` call-site. The BIC validator's multi-tag row now reads `intlList(r.tags)` instead of `r.tags.join(', ')`, so a German-locale BIC with location ending in `0` and branch `XXX` renders as `Test-BIC (Ort endet auf 0) und Hauptniederlassung (XXX)`. Other `.join(', ')` sites (TLS SANs, CIDR / cron internal fields, X.509 DN parts) intentionally left alone because they are technical token lists, not prose. One new Playwright case asserts the German `und` connector. Full suite: 216 passed. With this slice, all four `Intl.*` helpers (`NumberFormat`, `RelativeTimeFormat`, `PluralRules`, `ListFormat`) have at least one production call-site; §1.5 is closed for Phase 1.
 

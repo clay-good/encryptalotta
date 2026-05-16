@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <!--
   encryptalotta — single-file portable build
-  Source mtime: 2026-05-16T13:34:39.551Z
-  Source: index.html (SHA-256: f618a5d6c2666d3d6e3852592570ade04856679e6d890d2b4e3ea024472e6761)
+  Source mtime: 2026-05-16T16:35:21.284Z
+  Source: index.html (SHA-256: 2f149e322806de00b519cbc48c4942a3c86da769eeb8701e5cb4acd04896bd53)
   All vendored JavaScript inlined; favicons inlined as data: URIs.
   Identical functionality to the live site at https://encryptalotta.com.
   Runs from file://, USB stick, chat attachment, anywhere. No network calls.
@@ -3506,6 +3506,19 @@ var qrcode = function() {
             text-align: center;
             font-weight: 600;
         }
+
+        /* ===== Command palette (SPEC §1.6) ===== */
+        .palette-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 998; -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); }
+        .palette { position: fixed; top: 12vh; inset-inline: 0; margin-inline: auto; width: min(560px, 92vw); max-height: 70vh; background: var(--bg-secondary); border: 1px solid var(--border-light); border-radius: 12px; box-shadow: 0 24px 60px rgba(0,0,0,0.35); z-index: 999; display: flex; flex-direction: column; overflow: hidden; }
+        .palette.hidden, .palette-overlay.hidden { display: none; }
+        .palette-header { padding: 12px 16px 0; }
+        .palette-title { margin: 0; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.16em; color: var(--text-muted); font-weight: 700; }
+        #palette-input { margin: 10px 16px 12px; padding: 10px 12px; background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border); border-radius: 8px; font: inherit; }
+        #palette-input:focus { outline: 2px solid var(--text-primary); outline-offset: 1px; }
+        .palette-results { list-style: none; margin: 0; padding: 4px 0 8px; overflow-y: auto; flex: 1; }
+        .palette-results li { padding: 8px 16px; cursor: pointer; font-size: 0.92rem; color: var(--text-primary); border: 0; background: transparent; }
+        .palette-results li.is-active, .palette-results li:hover { background: var(--bg-tertiary); }
+        .palette-empty { padding: 18px 16px 22px; color: var(--text-muted); font-size: 0.9rem; text-align: center; }
     </style>
 </head>
 <body>
@@ -5476,6 +5489,19 @@ var qrcode = function() {
         </a>
     </footer>
 
+    <!-- Command palette (SPEC §1.6). Hidden by default; toggled by ⌘K / Ctrl+K. -->
+    <div id="palette-overlay" class="palette-overlay hidden" role="presentation"></div>
+    <div id="palette" class="palette hidden" role="dialog" aria-modal="true" aria-labelledby="palette-title">
+        <div class="palette-header">
+            <h2 id="palette-title" class="palette-title" data-i18n="palette.title">Command palette</h2>
+        </div>
+        <input id="palette-input" type="text" autocomplete="off" spellcheck="false"
+               data-i18n-attr="placeholder:palette.placeholder,aria-label:palette.placeholder"
+               placeholder="Search tools…">
+        <ul id="palette-results" class="palette-results" role="listbox" aria-labelledby="palette-title"></ul>
+        <div id="palette-empty" class="palette-empty hidden" data-i18n="palette.empty">No matching tools.</div>
+    </div>
+
     <script>
         // ==================== INTERNATIONALIZATION (i18n) ====================
         // Wave 1: chrome strings (title/meta, header, nav, view headings, primary CTAs).
@@ -5537,6 +5563,9 @@ var qrcode = function() {
                 'footer.creditAria': 'Made with love by Clay Good — claygood.com',
                 'footer.privacy': 'Privacy',
                 'footer.privacyAria': 'Privacy policy — encryptalotta.com/privacy.html',
+                'palette.title': 'Command palette',
+                'palette.placeholder': 'Search tools…',
+                'palette.empty': 'No matching tools.',
                 'breadcrumb.allTools': '← All tools',
                 'breadcrumb.backAria': 'Back to all tools',
                 // -------- Phase 6 Batch A --------
@@ -6663,6 +6692,9 @@ var qrcode = function() {
                 'footer.creditAria': 'Réalisé avec amour par Clay Good — claygood.com',
                 'footer.privacy': 'Confidentialité',
                 'footer.privacyAria': 'Politique de confidentialité — encryptalotta.com/privacy.html',
+                'palette.title': 'Palette de commandes',
+                'palette.placeholder': 'Rechercher des outils…',
+                'palette.empty': 'Aucun outil correspondant.',
                 'breadcrumb.allTools': '← Tous les outils',
                 'breadcrumb.backAria': 'Retour à tous les outils',
                 // -------- Phase 6 Batch A --------
@@ -7580,6 +7612,9 @@ var qrcode = function() {
                 'footer.creditAria': '由 Clay Good 用爱制作 — claygood.com',
                 'footer.privacy': '隐私',
                 'footer.privacyAria': '隐私政策 — encryptalotta.com/privacy.html',
+                'palette.title': '命令面板',
+                'palette.placeholder': '搜索工具…',
+                'palette.empty': '没有匹配的工具。',
                 'breadcrumb.allTools': '← 所有工具',
                 'breadcrumb.backAria': '返回所有工具',
                 // -------- Phase 6 Batch A --------
@@ -8482,6 +8517,9 @@ var qrcode = function() {
                 'footer.creditAria': 'Mit Liebe gemacht von Clay Good — claygood.com',
                 'footer.privacy': 'Datenschutz',
                 'footer.privacyAria': 'Datenschutzerklärung — encryptalotta.com/privacy.html',
+                'palette.title': 'Befehlspalette',
+                'palette.placeholder': 'Werkzeuge suchen…',
+                'palette.empty': 'Keine passenden Werkzeuge.',
                 'breadcrumb.allTools': '← Alle Tools',
                 'breadcrumb.backAria': 'Zurück zu allen Werkzeugen',
                 // -------- Phase 6 Batch A --------
@@ -9399,6 +9437,9 @@ var qrcode = function() {
                 'footer.creditAria': 'Clay Good द्वारा प्यार से बनाया गया — claygood.com',
                 'footer.privacy': 'गोपनीयता',
                 'footer.privacyAria': 'गोपनीयता नीति — encryptalotta.com/privacy.html',
+                'palette.title': 'कमांड पैलेट',
+                'palette.placeholder': 'टूल खोजें…',
+                'palette.empty': 'कोई मेल खाने वाला टूल नहीं।',
                 'breadcrumb.allTools': '← सभी टूल',
                 'breadcrumb.backAria': 'सभी टूल पर वापस जाएँ',
                 // -------- Phase 6 Batch A --------
@@ -10634,6 +10675,57 @@ var qrcode = function() {
             'ed25519', 'x25519'
         ];
 
+        // English-only synonyms for the command palette (SPEC §1.6). Whitespace-separated tokens;
+        // they augment the localized nav label so a polyglot user typing "swift" finds the BIC tool
+        // and a French user typing "rsa" still finds the key generator. Locale-specific synonyms
+        // (chiffrer / cifrar / verschlüsseln / 加密 / जोड़ें-typing) are deferred until a §1.3
+        // native reviewer is in the loop for each locale — the spec flags this as the single most
+        // error-prone localization gap and explicitly recommends shipping en-only first.
+        const TOOL_SYNONYMS = {
+            'generate':         'pgp keygen openpgp ecc curve25519 rsa gpg keys keypair',
+            'key-info':         'fingerprint inspect parse pgp key viewer openpgp',
+            'revoke':           'revocation certificate revoke openpgp',
+            'qr':               'qrcode qr-code share key multi-qr',
+            'tls-cert':         'x509 x.509 certificate ssl pem der san fingerprint',
+            'ssh-key':          'openssh ed25519 ecdsa authorized_keys fingerprint',
+            'pem-der':          'pem-to-der der-to-pem converter encoding',
+            'bip39':            'mnemonic seed phrase wallet cryptocurrency recovery bitcoin ethereum',
+            'encrypt':          'pgp encrypt openpgp gpg file message',
+            'decrypt':          'pgp decrypt openpgp gpg file message',
+            'text-crypto':      'text encryption message encrypt decrypt',
+            'password-encrypt': 'password encryption symmetric aes openpgp',
+            'stego':            'steganography hide payload lsb png image',
+            'sign':             'signature pgp openpgp detached cleartext',
+            'verify':           'signature verification pgp openpgp',
+            'hmac':             'hash mac message authentication code sha256 sha512',
+            'jwt':              'json web token jws jose decoder inspector hs256 rs256 es256',
+            'passwords':        'password generator passphrase diceware random',
+            'armor':            'ascii armor pgp openpgp converter',
+            'shamir':           'secret sharing k-of-n split secret threshold',
+            'exif':             'metadata photo gps image privacy strip remove',
+            'hash':             'checksum sha-1 sha-256 sha-384 sha-512 blake2b digest',
+            'encode':           'base64 base58 base32 hex encoder decoder url-encode',
+            'uuid':             'ulid guid identifier uuidv4 uuidv7 rfc9562',
+            'timestamp':        'epoch unix time iso8601 date converter relative',
+            'url':              'parser query string percent encoding decode',
+            'totp':             '2fa otp authenticator rfc6238 otpauth google-authenticator',
+            'diff':             'text diff compare side-by-side patch',
+            'csv':              'json tsv converter rfc4180 spreadsheet',
+            'regex':            'regular expression pattern regexp match tester',
+            'cron':             'crontab schedule cron expression next-run',
+            'color':            'hex rgb hsl oklch wcag contrast palette accessibility',
+            'format':           'json yaml xml formatter pretty minify',
+            'cidr':             'subnet ipv4 network broadcast rfc1918 calculator',
+            'pbkdf2':           'key derivation kdf password hash rfc8018',
+            'base':             'number base binary octal decimal hex radix bigint',
+            'iban':             'bank account international european banking mod-97',
+            'bic':              'swift swift-code iso9362 bank-identifier',
+            'gs1':              'ean ean-13 upc gtin barcode sscc',
+            'vat':              'tax-id vat-number vies eu-vat ust-idnr',
+            'ed25519':          'eddsa signature rfc8032 web-crypto',
+            'x25519':           'ecdh key-exchange rfc7748 hkdf web-crypto'
+        };
+
         function isValidTool(t) { return Object.prototype.hasOwnProperty.call(TOOL_TO_GROUP, t); }
 
         function setActiveTool(tool) {
@@ -10752,6 +10844,104 @@ var qrcode = function() {
         document.getElementById('lang-select').addEventListener('change', (e) => {
             setLang(e.target.value);
             refreshBreadcrumb();
+        });
+
+        // ==================== Command palette (SPEC §1.6) ====================
+        // ⌘K / Ctrl+K opens an overlay search; results filter against tool id, localized label,
+        // and English synonyms (TOOL_SYNONYMS). Locale folding via toLocaleLowerCase(lang) so the
+        // German user typing "Verschlüsseln" matches just as well as one typing "verschlüsseln".
+        const palette = {
+            overlay: document.getElementById('palette-overlay'),
+            panel:   document.getElementById('palette'),
+            input:   document.getElementById('palette-input'),
+            results: document.getElementById('palette-results'),
+            empty:   document.getElementById('palette-empty'),
+            active:  -1,
+            matches: []
+        };
+
+        function paletteIsOpen() { return !palette.panel.classList.contains('hidden'); }
+
+        function paletteOpen() {
+            palette.overlay.classList.remove('hidden');
+            palette.panel.classList.remove('hidden');
+            palette.input.value = '';
+            paletteRender('');
+            // Focus the input after the next frame so the keydown that triggered ⌘K doesn't
+            // get re-dispatched into the freshly-focused field.
+            setTimeout(() => palette.input.focus(), 0);
+        }
+
+        function paletteClose() {
+            palette.overlay.classList.add('hidden');
+            palette.panel.classList.add('hidden');
+        }
+
+        function paletteRender(q) {
+            const lang = intlLang();
+            const norm = s => (s || '').toLocaleLowerCase(lang);
+            const terms = norm(q).split(/\s+/).filter(Boolean);
+            const matches = [];
+            for (const tool of TOOL_ORDER) {
+                const label = t('nav.tool.' + tool) || tool;
+                const syn = TOOL_SYNONYMS[tool] || '';
+                const haystack = norm(tool + ' ' + label + ' ' + syn);
+                if (terms.length === 0 || terms.every(term => haystack.includes(term))) {
+                    matches.push({ tool, label });
+                }
+            }
+            palette.matches = matches;
+            palette.active = matches.length ? 0 : -1;
+            while (palette.results.firstChild) palette.results.removeChild(palette.results.firstChild);
+            matches.forEach((m, i) => {
+                const li = document.createElement('li');
+                li.textContent = m.label;
+                li.setAttribute('role', 'option');
+                li.id = 'palette-opt-' + m.tool;
+                li.dataset.tool = m.tool;
+                if (i === palette.active) li.classList.add('is-active');
+                li.addEventListener('mousedown', (e) => { e.preventDefault(); paletteSelect(m.tool); });
+                palette.results.appendChild(li);
+            });
+            palette.empty.classList.toggle('hidden', matches.length > 0);
+        }
+
+        function paletteSelect(tool) {
+            paletteClose();
+            location.hash = '#' + tool;
+        }
+
+        function paletteMove(delta) {
+            if (!palette.matches.length) return;
+            palette.active = (palette.active + delta + palette.matches.length) % palette.matches.length;
+            Array.from(palette.results.children).forEach((li, i) => {
+                const isActive = i === palette.active;
+                li.classList.toggle('is-active', isActive);
+                if (isActive) li.scrollIntoView({ block: 'nearest' });
+            });
+        }
+
+        palette.input.addEventListener('input', (e) => paletteRender(e.target.value));
+        palette.input.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape')          { e.preventDefault(); paletteClose(); }
+            else if (e.key === 'ArrowDown')  { e.preventDefault(); paletteMove(1); }
+            else if (e.key === 'ArrowUp')    { e.preventDefault(); paletteMove(-1); }
+            else if (e.key === 'Enter') {
+                e.preventDefault();
+                const m = palette.matches[palette.active];
+                if (m) paletteSelect(m.tool);
+            }
+        });
+        palette.overlay.addEventListener('click', paletteClose);
+
+        document.addEventListener('keydown', (e) => {
+            // ⌘K on Mac, Ctrl+K elsewhere. Skip when the user is composing IME text so multibyte
+            // input methods don't have their composition stolen.
+            if ((e.metaKey || e.ctrlKey) && !e.altKey && !e.shiftKey && (e.key === 'k' || e.key === 'K')) {
+                if (e.isComposing) return;
+                e.preventDefault();
+                if (paletteIsOpen()) paletteClose(); else paletteOpen();
+            }
         });
 
         // Theme toggle (sun/moon). Pre-paint script in <head> already applied the
