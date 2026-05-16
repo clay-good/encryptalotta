@@ -287,6 +287,30 @@ test('sd-jwt: flags an unreferenced (orphaned) disclosure', async ({ page }) => 
   await expect(page.locator('#jwt-results')).toContainText(/unreferenced/i);
 });
 
+test('sd-jwt: renders cleartext reconstructed payload with disclosed claims merged', async ({ page }) => {
+  const errs=[]; autoDismissDialogs(page, errs);
+  await page.goto('/index.html'); await gotoTool(page, 'jwt');
+  const sdjwt = buildSdJwt([
+    ['salt-a', 'given_name', 'Alice'],
+    ['salt-b', 'birthdate', '1990-02-29'],
+  ], { iss: 'https://issuer.example' });
+  await page.fill('#jwt-input', sdjwt);
+  await page.click('#btn-jwt-decode');
+  // Wait for the reconstructed block, then read the <pre> immediately following its header.
+  await expect(page.locator('#jwt-results')).toContainText(/Disclosed payload/i, { timeout: 5_000 });
+  const reconstructedText = await page.evaluate(() => {
+    const head = document.querySelector('#jwt-results [data-i18n="jwt.sdjwt.reconstructed"]');
+    return head && head.nextElementSibling ? head.nextElementSibling.textContent : '';
+  });
+  const parsed = JSON.parse(reconstructedText);
+  expect(parsed.given_name).toBe('Alice');
+  expect(parsed.birthdate).toBe('1990-02-29');
+  expect(parsed.iss).toBe('https://issuer.example');
+  // _sd and _sd_alg should be stripped from the reconstructed view.
+  expect(parsed._sd).toBeUndefined();
+  expect(parsed._sd_alg).toBeUndefined();
+});
+
 test('sd-jwt: surfaces a key-binding JWT when present', async ({ page }) => {
   const errs=[]; autoDismissDialogs(page, errs);
   await page.goto('/index.html'); await gotoTool(page, 'jwt');

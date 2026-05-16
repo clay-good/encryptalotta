@@ -3467,6 +3467,7 @@
                 'jwt.sdjwt.arrayElem': '(array element)',
                 'jwt.sdjwt.kbJwt': 'Key-binding JWT (KB-JWT)',
                 'jwt.sdjwt.parseErr': 'Parse error',
+                'jwt.sdjwt.reconstructed': 'Disclosed payload (reconstructed)',
                 'btn.jwtDecode': 'Decode',
                 'btn.jwtVerify': 'Verify Signature',
                 'err.jwtEmpty': 'Paste a JWT first',
@@ -4728,6 +4729,7 @@
                 'jwt.sdjwt.arrayElem': '(élément de tableau)',
                 'jwt.sdjwt.kbJwt': 'JWT de liaison de clé (KB-JWT)',
                 'jwt.sdjwt.parseErr': 'Erreur d’analyse',
+                'jwt.sdjwt.reconstructed': 'Charge utile divulguée (reconstruite)',
                 'btn.jwtDecode': 'Décoder',
                 'btn.jwtVerify': 'Vérifier la signature',
                 'err.jwtEmpty': 'Collez un JWT',
@@ -5765,6 +5767,7 @@
                 'jwt.sdjwt.arrayElem': '（数组元素）',
                 'jwt.sdjwt.kbJwt': '密钥绑定 JWT (KB-JWT)',
                 'jwt.sdjwt.parseErr': '解析错误',
+                'jwt.sdjwt.reconstructed': '披露后的 payload（重建）',
                 'btn.jwtDecode': '解码',
                 'btn.jwtVerify': '验证签名',
                 'err.jwtEmpty': '请先粘贴 JWT',
@@ -6787,6 +6790,7 @@
                 'jwt.sdjwt.arrayElem': '(Array-Element)',
                 'jwt.sdjwt.kbJwt': 'Key-Binding-JWT (KB-JWT)',
                 'jwt.sdjwt.parseErr': 'Analysefehler',
+                'jwt.sdjwt.reconstructed': 'Offengelegte Payload (rekonstruiert)',
                 'btn.jwtDecode': 'Dekodieren',
                 'btn.jwtVerify': 'Signatur verifizieren',
                 'err.jwtEmpty': 'JWT zuerst einfügen',
@@ -7824,6 +7828,7 @@
                 'jwt.sdjwt.arrayElem': '(सरणी तत्व)',
                 'jwt.sdjwt.kbJwt': 'की-बाइंडिंग JWT (KB-JWT)',
                 'jwt.sdjwt.parseErr': 'पार्स त्रुटि',
+                'jwt.sdjwt.reconstructed': 'प्रकट किया गया पेलोड (पुनर्निर्मित)',
                 'btn.jwtDecode': 'डिकोड',
                 'btn.jwtVerify': 'हस्ताक्षर सत्यापित करें',
                 'err.jwtEmpty': 'पहले JWT पेस्ट करें',
@@ -12633,6 +12638,9 @@
             wrap.appendChild(h);
 
             const enc = new TextEncoder();
+            // digest → { name?: string, value: any, isArrayElem: bool } — fed to the
+            // cleartext-payload reconstruction pass after the disclosure table is rendered.
+            const digestMap = new Map();
             for (let i = 0; i < disclosures.length; i++) {
                 const raw = disclosures[i];
                 let arr = null, parseErr = null;
@@ -12645,11 +12653,7 @@
                 // disclosure as it appears on the wire — not the decoded JSON. This
                 // is what §5.1.1 of the SD-JWT draft mandates.
                 const digestBytes = new Uint8Array(await crypto.subtle.digest(subtleAlg, enc.encode(raw)));
-                // Inline base64url — the file ships two `bytesToBase64` functions and the
-                // second-defined one (which ignores the `urlSafe` flag) wins by hoisting.
-                let digestBin = '';
-                for (let j = 0; j < digestBytes.length; j++) digestBin += String.fromCharCode(digestBytes[j]);
-                const digest = btoa(digestBin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+                const digest = bytesToBase64(digestBytes, true);
                 const matched = claimedDigests.has(digest);
 
                 const sep = document.createElement('div');
@@ -12663,15 +12667,69 @@
                     continue;
                 }
                 // Disclosure shape: [salt, name, value] for object claims, [salt, value] for array elements.
-                let name = '', value;
+                let name = '', value, isArrayElem = false;
                 if (Array.isArray(arr) && arr.length === 3) { name = String(arr[1]); value = arr[2]; }
-                else if (Array.isArray(arr) && arr.length === 2) { name = t('jwt.sdjwt.arrayElem'); value = arr[1]; }
+                else if (Array.isArray(arr) && arr.length === 2) { name = t('jwt.sdjwt.arrayElem'); value = arr[1]; isArrayElem = true; }
                 else { name = '?'; value = arr; }
                 const salt = Array.isArray(arr) ? String(arr[0]) : '';
+                digestMap.set(digest, { name: isArrayElem ? null : (Array.isArray(arr) && arr.length === 3 ? String(arr[1]) : null), value, isArrayElem });
                 tlsRenderRow(wrap, t('jwt.sdjwt.colName'), name);
                 tlsRenderRow(wrap, t('jwt.sdjwt.colValue'), typeof value === 'object' ? JSON.stringify(value) : String(value));
                 tlsRenderRow(wrap, t('jwt.sdjwt.colSalt'), salt);
                 tlsRenderRow(wrap, t('jwt.sdjwt.colDigest'), digest + '  (' + t(matched ? 'jwt.sdjwt.matched' : 'jwt.sdjwt.orphan') + ')');
+            }
+
+            // Cleartext-payload reconstruction (SD-JWT draft §7). Each `_sd` entry is
+            // replaced by its disclosed claim (name/value); array `{"...": digest}`
+            // placeholders are replaced by the disclosed array element. Digests
+            // without a matching disclosure are dropped (a verifier would do the
+            // same — they were issued but the holder chose not to disclose).
+            if (digestMap.size) {
+                function reconstruct(node) {
+                    if (Array.isArray(node)) {
+                        const out = [];
+                        for (const el of node) {
+                            if (el && typeof el === 'object' && !Array.isArray(el) && Object.keys(el).length === 1 && typeof el['...'] === 'string') {
+                                const hit = digestMap.get(el['...']);
+                                if (hit && hit.isArrayElem) out.push(reconstruct(hit.value));
+                                // else: digest not disclosed → omit the array slot
+                            } else {
+                                out.push(reconstruct(el));
+                            }
+                        }
+                        return out;
+                    }
+                    if (node && typeof node === 'object') {
+                        const out = {};
+                        for (const k of Object.keys(node)) {
+                            if (k === '_sd' && Array.isArray(node[k])) {
+                                for (const d of node[k]) {
+                                    if (typeof d !== 'string') continue;
+                                    const hit = digestMap.get(d);
+                                    if (hit && !hit.isArrayElem && hit.name) out[hit.name] = reconstruct(hit.value);
+                                }
+                                continue;
+                            }
+                            if (k === '_sd_alg') continue;
+                            out[k] = reconstruct(node[k]);
+                        }
+                        return out;
+                    }
+                    return node;
+                }
+                const reconstructed = reconstruct(payload);
+                const recWrap = document.createElement('div');
+                recWrap.style.cssText = 'margin-top: 18px;';
+                const recH = document.createElement('div');
+                recH.style.cssText = 'font-weight: 700; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 6px;';
+                recH.dataset.i18n = 'jwt.sdjwt.reconstructed';
+                recH.textContent = t('jwt.sdjwt.reconstructed');
+                const recPre = document.createElement('pre');
+                recPre.style.cssText = 'background: var(--bg-tertiary); padding: 12px 14px; border-radius: 8px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.82rem; white-space: pre-wrap; word-break: break-all; margin: 0; color: var(--text-primary);';
+                recPre.textContent = JSON.stringify(reconstructed, null, 2);
+                recWrap.appendChild(recH);
+                recWrap.appendChild(recPre);
+                wrap.appendChild(recWrap);
             }
 
             if (kbJwt) {
@@ -14146,12 +14204,6 @@
             const out = new Uint8Array(clean.length / 2);
             for (let i = 0; i < out.length; i++) out[i] = parseInt(clean.substr(i * 2, 2), 16);
             return out;
-        }
-
-        function bytesToBase64(bytes) {
-            let s = '';
-            for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
-            return btoa(s);
         }
 
         document.getElementById('btn-pbkdf2-derive').addEventListener('click', async () => {
