@@ -773,6 +773,107 @@ test('intl: BIC multi-tag list uses German "und" joiner via Intl.ListFormat', as
   await expect(page.locator('#bic-results')).toContainText(/Test-BIC.*und.*Hauptniederlassung/i, { timeout: 5_000 });
 });
 
+// =============== SEPA ISO 20022 inspector (SPEC §2.4) ===============
+
+const SEPA_PAIN001 = `<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.001.001.03">
+  <CstmrCdtTrfInitn>
+    <GrpHdr>
+      <MsgId>MSG-2024-001</MsgId>
+      <CreDtTm>2024-01-15T10:30:00</CreDtTm>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>100.00</CtrlSum>
+      <InitgPty><Nm>ACME Corp</Nm></InitgPty>
+    </GrpHdr>
+    <PmtInf>
+      <PmtInfId>PAY-001</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <ReqdExctnDt>2024-01-20</ReqdExctnDt>
+      <Dbtr><Nm>ACME Corp</Nm></Dbtr>
+      <DbtrAcct><Id><IBAN>DE89370400440532013000</IBAN></Id></DbtrAcct>
+      <DbtrAgt><FinInstnId><BIC>COBADEFFXXX</BIC></FinInstnId></DbtrAgt>
+      <CdtTrfTxInf>
+        <PmtId><EndToEndId>E2E-001</EndToEndId></PmtId>
+        <Amt><InstdAmt Ccy="EUR">100.00</InstdAmt></Amt>
+        <CdtrAgt><FinInstnId><BIC>DEUTDEFFXXX</BIC></FinInstnId></CdtrAgt>
+        <Cdtr><Nm>Supplier GmbH</Nm></Cdtr>
+        <CdtrAcct><Id><IBAN>DE91100000000123456789</IBAN></Id></CdtrAcct>
+        <RmtInf><Ustrd>Invoice 2024-001</Ustrd></RmtInf>
+      </CdtTrfTxInf>
+    </PmtInf>
+  </CstmrCdtTrfInitn>
+</Document>`;
+
+const SEPA_CAMT053 = `<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.053.001.02">
+  <BkToCstmrStmt>
+    <GrpHdr>
+      <MsgId>STMT-2024-Q1</MsgId>
+      <CreDtTm>2024-04-01T08:00:00</CreDtTm>
+    </GrpHdr>
+    <Stmt>
+      <Id>STMT-001</Id>
+      <Acct><Id><IBAN>DE89370400440532013000</IBAN></Id></Acct>
+      <Bal>
+        <Tp><CdOrPrtry><Cd>OPBD</Cd></CdOrPrtry></Tp>
+        <Amt Ccy="EUR">1000.00</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+      </Bal>
+      <Bal>
+        <Tp><CdOrPrtry><Cd>CLBD</Cd></CdOrPrtry></Tp>
+        <Amt Ccy="EUR">1200.50</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+      </Bal>
+      <Ntry>
+        <Amt Ccy="EUR">200.50</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <BookgDt><Dt>2024-03-15</Dt></BookgDt>
+      </Ntry>
+    </Stmt>
+  </BkToCstmrStmt>
+</Document>`;
+
+test('sepa: pain.001 parses headers, transactions, and IBANs', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  await page.fill('#sepa-input', SEPA_PAIN001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText('pain.001', { timeout: 5_000 });
+  await expect(page.locator('#sepa-results')).toContainText('MSG-2024-001');
+  await expect(page.locator('#sepa-results')).toContainText('E2E-001');
+  await expect(page.locator('#sepa-results')).toContainText('Supplier GmbH');
+  await expect(page.locator('#sepa-results')).toContainText('100.00 EUR');
+  await expect(page.locator('#sepa-results')).toContainText('Invoice 2024-001');
+  // Both IBANs in the document should pass MOD-97.
+  await expect(page.locator('#sepa-results')).toContainText(/IBAN MOD-97 valid/i);
+});
+
+test('sepa: camt.053 parses statement balances and entries', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  await page.fill('#sepa-input', SEPA_CAMT053);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText('camt.053', { timeout: 5_000 });
+  await expect(page.locator('#sepa-results')).toContainText('STMT-001');
+  await expect(page.locator('#sepa-results')).toContainText('1000.00 EUR');
+  await expect(page.locator('#sepa-results')).toContainText('1200.50 EUR');
+  await expect(page.locator('#sepa-results')).toContainText('200.50 EUR');
+});
+
+test('sepa: flags an IBAN that fails MOD-97', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Flip the last digit of the debtor IBAN — MOD-97 should fail.
+  const bad = SEPA_PAIN001.replace('DE89370400440532013000', 'DE89370400440532013001');
+  await page.fill('#sepa-input', bad);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/MOD-97.*failed.*DE89370400440532013001/i, { timeout: 5_000 });
+});
+
+test('sepa: rejects non-ISO 20022 XML', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  await page.fill('#sepa-input', '<?xml version="1.0"?><foo><bar/></foo>');
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/No <Document>/i, { timeout: 5_000 });
+});
+
 // =============== Command palette (SPEC §1.6) ===============
 
 test('palette: Ctrl+K opens, Esc closes', async ({ page }) => {

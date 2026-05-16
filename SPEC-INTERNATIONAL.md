@@ -1,6 +1,6 @@
 # Spec — International public-good extensions to encryptalotta
 
-Status: draft 15 (Phase 1 substantially complete: §1.4 logical-property CSS refactor + §1.5 full Intl coverage + §1.6 command palette landed. Every physical-direction CSS property in `index.html` is logical; `Intl.NumberFormat` + `Intl.RelativeTimeFormat` + `Intl.PluralRules` + `Intl.ListFormat` are all wired (PBKDF2 timing, CIDR / PGP key dates / relative timestamp / regex plurals / BIC multi-tag prose). The ⌘K / Ctrl+K command palette ships with 42 English synonym blocks + localized `palette.{title,placeholder,empty}` strings across all five locales; locale-specific synonyms deferred until §1.3 native reviewers are sourced — polyglot fallback ensures English synonyms always match. See §1.4, §1.5, §1.6 progress notes; Phase 4 complete except BLAKE3; Phase 5 distribution scripts + PWA precache service worker shipped; Phase 6 regulator presets shipped in PGP key generator + PBKDF2 tool + annual freshness audit covering both blocks; SECURITY.md + THREAT-MODEL.md published; GDPR-by-design /privacy.html published; regional hreflang aliases)
+Status: draft 16 (Phase 1 substantially complete; Phase 7 §2.4 SEPA ISO 20022 inspector landed as the first larger Phase-7 tool, tool count 42 → 43. §1.4 logical-property CSS refactor + §1.5 full Intl coverage + §1.6 command palette landed. Every physical-direction CSS property in `index.html` is logical; `Intl.NumberFormat` + `Intl.RelativeTimeFormat` + `Intl.PluralRules` + `Intl.ListFormat` are all wired (PBKDF2 timing, CIDR / PGP key dates / relative timestamp / regex plurals / BIC multi-tag prose). The ⌘K / Ctrl+K command palette ships with 42 English synonym blocks + localized `palette.{title,placeholder,empty}` strings across all five locales; locale-specific synonyms deferred until §1.3 native reviewers are sourced — polyglot fallback ensures English synonyms always match. See §1.4, §1.5, §1.6 progress notes; Phase 4 complete except BLAKE3; Phase 5 distribution scripts + PWA precache service worker shipped; Phase 6 regulator presets shipped in PGP key generator + PBKDF2 tool + annual freshness audit covering both blocks; SECURITY.md + THREAT-MODEL.md published; GDPR-by-design /privacy.html published; regional hreflang aliases)
 Audience: maintainers and contributors
 Scope: how to extend encryptalotta.com so it serves an international audience — with a deliberate emphasis on Europe and other regions that lean heavily on open-source — without compromising the site's existing character (single-page, fully client-side, no analytics, no CDN, no tracking, no build step beyond a couple of vendored scripts).
 
@@ -389,7 +389,27 @@ Each tool below follows the existing project pattern: pure browser code, zero ne
 
 **Tension flag:** ES NIF/NIE overlap with personal tax IDs. **Validate VAT formats only**, never NIF/NIE for individuals. The CIF (corporate) format is fine. This is one of the rare cases where the line between "commercial identifier" and "PII" is fuzzy — when in doubt, omit the country.
 
-### 2.4 SEPA XML inspector (pain.001 / camt.053 / pain.008)
+### 2.4 SEPA XML inspector (pain.001 / camt.053 / pain.008) — **🟡 pain.001 + camt.053 shipped (draft 16); pain.008 inherits the pain.001 renderer**
+
+**Status notes (draft 16):** Landed as the `sepa` tool. The parser is namespace-blind — it walks ISO 20022 XML by `localName` only, so the same code handles `pain.001.001.03`, `pain.001.001.09`, `camt.053.001.02`, `camt.053.001.08`, and any other minor revision without per-version branching.
+
+- **pain.001 + pain.008**: header row (MsgId, CreDtTm, InitgPty, NbOfTxs, CtrlSum) + per-`PmtInf` debtor account/IBAN/BIC, then per-transaction (`CdtTrfTxInf` / `DrctDbtTxInf`) end-to-end ID, amount + currency (from `Amt/InstdAmt`'s `Ccy` attribute), debtor + creditor names with their IBANs in parens, remittance info.
+- **camt.053**: statement ID, account IBAN, FrToDt window, every `<Bal>` (opening `OPBD` and closing `CLBD` labeled explicitly via the existing strings table; other balance-type codes fall through with their raw 4-letter code), then per-`Ntry` booking date, amount, credit/debit indicator.
+- **IBAN cross-check**: every `<IBAN>` element anywhere in the document is run through the existing `ibanValidate()` (the same MOD-97 implementation that powers the IBAN tool). When all checksums pass, a single confirmation row is rendered (`IBAN MOD-97 valid (N)`); on a failure, each bad IBAN gets its own warning row.
+- **Unrecognized roots**: a `<Document>` whose first child isn't one of the three known wrappers still renders the header (with the unknown local name as the document type) and then emits a `sepa.warn.unknownDoc` warning rather than refusing the file outright.
+
+UI: a single textarea + Parse button, mirrors the existing IBAN / BIC / VAT layout. No vendored deps — `DOMParser` only. ~200 lines of parser + render JS, ~12 new strings × 5 locales (en + fr + de reviewed against standard banking terminology; zh-CN + hi are machine-quality drafts per the project pattern). 5 SEO prose keys (`tool.sepa.{title,metaDescription,about.{what,how,why}}`) en-only per the existing Phase 7 carve-out.
+
+Four new Playwright cases:
+
+1. pain.001 — parses headers, transactions, both IBANs, and renders `100.00 EUR` + `Invoice 2024-001`.
+2. camt.053 — parses statement ID, opening / closing balance, entry amounts.
+3. Flipping the last digit of the debtor IBAN — surfaces a MOD-97 warning row with the bad IBAN inline.
+4. Non-ISO-20022 XML (`<foo><bar/></foo>`) — reports `No <Document> root element`.
+
+Full Playwright suite: 227 passed. Tool count 42 → 43; JSON-LD `featureList_count`, JSON-LD description, meta description, og:description, twitter:description, and README all updated.
+
+**What's not in this slice:** XAdES-signed SEPA files (the embedded `<ds:Signature>` inside pain.001 production files is parsed *around* by the namespace-blind walker, not verified — that's §2.5 territory); SEPA card schemes (`acmt.*`, `caaa.*`); the per-transaction `InstrId` field (only `EndToEndId` is surfaced); the schema-version detection in the document banner (would require a small upgrade to read the namespace URI's terminal version).
 
 **Why:** Finance/accounting developers across the EU need to debug payment files. No good browser-based tool exists.
 
@@ -698,6 +718,8 @@ All ~1-day implementations. Roughly doubles the site's tool count for a small fr
 
 No runtime changes; full Playwright suite still 206 passed.
 
+**Progress (draft 16):** Phase 7 §2.4 SEPA ISO 20022 XML inspector shipped — first larger Phase-7 tool. Namespace-blind `DOMParser` walk by `localName` handles pain.001 (credit-transfer initiation, all minor revisions), camt.053 (bank-to-customer statement), and pain.008 (direct-debit, inherits the pain.001 renderer). Every `<IBAN>` element is cross-checked against the existing `ibanValidate()` MOD-97 implementation and bad checksums surface inline as warning rows. UI mirrors the IBAN / BIC / VAT layout (textarea + Parse button). No vendored deps. ~200 lines of parser + render JS, ~12 new UI strings × 5 locales (en/fr/de reviewed, zh-CN/hi machine-quality drafts per project pattern), 5 SEO prose keys en-only via the existing Phase 7 carve-out. Tool count 42 → 43 — JSON-LD `featureList` + `featureList_count`, meta/og/twitter descriptions, and README all updated. Four new Playwright cases (pain.001 happy path, camt.053 happy path, MOD-97 failure flagged, non-ISO-20022 XML rejected). Full suite: 227 passed.
+
 **Progress (draft 15):** Phase 1 §1.6 command palette shipped end-to-end. Modal dialog (~14 lines of CSS, 13 lines of HTML) with `role="dialog"` / `aria-modal` / `aria-labelledby` + `role="listbox"` results, triggered by `⌘K` / `Ctrl+K`, closes on `Esc` / overlay-click. Filter haystack = tool-id + localized label + English synonyms, locale-folded via `toLocaleLowerCase(lang)`; multi-term queries AND'd. `TOOL_SYNONYMS` ships English-only (42 entries) per the §1.6 directive to defer locale-specific synonyms until §1.3 native review — polyglot fallback ensures English queries always match in any locale. Three new UI strings (`palette.title`, `palette.placeholder`, `palette.empty`) translated for all five locales; STRINGS now 1101 keys × 5 locales. Seven new Playwright cases (Ctrl+K open/Esc close, "swift" → BIC, "epoch" → timestamp, multi-term "ed signature" → Ed25519, ArrowDown+Enter, empty state, fr + en-query polyglot invariant). Full suite: 223 passed.
 
 **Progress (draft 14):** Phase 1 §1.5 third slice — first `Intl.ListFormat` call-site. The BIC validator's multi-tag row now reads `intlList(r.tags)` instead of `r.tags.join(', ')`, so a German-locale BIC with location ending in `0` and branch `XXX` renders as `Test-BIC (Ort endet auf 0) und Hauptniederlassung (XXX)`. Other `.join(', ')` sites (TLS SANs, CIDR / cron internal fields, X.509 DN parts) intentionally left alone because they are technical token lists, not prose. One new Playwright case asserts the German `und` connector. Full suite: 216 passed. With this slice, all four `Intl.*` helpers (`NumberFormat`, `RelativeTimeFormat`, `PluralRules`, `ListFormat`) have at least one production call-site; §1.5 is closed for Phase 1.
@@ -739,7 +761,7 @@ No runtime changes; full Playwright suite still 206 passed.
 
 ### Phase 7 — Larger tool builds
 
-1. SEPA XML inspector (§2.4).
+1. 🟡 SEPA XML inspector (§2.4) — pain.001 + camt.053 shipped draft 16; pain.008 inherits the pain.001 renderer; XAdES-signed files deferred to §2.5.
 2. eIDAS signature inspector — PAdES/CAdES/XAdES (§2.5).
 3. EU LOTL viewer (§2.6).
 4. Factur-X / ZUGFeRD / PEPPOL inspector (§2.7).

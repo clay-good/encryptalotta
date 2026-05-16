@@ -94,7 +94,7 @@
           "name": "encryptalotta",
           "alternateName": ["Encrypt A Lot", "Encryptalotta"],
           "url": "https://encryptalotta.com/",
-          "description": "Free, client-side privacy and developer toolbox with 36 tools that run entirely in your browser: PGP encryption / decryption / signing / verification, TLS and SSH key parsers, HMAC, JWT inspector, TOTP / 2FA, PBKDF2 key derivation, BIP39 mnemonic seed phrase generator and validator, hashing (SHA-1/256/384/512), Base64 / Base32 / Base58 / Hex encoding, number base converter (binary / octal / decimal / hex / any base 2–36), UUID v4 / v7 and ULID, Unix timestamp, URL parser, password generator, QR sharing, Shamir's Secret Sharing, EXIF eraser, image steganography, ASCII armor, PEM / DER converter, text diff, regex tester, CSV / JSON / TSV converter, cron decoder, color converter with WCAG contrast, JSON / YAML / XML formatter, CIDR subnet calculator. No server uploads, no telemetry, no CDN, no tracking.",
+          "description": "Free, client-side privacy and developer toolbox with 43 tools that run entirely in your browser: PGP encryption / decryption / signing / verification, TLS and SSH key parsers, HMAC, JWT inspector, TOTP / 2FA, PBKDF2 key derivation, BIP39 mnemonic seed phrase generator and validator, hashing (SHA-1/256/384/512), Base64 / Base32 / Base58 / Hex encoding, number base converter (binary / octal / decimal / hex / any base 2–36), UUID v4 / v7 and ULID, Unix timestamp, URL parser, password generator, QR sharing, Shamir's Secret Sharing, EXIF eraser, image steganography, ASCII armor, PEM / DER converter, text diff, regex tester, CSV / JSON / TSV converter, cron decoder, color converter with WCAG contrast, JSON / YAML / XML formatter, CIDR subnet calculator. No server uploads, no telemetry, no CDN, no tracking.",
           "applicationCategory": ["SecurityApplication", "UtilitiesApplication", "DeveloperApplication"],
           "applicationSubCategory": "Encryption",
           "operatingSystem": "Any",
@@ -150,9 +150,10 @@
             "GS1 / EAN / GTIN / SSCC barcode checksum (mod-10) and prefix decoder",
             "EU VAT number validator — format + checksum (offline, no VIES round-trip)",
             "Ed25519 sign / verify (RFC 8032 via Web Crypto)",
-            "X25519 ECDH key agreement (RFC 7748) with optional HKDF-SHA-256 / SHA-512 post-processing"
+            "X25519 ECDH key agreement (RFC 7748) with optional HKDF-SHA-256 / SHA-512 post-processing",
+            "SEPA ISO 20022 XML inspector (pain.001 credit-transfer initiation and camt.053 bank statement)"
           ],
-          "featureList_count": 42,
+          "featureList_count": 43,
           "screenshot": "https://encryptalotta.com/encryptalotta.png",
           "softwareHelp": { "@type": "CreativeWork", "url": "https://github.com/clay-good/encryptalotta/" },
           "license": "https://github.com/clay-good/encryptalotta/blob/main/LICENSE"
@@ -467,7 +468,7 @@
         /* ==========================================================
            NAVIGATION (v3): minimalist home grid.
            - Sticky topbar: logo (clickable home) + language switcher.
-           - Home (#/) renders all 36 tools as cards grouped by category.
+           - Home (#/) renders all 43 tools as cards grouped by category.
            - Each tool view shows a thin breadcrumb above the panel.
            - Footer hosts a single centered GitHub badge.
            - .nav-subtab is preserved for inline mode tabs inside Stego
@@ -1435,6 +1436,10 @@
                     <button class="tool-card" type="button" data-tool="vat">
                         <span class="tc-title" data-i18n="nav.tool.vat">EU VAT</span>
                         <span class="tc-desc" data-i18n="tool.vat.desc">Check the format and (where defined) checksum of an EU / UK / NO / CH VAT number.</span>
+                    </button>
+                    <button class="tool-card" type="button" data-tool="sepa">
+                        <span class="tc-title" data-i18n="nav.tool.sepa">SEPA XML</span>
+                        <span class="tc-desc" data-i18n="tool.sepa.desc">Inspect SEPA ISO 20022 payment XML (pain.001 credit transfer or camt.053 statement). Parses headers, transactions, IBANs, amounts.</span>
                     </button>
                     <button class="tool-card" type="button" data-tool="ed25519">
                         <span class="tc-title" data-i18n="nav.tool.ed25519">Ed25519</span>
@@ -3047,6 +3052,24 @@
                 <div id="vat-results" class="hidden" style="margin-top: 24px;"></div>
             </div>
 
+            <!-- SEPA ISO 20022 XML Inspector View (SPEC §2.4) -->
+            <div id="sepa-view" class="view" role="tabpanel" aria-labelledby="sepa-h2">
+                <h2 id="sepa-h2" style="margin-bottom: 25px;" data-i18n="view.sepa.h2">SEPA ISO 20022 XML Inspector</h2>
+
+                <div class="alert alert-info">
+                    <strong data-i18n="alert.clientSideTitle">100% Client-Side:</strong> <span data-i18n="alert.clientSideGenericBody">All operations happen locally in your browser. Nothing is uploaded to any server.</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="sepa-input" data-i18n="sepa.label.input">Paste SEPA XML (pain.001 credit-transfer initiation or camt.053 bank-to-customer statement)</label>
+                    <textarea id="sepa-input" rows="10" spellcheck="false" data-i18n-attr="placeholder:sepa.ph.input" placeholder="&lt;?xml version=&quot;1.0&quot;?&gt;&#10;&lt;Document xmlns=&quot;urn:iso:std:iso:20022:tech:xsd:pain.001.001.03&quot;&gt;&#10;  &lt;CstmrCdtTrfInitn&gt;...&lt;/CstmrCdtTrfInitn&gt;&#10;&lt;/Document&gt;" dir="ltr" style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.85rem;"></textarea>
+                </div>
+
+                <button id="btn-sepa-parse" class="btn" data-i18n="btn.sepaParse">Parse</button>
+
+                <div id="sepa-results" class="hidden" style="margin-top: 24px;"></div>
+            </div>
+
             <!-- Ed25519 Sign / Verify View -->
             <div id="ed25519-view" class="view" role="tabpanel" aria-labelledby="ed25519-h2">
                 <h2 id="ed25519-h2" style="margin-bottom: 25px;" data-i18n="view.ed25519.h2">Ed25519 — Sign / Verify</h2>
@@ -4249,6 +4272,49 @@
                 'tool.vat.about.what': 'Checks a VAT number against its per-country format and computes the published checksum where one exists (DE, FR, IT, BE, AT, NL format-only, ES CIF, etc.). Personal-identity numbers (ES NIF/NIE, IT Codice Fiscale) are explicitly rejected by design.',
                 'tool.vat.about.how': 'Per-country regex enforces the structural rules. For countries with a published checksum (about 70% of the supported set), the algorithm is implemented locally — mod-11 weighted for most, Luhn for IT/SE, MOD 11,10 for HR/DE, mod-97 for BE, mod-89 for LU. The rest report "format only" without claiming more.',
                 'tool.vat.about.why': 'Catches the vast majority of typos in supplier onboarding, invoice review, and SEPA payment files without sending a VAT number to a third-party API. To confirm a number is actively registered, the EU Commission’s VIES service at ec.europa.eu/taxation_customs/vies is the authoritative source.',
+                // -------- Phase 13 (i18n spec §2.4): SEPA ISO 20022 inspector --------
+                'nav.tool.sepa': 'SEPA XML',
+                'tool.sepa.desc': 'Inspect SEPA ISO 20022 payment XML (pain.001 credit transfer or camt.053 statement). Parses headers, transactions, IBANs, amounts.',
+                'view.sepa.h2': 'SEPA ISO 20022 XML Inspector',
+                'sepa.label.input': 'Paste SEPA XML (pain.001 credit-transfer initiation or camt.053 bank-to-customer statement)',
+                'sepa.ph.input': 'Paste your ISO 20022 XML here…',
+                'btn.sepaParse': 'Parse',
+                'sepa.row.docType': 'Document type',
+                'sepa.row.msgId': 'Message ID',
+                'sepa.row.creDtTm': 'Creation date/time',
+                'sepa.row.initgPty': 'Initiating party',
+                'sepa.row.nbOfTxs': 'Number of transactions',
+                'sepa.row.ctrlSum': 'Control sum',
+                'sepa.row.acct': 'Account',
+                'sepa.row.iban': 'IBAN',
+                'sepa.row.bic': 'BIC',
+                'sepa.row.stmtId': 'Statement ID',
+                'sepa.row.fromTo': 'From / to',
+                'sepa.row.openingBal': 'Opening balance',
+                'sepa.row.closingBal': 'Closing balance',
+                'sepa.tx.heading': 'Transactions',
+                'sepa.tx.endToEnd': 'End-to-end ID',
+                'sepa.tx.amount': 'Amount',
+                'sepa.tx.debtor': 'Debtor',
+                'sepa.tx.creditor': 'Creditor',
+                'sepa.tx.remittance': 'Remittance info',
+                'sepa.entry.heading': 'Entries',
+                'sepa.entry.bookDt': 'Booking date',
+                'sepa.entry.amount': 'Amount',
+                'sepa.entry.cdtDbt': 'Credit / debit',
+                'sepa.row.error': 'Parse error',
+                'sepa.row.warning': 'Warnings',
+                'sepa.ok.ibanValid': 'IBAN MOD-97 valid',
+                'sepa.warn.ibanInvalid': 'IBAN MOD-97 check failed: {iban}',
+                'sepa.warn.unknownDoc': 'Unrecognized ISO 20022 root element — partial parse only.',
+                'err.sepaEmpty': 'XML input is empty.',
+                'err.sepaParse': 'XML parse error: {detail}',
+                'err.sepaNoRoot': 'No <Document> root element found — is this an ISO 20022 XML file?',
+                'tool.sepa.title': 'SEPA ISO 20022 XML Inspector — Online (pain.001 / camt.053)',
+                'tool.sepa.metaDescription': 'Free, browser-based SEPA ISO 20022 inspector. Paste a pain.001 credit-transfer file or a camt.053 statement and see the parsed headers, transactions, debtor/creditor, IBANs (MOD-97 verified), and amounts. No upload. No tracking.',
+                'tool.sepa.about.what': 'Decodes SEPA ISO 20022 payment XML — pain.001 (customer-to-bank credit transfer initiation) and camt.053 (bank-to-customer statement) — and renders the message header, per-transaction details, and IBAN checks.',
+                'tool.sepa.about.how': 'The browser\'s built-in DOMParser walks the XML namespace-blind (by local tag name) so the same parser handles pain.001 schema versions 03, 09, and any other ISO 20022 minor revision. IBANs found in the document are run through the existing MOD-97 validator (same code as the IBAN tool) and flagged inline if the checksum fails.',
+                'tool.sepa.about.why': 'Finance and accounting developers across the SEPA zone regularly debug payment XML against bank specs that mismatch in subtle ways. A local parser keeps confidential payment files off third-party debugging services — the rest of the encryptalotta toolbox already runs offline for the same reason.',
                 // -------- Phase 12 (i18n spec §2.10): Ed25519 + X25519 --------
                 'nav.tool.ed25519': 'Ed25519',
                 'tool.ed25519.desc': 'Generate Ed25519 keypairs and produce or verify signatures (RFC 8032 via Web Crypto).',
@@ -5179,6 +5245,44 @@
                 'err.vatNoCountry': 'Préfixe pays inconnu. Préfixez avec le code pays à deux lettres (par ex. FR, DE, IT).',
                 'err.vatFormat': 'Le format ne correspond pas au schéma {cc}. Exemple : {cc}{example}.',
                 'err.vatPersonalIdRejected': 'Cela ressemble à un numéro d’identité espagnol (NIF/NIE), pas à un numéro de TVA. Par conception, cet outil ne valide pas d’identifiant personnel — voir la spécification.',
+                // -------- Phase 13: SEPA ISO 20022 inspector (French — locked against standard FR banking terminology) --------
+                'nav.tool.sepa': 'XML SEPA',
+                'tool.sepa.desc': 'Inspecter un fichier XML de paiement SEPA ISO 20022 (pain.001 virement ou camt.053 relevé). Analyse les en-têtes, les transactions, les IBAN et les montants.',
+                'view.sepa.h2': 'Inspecteur SEPA ISO 20022',
+                'sepa.label.input': 'Collez le XML SEPA (pain.001 initiation de virement ou camt.053 relevé banque-à-client)',
+                'sepa.ph.input': 'Collez ici votre XML ISO 20022…',
+                'btn.sepaParse': 'Analyser',
+                'sepa.row.docType': 'Type de document',
+                'sepa.row.msgId': 'Identifiant du message',
+                'sepa.row.creDtTm': 'Date/heure de création',
+                'sepa.row.initgPty': 'Donneur d’ordre',
+                'sepa.row.nbOfTxs': 'Nombre de transactions',
+                'sepa.row.ctrlSum': 'Total de contrôle',
+                'sepa.row.acct': 'Compte',
+                'sepa.row.iban': 'IBAN',
+                'sepa.row.bic': 'BIC',
+                'sepa.row.stmtId': 'Identifiant du relevé',
+                'sepa.row.fromTo': 'Du / au',
+                'sepa.row.openingBal': 'Solde initial',
+                'sepa.row.closingBal': 'Solde final',
+                'sepa.tx.heading': 'Transactions',
+                'sepa.tx.endToEnd': 'Identifiant de bout en bout',
+                'sepa.tx.amount': 'Montant',
+                'sepa.tx.debtor': 'Débiteur',
+                'sepa.tx.creditor': 'Créancier',
+                'sepa.tx.remittance': 'Informations de remise',
+                'sepa.entry.heading': 'Écritures',
+                'sepa.entry.bookDt': 'Date de comptabilisation',
+                'sepa.entry.amount': 'Montant',
+                'sepa.entry.cdtDbt': 'Crédit / débit',
+                'sepa.row.error': 'Erreur d’analyse',
+                'sepa.row.warning': 'Avertissements',
+                'sepa.ok.ibanValid': 'IBAN MOD-97 valide',
+                'sepa.warn.ibanInvalid': 'Échec de la vérification MOD-97 de l’IBAN : {iban}',
+                'sepa.warn.unknownDoc': 'Élément racine ISO 20022 non reconnu — analyse partielle uniquement.',
+                'err.sepaEmpty': 'Le XML d’entrée est vide.',
+                'err.sepaParse': 'Erreur d’analyse XML : {detail}',
+                'err.sepaNoRoot': 'Aucun élément racine <Document> trouvé — s’agit-il bien d’un fichier XML ISO 20022 ?',
                 // -------- Phase 12: Ed25519 + X25519 (French) --------
                 'nav.tool.ed25519': 'Ed25519',
                 'tool.ed25519.desc': 'Générer des paires de clés Ed25519 et signer ou vérifier (RFC 8032 via Web Crypto).',
@@ -6084,6 +6188,44 @@
                 'err.vatNoCountry': '未识别的国家前缀。请在前面加上两位字母国家代码（如 DE、FR、IT）。',
                 'err.vatFormat': '格式与 {cc} 的版式不符。示例：{cc}{example}。',
                 'err.vatPersonalIdRejected': '这看起来像西班牙个人身份号（NIF/NIE），而非增值税号。本工具按设计不校验个人身份号 — 详见规范。',
+                // -------- Phase 13: SEPA ISO 20022 inspector (Simplified Chinese — machine-quality, awaiting native review) --------
+                'nav.tool.sepa': 'SEPA XML',
+                'tool.sepa.desc': '检查 SEPA ISO 20022 付款 XML（pain.001 信用转账或 camt.053 对账单）。解析标头、交易、IBAN 和金额。',
+                'view.sepa.h2': 'SEPA ISO 20022 XML 检查器',
+                'sepa.label.input': '粘贴 SEPA XML（pain.001 信用转账发起或 camt.053 银行对客户对账单）',
+                'sepa.ph.input': '在此处粘贴您的 ISO 20022 XML…',
+                'btn.sepaParse': '解析',
+                'sepa.row.docType': '文档类型',
+                'sepa.row.msgId': '消息 ID',
+                'sepa.row.creDtTm': '创建日期/时间',
+                'sepa.row.initgPty': '发起方',
+                'sepa.row.nbOfTxs': '交易笔数',
+                'sepa.row.ctrlSum': '控制总额',
+                'sepa.row.acct': '账户',
+                'sepa.row.iban': 'IBAN',
+                'sepa.row.bic': 'BIC',
+                'sepa.row.stmtId': '对账单 ID',
+                'sepa.row.fromTo': '起 / 至',
+                'sepa.row.openingBal': '期初余额',
+                'sepa.row.closingBal': '期末余额',
+                'sepa.tx.heading': '交易',
+                'sepa.tx.endToEnd': '端到端 ID',
+                'sepa.tx.amount': '金额',
+                'sepa.tx.debtor': '付款人',
+                'sepa.tx.creditor': '收款人',
+                'sepa.tx.remittance': '汇款信息',
+                'sepa.entry.heading': '分录',
+                'sepa.entry.bookDt': '记账日期',
+                'sepa.entry.amount': '金额',
+                'sepa.entry.cdtDbt': '贷 / 借',
+                'sepa.row.error': '解析错误',
+                'sepa.row.warning': '警告',
+                'sepa.ok.ibanValid': 'IBAN MOD-97 有效',
+                'sepa.warn.ibanInvalid': 'IBAN MOD-97 校验失败：{iban}',
+                'sepa.warn.unknownDoc': '无法识别的 ISO 20022 根元素 — 仅部分解析。',
+                'err.sepaEmpty': 'XML 输入为空。',
+                'err.sepaParse': 'XML 解析错误：{detail}',
+                'err.sepaNoRoot': '未找到 <Document> 根元素 — 这是 ISO 20022 XML 文件吗？',
                 // -------- Phase 12: Ed25519 + X25519 (Simplified Chinese — machine-quality) --------
                 'nav.tool.ed25519': 'Ed25519',
                 'tool.ed25519.desc': '生成 Ed25519 密钥对，并签名或验证（RFC 8032，基于 Web Crypto）。',
@@ -7004,6 +7146,44 @@
                 'err.vatNoCountry': 'Unbekanntes Länderpräfix. Bitte den zweistelligen Ländercode voranstellen (z. B. DE, FR, IT).',
                 'err.vatFormat': 'Format entspricht nicht dem Schema für {cc}. Beispiel: {cc}{example}.',
                 'err.vatPersonalIdRejected': 'Das sieht nach einer spanischen Personenkennung (NIF/NIE) aus, nicht nach einer USt-IdNr. Dieses Werkzeug validiert per Design keine persönlichen IDs — siehe die Spezifikation.',
+                // -------- Phase 13: SEPA ISO 20022 inspector (German — locked against standard DE banking terminology) --------
+                'nav.tool.sepa': 'SEPA-XML',
+                'tool.sepa.desc': 'SEPA-Zahlungs-XML im ISO-20022-Format prüfen (pain.001 Überweisung oder camt.053 Kontoauszug). Liest Kopfdaten, Transaktionen, IBANs und Beträge.',
+                'view.sepa.h2': 'SEPA-ISO-20022-XML-Inspektor',
+                'sepa.label.input': 'SEPA-XML einfügen (pain.001 Überweisungsinitiierung oder camt.053 Bank-zu-Kunde-Auszug)',
+                'sepa.ph.input': 'Fügen Sie hier Ihr ISO-20022-XML ein…',
+                'btn.sepaParse': 'Prüfen',
+                'sepa.row.docType': 'Dokumenttyp',
+                'sepa.row.msgId': 'Nachrichten-ID',
+                'sepa.row.creDtTm': 'Erstellungsdatum/-zeit',
+                'sepa.row.initgPty': 'Auftraggeber',
+                'sepa.row.nbOfTxs': 'Anzahl Transaktionen',
+                'sepa.row.ctrlSum': 'Kontrollsumme',
+                'sepa.row.acct': 'Konto',
+                'sepa.row.iban': 'IBAN',
+                'sepa.row.bic': 'BIC',
+                'sepa.row.stmtId': 'Auszugs-ID',
+                'sepa.row.fromTo': 'Von / bis',
+                'sepa.row.openingBal': 'Anfangssaldo',
+                'sepa.row.closingBal': 'Endsaldo',
+                'sepa.tx.heading': 'Transaktionen',
+                'sepa.tx.endToEnd': 'End-to-End-ID',
+                'sepa.tx.amount': 'Betrag',
+                'sepa.tx.debtor': 'Zahlungspflichtiger',
+                'sepa.tx.creditor': 'Zahlungsempfänger',
+                'sepa.tx.remittance': 'Verwendungszweck',
+                'sepa.entry.heading': 'Buchungen',
+                'sepa.entry.bookDt': 'Buchungsdatum',
+                'sepa.entry.amount': 'Betrag',
+                'sepa.entry.cdtDbt': 'Haben / Soll',
+                'sepa.row.error': 'Analysefehler',
+                'sepa.row.warning': 'Warnungen',
+                'sepa.ok.ibanValid': 'IBAN MOD-97 gültig',
+                'sepa.warn.ibanInvalid': 'IBAN-MOD-97-Prüfung fehlgeschlagen: {iban}',
+                'sepa.warn.unknownDoc': 'Unbekanntes ISO-20022-Wurzelelement — nur Teilanalyse.',
+                'err.sepaEmpty': 'Die XML-Eingabe ist leer.',
+                'err.sepaParse': 'XML-Analysefehler: {detail}',
+                'err.sepaNoRoot': 'Kein <Document>-Wurzelelement gefunden — handelt es sich wirklich um eine ISO-20022-XML-Datei?',
                 // -------- Phase 12: Ed25519 + X25519 (German) --------
                 'nav.tool.ed25519': 'Ed25519',
                 'tool.ed25519.desc': 'Ed25519-Schlüsselpaare erzeugen und signieren bzw. verifizieren (RFC 8032 via Web Crypto).',
@@ -7909,6 +8089,44 @@
                 'err.vatNoCountry': 'अज्ञात देश उपसर्ग। कृपया 2-अक्षर देश कोड लगाएँ (जैसे DE, FR, IT)।',
                 'err.vatFormat': 'स्वरूप {cc} के लेआउट से मेल नहीं खाता। उदाहरण: {cc}{example}।',
                 'err.vatPersonalIdRejected': 'यह स्पेनिश व्यक्तिगत पहचान संख्या (NIF/NIE) जैसी दिखती है, VAT संख्या नहीं। यह टूल डिज़ाइन के अनुसार व्यक्तिगत IDs को सत्यापित नहीं करता — स्पेसिफ़िकेशन देखें।',
+                // -------- Phase 13: SEPA ISO 20022 inspector (Hindi — machine-quality, awaiting native review) --------
+                'nav.tool.sepa': 'SEPA XML',
+                'tool.sepa.desc': 'SEPA ISO 20022 भुगतान XML की जाँच करें (pain.001 क्रेडिट ट्रांसफर या camt.053 स्टेटमेंट)। शीर्षक, लेन-देन, IBAN और राशियाँ पार्स करता है।',
+                'view.sepa.h2': 'SEPA ISO 20022 XML इंस्पेक्टर',
+                'sepa.label.input': 'SEPA XML चिपकाएँ (pain.001 क्रेडिट ट्रांसफर आरंभीकरण या camt.053 बैंक-से-ग्राहक स्टेटमेंट)',
+                'sepa.ph.input': 'अपना ISO 20022 XML यहाँ चिपकाएँ…',
+                'btn.sepaParse': 'पार्स करें',
+                'sepa.row.docType': 'दस्तावेज़ प्रकार',
+                'sepa.row.msgId': 'संदेश ID',
+                'sepa.row.creDtTm': 'निर्माण दिनांक/समय',
+                'sepa.row.initgPty': 'आरंभ करने वाला पक्ष',
+                'sepa.row.nbOfTxs': 'लेन-देन की संख्या',
+                'sepa.row.ctrlSum': 'नियंत्रण योग',
+                'sepa.row.acct': 'खाता',
+                'sepa.row.iban': 'IBAN',
+                'sepa.row.bic': 'BIC',
+                'sepa.row.stmtId': 'स्टेटमेंट ID',
+                'sepa.row.fromTo': 'से / तक',
+                'sepa.row.openingBal': 'प्रारंभिक शेष',
+                'sepa.row.closingBal': 'अंतिम शेष',
+                'sepa.tx.heading': 'लेन-देन',
+                'sepa.tx.endToEnd': 'एंड-टू-एंड ID',
+                'sepa.tx.amount': 'राशि',
+                'sepa.tx.debtor': 'देनदार',
+                'sepa.tx.creditor': 'लेनदार',
+                'sepa.tx.remittance': 'प्रेषण जानकारी',
+                'sepa.entry.heading': 'प्रविष्टियाँ',
+                'sepa.entry.bookDt': 'बुकिंग दिनांक',
+                'sepa.entry.amount': 'राशि',
+                'sepa.entry.cdtDbt': 'क्रेडिट / डेबिट',
+                'sepa.row.error': 'पार्स त्रुटि',
+                'sepa.row.warning': 'चेतावनियाँ',
+                'sepa.ok.ibanValid': 'IBAN MOD-97 वैध',
+                'sepa.warn.ibanInvalid': 'IBAN MOD-97 जाँच विफल: {iban}',
+                'sepa.warn.unknownDoc': 'अज्ञात ISO 20022 रूट तत्व — केवल आंशिक पार्सिंग।',
+                'err.sepaEmpty': 'XML इनपुट खाली है।',
+                'err.sepaParse': 'XML पार्स त्रुटि: {detail}',
+                'err.sepaNoRoot': 'कोई <Document> रूट तत्व नहीं मिला — क्या यह ISO 20022 XML फ़ाइल है?',
                 // -------- Phase 12: Ed25519 + X25519 (Hindi — machine-quality) --------
                 'nav.tool.ed25519': 'Ed25519',
                 'tool.ed25519.desc': 'Ed25519 कुंजी युग्म बनाएँ और हस्ताक्षर करें या सत्यापित करें (RFC 8032, Web Crypto के ज़रिए)।',
@@ -8348,6 +8566,7 @@
             'bic': 'utilities',
             'gs1': 'utilities',
             'vat': 'utilities',
+            'sepa': 'utilities',
             'ed25519': 'utilities',
             'x25519': 'utilities'
         };
@@ -8360,7 +8579,7 @@
             'sign', 'verify', 'hmac', 'jwt',
             'passwords', 'armor', 'shamir', 'exif',
             'hash', 'encode', 'uuid', 'timestamp', 'url', 'totp', 'diff', 'csv', 'regex', 'cron', 'color', 'format', 'cidr', 'pbkdf2', 'base',
-            'iban', 'bic', 'gs1', 'vat',
+            'iban', 'bic', 'gs1', 'vat', 'sepa',
             'ed25519', 'x25519'
         ];
 
@@ -8411,6 +8630,7 @@
             'bic':              'swift swift-code iso9362 bank-identifier',
             'gs1':              'ean ean-13 upc gtin barcode sscc',
             'vat':              'tax-id vat-number vies eu-vat ust-idnr',
+            'sepa':             'iso20022 pain.001 camt.053 pain.008 credit-transfer direct-debit statement european payments xml',
             'ed25519':          'eddsa signature rfc8032 web-crypto',
             'x25519':           'ecdh key-exchange rfc7748 hkdf web-crypto'
         };
@@ -8755,6 +8975,7 @@
             'bic':              ['iban', 'vat', 'gs1'],
             'gs1':              ['iban', 'bic', 'vat'],
             'vat':              ['iban', 'bic', 'regex'],
+            'sepa':             ['iban', 'bic', 'format'],
             'ed25519':          ['x25519', 'sign', 'verify'],
             'x25519':           ['ed25519', 'pbkdf2', 'hmac']
         };
@@ -14484,6 +14705,226 @@
                 tlsRenderRow(out, t('vat.row.note'), t('vat.row.viesNote'));
             } catch (e) {
                 tlsRenderRow(out, t('vat.row.error'), e.message);
+            }
+        });
+
+        // ==================== Phase 13 (i18n spec §2.4): SEPA ISO 20022 XML inspector ====================
+        // Parses pain.001 (customer-to-bank credit-transfer initiation) and camt.053 (bank-to-customer
+        // statement). The parser walks by *local* tag name only — XML namespaces are ignored so the
+        // same code handles every published minor revision of these messages without per-version
+        // branching. IBANs found inside the document are re-validated through the existing MOD-97
+        // checker (same code that powers the IBAN tool) and flagged in a warnings row.
+
+        function sepaTextOf(root, localName) {
+            if (!root) return '';
+            const el = sepaFirst(root, localName);
+            return el ? (el.textContent || '').trim() : '';
+        }
+        function sepaFirst(root, localName) {
+            // getElementsByTagName matches local names when the document is XML; for HTML it would
+            // need to be lowercased. DOMParser with text/xml gives us the XML form.
+            const list = root.getElementsByTagName(localName);
+            return list && list.length ? list[0] : null;
+        }
+        function sepaFirstChildLocal(parent, localName) {
+            if (!parent || !parent.children) return null;
+            for (const c of parent.children) if (c.localName === localName) return c;
+            return null;
+        }
+        function sepaAllLocal(parent, localName) {
+            const out = [];
+            if (!parent) return out;
+            const stack = [parent];
+            while (stack.length) {
+                const n = stack.shift();
+                for (const c of n.children || []) {
+                    if (c.localName === localName) out.push(c);
+                    stack.push(c);
+                }
+            }
+            return out;
+        }
+
+        function sepaDetectDocType(doc) {
+            // The root <Document> wraps one message-set child whose local name identifies the type.
+            const docRoot = doc.documentElement;
+            if (!docRoot || docRoot.localName !== 'Document') return null;
+            const inner = docRoot.firstElementChild;
+            if (!inner) return null;
+            const ln = inner.localName;
+            // Map known wrappers to the spec's standard mnemonic.
+            if (ln === 'CstmrCdtTrfInitn') return { type: 'pain.001', wrapper: inner, label: 'pain.001 (customer credit-transfer initiation)' };
+            if (ln === 'CstmrDrctDbtInitn') return { type: 'pain.008', wrapper: inner, label: 'pain.008 (customer direct-debit initiation)' };
+            if (ln === 'BkToCstmrStmt') return { type: 'camt.053', wrapper: inner, label: 'camt.053 (bank-to-customer statement)' };
+            return { type: 'unknown', wrapper: inner, label: ln };
+        }
+
+        function sepaParse(xmlText) {
+            const text = String(xmlText || '').trim();
+            if (!text) throw new Error(t('err.sepaEmpty'));
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(text, 'text/xml');
+            const errEl = doc.getElementsByTagName('parsererror')[0];
+            if (errEl) throw new Error(tFormat('err.sepaParse', { detail: (errEl.textContent || '').slice(0, 200) }));
+            const detected = sepaDetectDocType(doc);
+            if (!detected) throw new Error(t('err.sepaNoRoot'));
+            return { doc, detected };
+        }
+
+        function sepaRenderHeader(out, detected) {
+            const w = detected.wrapper;
+            const grpHdr = sepaFirst(w, 'GrpHdr');
+            tlsRenderRow(out, t('sepa.row.docType'), detected.label);
+            if (grpHdr) {
+                const msgId = sepaTextOf(grpHdr, 'MsgId');
+                const cre   = sepaTextOf(grpHdr, 'CreDtTm');
+                const initg = sepaTextOf(sepaFirst(grpHdr, 'InitgPty') || grpHdr, 'Nm');
+                if (msgId) tlsRenderRow(out, t('sepa.row.msgId'),    msgId);
+                if (cre)   tlsRenderRow(out, t('sepa.row.creDtTm'),  cre);
+                if (initg) tlsRenderRow(out, t('sepa.row.initgPty'), initg);
+                const n   = sepaTextOf(grpHdr, 'NbOfTxs');
+                const sum = sepaTextOf(grpHdr, 'CtrlSum');
+                if (n)   tlsRenderRow(out, t('sepa.row.nbOfTxs'),  n);
+                if (sum) tlsRenderRow(out, t('sepa.row.ctrlSum'),  sum);
+            }
+        }
+
+        function sepaTxRender(out, tx) {
+            const e2e = sepaTextOf(sepaFirst(tx, 'PmtId') || tx, 'EndToEndId');
+            const amtEl = sepaFirst(tx, 'InstdAmt') || sepaFirst(tx, 'Amt');
+            const amt = amtEl ? ((amtEl.textContent || '').trim() + ' ' + (amtEl.getAttribute('Ccy') || '')).trim() : '';
+            const dbtr = sepaTextOf(sepaFirst(tx, 'Dbtr') || tx, 'Nm');
+            const cdtr = sepaTextOf(sepaFirst(tx, 'Cdtr') || tx, 'Nm');
+            const rmt  = sepaTextOf(sepaFirst(tx, 'RmtInf') || tx, 'Ustrd');
+            const cdtrIban = sepaTextOf(sepaFirst(tx, 'CdtrAcct') || tx, 'IBAN');
+            const dbtrIban = sepaTextOf(sepaFirst(tx, 'DbtrAcct') || tx, 'IBAN');
+            if (e2e)  tlsRenderRow(out, t('sepa.tx.endToEnd'),   e2e);
+            if (amt)  tlsRenderRow(out, t('sepa.tx.amount'),     amt);
+            if (dbtr) tlsRenderRow(out, t('sepa.tx.debtor'),     dbtr + (dbtrIban ? '  (' + dbtrIban + ')' : ''));
+            if (cdtr) tlsRenderRow(out, t('sepa.tx.creditor'),   cdtr + (cdtrIban ? '  (' + cdtrIban + ')' : ''));
+            if (rmt)  tlsRenderRow(out, t('sepa.tx.remittance'), rmt);
+        }
+
+        function sepaRenderPain001(out, detected) {
+            const w = detected.wrapper;
+            sepaRenderHeader(out, detected);
+            const pmtInfs = sepaAllLocal(w, 'PmtInf');
+            const heading = document.createElement('div');
+            heading.style.cssText = 'margin: 16px 0 6px; font-weight: 700;';
+            heading.textContent = t('sepa.tx.heading');
+            out.appendChild(heading);
+            for (const pi of pmtInfs) {
+                const dbtrIban = sepaTextOf(sepaFirst(pi, 'DbtrAcct') || pi, 'IBAN');
+                const dbtrBic  = sepaTextOf(sepaFirst(pi, 'DbtrAgt')  || pi, 'BIC') || sepaTextOf(sepaFirst(pi, 'DbtrAgt') || pi, 'BICFI');
+                if (dbtrIban) tlsRenderRow(out, t('sepa.row.iban'), dbtrIban);
+                if (dbtrBic)  tlsRenderRow(out, t('sepa.row.bic'),  dbtrBic);
+                const txs = sepaAllLocal(pi, 'CdtTrfTxInf').concat(sepaAllLocal(pi, 'DrctDbtTxInf'));
+                txs.forEach((tx, i) => {
+                    const sep = document.createElement('div');
+                    sep.style.cssText = 'margin-top: 12px; font-size: 0.82rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em;';
+                    sep.textContent = '#' + (i + 1);
+                    out.appendChild(sep);
+                    sepaTxRender(out, tx);
+                });
+            }
+        }
+
+        function sepaRenderCamt053(out, detected) {
+            const w = detected.wrapper;
+            // GrpHdr lives at the top of BkToCstmrStmt; statement-level data is inside <Stmt>.
+            sepaRenderHeader(out, detected);
+            const stmt = sepaFirst(w, 'Stmt');
+            if (!stmt) return;
+            const stmtId = sepaTextOf(stmt, 'Id');
+            if (stmtId) tlsRenderRow(out, t('sepa.row.stmtId'), stmtId);
+            const acctIban = sepaTextOf(sepaFirst(stmt, 'Acct') || stmt, 'IBAN');
+            if (acctIban) tlsRenderRow(out, t('sepa.row.iban'), acctIban);
+            const fromTo = sepaFirst(stmt, 'FrToDt');
+            if (fromTo) {
+                const fr = sepaTextOf(fromTo, 'FrDtTm');
+                const to = sepaTextOf(fromTo, 'ToDtTm');
+                if (fr || to) tlsRenderRow(out, t('sepa.row.fromTo'), (fr || '') + ' — ' + (to || ''));
+            }
+            for (const bal of sepaAllLocal(stmt, 'Bal')) {
+                const code = sepaTextOf(sepaFirst(bal, 'Tp') || bal, 'Cd');
+                const amtEl = sepaFirst(bal, 'Amt');
+                if (!amtEl) continue;
+                const amt = ((amtEl.textContent || '').trim() + ' ' + (amtEl.getAttribute('Ccy') || '')).trim();
+                const label = code === 'OPBD' ? t('sepa.row.openingBal')
+                            : code === 'CLBD' ? t('sepa.row.closingBal')
+                            : code || 'Balance';
+                tlsRenderRow(out, label, amt);
+            }
+            const entries = sepaAllLocal(stmt, 'Ntry');
+            if (entries.length) {
+                const heading = document.createElement('div');
+                heading.style.cssText = 'margin: 16px 0 6px; font-weight: 700;';
+                heading.textContent = t('sepa.entry.heading');
+                out.appendChild(heading);
+            }
+            entries.forEach((entry, i) => {
+                const sep = document.createElement('div');
+                sep.style.cssText = 'margin-top: 12px; font-size: 0.82rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em;';
+                sep.textContent = '#' + (i + 1);
+                out.appendChild(sep);
+                const bookDt = sepaTextOf(sepaFirst(entry, 'BookgDt') || entry, 'Dt');
+                const amtEl = sepaFirst(entry, 'Amt');
+                const amt = amtEl ? ((amtEl.textContent || '').trim() + ' ' + (amtEl.getAttribute('Ccy') || '')).trim() : '';
+                const cdtDbt = sepaTextOf(entry, 'CdtDbtInd');
+                if (bookDt) tlsRenderRow(out, t('sepa.entry.bookDt'), bookDt);
+                if (amt)    tlsRenderRow(out, t('sepa.entry.amount'), amt);
+                if (cdtDbt) tlsRenderRow(out, t('sepa.entry.cdtDbt'), cdtDbt);
+            });
+        }
+
+        function sepaCollectIbans(doc) {
+            const out = [];
+            const list = doc.getElementsByTagName('IBAN');
+            for (const el of list) {
+                const v = (el.textContent || '').trim();
+                if (v && !out.includes(v)) out.push(v);
+            }
+            return out;
+        }
+
+        function sepaCheckIbans(out, doc) {
+            const ibans = sepaCollectIbans(doc);
+            if (!ibans.length) return;
+            const bad = [];
+            for (const iban of ibans) {
+                // ibanValidate throws on length/format failures and returns {ok:false} on MOD-97
+                // failure — flag both. Bare digit-flips fall into the second branch.
+                try {
+                    const r = ibanValidate(iban);
+                    if (!r || !r.ok) bad.push(iban);
+                } catch (e) {
+                    bad.push(iban);
+                }
+            }
+            if (bad.length === 0) {
+                tlsRenderRow(out, t('sepa.row.warning'), t('sepa.ok.ibanValid') + '  (' + intlNumber(ibans.length) + ')');
+            } else {
+                for (const iban of bad) {
+                    tlsRenderRow(out, t('sepa.row.warning'), tFormat('sepa.warn.ibanInvalid', { iban }));
+                }
+            }
+        }
+
+        document.getElementById('btn-sepa-parse').addEventListener('click', () => {
+            const out = document.getElementById('sepa-results');
+            while (out.firstChild) out.removeChild(out.firstChild);
+            out.classList.remove('hidden');
+            try {
+                const { doc, detected } = sepaParse(document.getElementById('sepa-input').value);
+                if (detected.type === 'pain.001' || detected.type === 'pain.008') sepaRenderPain001(out, detected);
+                else if (detected.type === 'camt.053') sepaRenderCamt053(out, detected);
+                else {
+                    sepaRenderHeader(out, detected);
+                    tlsRenderRow(out, t('sepa.row.warning'), t('sepa.warn.unknownDoc'));
+                }
+                sepaCheckIbans(out, doc);
+            } catch (e) {
+                tlsRenderRow(out, t('sepa.row.error'), e.message);
             }
         });
 
