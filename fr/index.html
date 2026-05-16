@@ -4351,6 +4351,8 @@
                 'sepa.row.closingBal': 'Closing balance',
                 'sepa.tx.heading': 'Transactions',
                 'sepa.tx.instrId': 'Instruction ID',
+                'sepa.tx.mndtId': 'Mandate ID',
+                'sepa.row.reqdExctnDt': 'Requested execution date',
                 'sepa.tx.endToEnd': 'End-to-end ID',
                 'sepa.tx.amount': 'Amount',
                 'sepa.tx.debtor': 'Debtor',
@@ -4433,6 +4435,9 @@
                 'ubl.row.taxInclusive': 'Total including tax',
                 'ubl.row.payableAmount': 'Amount due for payment',
                 'ubl.lines.heading': 'Line items',
+                'ubl.lines.copyCsv': 'Copy as CSV',
+                'ubl.lines.copied': '✓ Copied',
+                'ubl.lines.copyFail': 'Copy failed',
                 'ubl.line.name': 'Item',
                 'ubl.line.qty': 'Quantity',
                 'ubl.line.price': 'Unit price',
@@ -5414,6 +5419,8 @@
                 'sepa.row.closingBal': 'Solde final',
                 'sepa.tx.heading': 'Transactions',
                 'sepa.tx.instrId': 'ID d’instruction',
+                'sepa.tx.mndtId': 'ID de mandat',
+                'sepa.row.reqdExctnDt': 'Date d’exécution demandée',
                 'sepa.tx.endToEnd': 'Identifiant de bout en bout',
                 'sepa.tx.amount': 'Montant',
                 'sepa.tx.debtor': 'Débiteur',
@@ -5486,6 +5493,9 @@
                 'ubl.row.taxInclusive': 'Total toutes taxes comprises',
                 'ubl.row.payableAmount': 'Montant à payer',
                 'ubl.lines.heading': 'Lignes de facture',
+                'ubl.lines.copyCsv': 'Copier en CSV',
+                'ubl.lines.copied': '✓ Copié',
+                'ubl.lines.copyFail': 'Échec de la copie',
                 'ubl.line.name': 'Article',
                 'ubl.line.qty': 'Quantité',
                 'ubl.line.price': 'Prix unitaire',
@@ -6437,6 +6447,8 @@
                 'sepa.row.closingBal': '期末余额',
                 'sepa.tx.heading': '交易',
                 'sepa.tx.instrId': '指令 ID',
+                'sepa.tx.mndtId': '授权 ID',
+                'sepa.row.reqdExctnDt': '请求的执行日期',
                 'sepa.tx.endToEnd': '端到端 ID',
                 'sepa.tx.amount': '金额',
                 'sepa.tx.debtor': '付款人',
@@ -6509,6 +6521,9 @@
                 'ubl.row.taxInclusive': '含税合计',
                 'ubl.row.payableAmount': '应付金额',
                 'ubl.lines.heading': '行项目',
+                'ubl.lines.copyCsv': '复制为 CSV',
+                'ubl.lines.copied': '✓ 已复制',
+                'ubl.lines.copyFail': '复制失败',
                 'ubl.line.name': '项目',
                 'ubl.line.qty': '数量',
                 'ubl.line.price': '单价',
@@ -7475,6 +7490,8 @@
                 'sepa.row.closingBal': 'Endsaldo',
                 'sepa.tx.heading': 'Transaktionen',
                 'sepa.tx.instrId': 'Instruktions-ID',
+                'sepa.tx.mndtId': 'Mandats-ID',
+                'sepa.row.reqdExctnDt': 'Gewünschtes Ausführungsdatum',
                 'sepa.tx.endToEnd': 'End-to-End-ID',
                 'sepa.tx.amount': 'Betrag',
                 'sepa.tx.debtor': 'Zahlungspflichtiger',
@@ -7547,6 +7564,9 @@
                 'ubl.row.taxInclusive': 'Gesamtbetrag brutto',
                 'ubl.row.payableAmount': 'Zahlbetrag',
                 'ubl.lines.heading': 'Rechnungspositionen',
+                'ubl.lines.copyCsv': 'Als CSV kopieren',
+                'ubl.lines.copied': '✓ Kopiert',
+                'ubl.lines.copyFail': 'Kopieren fehlgeschlagen',
                 'ubl.line.name': 'Artikel',
                 'ubl.line.qty': 'Menge',
                 'ubl.line.price': 'Stückpreis',
@@ -8498,6 +8518,8 @@
                 'sepa.row.closingBal': 'अंतिम शेष',
                 'sepa.tx.heading': 'लेन-देन',
                 'sepa.tx.instrId': 'निर्देश ID',
+                'sepa.tx.mndtId': 'मैंडेट ID',
+                'sepa.row.reqdExctnDt': 'अनुरोधित निष्पादन तिथि',
                 'sepa.tx.endToEnd': 'एंड-टू-एंड ID',
                 'sepa.tx.amount': 'राशि',
                 'sepa.tx.debtor': 'देनदार',
@@ -8570,6 +8592,9 @@
                 'ubl.row.taxInclusive': 'कर सहित कुल',
                 'ubl.row.payableAmount': 'देय राशि',
                 'ubl.lines.heading': 'पंक्ति आइटम',
+                'ubl.lines.copyCsv': 'CSV में कॉपी करें',
+                'ubl.lines.copied': '✓ कॉपी किया गया',
+                'ubl.lines.copyFail': 'कॉपी विफल',
                 'ubl.line.name': 'आइटम',
                 'ubl.line.qty': 'मात्रा',
                 'ubl.line.price': 'इकाई मूल्य',
@@ -15441,8 +15466,12 @@
             const rmt  = sepaTextOf(sepaFirst(tx, 'RmtInf') || tx, 'Ustrd');
             const cdtrIban = sepaTextOf(sepaFirst(tx, 'CdtrAcct') || tx, 'IBAN');
             const dbtrIban = sepaTextOf(sepaFirst(tx, 'DbtrAcct') || tx, 'IBAN');
+            // Direct-debit mandate ID lives inside DrctDbtTx/MndtRltdInf; only present
+            // on pain.008 transactions, so this row only surfaces when meaningful.
+            const mndtId = sepaTextOf(sepaFirst(sepaFirst(tx, 'DrctDbtTx') || tx, 'MndtRltdInf') || tx, 'MndtId');
             if (instrId) tlsRenderRow(out, t('sepa.tx.instrId'), instrId);
             if (e2e)  tlsRenderRow(out, t('sepa.tx.endToEnd'),   e2e);
+            if (mndtId) tlsRenderRow(out, t('sepa.tx.mndtId'),   mndtId);
             if (amt)  tlsRenderRow(out, t('sepa.tx.amount'),     amt);
             if (dbtr) tlsRenderRow(out, t('sepa.tx.debtor'),     dbtr + (dbtrIban ? '  (' + dbtrIban + ')' : ''));
             if (cdtr) tlsRenderRow(out, t('sepa.tx.creditor'),   cdtr + (cdtrIban ? '  (' + cdtrIban + ')' : ''));
@@ -15460,8 +15489,14 @@
             for (const pi of pmtInfs) {
                 const dbtrIban = sepaTextOf(sepaFirst(pi, 'DbtrAcct') || pi, 'IBAN');
                 const dbtrBic  = sepaTextOf(sepaFirst(pi, 'DbtrAgt')  || pi, 'BIC') || sepaTextOf(sepaFirst(pi, 'DbtrAgt') || pi, 'BICFI');
+                // ReqdExctnDt is the requested execution date for the whole PmtInf group.
+                // Schemas before pain.001.001.09 use a plain element value; .09+ wraps it
+                // in a <Dt> child — accept either by checking the child first.
+                const reqdEl = sepaFirst(pi, 'ReqdExctnDt');
+                const reqdExctn = reqdEl ? (sepaTextOf(reqdEl, 'Dt') || (reqdEl.textContent || '').trim()) : '';
                 if (dbtrIban) tlsRenderRow(out, t('sepa.row.iban'), dbtrIban);
                 if (dbtrBic)  tlsRenderRow(out, t('sepa.row.bic'),  dbtrBic);
+                if (reqdExctn) tlsRenderRow(out, t('sepa.row.reqdExctnDt'), reqdExctn);
                 const txs = sepaAllLocal(pi, 'CdtTrfTxInf').concat(sepaAllLocal(pi, 'DrctDbtTxInf'));
                 txs.forEach((tx, i) => {
                     const sep = document.createElement('div');
@@ -15866,6 +15901,14 @@
             });
         }
 
+        function ublCsvCell(v) {
+            // RFC 4180 quoting: wrap in quotes when the field contains "," `"` or a newline,
+            // and double up embedded quotes. Empty cells pass through unquoted.
+            const s = v == null ? '' : String(v);
+            if (s === '') return '';
+            return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+        }
+
         function ublRenderLines(out, detected) {
             // InvoiceLine on <Invoice>; CreditNoteLine on <CreditNote>. Each carries a quantity,
             // a Price/PriceAmount, an Item/Name, and a LineExtensionAmount.
@@ -15875,24 +15918,57 @@
             const lines = sepaAllLocal(r, wantLocal);
             if (!lines.length) return;
             const heading = document.createElement('div');
-            heading.style.cssText = 'margin: 16px 0 6px; font-weight: 700;';
-            heading.textContent = t('ubl.lines.heading');
+            heading.style.cssText = 'margin: 16px 0 6px; font-weight: 700; display: flex; align-items: center; gap: 12px;';
+            const headingLabel = document.createElement('span');
+            headingLabel.dataset.i18n = 'ubl.lines.heading';
+            headingLabel.textContent = t('ubl.lines.heading');
+            heading.appendChild(headingLabel);
+            const csvBtn = document.createElement('button');
+            csvBtn.type = 'button';
+            csvBtn.id = 'btn-ubl-copy-csv';
+            csvBtn.style.cssText = 'font-size: 0.78rem; padding: 4px 10px; cursor: pointer; border: 1px solid var(--border); background: var(--bg-tertiary); color: var(--text-primary); border-radius: 6px; font-weight: 600;';
+            csvBtn.dataset.i18n = 'ubl.lines.copyCsv';
+            csvBtn.textContent = t('ubl.lines.copyCsv');
+            heading.appendChild(csvBtn);
             out.appendChild(heading);
+
+            // Build the CSV row-by-row as we render the visible table, so the export
+            // is the literal data the user just inspected — no parallel parsing path.
+            const csvRows = [['#', 'Name', 'Quantity', 'UnitCode', 'Price', 'PriceCurrency', 'LineAmount', 'LineCurrency'].join(',')];
             lines.forEach((line, i) => {
                 const sep = document.createElement('div');
                 sep.style.cssText = 'margin-top: 12px; font-size: 0.82rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em;';
                 sep.textContent = '#' + (i + 1);
                 out.appendChild(sep);
                 const qtyEl  = sepaFirst(line, qtyLocal);
-                const qty    = qtyEl ? ((qtyEl.textContent || '').trim() + (qtyEl.getAttribute('unitCode') ? ' ' + qtyEl.getAttribute('unitCode') : '')) : '';
-                const lineAmt = ublAmt(sepaFirst(line, 'LineExtensionAmount'));
+                const qtyRaw = qtyEl ? (qtyEl.textContent || '').trim() : '';
+                const unitCode = qtyEl ? (qtyEl.getAttribute('unitCode') || '') : '';
+                const qty    = qtyRaw + (unitCode ? ' ' + unitCode : '');
+                const lineAmtEl = sepaFirst(line, 'LineExtensionAmount');
+                const lineAmt = ublAmt(lineAmtEl);
+                const lineAmtRaw = lineAmtEl ? (lineAmtEl.textContent || '').trim() : '';
+                const lineCcy = lineAmtEl ? (lineAmtEl.getAttribute('currencyID') || '') : '';
                 const item = sepaFirst(line, 'Item');
                 const name = item ? sepaTextOf(item, 'Name') : '';
-                const price = ublAmt(sepaFirst(sepaFirst(line, 'Price') || line, 'PriceAmount'));
+                const priceEl = sepaFirst(sepaFirst(line, 'Price') || line, 'PriceAmount');
+                const price = ublAmt(priceEl);
+                const priceRaw = priceEl ? (priceEl.textContent || '').trim() : '';
+                const priceCcy = priceEl ? (priceEl.getAttribute('currencyID') || '') : '';
                 if (name)    tlsRenderRow(out, t('ubl.line.name'),   name);
                 if (qty)     tlsRenderRow(out, t('ubl.line.qty'),    qty);
                 if (price)   tlsRenderRow(out, t('ubl.line.price'),  price);
                 if (lineAmt) tlsRenderRow(out, t('ubl.line.amount'), lineAmt);
+                csvRows.push([i + 1, name, qtyRaw, unitCode, priceRaw, priceCcy, lineAmtRaw, lineCcy].map(ublCsvCell).join(','));
+            });
+            const csv = csvRows.join('\n') + '\n';
+            csvBtn.addEventListener('click', async () => {
+                try {
+                    await navigator.clipboard.writeText(csv);
+                    csvBtn.textContent = t('ubl.lines.copied');
+                    setTimeout(() => { csvBtn.textContent = t('ubl.lines.copyCsv'); }, 1500);
+                } catch (e) {
+                    csvBtn.textContent = t('ubl.lines.copyFail');
+                }
             });
         }
 

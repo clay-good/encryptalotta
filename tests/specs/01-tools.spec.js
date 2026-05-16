@@ -980,6 +980,52 @@ test('sepa: surfaces per-transaction InstrId alongside EndToEndId', async ({ pag
   await expect(page.locator('#sepa-results')).toContainText('E2E-001');
 });
 
+test('sepa: surfaces ReqdExctnDt (requested execution date) per PmtInf', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // SEPA_PAIN001 already carries `<ReqdExctnDt>2024-01-20</ReqdExctnDt>` inside <PmtInf>.
+  await page.fill('#sepa-input', SEPA_PAIN001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText('2024-01-20', { timeout: 5_000 });
+});
+
+test('sepa: pain.008 direct debit surfaces per-transaction MndtId', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  const pain008 = `<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.008.001.02">
+  <CstmrDrctDbtInitn>
+    <GrpHdr>
+      <MsgId>DD-MSG-2024-099</MsgId>
+      <CreDtTm>2024-05-15T09:00:00</CreDtTm>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>42.00</CtrlSum>
+      <InitgPty><Nm>Creditor Inc</Nm></InitgPty>
+    </GrpHdr>
+    <PmtInf>
+      <PmtInfId>DD-PAY-001</PmtInfId>
+      <PmtMtd>DD</PmtMtd>
+      <ReqdColltnDt>2024-06-01</ReqdColltnDt>
+      <Cdtr><Nm>Creditor Inc</Nm></Cdtr>
+      <CdtrAcct><Id><IBAN>DE91100000000123456789</IBAN></Id></CdtrAcct>
+      <CdtrAgt><FinInstnId><BIC>DEUTDEFFXXX</BIC></FinInstnId></CdtrAgt>
+      <DrctDbtTxInf>
+        <PmtId><EndToEndId>DD-E2E-077</EndToEndId></PmtId>
+        <InstdAmt Ccy="EUR">42.00</InstdAmt>
+        <DrctDbtTx><MndtRltdInf><MndtId>MANDATE-2024-XYZ</MndtId></MndtRltdInf></DrctDbtTx>
+        <DbtrAgt><FinInstnId><BIC>COBADEFFXXX</BIC></FinInstnId></DbtrAgt>
+        <Dbtr><Nm>Subscriber</Nm></Dbtr>
+        <DbtrAcct><Id><IBAN>DE89370400440532013000</IBAN></Id></DbtrAcct>
+        <RmtInf><Ustrd>Subscription May 2024</Ustrd></RmtInf>
+      </DrctDbtTxInf>
+    </PmtInf>
+  </CstmrDrctDbtInitn>
+</Document>`;
+  await page.fill('#sepa-input', pain008);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText('pain.008', { timeout: 5_000 });
+  await expect(page.locator('#sepa-results')).toContainText('MANDATE-2024-XYZ');
+  await expect(page.locator('#sepa-results')).toContainText('Subscription May 2024');
+});
+
 test('sepa: rejects non-ISO 20022 XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'sepa');
   await page.fill('#sepa-input', '<?xml version="1.0"?><foo><bar/></foo>');
@@ -1175,6 +1221,20 @@ test('ubl: CreditNote parses CreditNoteLine and payable amount', async ({ page }
   await expect(page.locator('#ubl-results')).toContainText('CN-2024-007');
   await expect(page.locator('#ubl-results')).toContainText('Refunded Widget');
   await expect(page.locator('#ubl-results')).toContainText('50.00 EUR');
+});
+
+test('ubl: copy-as-CSV exposes a row per line item with the correct columns', async ({ page, context }) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#btn-ubl-copy-csv')).toBeVisible({ timeout: 5_000 });
+  await page.click('#btn-ubl-copy-csv');
+  const csv = await page.evaluate(() => navigator.clipboard.readText());
+  const rows = csv.trim().split('\n');
+  expect(rows[0]).toBe('#,Name,Quantity,UnitCode,Price,PriceCurrency,LineAmount,LineCurrency');
+  // First (and only) line item: Widget Pro, qty 2 C62, price 50 EUR, line 100 EUR.
+  expect(rows[1]).toMatch(/^1,Widget Pro,2,C62,50\.00,EUR,100\.00,EUR$/);
 });
 
 test('ubl: rejects non-UBL XML', async ({ page }) => {
