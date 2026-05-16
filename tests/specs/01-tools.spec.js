@@ -1,6 +1,7 @@
 /* eslint-disable */
 import { test, expect } from '@playwright/test';
 import fs from 'node:fs';
+import nodeCrypto from 'node:crypto';
 
 let FIXTURE = null;
 const PASS = 'CorrectHorseBatteryStaple-9!';
@@ -229,6 +230,75 @@ test('jwt: decode RFC 7519 example', async ({ page }) => {
   await page.fill('#jwt-input', tok);
   await page.click('#btn-jwt-decode');
   await expect(page.locator('#jwt-results')).toContainText('John Doe', { timeout: 5_000 });
+});
+
+// SD-JWT (draft-ietf-oauth-selective-disclosure-jwt) — EUDI Wallet credential format (SPEC §2.8)
+function b64url(bufOrStr) {
+  const buf = typeof bufOrStr === 'string' ? Buffer.from(bufOrStr, 'utf8') : bufOrStr;
+  return buf.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+function buildSdJwt(disclosuresJson, extraPayload = {}, kbJwt = null) {
+  // Each disclosure: base64url(JSON.stringify([salt, name, value])).
+  // The digest stored in _sd is SHA-256 over the ASCII bytes of that base64url string.
+  const encoded = disclosuresJson.map(d => b64url(JSON.stringify(d)));
+  const digests = encoded.map(e => b64url(nodeCrypto.createHash('sha256').update(e, 'ascii').digest()));
+  const header = b64url(JSON.stringify({ typ: 'vc+sd-jwt', alg: 'HS256' }));
+  const payload = b64url(JSON.stringify({ iss: 'https://issuer.example', _sd_alg: 'sha-256', _sd: digests, ...extraPayload }));
+  const sig = b64url(Buffer.from('signature-placeholder'));
+  let tok = `${header}.${payload}.${sig}~` + encoded.join('~');
+  if (kbJwt) tok += '~' + kbJwt;
+  return tok;
+}
+
+test('sd-jwt: surfaces disclosures and matches them against _sd digests', async ({ page }) => {
+  const errs=[]; autoDismissDialogs(page, errs);
+  await page.goto('/index.html'); await gotoTool(page, 'jwt');
+  const sdjwt = buildSdJwt([
+    ['salt-abc', 'given_name', 'John'],
+    ['salt-xyz', 'family_name', 'Doe'],
+  ]);
+  await page.fill('#jwt-input', sdjwt);
+  await page.click('#btn-jwt-decode');
+  await expect(page.locator('#jwt-results')).toContainText('given_name', { timeout: 5_000 });
+  await expect(page.locator('#jwt-results')).toContainText('John');
+  await expect(page.locator('#jwt-results')).toContainText('family_name');
+  await expect(page.locator('#jwt-results')).toContainText('Doe');
+  // Both disclosures must show as referenced in the payload's _sd array.
+  const matches = await page.locator('#jwt-results').getByText(/referenced in payload _sd/i).count();
+  expect(matches).toBeGreaterThanOrEqual(2);
+});
+
+test('sd-jwt: flags an unreferenced (orphaned) disclosure', async ({ page }) => {
+  const errs=[]; autoDismissDialogs(page, errs);
+  await page.goto('/index.html'); await gotoTool(page, 'jwt');
+  // Build a token whose payload _sd does NOT list our disclosure's digest.
+  // Easiest path: build normally, then strip _sd by stomping it with a known-wrong digest.
+  const sdjwt = buildSdJwt([['salt-orphan', 'orphan_claim', 'orphan_value']], { _sd_override: true });
+  // Replace the genuine _sd list with a single bogus digest so the disclosure is unmatched.
+  // (Quickest way: rebuild manually.)
+  const enc = b64url(JSON.stringify(['salt-orphan', 'orphan_claim', 'orphan_value']));
+  const header = b64url(JSON.stringify({ typ: 'vc+sd-jwt', alg: 'HS256' }));
+  const payload = b64url(JSON.stringify({ iss: 'https://issuer.example', _sd_alg: 'sha-256', _sd: ['AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'] }));
+  const sig = b64url(Buffer.from('sig'));
+  const tok = `${header}.${payload}.${sig}~${enc}`;
+  await page.fill('#jwt-input', tok);
+  await page.click('#btn-jwt-decode');
+  await expect(page.locator('#jwt-results')).toContainText('orphan_claim', { timeout: 5_000 });
+  await expect(page.locator('#jwt-results')).toContainText(/unreferenced/i);
+});
+
+test('sd-jwt: surfaces a key-binding JWT when present', async ({ page }) => {
+  const errs=[]; autoDismissDialogs(page, errs);
+  await page.goto('/index.html'); await gotoTool(page, 'jwt');
+  const kbHeader = b64url(JSON.stringify({ typ: 'kb+jwt', alg: 'ES256' }));
+  const kbPayload = b64url(JSON.stringify({ aud: 'https://verifier.example', nonce: 'nonce-42', iat: 1700000000 }));
+  const kbSig = b64url(Buffer.from('kb-sig'));
+  const kbJwt = `${kbHeader}.${kbPayload}.${kbSig}`;
+  const sdjwt = buildSdJwt([['salt-1', 'birthdate', '1970-01-01']], {}, kbJwt);
+  await page.fill('#jwt-input', sdjwt);
+  await page.click('#btn-jwt-decode');
+  await expect(page.locator('#jwt-results')).toContainText(/Key-binding JWT/i, { timeout: 5_000 });
+  await expect(page.locator('#jwt-results')).toContainText('nonce-42');
 });
 
 // =============== UTILITIES ===============
