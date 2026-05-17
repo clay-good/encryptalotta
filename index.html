@@ -4442,6 +4442,8 @@
                 'sepa.warn.ctrlSumMismatch': 'CtrlSum mismatch: header declares {declared} but transaction amounts sum to {actual} (ISO 20022 group-header invariant)',
                 'sepa.ok.ibanBicCountry': 'IBAN ↔ BIC country codes agree across all account/agent pairs ({n})',
                 'sepa.warn.ibanBicCountry': 'IBAN ↔ BIC country mismatch: IBAN {iban} declares country {ibanCC} but BIC {bic} declares {bicCC}',
+                'sepa.ok.pmtMtd': 'PmtMtd matches document type: {n} PmtInf block(s) declare {expected} as expected for {docType}',
+                'sepa.warn.pmtMtd': 'PmtMtd mismatch: PmtInf #{idx} declares {actual} but {docType} requires {expected} (ISO 20022 / EPC SEPA rulebook)',
                 'sepa.warn.ccyInvalid': 'Currency code not active per ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unrecognized ISO 20022 root element — partial parse only.',
                 'err.sepaEmpty': 'XML input is empty.',
@@ -5578,6 +5580,8 @@
                 'sepa.warn.ctrlSumMismatch': 'CtrlSum incohérent : l’en-tête déclare {declared} mais le total des transactions est {actual} (invariant d’en-tête ISO 20022)',
                 'sepa.ok.ibanBicCountry': 'Codes pays IBAN ↔ BIC cohérents pour toutes les paires compte/agent ({n})',
                 'sepa.warn.ibanBicCountry': 'Codes pays IBAN ↔ BIC incohérents : l’IBAN {iban} déclare {ibanCC} mais le BIC {bic} déclare {bicCC}',
+                'sepa.ok.pmtMtd': 'PmtMtd cohérent avec le type de document : {n} bloc(s) PmtInf déclarent {expected} comme attendu pour {docType}',
+                'sepa.warn.pmtMtd': 'PmtMtd incohérent : le bloc PmtInf n°{idx} déclare {actual} alors que {docType} exige {expected} (ISO 20022 / règles EPC SEPA)',
                 'sepa.warn.ccyInvalid': 'Code monétaire non actif selon ISO 4217 : {code}',
                 'sepa.warn.unknownDoc': 'Élément racine ISO 20022 non reconnu — analyse partielle uniquement.',
                 'err.sepaEmpty': 'Le XML d’entrée est vide.',
@@ -6674,6 +6678,8 @@
                 'sepa.warn.ctrlSumMismatch': 'CtrlSum 不一致：报文头声明 {declared}，但交易金额合计为 {actual}（ISO 20022 组头不变量）',
                 'sepa.ok.ibanBicCountry': '所有账户/代理对的 IBAN ↔ BIC 国家代码一致（{n}）',
                 'sepa.warn.ibanBicCountry': 'IBAN ↔ BIC 国家代码不一致：IBAN {iban} 声明 {ibanCC}，但 BIC {bic} 声明 {bicCC}',
+                'sepa.ok.pmtMtd': 'PmtMtd 与文档类型一致：{n} 个 PmtInf 块均声明为 {expected}，符合 {docType} 的要求',
+                'sepa.warn.pmtMtd': 'PmtMtd 不一致：PmtInf 第 {idx} 项声明 {actual}，但 {docType} 要求 {expected}（ISO 20022 / EPC SEPA 规则书）',
                 'sepa.warn.ccyInvalid': '币种代码不在 ISO 4217 现行清单中：{code}',
                 'sepa.warn.unknownDoc': '无法识别的 ISO 20022 根元素 — 仅部分解析。',
                 'err.sepaEmpty': 'XML 输入为空。',
@@ -7785,6 +7791,8 @@
                 'sepa.warn.ctrlSumMismatch': 'CtrlSum weicht ab: Header deklariert {declared}, Transaktionsbeträge summieren sich jedoch zu {actual} (ISO-20022-Gruppenkopf-Invariante)',
                 'sepa.ok.ibanBicCountry': 'IBAN-↔-BIC-Ländercodes stimmen über alle Konto/Agent-Paare überein ({n})',
                 'sepa.warn.ibanBicCountry': 'IBAN-↔-BIC-Landesabweichung: IBAN {iban} deklariert Land {ibanCC}, BIC {bic} deklariert jedoch {bicCC}',
+                'sepa.ok.pmtMtd': 'PmtMtd passt zum Dokumenttyp: {n} PmtInf-Block(s) deklarieren {expected}, wie für {docType} erwartet',
+                'sepa.warn.pmtMtd': 'PmtMtd-Abweichung: PmtInf Nr. {idx} deklariert {actual}, {docType} verlangt jedoch {expected} (ISO 20022 / EPC-SEPA-Rulebook)',
                 'sepa.warn.ccyInvalid': 'Währungscode nicht aktiv nach ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unbekanntes ISO-20022-Wurzelelement — nur Teilanalyse.',
                 'err.sepaEmpty': 'Die XML-Eingabe ist leer.',
@@ -8881,6 +8889,8 @@
                 'sepa.warn.ctrlSumMismatch': 'CtrlSum बेमेल: हेडर {declared} घोषित करता है पर लेन-देन योग {actual} है (ISO 20022 समूह-हेडर अपरिवर्तनीय)',
                 'sepa.ok.ibanBicCountry': 'सभी खाता/एजेंट जोड़ियों के लिए IBAN ↔ BIC देश कोड संगत ({n})',
                 'sepa.warn.ibanBicCountry': 'IBAN ↔ BIC देश कोड बेमेल: IBAN {iban} देश {ibanCC} घोषित करता है पर BIC {bic} {bicCC} घोषित करता है',
+                'sepa.ok.pmtMtd': 'PmtMtd दस्तावेज़ प्रकार से मेल खाता है: {n} PmtInf ब्लॉक {docType} के लिए अपेक्षित {expected} घोषित करते हैं',
+                'sepa.warn.pmtMtd': 'PmtMtd बेमेल: PmtInf #{idx} ने {actual} घोषित किया, परन्तु {docType} के लिए {expected} आवश्यक है (ISO 20022 / EPC SEPA रूलबुक)',
                 'sepa.warn.ccyInvalid': 'मुद्रा कोड ISO 4217 में सक्रिय नहीं: {code}',
                 'sepa.warn.unknownDoc': 'अज्ञात ISO 20022 रूट तत्व — केवल आंशिक पार्सिंग।',
                 'err.sepaEmpty': 'XML इनपुट खाली है।',
@@ -16348,6 +16358,37 @@
             }
         }
 
+        // ISO 20022 / EPC SEPA Rulebook PmtMtd consistency check:
+        //   - pain.001 (customer credit-transfer initiation) → PmtMtd MUST be 'TRF'
+        //   - pain.008 (customer direct-debit initiation)    → PmtMtd MUST be 'DD'
+        // Banks reject pain files whose PmtMtd contradicts the message schema
+        // — a mixed file with the wrong PmtMtd is essentially malformed at the
+        // payment-rail level, even when the XML itself parses.
+        function sepaCheckPmtMtd(out, doc, detected) {
+            if (detected.type !== 'pain.001' && detected.type !== 'pain.008') return;
+            const w = detected.wrapper;
+            if (!w) return;
+            const expected = detected.type === 'pain.001' ? 'TRF' : 'DD';
+            const pmtInfs = sepaAllLocal(w, 'PmtInf');
+            if (!pmtInfs.length) return;
+            const bad = [];
+            let seen = 0;
+            pmtInfs.forEach((pi, i) => {
+                const declared = (sepaTextOf(pi, 'PmtMtd') || '').trim().toUpperCase();
+                if (!declared) return;          // optional — schema allows omission
+                seen++;
+                if (declared !== expected) bad.push({ idx: i + 1, actual: declared });
+            });
+            if (!seen) return;
+            if (bad.length === 0) {
+                tlsRenderRow(out, t('sepa.row.warning'), '✓ ' + tFormat('sepa.ok.pmtMtd', { n: intlNumber(seen), expected, docType: detected.type }));
+            } else {
+                for (const b of bad) {
+                    tlsRenderRow(out, t('sepa.row.warning'), '✗ ' + tFormat('sepa.warn.pmtMtd', { idx: intlNumber(b.idx), actual: b.actual, expected, docType: detected.type }));
+                }
+            }
+        }
+
         function sepaCheckBics(out, doc) {
             const bics = sepaCollectBics(doc);
             if (!bics.length) return;
@@ -16386,6 +16427,7 @@
                 sepaCheckCurrencies(out, doc);
                 sepaCheckGrpHdrInvariants(out, doc, detected);
                 sepaCheckIbanBicCountryParity(out, doc, detected);
+                sepaCheckPmtMtd(out, doc, detected);
             } catch (e) {
                 tlsRenderRow(out, t('sepa.row.error'), e.message);
             }

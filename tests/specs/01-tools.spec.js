@@ -1343,6 +1343,23 @@ test('sepa: IBAN↔BIC country-code parity flags a German IBAN routed via a Fren
   await expect(page.locator('#sepa-results')).toContainText(/BNPAFRPPXXX/);
 });
 
+test('sepa: PmtMtd consistency confirms TRF on a well-formed pain.001', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  await page.fill('#sepa-input', SEPA_PAIN001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/PmtMtd matches document type.*TRF.*pain\.001/i, { timeout: 5_000 });
+});
+
+test('sepa: PmtMtd consistency flags DD declared inside a pain.001', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Swap the credit-transfer PmtMtd for a direct-debit one — schema-valid XML,
+  // but EPC rulebook-broken: pain.001 must declare TRF, not DD.
+  const bad = SEPA_PAIN001.replace('<PmtMtd>TRF</PmtMtd>', '<PmtMtd>DD</PmtMtd>');
+  await page.fill('#sepa-input', bad);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/PmtMtd mismatch.*declares DD.*pain\.001 requires TRF/i, { timeout: 5_000 });
+});
+
 test('sepa: rejects non-ISO 20022 XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'sepa');
   await page.fill('#sepa-input', '<?xml version="1.0"?><foo><bar/></foo>');
