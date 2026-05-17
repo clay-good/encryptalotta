@@ -4520,6 +4520,8 @@
                 'ubl.warn.lineTotalsMismatch': 'Line sum {sum} ≠ declared LineExtensionAmount {declared}',
                 'ubl.ok.taxConsistent': 'TaxExclusive + Σ TaxAmount = TaxInclusive',
                 'ubl.warn.taxMismatch': 'TaxExclusive + Σ TaxAmount = {computed} ≠ declared TaxInclusive {declared}',
+                'ubl.ok.ccyValid': 'Currency codes active per ISO 4217: {list}',
+                'ubl.warn.ccyInvalid': 'Currency code not active per ISO 4217: {code}',
                 'err.ublEmpty': 'XML input is empty.',
                 'err.ublParse': 'XML parse error: {detail}',
                 'err.ublNoRoot': 'No <Invoice> or <CreditNote> root element found — is this an OASIS UBL 2.1 XML file?',
@@ -5625,6 +5627,8 @@
                 'ubl.warn.lineTotalsMismatch': 'Somme des lignes {sum} ≠ LineExtensionAmount déclaré {declared}',
                 'ubl.ok.taxConsistent': 'TaxExclusive + Σ TaxAmount = TaxInclusive',
                 'ubl.warn.taxMismatch': 'TaxExclusive + Σ TaxAmount = {computed} ≠ TaxInclusive déclaré {declared}',
+                'ubl.ok.ccyValid': 'Codes monétaires actifs selon ISO 4217 : {list}',
+                'ubl.warn.ccyInvalid': 'Code monétaire non actif selon ISO 4217 : {code}',
                 'err.ublEmpty': 'Le XML d’entrée est vide.',
                 'err.ublParse': 'Erreur d’analyse XML : {detail}',
                 'err.ublNoRoot': 'Aucun élément racine <Invoice> ou <CreditNote> trouvé — s’agit-il d’un fichier OASIS UBL 2.1 ?',
@@ -6700,6 +6704,8 @@
                 'ubl.warn.lineTotalsMismatch': '明细行合计 {sum} ≠ 声明的 LineExtensionAmount {declared}',
                 'ubl.ok.taxConsistent': 'TaxExclusive + Σ TaxAmount = TaxInclusive',
                 'ubl.warn.taxMismatch': 'TaxExclusive + Σ TaxAmount = {computed} ≠ 声明的 TaxInclusive {declared}',
+                'ubl.ok.ccyValid': '币种代码按 ISO 4217 有效：{list}',
+                'ubl.warn.ccyInvalid': '币种代码不在 ISO 4217 现行清单中：{code}',
                 'err.ublEmpty': 'XML 输入为空。',
                 'err.ublParse': 'XML 解析错误：{detail}',
                 'err.ublNoRoot': '未找到 <Invoice> 或 <CreditNote> 根元素 — 这是 OASIS UBL 2.1 XML 文件吗？',
@@ -7790,6 +7796,8 @@
                 'ubl.warn.lineTotalsMismatch': 'Positionssumme {sum} ≠ deklarierter LineExtensionAmount {declared}',
                 'ubl.ok.taxConsistent': 'TaxExclusive + Σ TaxAmount = TaxInclusive',
                 'ubl.warn.taxMismatch': 'TaxExclusive + Σ TaxAmount = {computed} ≠ deklarierter TaxInclusive {declared}',
+                'ubl.ok.ccyValid': 'Währungscodes nach ISO 4217 aktiv: {list}',
+                'ubl.warn.ccyInvalid': 'Währungscode nicht aktiv nach ISO 4217: {code}',
                 'err.ublEmpty': 'XML-Eingabe ist leer.',
                 'err.ublParse': 'XML-Analysefehler: {detail}',
                 'err.ublNoRoot': 'Kein <Invoice>- oder <CreditNote>-Wurzelelement gefunden — handelt es sich wirklich um ein OASIS-UBL-2.1-XML?',
@@ -8865,6 +8873,8 @@
                 'ubl.warn.lineTotalsMismatch': 'पंक्तियों का योग {sum} ≠ घोषित LineExtensionAmount {declared}',
                 'ubl.ok.taxConsistent': 'TaxExclusive + Σ TaxAmount = TaxInclusive',
                 'ubl.warn.taxMismatch': 'TaxExclusive + Σ TaxAmount = {computed} ≠ घोषित TaxInclusive {declared}',
+                'ubl.ok.ccyValid': 'मुद्रा कोड ISO 4217 के अनुसार सक्रिय: {list}',
+                'ubl.warn.ccyInvalid': 'मुद्रा कोड ISO 4217 में सक्रिय नहीं: {code}',
                 'err.ublEmpty': 'XML इनपुट खाली है।',
                 'err.ublParse': 'XML पार्स त्रुटि: {detail}',
                 'err.ublNoRoot': 'कोई <Invoice> या <CreditNote> रूट तत्व नहीं मिला — क्या यह OASIS UBL 2.1 XML फ़ाइल है?',
@@ -16569,17 +16579,47 @@
             }
         }
 
+        // Walk every UBL element carrying a `currencyID="..."` attribute (the
+        // PEPPOL/UBL equivalent of ISO 20022's `Ccy="..."` — present on every
+        // *Amount element such as LineExtensionAmount, TaxAmount, PriceAmount,
+        // TaxInclusiveAmount, PayableAmount, …) and verify each code is
+        // currently active per ISO 4217. Reuses the same active-currencies set
+        // declared inline in the SEPA inspector above, so historical codes
+        // (ITL, DEM, ROL pre-2005) are deliberately rejected — pasting an
+        // unmigrated invoice surfaces the cleanup task. Catches typos
+        // (`ERU` for `EUR`) that the totals-consistency check would not see.
+        function ublCollectCurrencies(doc) {
+            const seen = new Set();
+            const all = doc.getElementsByTagNameNS('*', '*');
+            for (const el of all) {
+                const ccy = el.getAttribute && el.getAttribute('currencyID');
+                if (ccy) seen.add(ccy.trim());
+            }
+            return [...seen];
+        }
+        function ublCheckCurrencies(out, doc) {
+            const codes = ublCollectCurrencies(doc);
+            if (!codes.length) return;
+            const bad = codes.filter(c => !ISO_4217_ACTIVE.has(c.toUpperCase()));
+            if (bad.length === 0) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + tFormat('ubl.ok.ccyValid', { list: intlList(codes) }));
+            } else {
+                for (const c of bad) tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + tFormat('ubl.warn.ccyInvalid', { code: c }));
+            }
+        }
+
         document.getElementById('btn-ubl-parse').addEventListener('click', () => {
             const out = document.getElementById('ubl-results');
             while (out.firstChild) out.removeChild(out.firstChild);
             out.classList.remove('hidden');
             try {
-                const { detected } = ublParse(document.getElementById('ubl-input').value);
+                const { doc, detected } = ublParse(document.getElementById('ubl-input').value);
                 ublRenderHeader(out, detected);
                 ublRenderTotals(out, detected);
                 ublRenderLines(out, detected);
                 ublRenderTaxBreakdown(out, detected);
                 ublCheckTotals(out, detected);
+                ublCheckCurrencies(out, doc);
             } catch (e) {
                 tlsRenderRow(out, t('ubl.row.error'), e.message);
             }

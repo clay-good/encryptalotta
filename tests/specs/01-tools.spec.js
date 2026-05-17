@@ -1497,6 +1497,24 @@ test('ubl: totals consistency flags a tax-inclusive mismatch', async ({ page }) 
   await expect(page.locator('#ubl-results')).toContainText(/TaxExclusive \+ Σ TaxAmount = 119\.00 EUR ≠ declared TaxInclusive 120\.00 EUR/i, { timeout: 5_000 });
 });
 
+test('ubl: ISO 4217 currency cross-check confirms a well-formed EUR invoice', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  // Single confirmation row listing the active currency codes seen in the doc.
+  await expect(page.locator('#ubl-results')).toContainText(/Currency codes active per ISO 4217:\s*EUR/i, { timeout: 5_000 });
+});
+
+test('ubl: ISO 4217 currency cross-check flags a typo (ERU for EUR)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Flip every currencyID="EUR" to ERU. Real-world finger-flip; the totals-
+  // consistency check would not catch it (all amounts still balance).
+  const bad = UBL_INVOICE.replace(/currencyID="EUR"/g, 'currencyID="ERU"');
+  await page.fill('#ubl-input', bad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Currency code not active per ISO 4217:\s*ERU/i, { timeout: 5_000 });
+});
+
 test('ubl: rejects non-UBL XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   await page.fill('#ubl-input', '<?xml version="1.0"?><Document/>');
