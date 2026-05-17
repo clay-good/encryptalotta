@@ -1722,6 +1722,23 @@ test('ubl: DueDate vs IssueDate flags a backdated DueDate', async ({ page }) => 
   await expect(page.locator('#ubl-results')).toContainText(/DueDate 2024-03-15 is earlier than IssueDate 2024-04-01/i, { timeout: 5_000 });
 });
 
+test('ubl: VAT category code confirms when TaxCategory/ID is in the EN 16931 allowed set', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // UBL_INVOICE declares TaxCategory/ID = 'S' (Standard rate) — the canonical happy path.
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/VAT category codes valid \(UNCL 5305 \/ EN 16931\).*S/i, { timeout: 5_000 });
+});
+
+test('ubl: VAT category code flags an unknown letter', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // 'XX' is schema-valid plain text but not in the EN 16931 / UNCL 5305 allowed set.
+  const bad = UBL_INVOICE.replace('<cbc:ID>S</cbc:ID>', '<cbc:ID>XX</cbc:ID>');
+  await page.fill('#ubl-input', bad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Unknown VAT category code XX/i, { timeout: 5_000 });
+});
+
 test('ubl: rejects non-UBL XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   await page.fill('#ubl-input', '<?xml version="1.0"?><Document/>');

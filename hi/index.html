@@ -4539,6 +4539,8 @@
                 'ubl.warn.vatRate': 'TaxSubtotal #{idx} VAT-rate mismatch: declared TaxAmount {declared} but TaxableAmount × {pct}% = {expected} (EN 16931 BR-CO-17)',
                 'ubl.ok.dueDate': 'DueDate {due} is on or after IssueDate {issue}',
                 'ubl.warn.dueDate': 'DueDate {due} is earlier than IssueDate {issue} — payment cannot fall due before the invoice is issued',
+                'ubl.ok.vatCategory': 'VAT category codes valid (UNCL 5305 / EN 16931): {codes}',
+                'ubl.warn.vatCategory': 'Unknown VAT category code {code} — not in UNCL 5305 / EN 16931 allowed set (S, Z, E, AE, K, G, O, L, M)',
                 'ubl.warn.ccyInvalid': 'Currency code not active per ISO 4217: {code}',
                 'err.ublEmpty': 'XML input is empty.',
                 'err.ublParse': 'XML parse error: {detail}',
@@ -5667,6 +5669,8 @@
                 'ubl.warn.vatRate': 'TaxSubtotal n°{idx} taux de TVA incohérent : TaxAmount déclaré {declared} mais TaxableAmount × {pct} % = {expected} (EN 16931 BR-CO-17)',
                 'ubl.ok.dueDate': 'Date d’échéance {due} postérieure ou égale à la date d’émission {issue}',
                 'ubl.warn.dueDate': 'Date d’échéance {due} antérieure à la date d’émission {issue} — l’échéance ne peut précéder l’émission de la facture',
+                'ubl.ok.vatCategory': 'Codes de catégorie TVA valides (UNCL 5305 / EN 16931) : {codes}',
+                'ubl.warn.vatCategory': 'Code de catégorie TVA inconnu {code} — absent de la liste UNCL 5305 / EN 16931 (S, Z, E, AE, K, G, O, L, M)',
                 'ubl.warn.ccyInvalid': 'Code monétaire non actif selon ISO 4217 : {code}',
                 'err.ublEmpty': 'Le XML d’entrée est vide.',
                 'err.ublParse': 'Erreur d’analyse XML : {detail}',
@@ -6765,6 +6769,8 @@
                 'ubl.warn.vatRate': 'TaxSubtotal 第 {idx} 项税率不一致：声明 TaxAmount {declared}，但 TaxableAmount × {pct}% = {expected}（EN 16931 BR-CO-17）',
                 'ubl.ok.dueDate': '到期日期 {due} 不早于开票日期 {issue}',
                 'ubl.warn.dueDate': '到期日期 {due} 早于开票日期 {issue} — 付款不应在发票开具之前到期',
+                'ubl.ok.vatCategory': '增值税类别代码符合 UNCL 5305 / EN 16931：{codes}',
+                'ubl.warn.vatCategory': '未知的增值税类别代码 {code}（UNCL 5305 / EN 16931 仅允许 S、Z、E、AE、K、G、O、L、M）',
                 'ubl.warn.ccyInvalid': '币种代码不在 ISO 4217 现行清单中：{code}',
                 'err.ublEmpty': 'XML 输入为空。',
                 'err.ublParse': 'XML 解析错误：{detail}',
@@ -7878,6 +7884,8 @@
                 'ubl.warn.vatRate': 'TaxSubtotal Nr. {idx} USt-Satz weicht ab: deklarierter TaxAmount {declared}, aber TaxableAmount × {pct} % = {expected} (EN 16931 BR-CO-17)',
                 'ubl.ok.dueDate': 'Fälligkeitsdatum {due} liegt am oder nach dem Ausstellungsdatum {issue}',
                 'ubl.warn.dueDate': 'Fälligkeitsdatum {due} liegt vor dem Ausstellungsdatum {issue} — eine Zahlung kann nicht vor der Rechnungsstellung fällig werden',
+                'ubl.ok.vatCategory': 'USt-Kategoriecodes gemäß UNCL 5305 / EN 16931: {codes}',
+                'ubl.warn.vatCategory': 'Unbekannter USt-Kategoriecode {code} — nicht in der UNCL-5305- / EN-16931-Liste (S, Z, E, AE, K, G, O, L, M)',
                 'ubl.warn.ccyInvalid': 'Währungscode nicht aktiv nach ISO 4217: {code}',
                 'err.ublEmpty': 'XML-Eingabe ist leer.',
                 'err.ublParse': 'XML-Analysefehler: {detail}',
@@ -8976,6 +8984,8 @@
                 'ubl.warn.vatRate': 'TaxSubtotal #{idx} VAT दर बेमेल: घोषित TaxAmount {declared} पर TaxableAmount × {pct}% = {expected} (EN 16931 BR-CO-17)',
                 'ubl.ok.dueDate': 'देय तिथि {due} जारी तिथि {issue} पर या उसके बाद है',
                 'ubl.warn.dueDate': 'देय तिथि {due} जारी तिथि {issue} से पहले है — चालान जारी होने से पहले भुगतान देय नहीं हो सकता',
+                'ubl.ok.vatCategory': 'VAT श्रेणी कोड UNCL 5305 / EN 16931 के अनुसार मान्य: {codes}',
+                'ubl.warn.vatCategory': 'अज्ञात VAT श्रेणी कोड {code} — UNCL 5305 / EN 16931 अनुमत सूची (S, Z, E, AE, K, G, O, L, M) में नहीं',
                 'ubl.warn.ccyInvalid': 'मुद्रा कोड ISO 4217 में सक्रिय नहीं: {code}',
                 'err.ublEmpty': 'XML इनपुट खाली है।',
                 'err.ublParse': 'XML पार्स त्रुटि: {detail}',
@@ -17015,6 +17025,35 @@
             }
         }
 
+        // EN 16931 / UNCL 5305 VAT category-code validation. The allowed letters
+        // come from the EN 16931 BR-S/Z/E/AE/K/G/O/L/M rule families; values
+        // outside this set are schema-valid plain strings but rail-broken — a
+        // PEPPOL access point will reject the invoice at the category-code check.
+        // We walk every <cac:TaxCategory>/<cbc:ID> reachable from the root (both
+        // header-side TaxSubtotal/TaxCategory and item-level ClassifiedTaxCategory)
+        // and dedupe before reporting.
+        const UBL_VAT_CATS = new Set(['S','Z','E','AE','K','G','O','L','M']);
+        function ublCheckVatCategories(out, detected) {
+            const cats = sepaAllLocal(detected.root, 'TaxCategory');
+            if (!cats.length) return;
+            const seen = new Set();
+            const bad  = new Set();
+            for (const c of cats) {
+                const raw = (sepaTextOf(c, 'ID') || '').trim().toUpperCase();
+                if (!raw) continue;
+                seen.add(raw);
+                if (!UBL_VAT_CATS.has(raw)) bad.add(raw);
+            }
+            if (!seen.size) return;
+            if (bad.size === 0) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + tFormat('ubl.ok.vatCategory', { codes: intlList(Array.from(seen)) }));
+            } else {
+                for (const code of bad) {
+                    tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + tFormat('ubl.warn.vatCategory', { code }));
+                }
+            }
+        }
+
         function ublCheckIbans(out, doc) {
             const ibans = ublCollectIbans(doc);
             if (!ibans.length) return;
@@ -17049,6 +17088,7 @@
                 ublCheckTotals(out, detected);
                 ublCheckCurrencies(out, doc);
                 ublCheckVatRates(out, detected);
+                ublCheckVatCategories(out, detected);
                 ublCheckDates(out, detected);
                 ublCheckIbans(out, doc);
             } catch (e) {
