@@ -4437,6 +4437,8 @@
                 'sepa.warn.nbTxMismatch': 'NbOfTxs mismatch: header declares {declared} but file contains {actual} transactions (ISO 20022 group-header invariant)',
                 'sepa.ok.ctrlSumMatch': 'CtrlSum matches transaction total ({sum})',
                 'sepa.warn.ctrlSumMismatch': 'CtrlSum mismatch: header declares {declared} but transaction amounts sum to {actual} (ISO 20022 group-header invariant)',
+                'sepa.ok.ibanBicCountry': 'IBAN ↔ BIC country codes agree across all account/agent pairs ({n})',
+                'sepa.warn.ibanBicCountry': 'IBAN ↔ BIC country mismatch: IBAN {iban} declares country {ibanCC} but BIC {bic} declares {bicCC}',
                 'sepa.warn.ccyInvalid': 'Currency code not active per ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unrecognized ISO 20022 root element — partial parse only.',
                 'err.sepaEmpty': 'XML input is empty.',
@@ -5569,6 +5571,8 @@
                 'sepa.warn.nbTxMismatch': 'NbOfTxs incohérent : l’en-tête déclare {declared} mais le fichier contient {actual} transactions (invariant d’en-tête ISO 20022)',
                 'sepa.ok.ctrlSumMatch': 'CtrlSum correspond au total des transactions ({sum})',
                 'sepa.warn.ctrlSumMismatch': 'CtrlSum incohérent : l’en-tête déclare {declared} mais le total des transactions est {actual} (invariant d’en-tête ISO 20022)',
+                'sepa.ok.ibanBicCountry': 'Codes pays IBAN ↔ BIC cohérents pour toutes les paires compte/agent ({n})',
+                'sepa.warn.ibanBicCountry': 'Codes pays IBAN ↔ BIC incohérents : l’IBAN {iban} déclare {ibanCC} mais le BIC {bic} déclare {bicCC}',
                 'sepa.warn.ccyInvalid': 'Code monétaire non actif selon ISO 4217 : {code}',
                 'sepa.warn.unknownDoc': 'Élément racine ISO 20022 non reconnu — analyse partielle uniquement.',
                 'err.sepaEmpty': 'Le XML d’entrée est vide.',
@@ -6661,6 +6665,8 @@
                 'sepa.warn.nbTxMismatch': 'NbOfTxs 不一致：报文头声明 {declared}，但文件含 {actual} 笔交易（ISO 20022 组头不变量）',
                 'sepa.ok.ctrlSumMatch': 'CtrlSum 与交易合计一致（{sum}）',
                 'sepa.warn.ctrlSumMismatch': 'CtrlSum 不一致：报文头声明 {declared}，但交易金额合计为 {actual}（ISO 20022 组头不变量）',
+                'sepa.ok.ibanBicCountry': '所有账户/代理对的 IBAN ↔ BIC 国家代码一致（{n}）',
+                'sepa.warn.ibanBicCountry': 'IBAN ↔ BIC 国家代码不一致：IBAN {iban} 声明 {ibanCC}，但 BIC {bic} 声明 {bicCC}',
                 'sepa.warn.ccyInvalid': '币种代码不在 ISO 4217 现行清单中：{code}',
                 'sepa.warn.unknownDoc': '无法识别的 ISO 20022 根元素 — 仅部分解析。',
                 'err.sepaEmpty': 'XML 输入为空。',
@@ -7768,6 +7774,8 @@
                 'sepa.warn.nbTxMismatch': 'NbOfTxs weicht ab: Header deklariert {declared}, Datei enthält jedoch {actual} Transaktionen (ISO-20022-Gruppenkopf-Invariante)',
                 'sepa.ok.ctrlSumMatch': 'CtrlSum stimmt mit Transaktionssumme überein ({sum})',
                 'sepa.warn.ctrlSumMismatch': 'CtrlSum weicht ab: Header deklariert {declared}, Transaktionsbeträge summieren sich jedoch zu {actual} (ISO-20022-Gruppenkopf-Invariante)',
+                'sepa.ok.ibanBicCountry': 'IBAN-↔-BIC-Ländercodes stimmen über alle Konto/Agent-Paare überein ({n})',
+                'sepa.warn.ibanBicCountry': 'IBAN-↔-BIC-Landesabweichung: IBAN {iban} deklariert Land {ibanCC}, BIC {bic} deklariert jedoch {bicCC}',
                 'sepa.warn.ccyInvalid': 'Währungscode nicht aktiv nach ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unbekanntes ISO-20022-Wurzelelement — nur Teilanalyse.',
                 'err.sepaEmpty': 'Die XML-Eingabe ist leer.',
@@ -8860,6 +8868,8 @@
                 'sepa.warn.nbTxMismatch': 'NbOfTxs बेमेल: हेडर {declared} घोषित करता है पर फ़ाइल में {actual} लेन-देन हैं (ISO 20022 समूह-हेडर अपरिवर्तनीय)',
                 'sepa.ok.ctrlSumMatch': 'CtrlSum लेन-देन कुल से मेल खाता है ({sum})',
                 'sepa.warn.ctrlSumMismatch': 'CtrlSum बेमेल: हेडर {declared} घोषित करता है पर लेन-देन योग {actual} है (ISO 20022 समूह-हेडर अपरिवर्तनीय)',
+                'sepa.ok.ibanBicCountry': 'सभी खाता/एजेंट जोड़ियों के लिए IBAN ↔ BIC देश कोड संगत ({n})',
+                'sepa.warn.ibanBicCountry': 'IBAN ↔ BIC देश कोड बेमेल: IBAN {iban} देश {ibanCC} घोषित करता है पर BIC {bic} {bicCC} घोषित करता है',
                 'sepa.warn.ccyInvalid': 'मुद्रा कोड ISO 4217 में सक्रिय नहीं: {code}',
                 'sepa.warn.unknownDoc': 'अज्ञात ISO 20022 रूट तत्व — केवल आंशिक पार्सिंग।',
                 'err.sepaEmpty': 'XML इनपुट खाली है।',
@@ -16201,6 +16211,65 @@
             }
         }
 
+        // ISO 13616 IBANs encode the issuing country in chars 0-1; ISO 9362
+        // BICs encode the same in chars 4-5 (the BIC's country sub-code). When
+        // an account/agent pair sits inside the same scope (DbtrAcct + DbtrAgt
+        // at PmtInf level, CdtrAcct + CdtrAgt at transaction level), the two
+        // country codes MUST agree — a German IBAN routed via a French agent
+        // is almost always a copy-paste error and is rejected at clearing
+        // (EBA STEP2, EBA Clearing, STET). The walker pairs the elements by
+        // proximity (siblings within the same parent) and reports each
+        // mismatch as a danger row; matches across all pairs collapse into a
+        // single confirmation row.
+        function sepaPairIbanBic(parent) {
+            // Return [{ iban, bic }] for every (Acct, Agt) sibling pair under `parent`.
+            // We look for the standard ISO 20022 element names without prefixing
+            // them with the scope (Dbtr/Cdtr) — every named pair we surface here
+            // has already been promised by the schema to be the right scope's
+            // pair.
+            if (!parent) return [];
+            const out = [];
+            const acctNames = ['DbtrAcct', 'CdtrAcct'];
+            const agtNames  = ['DbtrAgt',  'CdtrAgt'];
+            for (let i = 0; i < acctNames.length; i++) {
+                const acct = sepaFirst(parent, acctNames[i]);
+                const agt  = sepaFirst(parent, agtNames[i]);
+                if (!acct || !agt) continue;
+                const iban = sepaTextOf(acct, 'IBAN');
+                const bic  = sepaTextOf(agt, 'BIC') || sepaTextOf(agt, 'BICFI');
+                if (iban && bic) out.push({ iban: iban.replace(/\s+/g, '').toUpperCase(), bic: bic.replace(/\s+/g, '').toUpperCase() });
+            }
+            return out;
+        }
+
+        function sepaCheckIbanBicCountryParity(out, doc, detected) {
+            if (detected.type !== 'pain.001' && detected.type !== 'pain.008') return;
+            const w = detected.wrapper;
+            if (!w) return;
+            const pairs = [];
+            for (const pi of sepaAllLocal(w, 'PmtInf')) {
+                pairs.push(...sepaPairIbanBic(pi));
+                for (const tx of sepaAllLocal(pi, 'CdtTrfTxInf'))   pairs.push(...sepaPairIbanBic(tx));
+                for (const tx of sepaAllLocal(pi, 'DrctDbtTxInf')) pairs.push(...sepaPairIbanBic(tx));
+            }
+            if (!pairs.length) return;
+            const bad = [];
+            for (const p of pairs) {
+                const ibanCC = p.iban.slice(0, 2);
+                const bicCC  = p.bic.slice(4, 6);
+                if (/^[A-Z]{2}$/.test(ibanCC) && /^[A-Z]{2}$/.test(bicCC) && ibanCC !== bicCC) {
+                    bad.push({ iban: p.iban, bic: p.bic, ibanCC, bicCC });
+                }
+            }
+            if (bad.length === 0) {
+                tlsRenderRow(out, t('sepa.row.warning'), '✓ ' + tFormat('sepa.ok.ibanBicCountry', { n: intlNumber(pairs.length) }));
+            } else {
+                for (const b of bad) {
+                    tlsRenderRow(out, t('sepa.row.warning'), '✗ ' + tFormat('sepa.warn.ibanBicCountry', { iban: b.iban, ibanCC: b.ibanCC, bic: b.bic, bicCC: b.bicCC }));
+                }
+            }
+        }
+
         // ISO 20022 pain.001 / pain.008 group-header invariants (EPC SEPA rulebook):
         //   - GrpHdr/NbOfTxs MUST equal the count of transaction-info elements
         //     (CdtTrfTxInf for credit transfers, DrctDbtTxInf for direct debits)
@@ -16303,6 +16372,7 @@
                 sepaCheckBics(out, doc);
                 sepaCheckCurrencies(out, doc);
                 sepaCheckGrpHdrInvariants(out, doc, detected);
+                sepaCheckIbanBicCountryParity(out, doc, detected);
             } catch (e) {
                 tlsRenderRow(out, t('sepa.row.error'), e.message);
             }

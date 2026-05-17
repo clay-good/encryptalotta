@@ -1321,6 +1321,28 @@ test('sepa: CtrlSum mismatch flagged when header undersums transaction amounts',
   await expect(page.locator('#sepa-results')).toContainText(/100/);
 });
 
+test('sepa: IBAN↔BIC country-code parity confirms on a well-formed German pain.001', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // SEPA_PAIN001 has DE IBANs paired with DE BICs (COBADEFFXXX / DEUTDEFFXXX);
+  // ISO 13616 vs ISO 9362 country codes should agree across both Dbtr and Cdtr.
+  await page.fill('#sepa-input', SEPA_PAIN001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/IBAN ↔ BIC country codes agree/i, { timeout: 5_000 });
+});
+
+test('sepa: IBAN↔BIC country-code parity flags a German IBAN routed via a French agent', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Swap the debtor's BIC for a French one while keeping the German IBAN —
+  // the kind of copy-paste error EBA clearing rejects. The mismatched pair
+  // should surface as a danger row carrying both country codes.
+  const bad = SEPA_PAIN001.replace('<BIC>COBADEFFXXX</BIC>', '<BIC>BNPAFRPPXXX</BIC>');
+  await page.fill('#sepa-input', bad);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/IBAN ↔ BIC country mismatch/i, { timeout: 5_000 });
+  await expect(page.locator('#sepa-results')).toContainText(/DE89370400440532013000/);
+  await expect(page.locator('#sepa-results')).toContainText(/BNPAFRPPXXX/);
+});
+
 test('sepa: rejects non-ISO 20022 XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'sepa');
   await page.fill('#sepa-input', '<?xml version="1.0"?><foo><bar/></foo>');
