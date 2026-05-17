@@ -1378,6 +1378,39 @@ test('sepa: ChrgBr enforcement flags DEBT inside a SEPA pain.001', async ({ page
   await expect(page.locator('#sepa-results')).toContainText(/ChrgBr mismatch.*declares DEBT.*SLEV/i, { timeout: 5_000 });
 });
 
+test('sepa: EndToEndId uniqueness confirms a batch with distinct ids', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // EPC SEPA Rulebook requires EndToEndId uniqueness per Originator. Append a
+  // second CdtTrfTxInf carrying a distinct E2E-002 so the file holds two transactions.
+  const secondTx = `      <CdtTrfTxInf>
+        <PmtId><EndToEndId>E2E-002</EndToEndId></PmtId>
+        <Amt><InstdAmt Ccy="EUR">50.00</InstdAmt></Amt>
+        <CdtrAgt><FinInstnId><BIC>DEUTDEFFXXX</BIC></FinInstnId></CdtrAgt>
+        <Cdtr><Nm>Other Supplier</Nm></Cdtr>
+        <CdtrAcct><Id><IBAN>DE91100000000123456789</IBAN></Id></CdtrAcct>
+      </CdtTrfTxInf>`;
+  const good = SEPA_PAIN001.replace('</CdtTrfTxInf>\n    </PmtInf>', `</CdtTrfTxInf>\n${secondTx}\n    </PmtInf>`);
+  await page.fill('#sepa-input', good);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/EndToEndId values are unique across the file.*EPC SEPA Rulebook/i, { timeout: 5_000 });
+});
+
+test('sepa: EndToEndId uniqueness flags a duplicated id within the file', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Append a second CdtTrfTxInf reusing the same E2E-001 — clearing systems reject this.
+  const dupTx = `      <CdtTrfTxInf>
+        <PmtId><EndToEndId>E2E-001</EndToEndId></PmtId>
+        <Amt><InstdAmt Ccy="EUR">75.00</InstdAmt></Amt>
+        <CdtrAgt><FinInstnId><BIC>DEUTDEFFXXX</BIC></FinInstnId></CdtrAgt>
+        <Cdtr><Nm>Dup Supplier</Nm></Cdtr>
+        <CdtrAcct><Id><IBAN>DE91100000000123456789</IBAN></Id></CdtrAcct>
+      </CdtTrfTxInf>`;
+  const bad = SEPA_PAIN001.replace('</CdtTrfTxInf>\n    </PmtInf>', `</CdtTrfTxInf>\n${dupTx}\n    </PmtInf>`);
+  await page.fill('#sepa-input', bad);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/EndToEndId duplicated within file.*E2E-001.*2 times.*uniqueness per Originator/i, { timeout: 5_000 });
+});
+
 test('sepa: rejects non-ISO 20022 XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'sepa');
   await page.fill('#sepa-input', '<?xml version="1.0"?><foo><bar/></foo>');

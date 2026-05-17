@@ -6754,6 +6754,8 @@ var qrcode = function() {
                 'sepa.warn.pmtMtd': 'PmtMtd mismatch: PmtInf #{idx} declares {actual} but {docType} requires {expected} (ISO 20022 / EPC SEPA rulebook)',
                 'sepa.ok.chrgBr': 'ChrgBr matches EPC SEPA Rulebook: {n} PmtInf block(s) declare SLEV (charges shared, allocated by local law)',
                 'sepa.warn.chrgBr': 'ChrgBr mismatch: PmtInf #{idx} declares {actual} but EPC SEPA Rulebook requires SLEV (charges shared, allocated by local law)',
+                'sepa.ok.e2eUnique': 'EndToEndId values are unique across the file ({n} transaction(s)) per EPC SEPA Rulebook',
+                'sepa.warn.e2eDup': 'EndToEndId duplicated within file: {id} appears {count} times — EPC SEPA Rulebook requires uniqueness per Originator (ISO 20022 / EPC SCT/SDD)',
                 'sepa.warn.ccyInvalid': 'Currency code not active per ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unrecognized ISO 20022 root element — partial parse only.',
                 'err.sepaEmpty': 'XML input is empty.',
@@ -7896,6 +7898,8 @@ var qrcode = function() {
                 'sepa.warn.pmtMtd': 'PmtMtd incohérent : le bloc PmtInf n°{idx} déclare {actual} alors que {docType} exige {expected} (ISO 20022 / règles EPC SEPA)',
                 'sepa.ok.chrgBr': 'ChrgBr conforme aux règles EPC SEPA : {n} bloc(s) PmtInf déclarent SLEV (frais partagés, selon la loi locale)',
                 'sepa.warn.chrgBr': 'ChrgBr non conforme : le bloc PmtInf n°{idx} déclare {actual} alors que les règles EPC SEPA exigent SLEV (frais partagés, selon la loi locale)',
+                'sepa.ok.e2eUnique': 'Les identifiants EndToEndId sont uniques dans le fichier ({n} transaction(s)) conformément aux règles EPC SEPA',
+                'sepa.warn.e2eDup': 'EndToEndId dupliqué dans le fichier : {id} apparaît {count} fois — les règles EPC SEPA exigent l’unicité par donneur d’ordre (ISO 20022 / EPC SCT/SDD)',
                 'sepa.warn.ccyInvalid': 'Code monétaire non actif selon ISO 4217 : {code}',
                 'sepa.warn.unknownDoc': 'Élément racine ISO 20022 non reconnu — analyse partielle uniquement.',
                 'err.sepaEmpty': 'Le XML d’entrée est vide.',
@@ -8998,6 +9002,8 @@ var qrcode = function() {
                 'sepa.warn.pmtMtd': 'PmtMtd 不一致：PmtInf 第 {idx} 项声明 {actual}，但 {docType} 要求 {expected}（ISO 20022 / EPC SEPA 规则书）',
                 'sepa.ok.chrgBr': 'ChrgBr 符合 EPC SEPA 规则书：{n} 个 PmtInf 块均声明 SLEV（费用按当地法律分担）',
                 'sepa.warn.chrgBr': 'ChrgBr 不一致：PmtInf 第 {idx} 项声明 {actual}，但 EPC SEPA 规则书要求 SLEV（费用按当地法律分担）',
+                'sepa.ok.e2eUnique': 'EndToEndId 在整个文件中唯一（{n} 笔交易），符合 EPC SEPA 规则书要求',
+                'sepa.warn.e2eDup': 'EndToEndId 在文件中重复：{id} 出现 {count} 次 — EPC SEPA 规则书要求按发起人保持唯一（ISO 20022 / EPC SCT/SDD）',
                 'sepa.warn.ccyInvalid': '币种代码不在 ISO 4217 现行清单中：{code}',
                 'sepa.warn.unknownDoc': '无法识别的 ISO 20022 根元素 — 仅部分解析。',
                 'err.sepaEmpty': 'XML 输入为空。',
@@ -10115,6 +10121,8 @@ var qrcode = function() {
                 'sepa.warn.pmtMtd': 'PmtMtd-Abweichung: PmtInf Nr. {idx} deklariert {actual}, {docType} verlangt jedoch {expected} (ISO 20022 / EPC-SEPA-Rulebook)',
                 'sepa.ok.chrgBr': 'ChrgBr entspricht EPC-SEPA-Rulebook: {n} PmtInf-Block(s) deklarieren SLEV (Entgelte nach lokalem Recht geteilt)',
                 'sepa.warn.chrgBr': 'ChrgBr-Abweichung: PmtInf Nr. {idx} deklariert {actual}, das EPC-SEPA-Rulebook verlangt jedoch SLEV (Entgelte nach lokalem Recht geteilt)',
+                'sepa.ok.e2eUnique': 'EndToEndId-Werte sind dateiweit eindeutig ({n} Transaktion(en)) gemäß EPC-SEPA-Rulebook',
+                'sepa.warn.e2eDup': 'EndToEndId in der Datei doppelt vergeben: {id} kommt {count}-mal vor — das EPC-SEPA-Rulebook verlangt Eindeutigkeit je Auftraggeber (ISO 20022 / EPC SCT/SDD)',
                 'sepa.warn.ccyInvalid': 'Währungscode nicht aktiv nach ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unbekanntes ISO-20022-Wurzelelement — nur Teilanalyse.',
                 'err.sepaEmpty': 'Die XML-Eingabe ist leer.',
@@ -11217,6 +11225,8 @@ var qrcode = function() {
                 'sepa.warn.pmtMtd': 'PmtMtd बेमेल: PmtInf #{idx} ने {actual} घोषित किया, परन्तु {docType} के लिए {expected} आवश्यक है (ISO 20022 / EPC SEPA रूलबुक)',
                 'sepa.ok.chrgBr': 'ChrgBr EPC SEPA रूलबुक के अनुरूप: {n} PmtInf ब्लॉक SLEV (शुल्क स्थानीय कानून के अनुसार साझा) घोषित करते हैं',
                 'sepa.warn.chrgBr': 'ChrgBr बेमेल: PmtInf #{idx} ने {actual} घोषित किया, परन्तु EPC SEPA रूलबुक SLEV (शुल्क स्थानीय कानून के अनुसार साझा) आवश्यक है',
+                'sepa.ok.e2eUnique': 'EndToEndId मान फ़ाइल में अद्वितीय हैं ({n} लेन-देन), EPC SEPA रूलबुक के अनुसार',
+                'sepa.warn.e2eDup': 'EndToEndId फ़ाइल में दोहराया गया: {id} {count} बार दिखाई देता है — EPC SEPA रूलबुक प्रति आरंभकर्ता अद्वितीयता आवश्यक करता है (ISO 20022 / EPC SCT/SDD)',
                 'sepa.warn.ccyInvalid': 'मुद्रा कोड ISO 4217 में सक्रिय नहीं: {code}',
                 'sepa.warn.unknownDoc': 'अज्ञात ISO 20022 रूट तत्व — केवल आंशिक पार्सिंग।',
                 'err.sepaEmpty': 'XML इनपुट खाली है।',
@@ -18750,6 +18760,48 @@ var qrcode = function() {
             }
         }
 
+        // EPC SEPA Rulebook EndToEndId uniqueness: both the SEPA Credit
+        // Transfer Rulebook (pain.001) and the SEPA Direct Debit Rulebook
+        // (pain.008) require that the EndToEndId carried in each transaction
+        // (CdtTrfTxInf/PmtId/EndToEndId for SCT, DrctDbtTxInf/PmtId/EndToEndId
+        // for SDD) be unique per Originator. Within a single initiation file
+        // the practical gate is dataset-wide uniqueness — clearing systems
+        // (EBA STEP2, STET, RT1) reject the file or the duplicate occurrence
+        // because the EndToEndId is the reconciliation key the beneficiary
+        // and the originator both use to track the payment. ISO 20022 lets
+        // EndToEndId be any Max35Text value, so duplicates are schema-valid
+        // but rail-broken — the typical real-world cause is a script that
+        // forgot to advance a sequence counter while generating a batch.
+        // Skips silently if fewer than two transactions carry an EndToEndId.
+        function sepaCheckE2eIdUnique(out, doc, detected) {
+            if (detected.type !== 'pain.001' && detected.type !== 'pain.008') return;
+            const w = detected.wrapper;
+            if (!w) return;
+            const counts = new Map();
+            let total = 0;
+            for (const pi of sepaAllLocal(w, 'PmtInf')) {
+                const txs = sepaAllLocal(pi, 'CdtTrfTxInf').concat(sepaAllLocal(pi, 'DrctDbtTxInf'));
+                for (const tx of txs) {
+                    const pmtId = sepaFirst(tx, 'PmtId');
+                    if (!pmtId) continue;
+                    const id = (sepaTextOf(pmtId, 'EndToEndId') || '').trim();
+                    if (!id) continue;
+                    total++;
+                    counts.set(id, (counts.get(id) || 0) + 1);
+                }
+            }
+            if (total < 2) return;
+            const dups = [];
+            for (const [id, c] of counts) if (c > 1) dups.push({ id, count: c });
+            if (dups.length === 0) {
+                tlsRenderRow(out, t('sepa.row.warning'), '✓ ' + tFormat('sepa.ok.e2eUnique', { n: intlNumber(total) }));
+            } else {
+                for (const d of dups) {
+                    tlsRenderRow(out, t('sepa.row.warning'), '✗ ' + tFormat('sepa.warn.e2eDup', { id: d.id, count: intlNumber(d.count) }));
+                }
+            }
+        }
+
         function sepaCheckBics(out, doc) {
             const bics = sepaCollectBics(doc);
             if (!bics.length) return;
@@ -18790,6 +18842,7 @@ var qrcode = function() {
                 sepaCheckIbanBicCountryParity(out, doc, detected);
                 sepaCheckPmtMtd(out, doc, detected);
                 sepaCheckChrgBr(out, doc, detected);
+                sepaCheckE2eIdUnique(out, doc, detected);
             } catch (e) {
                 tlsRenderRow(out, t('sepa.row.error'), e.message);
             }
