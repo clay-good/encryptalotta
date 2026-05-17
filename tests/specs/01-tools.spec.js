@@ -1144,6 +1144,23 @@ test('sepa: BIC format check passes for valid BICs in pain.001', async ({ page }
   await expect(page.locator('#sepa-results')).toContainText(/BIC format valid \(ISO 9362\)/i, { timeout: 5_000 });
 });
 
+test('sepa: currency code check passes on EUR in pain.001', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  await page.fill('#sepa-input', SEPA_PAIN001);
+  await page.click('#btn-sepa-parse');
+  // Fixture uses Ccy="EUR" — must be flagged as active per ISO 4217.
+  await expect(page.locator('#sepa-results')).toContainText(/Currency codes active per ISO 4217:.*EUR/i, { timeout: 5_000 });
+});
+
+test('sepa: currency code check flags a typo / historical code', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Swap Ccy="EUR" for Ccy="ERU" (a common typo) — ERU is not in the active list.
+  const bad = SEPA_PAIN001.replace(/Ccy="EUR"/g, 'Ccy="ERU"');
+  await page.fill('#sepa-input', bad);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Currency code not active per ISO 4217: ERU/i, { timeout: 5_000 });
+});
+
 test('sepa: BIC format check flags a malformed BIC', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'sepa');
   // Stomp the debtor BIC's first segment so it fails the bank-code regex.
