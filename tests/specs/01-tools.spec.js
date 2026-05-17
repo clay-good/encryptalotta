@@ -1380,6 +1380,31 @@ test('lotl: TSL mode renders TSP and services', async ({ page }) => {
   await expect(page.locator('#lotl-results')).toContainText(/Embedded X\.509/i);
 });
 
+test('lotl: NextUpdate in the future surfaces a "current" freshness row', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'lotl');
+  // Build a LOTL fixture with NextUpdate set ~30 days from "today" relative to
+  // the page; the freshness check is wall-clock, so we use the test-harness clock.
+  const future = new Date(Date.now() + 30 * 86400000).toISOString();
+  const xml = LOTL_LIST.replace(/<NextUpdate>.*<\/NextUpdate>/, `<NextUpdate><dateTime>${future}</dateTime></NextUpdate>`);
+  await page.fill('#lotl-input', xml);
+  await page.click('#btn-lotl-parse');
+  await expect(page.locator('#lotl-results')).toContainText(/Trust list is current/i, { timeout: 5_000 });
+  await expect(page.locator('#lotl-results')).toContainText(/ETSI TS 119 612/);
+});
+
+test('lotl: NextUpdate in the past surfaces a stale-trust-list warning', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'lotl');
+  // ETSI TS 119 612 §5.3.13: a maintainer relying on a cached XML where the
+  // NextUpdate horizon has passed could trust a cert that has since been
+  // withdrawn from the EU list. Surface a red row.
+  const past = new Date(Date.now() - 90 * 86400000).toISOString();
+  const xml = LOTL_LIST.replace(/<NextUpdate>.*<\/NextUpdate>/, `<NextUpdate><dateTime>${past}</dateTime></NextUpdate>`);
+  await page.fill('#lotl-input', xml);
+  await page.click('#btn-lotl-parse');
+  await expect(page.locator('#lotl-results')).toContainText(/Trust list is stale/i, { timeout: 5_000 });
+  await expect(page.locator('#lotl-results')).toContainText(/ec\.europa\.eu/);
+});
+
 test('lotl: rejects non-trust-list XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'lotl');
   await page.fill('#lotl-input', '<?xml version="1.0"?><Document/>');

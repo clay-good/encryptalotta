@@ -4459,6 +4459,9 @@
                 'lotl.row.operator': 'Scheme operator',
                 'lotl.row.issueDt': 'List issue date',
                 'lotl.row.nextUpdate': 'Next update',
+                'lotl.row.freshness': 'Freshness',
+                'lotl.warn.stale': 'Trust list is stale — NextUpdate was {n} days ago; refetch from ec.europa.eu before relying on this list (ETSI TS 119 612 §5.3.13)',
+                'lotl.ok.current': 'Trust list is current — next update due in {n} days (ETSI TS 119 612 §5.3.13)',
                 'lotl.row.sequenceNumber': 'Sequence number',
                 'lotl.row.tslVersion': 'TSL version',
                 'lotl.row.country': 'Country',
@@ -5575,6 +5578,9 @@
                 'lotl.row.operator': 'Opérateur du schéma',
                 'lotl.row.issueDt': 'Date d’émission de la liste',
                 'lotl.row.nextUpdate': 'Prochaine mise à jour',
+                'lotl.row.freshness': 'Fraîcheur',
+                'lotl.warn.stale': 'Liste de confiance obsolète — NextUpdate est dépassée de {n} jours ; récupérer la liste depuis ec.europa.eu avant toute utilisation (ETSI TS 119 612 §5.3.13)',
+                'lotl.ok.current': 'Liste de confiance à jour — prochaine mise à jour dans {n} jours (ETSI TS 119 612 §5.3.13)',
                 'lotl.row.sequenceNumber': 'Numéro de séquence',
                 'lotl.row.tslVersion': 'Version TSL',
                 'lotl.row.country': 'Pays',
@@ -6656,6 +6662,9 @@
                 'lotl.row.operator': '方案运营方',
                 'lotl.row.issueDt': '列表发布日期',
                 'lotl.row.nextUpdate': '下次更新',
+                'lotl.row.freshness': '新鲜度',
+                'lotl.warn.stale': '信任列表已过期 — NextUpdate 在 {n} 天前已到期；信任前请从 ec.europa.eu 重新获取（ETSI TS 119 612 §5.3.13）',
+                'lotl.ok.current': '信任列表为最新 — 下次更新将在 {n} 天后（ETSI TS 119 612 §5.3.13）',
                 'lotl.row.sequenceNumber': '序列号',
                 'lotl.row.tslVersion': 'TSL 版本',
                 'lotl.row.country': '国家',
@@ -7752,6 +7761,9 @@
                 'lotl.row.operator': 'Schemabetreiber',
                 'lotl.row.issueDt': 'Ausstellungsdatum',
                 'lotl.row.nextUpdate': 'Nächste Aktualisierung',
+                'lotl.row.freshness': 'Aktualität',
+                'lotl.warn.stale': 'Vertrauensliste ist veraltet — NextUpdate liegt {n} Tage zurück; vor der Verwendung erneut von ec.europa.eu abrufen (ETSI TS 119 612 §5.3.13)',
+                'lotl.ok.current': 'Vertrauensliste ist aktuell — nächste Aktualisierung in {n} Tagen (ETSI TS 119 612 §5.3.13)',
                 'lotl.row.sequenceNumber': 'Sequenznummer',
                 'lotl.row.tslVersion': 'TSL-Version',
                 'lotl.row.country': 'Land',
@@ -8833,6 +8845,9 @@
                 'lotl.row.operator': 'योजना संचालक',
                 'lotl.row.issueDt': 'सूची जारी करने की तिथि',
                 'lotl.row.nextUpdate': 'अगला अद्यतन',
+                'lotl.row.freshness': 'ताज़गी',
+                'lotl.warn.stale': 'विश्वास सूची पुरानी है — NextUpdate {n} दिन पहले बीत चुकी थी; भरोसा करने से पहले ec.europa.eu से पुनः प्राप्त करें (ETSI TS 119 612 §5.3.13)',
+                'lotl.ok.current': 'विश्वास सूची वर्तमान है — अगला अद्यतन {n} दिनों में नियत है (ETSI TS 119 612 §5.3.13)',
                 'lotl.row.sequenceNumber': 'अनुक्रम संख्या',
                 'lotl.row.tslVersion': 'TSL संस्करण',
                 'lotl.row.country': 'देश',
@@ -16280,6 +16295,26 @@
             if (seqNum)    tlsRenderRow(out, t('lotl.row.sequenceNumber'), seqNum);
             if (issueDt)   tlsRenderRow(out, t('lotl.row.issueDt'),   issueDt);
             if (nextUpd)   tlsRenderRow(out, t('lotl.row.nextUpdate'), nextUpd);
+            // ETSI TS 119 612 §5.3.13: trust lists carry a NextUpdate the operator
+            // commits to. A maintainer using a cached LOTL / TSL XML needs to know
+            // when that horizon has passed — accepting trust decisions from a
+            // stale list can mean trusting a cert that has since been revoked or
+            // withdrawn at the EU level. We surface a stale / current row based on
+            // the parsed dateTime; if NextUpdate is absent or unparseable, no row
+            // (the existing nextUpd row already shows the raw value).
+            if (nextUpd) {
+                const due = new Date(nextUpd);
+                if (!isNaN(due.getTime())) {
+                    const deltaMs = due.getTime() - Date.now();
+                    const dayMs = 86400000;
+                    const days = Math.round(Math.abs(deltaMs) / dayMs);
+                    if (deltaMs < 0) {
+                        tlsRenderRow(out, t('lotl.row.freshness'), '✗ ' + tFormat('lotl.warn.stale', { n: intlNumber(days) }));
+                    } else {
+                        tlsRenderRow(out, t('lotl.row.freshness'), '✓ ' + tFormat('lotl.ok.current', { n: intlNumber(days) }));
+                    }
+                }
+            }
         }
 
         function lotlRenderLotl(out, detected) {
