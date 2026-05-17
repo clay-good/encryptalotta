@@ -4534,6 +4534,8 @@
                 'ubl.ok.ccyValid': 'Currency codes active per ISO 4217: {list}',
                 'ubl.ok.ibanValid': 'Payee/Payer financial account IBANs valid (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'Payee/Payer IBAN failed ISO 13616 MOD-97 check: {iban}',
+                'ubl.ok.vatRate': 'TaxSubtotal #{idx}: TaxAmount matches TaxableAmount × {pct}% = {amount} (EN 16931 BR-CO-17)',
+                'ubl.warn.vatRate': 'TaxSubtotal #{idx} VAT-rate mismatch: declared TaxAmount {declared} but TaxableAmount × {pct}% = {expected} (EN 16931 BR-CO-17)',
                 'ubl.warn.ccyInvalid': 'Currency code not active per ISO 4217: {code}',
                 'err.ublEmpty': 'XML input is empty.',
                 'err.ublParse': 'XML parse error: {detail}',
@@ -5654,6 +5656,8 @@
                 'ubl.ok.ccyValid': 'Codes monétaires actifs selon ISO 4217 : {list}',
                 'ubl.ok.ibanValid': 'IBAN des comptes Payee/Payer valides (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'IBAN Payee/Payer échoue au contrôle ISO 13616 MOD-97 : {iban}',
+                'ubl.ok.vatRate': 'TaxSubtotal n°{idx} : TaxAmount correspond à TaxableAmount × {pct} % = {amount} (EN 16931 BR-CO-17)',
+                'ubl.warn.vatRate': 'TaxSubtotal n°{idx} taux de TVA incohérent : TaxAmount déclaré {declared} mais TaxableAmount × {pct} % = {expected} (EN 16931 BR-CO-17)',
                 'ubl.warn.ccyInvalid': 'Code monétaire non actif selon ISO 4217 : {code}',
                 'err.ublEmpty': 'Le XML d’entrée est vide.',
                 'err.ublParse': 'Erreur d’analyse XML : {detail}',
@@ -6744,6 +6748,8 @@
                 'ubl.ok.ccyValid': '币种代码按 ISO 4217 有效：{list}',
                 'ubl.ok.ibanValid': '收款方/付款方账户 IBAN 通过 ISO 13616 MOD-97 校验（{n}）',
                 'ubl.warn.ibanInvalid': '收款方/付款方 IBAN 未通过 ISO 13616 MOD-97 校验：{iban}',
+                'ubl.ok.vatRate': 'TaxSubtotal 第 {idx} 项：TaxAmount 与 TaxableAmount × {pct}% = {amount} 一致（EN 16931 BR-CO-17）',
+                'ubl.warn.vatRate': 'TaxSubtotal 第 {idx} 项税率不一致：声明 TaxAmount {declared}，但 TaxableAmount × {pct}% = {expected}（EN 16931 BR-CO-17）',
                 'ubl.warn.ccyInvalid': '币种代码不在 ISO 4217 现行清单中：{code}',
                 'err.ublEmpty': 'XML 输入为空。',
                 'err.ublParse': 'XML 解析错误：{detail}',
@@ -7849,6 +7855,8 @@
                 'ubl.ok.ccyValid': 'Währungscodes nach ISO 4217 aktiv: {list}',
                 'ubl.ok.ibanValid': 'IBANs der Payee-/Payer-Konten gültig (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'Payee-/Payer-IBAN scheitert an ISO-13616-MOD-97-Prüfung: {iban}',
+                'ubl.ok.vatRate': 'TaxSubtotal Nr. {idx}: TaxAmount stimmt mit TaxableAmount × {pct} % = {amount} überein (EN 16931 BR-CO-17)',
+                'ubl.warn.vatRate': 'TaxSubtotal Nr. {idx} USt-Satz weicht ab: deklarierter TaxAmount {declared}, aber TaxableAmount × {pct} % = {expected} (EN 16931 BR-CO-17)',
                 'ubl.warn.ccyInvalid': 'Währungscode nicht aktiv nach ISO 4217: {code}',
                 'err.ublEmpty': 'XML-Eingabe ist leer.',
                 'err.ublParse': 'XML-Analysefehler: {detail}',
@@ -8939,6 +8947,8 @@
                 'ubl.ok.ccyValid': 'मुद्रा कोड ISO 4217 के अनुसार सक्रिय: {list}',
                 'ubl.ok.ibanValid': 'भुगतानकर्ता/प्राप्तकर्ता खाते के IBAN वैध (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'भुगतानकर्ता/प्राप्तकर्ता IBAN ISO 13616 MOD-97 जाँच में विफल: {iban}',
+                'ubl.ok.vatRate': 'TaxSubtotal #{idx}: TaxAmount, TaxableAmount × {pct}% = {amount} से मेल खाता है (EN 16931 BR-CO-17)',
+                'ubl.warn.vatRate': 'TaxSubtotal #{idx} VAT दर बेमेल: घोषित TaxAmount {declared} पर TaxableAmount × {pct}% = {expected} (EN 16931 BR-CO-17)',
                 'ubl.warn.ccyInvalid': 'मुद्रा कोड ISO 4217 में सक्रिय नहीं: {code}',
                 'err.ublEmpty': 'XML इनपुट खाली है।',
                 'err.ublParse': 'XML पार्स त्रुटि: {detail}',
@@ -16823,6 +16833,46 @@
             return out;
         }
 
+        // EN 16931 BR-CO-17 (and the parallel category-letter rules BR-S-08,
+        // BR-Z-08, BR-E-08, BR-AE-08, BR-K-08, BR-G-08, BR-O-08, BR-IC-08):
+        // every TaxSubtotal's `TaxAmount` MUST equal `TaxableAmount × Percent / 100`
+        // within the EN 16931 rounding tolerance (±0.01 EUR — i.e. ±1 cent in
+        // integer-cent arithmetic, applied once per subtotal). The check
+        // surfaces the most common test-invoice error: typing the wrong
+        // monetary amount for a given rate (e.g. 19.50 EUR tax on a 100.00 EUR
+        // base at 19%, where the correct value is 19.00). Per-subtotal green ✓
+        // confirmation rows or red ✗ mismatch rows; missing fields skip silently
+        // (the per-rate breakdown above already surfaces the raw values).
+        function ublCheckVatRates(out, detected) {
+            const totals = sepaAllLocal(detected.root, 'TaxTotal');
+            const subs = [];
+            for (const tt of totals) for (const s of sepaAllLocal(tt, 'TaxSubtotal')) subs.push(s);
+            if (!subs.length) return;
+            subs.forEach((s, i) => {
+                const taxableEl = sepaFirst(s, 'TaxableAmount');
+                const amtEl     = sepaFirst(s, 'TaxAmount');
+                const cat       = sepaFirst(s, 'TaxCategory');
+                const pctStr    = cat ? sepaTextOf(cat, 'Percent') : '';
+                if (!taxableEl || !amtEl || !pctStr) return;
+                const taxable = ublParseCents(taxableEl.textContent);
+                const declared = ublParseCents(amtEl.textContent);
+                const pct = Number(pctStr);
+                if (taxable === null || declared === null || !Number.isFinite(pct)) return;
+                // Compute in tenths-of-cent to avoid double-rounding, then round
+                // once to integer cents (matches EN 16931's "round per subtotal" rule).
+                const expected = Math.round((taxable * pct) / 100);
+                const drift = Math.abs(declared - expected);
+                const fmtPct = intlNumber(pct);
+                const fmtExpected = intlNumber(expected / 100, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                const fmtDeclared = intlNumber(declared / 100, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                if (drift <= 1) {
+                    tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + tFormat('ubl.ok.vatRate', { idx: intlNumber(i + 1), pct: fmtPct, amount: fmtExpected }));
+                } else {
+                    tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + tFormat('ubl.warn.vatRate', { idx: intlNumber(i + 1), pct: fmtPct, declared: fmtDeclared, expected: fmtExpected }));
+                }
+            });
+        }
+
         function ublCheckIbans(out, doc) {
             const ibans = ublCollectIbans(doc);
             if (!ibans.length) return;
@@ -16856,6 +16906,7 @@
                 ublRenderTaxBreakdown(out, detected);
                 ublCheckTotals(out, detected);
                 ublCheckCurrencies(out, doc);
+                ublCheckVatRates(out, detected);
                 ublCheckIbans(out, doc);
             } catch (e) {
                 tlsRenderRow(out, t('ubl.row.error'), e.message);

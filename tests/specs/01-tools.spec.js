@@ -1606,6 +1606,34 @@ test('ubl: ISO 4217 currency cross-check flags a typo (ERU for EUR)', async ({ p
   await expect(page.locator('#ubl-results')).toContainText(/Currency code not active per ISO 4217:\s*ERU/i, { timeout: 5_000 });
 });
 
+test('ubl: VAT-rate consistency confirms a well-formed 19% TaxSubtotal', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // UBL_INVOICE declares TaxableAmount=100.00 × 19% with TaxAmount=19.00 —
+  // exactly EN 16931 BR-CO-17 says it should be.
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/TaxAmount matches TaxableAmount/i, { timeout: 5_000 });
+  await expect(page.locator('#ubl-results')).toContainText(/BR-CO-17/);
+});
+
+test('ubl: VAT-rate consistency flags a TaxAmount that disagrees with the declared rate', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Inject the canonical test-invoice error: keep the 19% rate and 100.00
+  // base, but declare TaxAmount as 19.50 — a 0.50 EUR overstatement well
+  // outside the EN 16931 ±0.01 rounding tolerance. The check fires per
+  // TaxSubtotal, so both the subtotal-level and the top-level TaxAmount
+  // get rewritten to keep totals balanced (otherwise the totals check would
+  // also fire and clutter the assertion target).
+  const bad = UBL_INVOICE
+    .replace('<cbc:TaxAmount currencyID="EUR">19.00</cbc:TaxAmount>\n    <cac:TaxSubtotal>\n      <cbc:TaxableAmount currencyID="EUR">100.00</cbc:TaxableAmount>\n      <cbc:TaxAmount currencyID="EUR">19.00</cbc:TaxAmount>',
+             '<cbc:TaxAmount currencyID="EUR">19.50</cbc:TaxAmount>\n    <cac:TaxSubtotal>\n      <cbc:TaxableAmount currencyID="EUR">100.00</cbc:TaxableAmount>\n      <cbc:TaxAmount currencyID="EUR">19.50</cbc:TaxAmount>');
+  await page.fill('#ubl-input', bad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/VAT-rate mismatch/i, { timeout: 5_000 });
+  await expect(page.locator('#ubl-results')).toContainText(/19\.00/);
+  await expect(page.locator('#ubl-results')).toContainText(/19\.50/);
+});
+
 test('ubl: PayeeFinancialAccount IBAN cross-check confirms MOD-97 on a valid IBAN', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   // PEPPOL BIS Billing 3.0: <cac:PaymentMeans> carries the supplier's bank
