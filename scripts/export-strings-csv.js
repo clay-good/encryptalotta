@@ -9,6 +9,16 @@
 // Status columns let a reviewer mark each row "ok" / "needs-rework" / "" without
 // overwriting the value cell. The importer respects whatever is in the value
 // cells regardless of status — status is metadata for humans, not the importer.
+//
+// Plural-key convention (Phase 1 §1.5 #4):
+//   Keys whose final segment is one of the six CLDR rule names — `.zero`,
+//   `.one`, `.two`, `.few`, `.many`, `.other` — form a plural group whose
+//   shared base is the part before the suffix. Call-sites resolve them with
+//   intlPlural('<base>', n), which picks the right rule via Intl.PluralRules.
+//   English MUST define `.other` per group (the universal fallback); other
+//   locales may omit rules their grammar does not use (German plurals collapse
+//   to `.other`, Chinese has no plural distinction at all). The audit script
+//   enforces the en-side `.other` invariant.
 
 const fs = require('fs');
 const path = require('path');

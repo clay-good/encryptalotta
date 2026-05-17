@@ -230,6 +230,36 @@ test('jwt: decode RFC 7519 example', async ({ page }) => {
   await page.fill('#jwt-input', tok);
   await page.click('#btn-jwt-decode');
   await expect(page.locator('#jwt-results')).toContainText('John Doe', { timeout: 5_000 });
+  // RFC 7519 example carries iat=1516239022 → 2018-01-18T01:30:22Z. The iat
+  // informational row should render that ISO timestamp.
+  await expect(page.locator('#jwt-results')).toContainText(/Issued at .*2018-01-18T01:30:22/);
+});
+
+test('jwt: nbf in the future flags token as not yet valid', async ({ page }) => {
+  const errs=[]; autoDismissDialogs(page, errs);
+  await page.goto('/index.html'); await gotoTool(page, 'jwt');
+  // Hand-craft a JWT with nbf one hour from now and exp two hours from now —
+  // exp passes (green) but nbf must independently surface a red row.
+  function b64u(o) { return Buffer.from(JSON.stringify(o)).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+  const future = Math.floor(Date.now() / 1000) + 3600;
+  const header = b64u({ alg: 'HS256', typ: 'JWT' });
+  const payload = b64u({ sub: 'x', nbf: future, exp: future + 3600 });
+  const sig = 'AAAA'; // arbitrary; decoder doesn't verify on the decode path
+  await page.fill('#jwt-input', `${header}.${payload}.${sig}`);
+  await page.click('#btn-jwt-decode');
+  await expect(page.locator('#jwt-results')).toContainText(/Not yet valid — nbf is/i, { timeout: 5_000 });
+});
+
+test('jwt: nbf in the past renders as active', async ({ page }) => {
+  const errs=[]; autoDismissDialogs(page, errs);
+  await page.goto('/index.html'); await gotoTool(page, 'jwt');
+  function b64u(o) { return Buffer.from(JSON.stringify(o)).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+  const past = Math.floor(Date.now() / 1000) - 3600;
+  const header = b64u({ alg: 'HS256', typ: 'JWT' });
+  const payload = b64u({ sub: 'x', nbf: past });
+  await page.fill('#jwt-input', `${header}.${payload}.AAAA`);
+  await page.click('#btn-jwt-decode');
+  await expect(page.locator('#jwt-results')).toContainText(/Active since .*\(nbf\)/i, { timeout: 5_000 });
 });
 
 // SD-JWT (draft-ietf-oauth-selective-disclosure-jwt) — EUDI Wallet credential format (SPEC §2.8)

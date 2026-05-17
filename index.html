@@ -3463,6 +3463,9 @@
                 'jwt.row.signature': 'Signature (hex)',
                 'jwt.exp.expired': 'Expired at {iso}',
                 'jwt.exp.valid': 'Valid until {iso}',
+                'jwt.nbf.notYet': 'Not yet valid — nbf is {iso}',
+                'jwt.nbf.active': 'Active since {iso} (nbf)',
+                'jwt.iat.issued': 'Issued at {iso} (iat)',
                 'jwt.verifyHeading': 'Verify the signature',
                 'jwt.verifyBody': 'Pick the algorithm matching the JWT header, then provide the matching key. RS256/ES256 use a PEM-formatted public key; HS256/384/512 use a shared secret.',
                 'jwt.label.key': 'Public key (PEM) or shared secret:',
@@ -4750,6 +4753,9 @@
                 'jwt.row.signature': 'Signature (hex)',
                 'jwt.exp.expired': 'Expiré le {iso}',
                 'jwt.exp.valid': 'Valide jusqu’au {iso}',
+                'jwt.nbf.notYet': 'Pas encore valide — nbf est {iso}',
+                'jwt.nbf.active': 'Actif depuis le {iso} (nbf)',
+                'jwt.iat.issued': 'Émis le {iso} (iat)',
                 'jwt.verifyHeading': 'Vérifier la signature',
                 'jwt.verifyBody': 'Choisissez l’algorithme indiqué dans l’en-tête, puis fournissez la clé correspondante. RS256/ES256 utilisent une clé publique PEM ; HS256/384/512 un secret partagé.',
                 'jwt.label.key': 'Clé publique (PEM) ou secret partagé :',
@@ -5813,6 +5819,9 @@
                 'jwt.row.signature': '签名（十六进制）',
                 'jwt.exp.expired': '于 {iso} 过期',
                 'jwt.exp.valid': '有效至 {iso}',
+                'jwt.nbf.notYet': '尚未生效 — nbf 为 {iso}',
+                'jwt.nbf.active': '自 {iso} 起生效 (nbf)',
+                'jwt.iat.issued': '签发于 {iso} (iat)',
                 'jwt.verifyHeading': '验证签名',
                 'jwt.verifyBody': '选择与 JWT 头部对应的算法，然后提供相应密钥。RS256/ES256 使用 PEM 格式的公钥；HS256/384/512 使用共享密钥。',
                 'jwt.label.key': '公钥（PEM）或共享密钥：',
@@ -6861,6 +6870,9 @@
                 'jwt.row.signature': 'Signatur (hex)',
                 'jwt.exp.expired': 'Abgelaufen am {iso}',
                 'jwt.exp.valid': 'Gültig bis {iso}',
+                'jwt.nbf.notYet': 'Noch nicht gültig — nbf ist {iso}',
+                'jwt.nbf.active': 'Aktiv seit {iso} (nbf)',
+                'jwt.iat.issued': 'Ausgestellt am {iso} (iat)',
                 'jwt.verifyHeading': 'Signatur verifizieren',
                 'jwt.verifyBody': 'Wähle den im JWT-Header genannten Algorithmus und stelle den passenden Schlüssel bereit. RS256/ES256 nutzen einen PEM-Public-Key; HS256/384/512 ein gemeinsames Geheimnis.',
                 'jwt.label.key': 'Public Key (PEM) oder gemeinsames Geheimnis:',
@@ -7924,6 +7936,9 @@
                 'jwt.row.signature': 'हस्ताक्षर (हेक्स)',
                 'jwt.exp.expired': '{iso} पर समाप्त',
                 'jwt.exp.valid': '{iso} तक मान्य',
+                'jwt.nbf.notYet': 'अभी मान्य नहीं — nbf {iso} है',
+                'jwt.nbf.active': '{iso} से सक्रिय (nbf)',
+                'jwt.iat.issued': '{iso} पर जारी (iat)',
                 'jwt.verifyHeading': 'हस्ताक्षर सत्यापित करें',
                 'jwt.verifyBody': 'JWT हेडर के अनुरूप एल्गोरिदम चुनें, फिर मेल खाती कुंजी प्रदान करें। RS256/ES256 PEM सार्वजनिक कुंजी का उपयोग करते हैं; HS256/384/512 साझा रहस्य।',
                 'jwt.label.key': 'सार्वजनिक कुंजी (PEM) या साझा रहस्य:',
@@ -13014,19 +13029,41 @@
             renderBlock('jwt.row.payload', jsonPretty(payload));
             renderBlock('jwt.row.signature', bytesToHex(sigBytes));
 
-            // Expiry indicator from the `exp` claim (seconds since epoch).
+            // Time-claim indicators from RFC 7519 §4.1.4-6: exp (expiry), nbf
+            // (not-before), iat (issued-at). exp / nbf both gate token usability —
+            // surface them with the same red / green semantics. iat is purely
+            // informational so it stays a neutral row.
+            const renderClaimBadge = (cls, msg) => {
+                const div = document.createElement('div');
+                const bg = cls === 'danger' ? 'rgba(231, 76, 60, 0.12)' : cls === 'success' ? 'rgba(46, 204, 113, 0.12)' : 'rgba(127, 127, 127, 0.10)';
+                const fg = cls === 'danger' ? 'var(--danger)' : cls === 'success' ? 'var(--success)' : 'var(--text-secondary)';
+                div.style.cssText = 'margin-top: 14px; padding: 10px 14px; border-radius: 8px; font-weight: 600; background: ' + bg + '; color: ' + fg + ';';
+                div.textContent = msg;
+                resultsEl.appendChild(div);
+            };
+
             if (payload && typeof payload.exp === 'number') {
                 const exp = new Date(payload.exp * 1000);
-                const now = Date.now();
-                const expired = exp.getTime() < now;
-                const expDiv = document.createElement('div');
-                expDiv.style.cssText = 'margin-top: 14px; padding: 10px 14px; border-radius: 8px; font-weight: 600; ' +
-                    (expired
-                        ? 'background: rgba(231, 76, 60, 0.12); color: var(--danger);'
-                        : 'background: rgba(46, 204, 113, 0.12); color: var(--success);');
-                expDiv.textContent = (expired ? '✗ ' : '✓ ') +
-                    tFormat(expired ? 'jwt.exp.expired' : 'jwt.exp.valid', { iso: exp.toISOString() });
-                resultsEl.appendChild(expDiv);
+                const expired = exp.getTime() < Date.now();
+                renderClaimBadge(expired ? 'danger' : 'success',
+                    (expired ? '✗ ' : '✓ ') + tFormat(expired ? 'jwt.exp.expired' : 'jwt.exp.valid', { iso: exp.toISOString() }));
+            }
+
+            // `nbf` (not-before): token MUST NOT be accepted before this instant
+            // (RFC 7519 §4.1.5). When `nbf` is in the future, surface a red row even
+            // if `exp` already rendered green — both gates have to pass.
+            if (payload && typeof payload.nbf === 'number') {
+                const nbf = new Date(payload.nbf * 1000);
+                const notYet = nbf.getTime() > Date.now();
+                renderClaimBadge(notYet ? 'danger' : 'success',
+                    (notYet ? '✗ ' : '✓ ') + tFormat(notYet ? 'jwt.nbf.notYet' : 'jwt.nbf.active', { iso: nbf.toISOString() }));
+            }
+
+            // `iat` (issued-at): informational only — issuers populate it for audit
+            // and replay-window math, but it does not gate acceptance by itself.
+            if (payload && typeof payload.iat === 'number') {
+                const iat = new Date(payload.iat * 1000);
+                renderClaimBadge('muted', tFormat('jwt.iat.issued', { iso: iat.toISOString() }));
             }
 
             return { header, payload, parts, signingInput: parts[0] + '.' + parts[1], sigBytes, sdJwt: split };

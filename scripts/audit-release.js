@@ -373,6 +373,35 @@ const isSeoEnOnly = (k) => SEO_EN_ONLY_RE.test(k);
     }
 }
 
+// Plural-key parity (Phase 1 §1.5 #4). Keys ending in one of the CLDR plural
+// rule suffixes (.zero/.one/.two/.few/.many/.other) form a plural group whose
+// base key is the part before the suffix. Intl.PluralRules' contract is that
+// `.other` is the universal fallback — every plural group MUST define it in en
+// (the source-of-truth locale). Non-en locales may omit unused rules: a German
+// or Chinese locale needs only `.other` if its language has no singular/plural
+// distinction. The check only enforces the en-side `.other` invariant — if it
+// fails, intlPlural() would fall through to the bare base key (which usually
+// doesn't exist) and surface "undefined" to a user.
+{
+    const PLURAL_SUFFIXES = ['zero', 'one', 'two', 'few', 'many', 'other'];
+    const PLURAL_RE = new RegExp(`\\.(${PLURAL_SUFFIXES.join('|')})$`);
+    const groups = new Map(); // baseKey -> Set<suffix> seen in en
+    for (const k of enKeys) {
+        const m = PLURAL_RE.exec(k);
+        if (!m) continue;
+        const base = k.slice(0, -m[0].length);
+        if (!groups.has(base)) groups.set(base, new Set());
+        groups.get(base).add(m[1]);
+    }
+    const missingOther = [];
+    for (const [base, suffixes] of groups) {
+        if (!suffixes.has('other')) missingOther.push(base);
+    }
+    if (groups.size === 0) pass('plural keys', 'no plural-suffixed keys yet');
+    else if (missingOther.length) fail('plural keys', `${missingOther.length} group(s) missing .other in en: ${missingOther.slice(0, 3).join(', ')}`);
+    else pass('plural keys', `${groups.size} plural group(s) in en, each with .other (CLDR fallback)`);
+}
+
 console.log('');
 if (failed > 0) {
     console.log(`AUDIT FAILED — ${failed} error(s)${warned ? ', ' + warned + ' warning(s)' : ''}.`);
