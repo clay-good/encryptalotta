@@ -250,6 +250,46 @@ test('jwt: nbf in the future flags token as not yet valid', async ({ page }) => 
   await expect(page.locator('#jwt-results')).toContainText(/Not yet valid — nbf is/i, { timeout: 5_000 });
 });
 
+test('jwt: expected iss cross-check accepts a matching issuer', async ({ page }) => {
+  const errs=[]; autoDismissDialogs(page, errs);
+  await page.goto('/index.html'); await gotoTool(page, 'jwt');
+  function b64u(o) { return Buffer.from(JSON.stringify(o)).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+  const header = b64u({ alg: 'HS256', typ: 'JWT' });
+  const payload = b64u({ iss: 'https://issuer.example', aud: 'https://verifier.example', sub: 'x' });
+  await page.fill('#jwt-input', `${header}.${payload}.AAAA`);
+  await page.locator('#jwt-iss').evaluate(el => el.closest('details').open = true);
+  await page.fill('#jwt-iss', 'https://issuer.example');
+  await page.click('#btn-jwt-decode');
+  await expect(page.locator('#jwt-results')).toContainText(/iss matches expected issuer/i, { timeout: 5_000 });
+});
+
+test('jwt: expected iss cross-check flags a wrong issuer', async ({ page }) => {
+  const errs=[]; autoDismissDialogs(page, errs);
+  await page.goto('/index.html'); await gotoTool(page, 'jwt');
+  function b64u(o) { return Buffer.from(JSON.stringify(o)).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+  const header = b64u({ alg: 'HS256', typ: 'JWT' });
+  const payload = b64u({ iss: 'https://issuer.example', sub: 'x' });
+  await page.fill('#jwt-input', `${header}.${payload}.AAAA`);
+  await page.locator('#jwt-iss').evaluate(el => el.closest('details').open = true);
+  await page.fill('#jwt-iss', 'https://attacker.example');
+  await page.click('#btn-jwt-decode');
+  await expect(page.locator('#jwt-results')).toContainText(/iss does not match expected.*https:\/\/issuer\.example/i, { timeout: 5_000 });
+});
+
+test('jwt: expected aud cross-check honors RFC 7519 array form', async ({ page }) => {
+  const errs=[]; autoDismissDialogs(page, errs);
+  await page.goto('/index.html'); await gotoTool(page, 'jwt');
+  function b64u(o) { return Buffer.from(JSON.stringify(o)).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+  const header = b64u({ alg: 'HS256', typ: 'JWT' });
+  // aud is an array per RFC 7519 §4.1.3; the verifier matches if expected is a member.
+  const payload = b64u({ iss: 'x', aud: ['https://api.a.example', 'https://api.b.example'] });
+  await page.fill('#jwt-input', `${header}.${payload}.AAAA`);
+  await page.locator('#jwt-aud').evaluate(el => el.closest('details').open = true);
+  await page.fill('#jwt-aud', 'https://api.b.example');
+  await page.click('#btn-jwt-decode');
+  await expect(page.locator('#jwt-results')).toContainText(/aud matches expected audience/i, { timeout: 5_000 });
+});
+
 test('jwt: nbf in the past renders as active', async ({ page }) => {
   const errs=[]; autoDismissDialogs(page, errs);
   await page.goto('/index.html'); await gotoTool(page, 'jwt');

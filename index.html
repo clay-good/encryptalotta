@@ -2443,8 +2443,18 @@
                 </div>
 
                 <details style="margin-bottom: 14px;">
-                    <summary style="cursor: pointer; color: var(--text-secondary); font-size: 0.9rem;" data-i18n="jwt.sdjwt.kbExpectSummary">SD-JWT KB-JWT verifier checks (optional)</summary>
-                    <div class="form-group" style="margin-top: 10px;">
+                    <summary style="cursor: pointer; color: var(--text-secondary); font-size: 0.9rem;" data-i18n="jwt.expectSummary">Verifier checks (optional)</summary>
+                    <div style="margin-top: 10px; font-size: 0.82rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em;" data-i18n="jwt.expectGroupJwt">JWT (RFC 7519)</div>
+                    <div class="form-group" style="margin-top: 6px;">
+                        <label for="jwt-iss" data-i18n="jwt.expectIssLabel">Expected issuer (iss claim):</label>
+                        <input id="jwt-iss" type="text" spellcheck="false" autocomplete="off" data-i18n-attr="placeholder:jwt.expectIssPh" placeholder="https://issuer.example.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="jwt-aud" data-i18n="jwt.expectAudLabel">Expected audience (aud claim):</label>
+                        <input id="jwt-aud" type="text" spellcheck="false" autocomplete="off" data-i18n-attr="placeholder:jwt.expectAudPh" placeholder="https://verifier.example.com">
+                    </div>
+                    <div style="margin-top: 14px; font-size: 0.82rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em;" data-i18n="jwt.expectGroupKb">SD-JWT KB-JWT</div>
+                    <div class="form-group" style="margin-top: 6px;">
                         <label for="jwt-kb-aud" data-i18n="jwt.sdjwt.kbExpectAudLabel">Expected audience (KB-JWT aud claim):</label>
                         <input id="jwt-kb-aud" type="text" spellcheck="false" autocomplete="off" data-i18n-attr="placeholder:jwt.sdjwt.kbExpectAudPh" placeholder="https://verifier.example.com">
                     </div>
@@ -3466,6 +3476,19 @@
                 'jwt.nbf.notYet': 'Not yet valid — nbf is {iso}',
                 'jwt.nbf.active': 'Active since {iso} (nbf)',
                 'jwt.iat.issued': 'Issued at {iso} (iat)',
+                'jwt.expectSummary': 'Verifier checks (optional)',
+                'jwt.expectGroupJwt': 'JWT (RFC 7519)',
+                'jwt.expectGroupKb': 'SD-JWT KB-JWT',
+                'jwt.expectIssLabel': 'Expected issuer (iss claim):',
+                'jwt.expectIssPh': 'https://issuer.example.com',
+                'jwt.expectAudLabel': 'Expected audience (aud claim):',
+                'jwt.expectAudPh': 'https://verifier.example.com',
+                'jwt.expect.issOk': 'iss matches expected issuer',
+                'jwt.expect.issFail': 'iss does not match expected (got: {got})',
+                'jwt.expect.issMissing': '✗ no iss claim in JWT',
+                'jwt.expect.audOk': 'aud matches expected audience',
+                'jwt.expect.audFail': 'aud does not match expected (got: {got})',
+                'jwt.expect.audMissing': '✗ no aud claim in JWT',
                 'jwt.verifyHeading': 'Verify the signature',
                 'jwt.verifyBody': 'Pick the algorithm matching the JWT header, then provide the matching key. RS256/ES256 use a PEM-formatted public key; HS256/384/512 use a shared secret.',
                 'jwt.label.key': 'Public key (PEM) or shared secret:',
@@ -4756,6 +4779,19 @@
                 'jwt.nbf.notYet': 'Pas encore valide — nbf est {iso}',
                 'jwt.nbf.active': 'Actif depuis le {iso} (nbf)',
                 'jwt.iat.issued': 'Émis le {iso} (iat)',
+                'jwt.expectSummary': 'Vérifications côté vérificateur (optionnel)',
+                'jwt.expectGroupJwt': 'JWT (RFC 7519)',
+                'jwt.expectGroupKb': 'SD-JWT KB-JWT',
+                'jwt.expectIssLabel': 'Émetteur attendu (claim iss) :',
+                'jwt.expectIssPh': 'https://emetteur.exemple.com',
+                'jwt.expectAudLabel': 'Audience attendue (claim aud) :',
+                'jwt.expectAudPh': 'https://verificateur.exemple.com',
+                'jwt.expect.issOk': 'iss correspond à l’émetteur attendu',
+                'jwt.expect.issFail': 'iss ne correspond pas (reçu : {got})',
+                'jwt.expect.issMissing': '✗ pas de claim iss dans le JWT',
+                'jwt.expect.audOk': 'aud correspond à l’audience attendue',
+                'jwt.expect.audFail': 'aud ne correspond pas (reçu : {got})',
+                'jwt.expect.audMissing': '✗ pas de claim aud dans le JWT',
                 'jwt.verifyHeading': 'Vérifier la signature',
                 'jwt.verifyBody': 'Choisissez l’algorithme indiqué dans l’en-tête, puis fournissez la clé correspondante. RS256/ES256 utilisent une clé publique PEM ; HS256/384/512 un secret partagé.',
                 'jwt.label.key': 'Clé publique (PEM) ou secret partagé :',
@@ -5822,6 +5858,19 @@
                 'jwt.nbf.notYet': '尚未生效 — nbf 为 {iso}',
                 'jwt.nbf.active': '自 {iso} 起生效 (nbf)',
                 'jwt.iat.issued': '签发于 {iso} (iat)',
+                'jwt.expectSummary': '验证方校验（可选）',
+                'jwt.expectGroupJwt': 'JWT (RFC 7519)',
+                'jwt.expectGroupKb': 'SD-JWT KB-JWT',
+                'jwt.expectIssLabel': '期望的签发者（iss 声明）：',
+                'jwt.expectIssPh': 'https://issuer.example.com',
+                'jwt.expectAudLabel': '期望的受众（aud 声明）：',
+                'jwt.expectAudPh': 'https://verifier.example.com',
+                'jwt.expect.issOk': 'iss 与期望签发者一致',
+                'jwt.expect.issFail': 'iss 与期望不一致（实际：{got}）',
+                'jwt.expect.issMissing': '✗ JWT 中没有 iss 声明',
+                'jwt.expect.audOk': 'aud 与期望受众一致',
+                'jwt.expect.audFail': 'aud 与期望不一致（实际：{got}）',
+                'jwt.expect.audMissing': '✗ JWT 中没有 aud 声明',
                 'jwt.verifyHeading': '验证签名',
                 'jwt.verifyBody': '选择与 JWT 头部对应的算法，然后提供相应密钥。RS256/ES256 使用 PEM 格式的公钥；HS256/384/512 使用共享密钥。',
                 'jwt.label.key': '公钥（PEM）或共享密钥：',
@@ -6873,6 +6922,19 @@
                 'jwt.nbf.notYet': 'Noch nicht gültig — nbf ist {iso}',
                 'jwt.nbf.active': 'Aktiv seit {iso} (nbf)',
                 'jwt.iat.issued': 'Ausgestellt am {iso} (iat)',
+                'jwt.expectSummary': 'Verifier-Prüfungen (optional)',
+                'jwt.expectGroupJwt': 'JWT (RFC 7519)',
+                'jwt.expectGroupKb': 'SD-JWT KB-JWT',
+                'jwt.expectIssLabel': 'Erwarteter Aussteller (iss-Claim):',
+                'jwt.expectIssPh': 'https://aussteller.example.com',
+                'jwt.expectAudLabel': 'Erwartete Audience (aud-Claim):',
+                'jwt.expectAudPh': 'https://verifier.example.com',
+                'jwt.expect.issOk': 'iss stimmt mit dem erwarteten Aussteller überein',
+                'jwt.expect.issFail': 'iss stimmt nicht überein (erhalten: {got})',
+                'jwt.expect.issMissing': '✗ kein iss-Claim im JWT',
+                'jwt.expect.audOk': 'aud stimmt mit der erwarteten Audience überein',
+                'jwt.expect.audFail': 'aud stimmt nicht überein (erhalten: {got})',
+                'jwt.expect.audMissing': '✗ kein aud-Claim im JWT',
                 'jwt.verifyHeading': 'Signatur verifizieren',
                 'jwt.verifyBody': 'Wähle den im JWT-Header genannten Algorithmus und stelle den passenden Schlüssel bereit. RS256/ES256 nutzen einen PEM-Public-Key; HS256/384/512 ein gemeinsames Geheimnis.',
                 'jwt.label.key': 'Public Key (PEM) oder gemeinsames Geheimnis:',
@@ -7939,6 +8001,19 @@
                 'jwt.nbf.notYet': 'अभी मान्य नहीं — nbf {iso} है',
                 'jwt.nbf.active': '{iso} से सक्रिय (nbf)',
                 'jwt.iat.issued': '{iso} पर जारी (iat)',
+                'jwt.expectSummary': 'सत्यापनकर्ता जाँच (वैकल्पिक)',
+                'jwt.expectGroupJwt': 'JWT (RFC 7519)',
+                'jwt.expectGroupKb': 'SD-JWT KB-JWT',
+                'jwt.expectIssLabel': 'अपेक्षित जारीकर्ता (iss क्लेम):',
+                'jwt.expectIssPh': 'https://issuer.example.com',
+                'jwt.expectAudLabel': 'अपेक्षित ऑडियंस (aud क्लेम):',
+                'jwt.expectAudPh': 'https://verifier.example.com',
+                'jwt.expect.issOk': 'iss अपेक्षित जारीकर्ता से मेल खाता है',
+                'jwt.expect.issFail': 'iss अपेक्षा से मेल नहीं खाता (प्राप्त: {got})',
+                'jwt.expect.issMissing': '✗ JWT में iss क्लेम नहीं है',
+                'jwt.expect.audOk': 'aud अपेक्षित ऑडियंस से मेल खाता है',
+                'jwt.expect.audFail': 'aud अपेक्षा से मेल नहीं खाता (प्राप्त: {got})',
+                'jwt.expect.audMissing': '✗ JWT में aud क्लेम नहीं है',
                 'jwt.verifyHeading': 'हस्ताक्षर सत्यापित करें',
                 'jwt.verifyBody': 'JWT हेडर के अनुरूप एल्गोरिदम चुनें, फिर मेल खाती कुंजी प्रदान करें। RS256/ES256 PEM सार्वजनिक कुंजी का उपयोग करते हैं; HS256/384/512 साझा रहस्य।',
                 'jwt.label.key': 'सार्वजनिक कुंजी (PEM) या साझा रहस्य:',
@@ -13064,6 +13139,40 @@
             if (payload && typeof payload.iat === 'number') {
                 const iat = new Date(payload.iat * 1000);
                 renderClaimBadge('muted', tFormat('jwt.iat.issued', { iso: iat.toISOString() }));
+            }
+
+            // Verifier-side `iss` / `aud` cross-checks against user-supplied
+            // expected values (RFC 7519 §4.1.1 + §4.1.3). These are replay /
+            // misdirection defenses: a token can be signature-valid but still
+            // wrong if it was issued by an unexpected party or addressed to a
+            // different verifier. The decoder surfaces a row only when the user
+            // supplied an expected value, so unconfigured tokens still decode
+            // exactly as before.
+            const expectIss = (document.getElementById('jwt-iss') || {}).value;
+            if (typeof expectIss === 'string' && expectIss.trim()) {
+                const want = expectIss.trim();
+                const got = payload && payload.iss;
+                if (typeof got === 'undefined') {
+                    renderClaimBadge('danger', t('jwt.expect.issMissing'));
+                } else if (got === want) {
+                    renderClaimBadge('success', '✓ ' + t('jwt.expect.issOk'));
+                } else {
+                    renderClaimBadge('danger', '✗ ' + tFormat('jwt.expect.issFail', { got: String(got) }));
+                }
+            }
+            const expectAud = (document.getElementById('jwt-aud') || {}).value;
+            if (typeof expectAud === 'string' && expectAud.trim()) {
+                const want = expectAud.trim();
+                const got = payload && payload.aud;
+                // RFC 7519 §4.1.3: aud MAY be a single string or an array of strings.
+                const matches = Array.isArray(got) ? got.includes(want) : got === want;
+                if (typeof got === 'undefined') {
+                    renderClaimBadge('danger', t('jwt.expect.audMissing'));
+                } else if (matches) {
+                    renderClaimBadge('success', '✓ ' + t('jwt.expect.audOk'));
+                } else {
+                    renderClaimBadge('danger', '✗ ' + tFormat('jwt.expect.audFail', { got: Array.isArray(got) ? got.join(', ') : String(got) }));
+                }
             }
 
             return { header, payload, parts, signingInput: parts[0] + '.' + parts[1], sigBytes, sdJwt: split };
