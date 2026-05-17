@@ -4535,6 +4535,8 @@
                 'ubl.warn.ibanInvalid': 'Payee/Payer IBAN failed ISO 13616 MOD-97 check: {iban}',
                 'ubl.ok.vatRate': 'TaxSubtotal #{idx}: TaxAmount matches TaxableAmount × {pct}% = {amount} (EN 16931 BR-CO-17)',
                 'ubl.warn.vatRate': 'TaxSubtotal #{idx} VAT-rate mismatch: declared TaxAmount {declared} but TaxableAmount × {pct}% = {expected} (EN 16931 BR-CO-17)',
+                'ubl.ok.dueDate': 'DueDate {due} is on or after IssueDate {issue}',
+                'ubl.warn.dueDate': 'DueDate {due} is earlier than IssueDate {issue} — payment cannot fall due before the invoice is issued',
                 'ubl.warn.ccyInvalid': 'Currency code not active per ISO 4217: {code}',
                 'err.ublEmpty': 'XML input is empty.',
                 'err.ublParse': 'XML parse error: {detail}',
@@ -5659,6 +5661,8 @@
                 'ubl.warn.ibanInvalid': 'IBAN Payee/Payer échoue au contrôle ISO 13616 MOD-97 : {iban}',
                 'ubl.ok.vatRate': 'TaxSubtotal n°{idx} : TaxAmount correspond à TaxableAmount × {pct} % = {amount} (EN 16931 BR-CO-17)',
                 'ubl.warn.vatRate': 'TaxSubtotal n°{idx} taux de TVA incohérent : TaxAmount déclaré {declared} mais TaxableAmount × {pct} % = {expected} (EN 16931 BR-CO-17)',
+                'ubl.ok.dueDate': 'Date d’échéance {due} postérieure ou égale à la date d’émission {issue}',
+                'ubl.warn.dueDate': 'Date d’échéance {due} antérieure à la date d’émission {issue} — l’échéance ne peut précéder l’émission de la facture',
                 'ubl.warn.ccyInvalid': 'Code monétaire non actif selon ISO 4217 : {code}',
                 'err.ublEmpty': 'Le XML d’entrée est vide.',
                 'err.ublParse': 'Erreur d’analyse XML : {detail}',
@@ -6753,6 +6757,8 @@
                 'ubl.warn.ibanInvalid': '收款方/付款方 IBAN 未通过 ISO 13616 MOD-97 校验：{iban}',
                 'ubl.ok.vatRate': 'TaxSubtotal 第 {idx} 项：TaxAmount 与 TaxableAmount × {pct}% = {amount} 一致（EN 16931 BR-CO-17）',
                 'ubl.warn.vatRate': 'TaxSubtotal 第 {idx} 项税率不一致：声明 TaxAmount {declared}，但 TaxableAmount × {pct}% = {expected}（EN 16931 BR-CO-17）',
+                'ubl.ok.dueDate': '到期日期 {due} 不早于开票日期 {issue}',
+                'ubl.warn.dueDate': '到期日期 {due} 早于开票日期 {issue} — 付款不应在发票开具之前到期',
                 'ubl.warn.ccyInvalid': '币种代码不在 ISO 4217 现行清单中：{code}',
                 'err.ublEmpty': 'XML 输入为空。',
                 'err.ublParse': 'XML 解析错误：{detail}',
@@ -7862,6 +7868,8 @@
                 'ubl.warn.ibanInvalid': 'Payee-/Payer-IBAN scheitert an ISO-13616-MOD-97-Prüfung: {iban}',
                 'ubl.ok.vatRate': 'TaxSubtotal Nr. {idx}: TaxAmount stimmt mit TaxableAmount × {pct} % = {amount} überein (EN 16931 BR-CO-17)',
                 'ubl.warn.vatRate': 'TaxSubtotal Nr. {idx} USt-Satz weicht ab: deklarierter TaxAmount {declared}, aber TaxableAmount × {pct} % = {expected} (EN 16931 BR-CO-17)',
+                'ubl.ok.dueDate': 'Fälligkeitsdatum {due} liegt am oder nach dem Ausstellungsdatum {issue}',
+                'ubl.warn.dueDate': 'Fälligkeitsdatum {due} liegt vor dem Ausstellungsdatum {issue} — eine Zahlung kann nicht vor der Rechnungsstellung fällig werden',
                 'ubl.warn.ccyInvalid': 'Währungscode nicht aktiv nach ISO 4217: {code}',
                 'err.ublEmpty': 'XML-Eingabe ist leer.',
                 'err.ublParse': 'XML-Analysefehler: {detail}',
@@ -8956,6 +8964,8 @@
                 'ubl.warn.ibanInvalid': 'भुगतानकर्ता/प्राप्तकर्ता IBAN ISO 13616 MOD-97 जाँच में विफल: {iban}',
                 'ubl.ok.vatRate': 'TaxSubtotal #{idx}: TaxAmount, TaxableAmount × {pct}% = {amount} से मेल खाता है (EN 16931 BR-CO-17)',
                 'ubl.warn.vatRate': 'TaxSubtotal #{idx} VAT दर बेमेल: घोषित TaxAmount {declared} पर TaxableAmount × {pct}% = {expected} (EN 16931 BR-CO-17)',
+                'ubl.ok.dueDate': 'देय तिथि {due} जारी तिथि {issue} पर या उसके बाद है',
+                'ubl.warn.dueDate': 'देय तिथि {due} जारी तिथि {issue} से पहले है — चालान जारी होने से पहले भुगतान देय नहीं हो सकता',
                 'ubl.warn.ccyInvalid': 'मुद्रा कोड ISO 4217 में सक्रिय नहीं: {code}',
                 'err.ublEmpty': 'XML इनपुट खाली है।',
                 'err.ublParse': 'XML पार्स त्रुटि: {detail}',
@@ -16940,6 +16950,29 @@
             });
         }
 
+        // Temporal sanity: DueDate (BT-9) must not precede IssueDate (BT-2).
+        // EN 16931 doesn't explicitly state this as a numbered business rule,
+        // but PEPPOL implementations universally reject backdated due dates
+        // since payment can't fall due before the invoice is issued. Surface
+        // a green confirmation row when both dates parse cleanly and DueDate
+        // ≥ IssueDate; surface a red row when DueDate < IssueDate. Skip
+        // silently when either date is missing or unparseable (the raw rows
+        // already render the underlying values).
+        function ublCheckDates(out, detected) {
+            const r = detected.root;
+            const issueStr = (sepaTextOf(r, 'IssueDate') || '').trim();
+            const dueStr   = (sepaTextOf(r, 'DueDate')   || '').trim();
+            if (!issueStr || !dueStr) return;
+            const issueTs = Date.parse(issueStr);
+            const dueTs   = Date.parse(dueStr);
+            if (!Number.isFinite(issueTs) || !Number.isFinite(dueTs)) return;
+            if (dueTs >= issueTs) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + tFormat('ubl.ok.dueDate', { due: dueStr, issue: issueStr }));
+            } else {
+                tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + tFormat('ubl.warn.dueDate', { due: dueStr, issue: issueStr }));
+            }
+        }
+
         function ublCheckIbans(out, doc) {
             const ibans = ublCollectIbans(doc);
             if (!ibans.length) return;
@@ -16974,6 +17007,7 @@
                 ublCheckTotals(out, detected);
                 ublCheckCurrencies(out, doc);
                 ublCheckVatRates(out, detected);
+                ublCheckDates(out, detected);
                 ublCheckIbans(out, doc);
             } catch (e) {
                 tlsRenderRow(out, t('ubl.row.error'), e.message);

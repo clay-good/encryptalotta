@@ -1687,6 +1687,24 @@ test('ubl: PayeeFinancialAccount IBAN cross-check flags a MOD-97 failure', async
   await expect(page.locator('#ubl-results')).toContainText('DE89370400440532013001');
 });
 
+test('ubl: DueDate vs IssueDate confirms when due date is after issue date', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // UBL_INVOICE has IssueDate=2024-04-01, DueDate=2024-05-01 — well-formed.
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/DueDate 2024-05-01 is on or after IssueDate 2024-04-01/i, { timeout: 5_000 });
+});
+
+test('ubl: DueDate vs IssueDate flags a backdated DueDate', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Swap the dates so payment falls due before the invoice is even issued —
+  // a real-world data-entry error that some PEPPOL access points reject.
+  const bad = UBL_INVOICE.replace('<cbc:DueDate>2024-05-01</cbc:DueDate>', '<cbc:DueDate>2024-03-15</cbc:DueDate>');
+  await page.fill('#ubl-input', bad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/DueDate 2024-03-15 is earlier than IssueDate 2024-04-01/i, { timeout: 5_000 });
+});
+
 test('ubl: rejects non-UBL XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   await page.fill('#ubl-input', '<?xml version="1.0"?><Document/>');
