@@ -1286,6 +1286,41 @@ test('sepa: pain.008 direct debit surfaces per-transaction MndtId', async ({ pag
   await expect(page.locator('#sepa-results')).toContainText('Subscription May 2024');
 });
 
+test('sepa: GrpHdr NbOfTxs + CtrlSum invariants confirm on a well-formed pain.001', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // The SEPA_PAIN001 fixture declares NbOfTxs=1 and CtrlSum=100.00, and the
+  // single transaction has InstdAmt 100.00 EUR — both invariants should pass.
+  await page.fill('#sepa-input', SEPA_PAIN001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/NbOfTxs matches transaction count/i, { timeout: 5_000 });
+  await expect(page.locator('#sepa-results')).toContainText(/CtrlSum matches transaction total/i);
+});
+
+test('sepa: NbOfTxs mismatch flagged when header overcounts transactions', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // ISO 20022 group-header invariant: GrpHdr/NbOfTxs MUST equal the file's
+  // transaction-info element count. EPC SEPA rulebook makes this a hard
+  // bank-side reject reason; surface the mismatch on the inspector too.
+  const bad = SEPA_PAIN001.replace('<NbOfTxs>1</NbOfTxs>', '<NbOfTxs>2</NbOfTxs>');
+  await page.fill('#sepa-input', bad);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/NbOfTxs mismatch/i, { timeout: 5_000 });
+  await expect(page.locator('#sepa-results')).toContainText(/ISO 20022/);
+});
+
+test('sepa: CtrlSum mismatch flagged when header undersums transaction amounts', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Header declares CtrlSum=50.00 but the transaction's InstdAmt is 100.00 —
+  // the inspector should surface a red row with both the declared and actual
+  // totals (well outside the ±0.01 rounding tolerance).
+  const bad = SEPA_PAIN001.replace('<CtrlSum>100.00</CtrlSum>', '<CtrlSum>50.00</CtrlSum>');
+  await page.fill('#sepa-input', bad);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/CtrlSum mismatch/i, { timeout: 5_000 });
+  await expect(page.locator('#sepa-results')).toContainText(/50/);
+  await expect(page.locator('#sepa-results')).toContainText(/100/);
+});
+
 test('sepa: rejects non-ISO 20022 XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'sepa');
   await page.fill('#sepa-input', '<?xml version="1.0"?><foo><bar/></foo>');

@@ -4436,6 +4436,10 @@
                 'sepa.ok.bicValid': 'BIC format valid (ISO 9362)',
                 'sepa.warn.bicInvalid': 'BIC format check failed: {bic}',
                 'sepa.ok.ccyValid': 'Currency codes active per ISO 4217: {list}',
+                'sepa.ok.nbTxMatch': 'NbOfTxs matches transaction count ({n})',
+                'sepa.warn.nbTxMismatch': 'NbOfTxs mismatch: header declares {declared} but file contains {actual} transactions (ISO 20022 group-header invariant)',
+                'sepa.ok.ctrlSumMatch': 'CtrlSum matches transaction total ({sum})',
+                'sepa.warn.ctrlSumMismatch': 'CtrlSum mismatch: header declares {declared} but transaction amounts sum to {actual} (ISO 20022 group-header invariant)',
                 'sepa.warn.ccyInvalid': 'Currency code not active per ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unrecognized ISO 20022 root element — partial parse only.',
                 'err.sepaEmpty': 'XML input is empty.',
@@ -5560,6 +5564,10 @@
                 'sepa.ok.bicValid': 'Format BIC valide (ISO 9362)',
                 'sepa.warn.bicInvalid': 'Échec du contrôle de format BIC : {bic}',
                 'sepa.ok.ccyValid': 'Codes monétaires actifs selon ISO 4217 : {list}',
+                'sepa.ok.nbTxMatch': 'NbOfTxs correspond au nombre de transactions ({n})',
+                'sepa.warn.nbTxMismatch': 'NbOfTxs incohérent : l’en-tête déclare {declared} mais le fichier contient {actual} transactions (invariant d’en-tête ISO 20022)',
+                'sepa.ok.ctrlSumMatch': 'CtrlSum correspond au total des transactions ({sum})',
+                'sepa.warn.ctrlSumMismatch': 'CtrlSum incohérent : l’en-tête déclare {declared} mais le total des transactions est {actual} (invariant d’en-tête ISO 20022)',
                 'sepa.warn.ccyInvalid': 'Code monétaire non actif selon ISO 4217 : {code}',
                 'sepa.warn.unknownDoc': 'Élément racine ISO 20022 non reconnu — analyse partielle uniquement.',
                 'err.sepaEmpty': 'Le XML d’entrée est vide.',
@@ -6644,6 +6652,10 @@
                 'sepa.ok.bicValid': 'BIC 格式有效（ISO 9362）',
                 'sepa.warn.bicInvalid': 'BIC 格式校验失败：{bic}',
                 'sepa.ok.ccyValid': '币种代码按 ISO 4217 有效：{list}',
+                'sepa.ok.nbTxMatch': 'NbOfTxs 与交易数量一致（{n}）',
+                'sepa.warn.nbTxMismatch': 'NbOfTxs 不一致：报文头声明 {declared}，但文件含 {actual} 笔交易（ISO 20022 组头不变量）',
+                'sepa.ok.ctrlSumMatch': 'CtrlSum 与交易合计一致（{sum}）',
+                'sepa.warn.ctrlSumMismatch': 'CtrlSum 不一致：报文头声明 {declared}，但交易金额合计为 {actual}（ISO 20022 组头不变量）',
                 'sepa.warn.ccyInvalid': '币种代码不在 ISO 4217 现行清单中：{code}',
                 'sepa.warn.unknownDoc': '无法识别的 ISO 20022 根元素 — 仅部分解析。',
                 'err.sepaEmpty': 'XML 输入为空。',
@@ -7743,6 +7755,10 @@
                 'sepa.ok.bicValid': 'BIC-Format gültig (ISO 9362)',
                 'sepa.warn.bicInvalid': 'BIC-Formatprüfung fehlgeschlagen: {bic}',
                 'sepa.ok.ccyValid': 'Währungscodes nach ISO 4217 aktiv: {list}',
+                'sepa.ok.nbTxMatch': 'NbOfTxs stimmt mit Anzahl der Transaktionen überein ({n})',
+                'sepa.warn.nbTxMismatch': 'NbOfTxs weicht ab: Header deklariert {declared}, Datei enthält jedoch {actual} Transaktionen (ISO-20022-Gruppenkopf-Invariante)',
+                'sepa.ok.ctrlSumMatch': 'CtrlSum stimmt mit Transaktionssumme überein ({sum})',
+                'sepa.warn.ctrlSumMismatch': 'CtrlSum weicht ab: Header deklariert {declared}, Transaktionsbeträge summieren sich jedoch zu {actual} (ISO-20022-Gruppenkopf-Invariante)',
                 'sepa.warn.ccyInvalid': 'Währungscode nicht aktiv nach ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unbekanntes ISO-20022-Wurzelelement — nur Teilanalyse.',
                 'err.sepaEmpty': 'Die XML-Eingabe ist leer.',
@@ -8827,6 +8843,10 @@
                 'sepa.ok.bicValid': 'BIC प्रारूप वैध (ISO 9362)',
                 'sepa.warn.bicInvalid': 'BIC प्रारूप जाँच विफल: {bic}',
                 'sepa.ok.ccyValid': 'मुद्रा कोड ISO 4217 के अनुसार सक्रिय: {list}',
+                'sepa.ok.nbTxMatch': 'NbOfTxs लेन-देन की संख्या से मेल खाता है ({n})',
+                'sepa.warn.nbTxMismatch': 'NbOfTxs बेमेल: हेडर {declared} घोषित करता है पर फ़ाइल में {actual} लेन-देन हैं (ISO 20022 समूह-हेडर अपरिवर्तनीय)',
+                'sepa.ok.ctrlSumMatch': 'CtrlSum लेन-देन कुल से मेल खाता है ({sum})',
+                'sepa.warn.ctrlSumMismatch': 'CtrlSum बेमेल: हेडर {declared} घोषित करता है पर लेन-देन योग {actual} है (ISO 20022 समूह-हेडर अपरिवर्तनीय)',
                 'sepa.warn.ccyInvalid': 'मुद्रा कोड ISO 4217 में सक्रिय नहीं: {code}',
                 'sepa.warn.unknownDoc': 'अज्ञात ISO 20022 रूट तत्व — केवल आंशिक पार्सिंग।',
                 'err.sepaEmpty': 'XML इनपुट खाली है।',
@@ -16164,6 +16184,71 @@
             }
         }
 
+        // ISO 20022 pain.001 / pain.008 group-header invariants (EPC SEPA rulebook):
+        //   - GrpHdr/NbOfTxs MUST equal the count of transaction-info elements
+        //     (CdtTrfTxInf for credit transfers, DrctDbtTxInf for direct debits)
+        //   - GrpHdr/CtrlSum, when present, MUST equal the sum of every
+        //     transaction-level InstdAmt across all PmtInf blocks (±0.01 to
+        //     tolerate the single-cent rounding drift the schema allows on
+        //     fractional currencies).
+        // Banks reject pain files where these don't agree — surfacing the
+        // mismatch in the inspector is the same shape as the UBL totals check
+        // from draft 28. The CtrlSum invariant only fires when CtrlSum is
+        // present (it's optional per the schema but conventional in practice).
+        function sepaCheckGrpHdrInvariants(out, doc, detected) {
+            if (detected.type !== 'pain.001' && detected.type !== 'pain.008') return;
+            const w = detected.wrapper;
+            if (!w) return;
+            const grpHdr = sepaFirst(w, 'GrpHdr');
+            if (!grpHdr) return;
+            // Pull every transaction-info element from every PmtInf block.
+            const txs = [];
+            for (const pi of sepaAllLocal(w, 'PmtInf')) {
+                for (const tx of sepaAllLocal(pi, 'CdtTrfTxInf')) txs.push(tx);
+                for (const tx of sepaAllLocal(pi, 'DrctDbtTxInf')) txs.push(tx);
+            }
+            // NbOfTxs parity. The schema declares it as a 1-15 digit string,
+            // not a number, but in practice it's always decimal — compare via
+            // Number() and warn on mismatch.
+            const declaredN = (sepaTextOf(grpHdr, 'NbOfTxs') || '').trim();
+            if (declaredN) {
+                const declared = Number(declaredN);
+                const actual = txs.length;
+                if (Number.isFinite(declared) && declared !== actual) {
+                    tlsRenderRow(out, t('sepa.row.warning'), '✗ ' + tFormat('sepa.warn.nbTxMismatch', { declared: intlNumber(declared), actual: intlNumber(actual) }));
+                } else if (Number.isFinite(declared)) {
+                    tlsRenderRow(out, t('sepa.row.warning'), '✓ ' + tFormat('sepa.ok.nbTxMatch', { n: intlNumber(actual) }));
+                }
+            }
+            // CtrlSum parity. Sum every InstdAmt (credit transfers) or Amt
+            // (direct debits) at the transaction level. Compare in integer
+            // cents to dodge IEEE-754 drift, with ±1 cent tolerance per the
+            // ISO 20022 implementation guide's rounding policy.
+            const declaredSumStr = (sepaTextOf(grpHdr, 'CtrlSum') || '').trim();
+            if (declaredSumStr) {
+                const declaredSum = Number(declaredSumStr);
+                let actualCents = 0;
+                let summable = true;
+                for (const tx of txs) {
+                    const el = sepaFirst(tx, 'InstdAmt') || sepaFirst(tx, 'Amt');
+                    if (!el) { summable = false; break; }
+                    const v = Number((el.textContent || '').trim());
+                    if (!Number.isFinite(v)) { summable = false; break; }
+                    actualCents += Math.round(v * 100);
+                }
+                if (summable && Number.isFinite(declaredSum)) {
+                    const declaredCents = Math.round(declaredSum * 100);
+                    const drift = Math.abs(actualCents - declaredCents);
+                    const actualFmt = (actualCents / 100).toFixed(2);
+                    if (drift <= 1) {
+                        tlsRenderRow(out, t('sepa.row.warning'), '✓ ' + tFormat('sepa.ok.ctrlSumMatch', { sum: intlNumber(actualCents / 100, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }));
+                    } else {
+                        tlsRenderRow(out, t('sepa.row.warning'), '✗ ' + tFormat('sepa.warn.ctrlSumMismatch', { declared: intlNumber(declaredSum, { minimumFractionDigits: 2, maximumFractionDigits: 2 }), actual: intlNumber(Number(actualFmt), { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }));
+                    }
+                }
+            }
+        }
+
         function sepaCheckBics(out, doc) {
             const bics = sepaCollectBics(doc);
             if (!bics.length) return;
@@ -16200,6 +16285,7 @@
                 sepaCheckIbans(out, doc);
                 sepaCheckBics(out, doc);
                 sepaCheckCurrencies(out, doc);
+                sepaCheckGrpHdrInvariants(out, doc, detected);
             } catch (e) {
                 tlsRenderRow(out, t('sepa.row.error'), e.message);
             }
