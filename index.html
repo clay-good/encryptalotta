@@ -3479,6 +3479,8 @@
                 'jwt.sub.subject': 'Subject (sub): {value}',
                 'jwt.jti.id': 'JWT ID (jti): {value}',
                 'jwt.kid.id': 'Key ID (kid): {value}',
+                'jwt.typ.id': 'Token type (typ): {value}',
+                'jwt.crit.warn': 'Critical headers (crit): {values} — RFC 7515 §4.1.11 requires the verifier to understand every named extension; reject the token unless every one is implemented',
                 'jwt.alg.none.warn': 'Header alg is "none" — RFC 8725 §3.1 forbids unsecured JWTs in production; reject unless this is a known test fixture',
                 'jwt.expectSummary': 'Verifier checks (optional)',
                 'jwt.expectGroupJwt': 'JWT (RFC 7519)',
@@ -4797,6 +4799,8 @@
                 'jwt.sub.subject': 'Sujet (sub) : {value}',
                 'jwt.jti.id': 'ID du JWT (jti) : {value}',
                 'jwt.kid.id': 'ID de clé (kid) : {value}',
+                'jwt.typ.id': 'Type de jeton (typ) : {value}',
+                'jwt.crit.warn': 'En-têtes critiques (crit) : {values} — la RFC 7515 §4.1.11 exige que le vérificateur comprenne chaque extension nommée ; rejeter le jeton sauf si toutes sont implémentées',
                 'jwt.alg.none.warn': 'L’en-tête alg est « none » — la RFC 8725 §3.1 interdit les JWT non sécurisés en production ; à rejeter sauf s’il s’agit d’un fixture de test connu',
                 'jwt.expectSummary': 'Vérifications côté vérificateur (optionnel)',
                 'jwt.expectGroupJwt': 'JWT (RFC 7519)',
@@ -5891,6 +5895,8 @@
                 'jwt.sub.subject': '主体 (sub)：{value}',
                 'jwt.jti.id': 'JWT ID (jti)：{value}',
                 'jwt.kid.id': '密钥 ID (kid)：{value}',
+                'jwt.typ.id': '令牌类型 (typ)：{value}',
+                'jwt.crit.warn': '关键头部 (crit)：{values} — RFC 7515 §4.1.11 要求验证方理解每个命名扩展；除非全部已实现，否则应拒绝该令牌',
                 'jwt.alg.none.warn': '头部 alg 为 "none" — RFC 8725 §3.1 禁止生产环境使用未签名 JWT；除非确认为已知测试样本，否则应拒绝',
                 'jwt.expectSummary': '验证方校验（可选）',
                 'jwt.expectGroupJwt': 'JWT (RFC 7519)',
@@ -6970,6 +6976,8 @@
                 'jwt.sub.subject': 'Subjekt (sub): {value}',
                 'jwt.jti.id': 'JWT-ID (jti): {value}',
                 'jwt.kid.id': 'Schlüssel-ID (kid): {value}',
+                'jwt.typ.id': 'Token-Typ (typ): {value}',
+                'jwt.crit.warn': 'Kritische Header (crit): {values} — RFC 7515 §4.1.11 verlangt, dass der Verifier jede genannte Erweiterung versteht; Token ablehnen, sofern nicht jede einzelne implementiert ist',
                 'jwt.alg.none.warn': 'Header-alg ist „none“ — RFC 8725 §3.1 verbietet ungesicherte JWTs in der Produktion; ablehnen, sofern es sich nicht um einen bekannten Test-Fixture handelt',
                 'jwt.expectSummary': 'Verifier-Prüfungen (optional)',
                 'jwt.expectGroupJwt': 'JWT (RFC 7519)',
@@ -8064,6 +8072,8 @@
                 'jwt.sub.subject': 'विषय (sub): {value}',
                 'jwt.jti.id': 'JWT ID (jti): {value}',
                 'jwt.kid.id': 'कुंजी ID (kid): {value}',
+                'jwt.typ.id': 'टोकन प्रकार (typ): {value}',
+                'jwt.crit.warn': 'क्रिटिकल हेडर (crit): {values} — RFC 7515 §4.1.11 के अनुसार सत्यापनकर्ता को हर नामित एक्सटेंशन समझना आवश्यक है; जब तक हर एक लागू न हो, टोकन को अस्वीकार करें',
                 'jwt.alg.none.warn': 'हेडर alg "none" है — RFC 8725 §3.1 उत्पादन में असुरक्षित JWT वर्जित करता है; जब तक यह ज्ञात परीक्षण फ़िक्सचर न हो, अस्वीकार करें',
                 'jwt.expectSummary': 'सत्यापनकर्ता जाँच (वैकल्पिक)',
                 'jwt.expectGroupJwt': 'JWT (RFC 7519)',
@@ -13209,6 +13219,29 @@
             // URL without eyeballing the raw header JSON.
             if (header && (typeof header.kid === 'string' || typeof header.kid === 'number') && String(header.kid).length) {
                 renderClaimBadge('muted', tFormat('jwt.kid.id', { value: String(header.kid) }));
+            }
+
+            // `typ` (token type, RFC 7515 §4.1.9 / RFC 8725 §3.11): explicit
+            // typing defense against token-type confusion attacks. RFC 8725
+            // recommends issuers populate `typ` with a specific media type
+            // (e.g. `at+jwt` for OAuth access tokens per RFC 9068, `JWT` for
+            // generic, `vc+sd-jwt` for SD-JWT VCs) so verifiers can refuse a
+            // token meant for a different audience-class. Surface it as an
+            // informational row so a maintainer can confirm the token's
+            // declared type matches the slot it's being used in.
+            if (header && typeof header.typ === 'string' && header.typ.length) {
+                renderClaimBadge('muted', tFormat('jwt.typ.id', { value: String(header.typ) }));
+            }
+
+            // `crit` (critical headers, RFC 7515 §4.1.11): array of header
+            // parameter names the verifier MUST understand or reject. If we
+            // surface a token with `crit` set, the maintainer needs to know
+            // because accepting the token without implementing every named
+            // extension is a real security failure — surface a danger row
+            // listing the crit names. Per the RFC, the value MUST be a non-
+            // empty JSON array of strings; we render the values as-is.
+            if (header && Array.isArray(header.crit) && header.crit.length) {
+                renderClaimBadge('danger', '✗ ' + tFormat('jwt.crit.warn', { values: intlList(header.crit.map(v => String(v))) }));
             }
 
             if (payload && typeof payload.exp === 'number') {

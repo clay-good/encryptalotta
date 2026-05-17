@@ -332,6 +332,22 @@ test('jwt: jti + kid surface as their own informational rows', async ({ page }) 
   await expect(page.locator('#jwt-results')).toContainText(/JWT ID \(jti\): 550e8400-e29b-41d4-a716-446655440000/i);
 });
 
+test('jwt: typ header + crit array surface as their own rows', async ({ page }) => {
+  const errs=[]; autoDismissDialogs(page, errs);
+  await page.goto('/index.html'); await gotoTool(page, 'jwt');
+  function b64u(o) { return Buffer.from(JSON.stringify(o)).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+  // typ is RFC 7515 §4.1.9 (token-type confusion defense per RFC 8725 §3.11);
+  // crit is RFC 7515 §4.1.11 — verifier MUST understand every named extension
+  // or reject. Both should surface unconditionally when present.
+  const header = b64u({ alg: 'HS256', typ: 'at+jwt', crit: ['exp', 'b64'] });
+  const payload = b64u({ sub: 'u-1' });
+  await page.fill('#jwt-input', `${header}.${payload}.AAAA`);
+  await page.click('#btn-jwt-decode');
+  await expect(page.locator('#jwt-results')).toContainText(/Token type \(typ\): at\+jwt/i, { timeout: 5_000 });
+  await expect(page.locator('#jwt-results')).toContainText(/Critical headers \(crit\):.*exp.*b64/i);
+  await expect(page.locator('#jwt-results')).toContainText(/RFC 7515/i);
+});
+
 test('jwt: sub claim surfaces as its own informational row', async ({ page }) => {
   const errs=[]; autoDismissDialogs(page, errs);
   await page.goto('/index.html'); await gotoTool(page, 'jwt');
