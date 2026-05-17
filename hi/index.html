@@ -3473,6 +3473,8 @@
                 'jwt.nbf.notYet': 'Not yet valid — nbf is {iso}',
                 'jwt.nbf.active': 'Active since {iso} (nbf)',
                 'jwt.iat.issued': 'Issued at {iso} (iat)',
+                'jwt.sub.subject': 'Subject (sub): {value}',
+                'jwt.alg.none.warn': 'Header alg is "none" — RFC 8725 §3.1 forbids unsecured JWTs in production; reject unless this is a known test fixture',
                 'jwt.expectSummary': 'Verifier checks (optional)',
                 'jwt.expectGroupJwt': 'JWT (RFC 7519)',
                 'jwt.expectGroupKb': 'SD-JWT KB-JWT',
@@ -4785,6 +4787,8 @@
                 'jwt.nbf.notYet': 'Pas encore valide — nbf est {iso}',
                 'jwt.nbf.active': 'Actif depuis le {iso} (nbf)',
                 'jwt.iat.issued': 'Émis le {iso} (iat)',
+                'jwt.sub.subject': 'Sujet (sub) : {value}',
+                'jwt.alg.none.warn': 'L’en-tête alg est « none » — la RFC 8725 §3.1 interdit les JWT non sécurisés en production ; à rejeter sauf s’il s’agit d’un fixture de test connu',
                 'jwt.expectSummary': 'Vérifications côté vérificateur (optionnel)',
                 'jwt.expectGroupJwt': 'JWT (RFC 7519)',
                 'jwt.expectGroupKb': 'SD-JWT KB-JWT',
@@ -5873,6 +5877,8 @@
                 'jwt.nbf.notYet': '尚未生效 — nbf 为 {iso}',
                 'jwt.nbf.active': '自 {iso} 起生效 (nbf)',
                 'jwt.iat.issued': '签发于 {iso} (iat)',
+                'jwt.sub.subject': '主体 (sub)：{value}',
+                'jwt.alg.none.warn': '头部 alg 为 "none" — RFC 8725 §3.1 禁止生产环境使用未签名 JWT；除非确认为已知测试样本，否则应拒绝',
                 'jwt.expectSummary': '验证方校验（可选）',
                 'jwt.expectGroupJwt': 'JWT (RFC 7519)',
                 'jwt.expectGroupKb': 'SD-JWT KB-JWT',
@@ -6946,6 +6952,8 @@
                 'jwt.nbf.notYet': 'Noch nicht gültig — nbf ist {iso}',
                 'jwt.nbf.active': 'Aktiv seit {iso} (nbf)',
                 'jwt.iat.issued': 'Ausgestellt am {iso} (iat)',
+                'jwt.sub.subject': 'Subjekt (sub): {value}',
+                'jwt.alg.none.warn': 'Header-alg ist „none“ — RFC 8725 §3.1 verbietet ungesicherte JWTs in der Produktion; ablehnen, sofern es sich nicht um einen bekannten Test-Fixture handelt',
                 'jwt.expectSummary': 'Verifier-Prüfungen (optional)',
                 'jwt.expectGroupJwt': 'JWT (RFC 7519)',
                 'jwt.expectGroupKb': 'SD-JWT KB-JWT',
@@ -8034,6 +8042,8 @@
                 'jwt.nbf.notYet': 'अभी मान्य नहीं — nbf {iso} है',
                 'jwt.nbf.active': '{iso} से सक्रिय (nbf)',
                 'jwt.iat.issued': '{iso} पर जारी (iat)',
+                'jwt.sub.subject': 'विषय (sub): {value}',
+                'jwt.alg.none.warn': 'हेडर alg "none" है — RFC 8725 §3.1 उत्पादन में असुरक्षित JWT वर्जित करता है; जब तक यह ज्ञात परीक्षण फ़िक्सचर न हो, अस्वीकार करें',
                 'jwt.expectSummary': 'सत्यापनकर्ता जाँच (वैकल्पिक)',
                 'jwt.expectGroupJwt': 'JWT (RFC 7519)',
                 'jwt.expectGroupKb': 'SD-JWT KB-JWT',
@@ -13159,6 +13169,16 @@
                 resultsEl.appendChild(div);
             };
 
+            // RFC 8725 §3.1 (JWT BCP): the `alg: "none"` algorithm-confusion
+            // attack is the textbook JWT footgun — any token whose header
+            // declares it is by definition unsigned, and accepting it as
+            // authentic has caused real-world bypasses. Surface a red banner
+            // unconditionally. Case-insensitive because `None` / `NONE` show
+            // up in the wild too.
+            if (header && typeof header.alg === 'string' && header.alg.toLowerCase() === 'none') {
+                renderClaimBadge('danger', '✗ ' + t('jwt.alg.none.warn'));
+            }
+
             if (payload && typeof payload.exp === 'number') {
                 const exp = new Date(payload.exp * 1000);
                 const expired = exp.getTime() < Date.now();
@@ -13181,6 +13201,14 @@
             if (payload && typeof payload.iat === 'number') {
                 const iat = new Date(payload.iat * 1000);
                 renderClaimBadge('muted', tFormat('jwt.iat.issued', { iso: iat.toISOString() }));
+            }
+
+            // `sub` (subject, RFC 7519 §4.1.2): the principal the JWT carries
+            // claims about — typically a user / account ID. Surface as an
+            // informational row so a maintainer reading a token doesn't have
+            // to eyeball the raw JSON to find the user it identifies.
+            if (payload && (typeof payload.sub === 'string' || typeof payload.sub === 'number') && String(payload.sub).length) {
+                renderClaimBadge('muted', tFormat('jwt.sub.subject', { value: String(payload.sub) }));
             }
 
             // Verifier-side `iss` / `aud` cross-checks against user-supplied

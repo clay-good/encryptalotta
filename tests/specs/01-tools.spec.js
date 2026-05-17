@@ -302,6 +302,33 @@ test('jwt: nbf in the past renders as active', async ({ page }) => {
   await expect(page.locator('#jwt-results')).toContainText(/Active since .*\(nbf\)/i, { timeout: 5_000 });
 });
 
+test('jwt: alg=none surfaces an RFC 8725 §3.1 warning row', async ({ page }) => {
+  const errs=[]; autoDismissDialogs(page, errs);
+  await page.goto('/index.html'); await gotoTool(page, 'jwt');
+  // The textbook alg=none attack: a token whose header declares the algorithm
+  // as unsigned. Decoder must always surface this in red, regardless of any
+  // other claims being well-formed.
+  function b64u(o) { return Buffer.from(JSON.stringify(o)).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+  const header = b64u({ alg: 'none', typ: 'JWT' });
+  const payload = b64u({ sub: 'admin' });
+  await page.fill('#jwt-input', `${header}.${payload}.`);
+  await page.click('#btn-jwt-decode');
+  await expect(page.locator('#jwt-results')).toContainText(/RFC 8725/i, { timeout: 5_000 });
+  await expect(page.locator('#jwt-results')).toContainText(/Header alg is "none"/i);
+});
+
+test('jwt: sub claim surfaces as its own informational row', async ({ page }) => {
+  const errs=[]; autoDismissDialogs(page, errs);
+  await page.goto('/index.html'); await gotoTool(page, 'jwt');
+  // RFC 7519 §A.1 fixture has sub=1234567890; we already assert "John Doe"
+  // elsewhere, so here we assert the new sub badge specifically renders the
+  // subject string out of the payload rather than only inside the raw JSON.
+  const tok = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
+  await page.fill('#jwt-input', tok);
+  await page.click('#btn-jwt-decode');
+  await expect(page.locator('#jwt-results')).toContainText(/Subject \(sub\): 1234567890/i, { timeout: 5_000 });
+});
+
 // SD-JWT (draft-ietf-oauth-selective-disclosure-jwt) — EUDI Wallet credential format (SPEC §2.8)
 function b64url(bufOrStr) {
   const buf = typeof bufOrStr === 'string' ? Buffer.from(bufOrStr, 'utf8') : bufOrStr;
