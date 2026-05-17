@@ -1606,6 +1606,37 @@ test('ubl: ISO 4217 currency cross-check flags a typo (ERU for EUR)', async ({ p
   await expect(page.locator('#ubl-results')).toContainText(/Currency code not active per ISO 4217:\s*ERU/i, { timeout: 5_000 });
 });
 
+test('ubl: PayeeFinancialAccount IBAN cross-check confirms MOD-97 on a valid IBAN', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // PEPPOL BIS Billing 3.0: <cac:PaymentMeans> carries the supplier's bank
+  // coordinates as <cac:PayeeFinancialAccount>/<cbc:ID>. When the value is
+  // shaped like an IBAN, the inspector runs ISO 13616 MOD-97 over it — same
+  // shape as the SEPA inspector's IBAN cross-check, parallel polish for §2.7.
+  const withIban = UBL_INVOICE.replace(
+    '</cac:LegalMonetaryTotal>',
+    '</cac:LegalMonetaryTotal>\n  <cac:PaymentMeans>\n    <cbc:PaymentMeansCode>30</cbc:PaymentMeansCode>\n    <cac:PayeeFinancialAccount>\n      <cbc:ID>DE89370400440532013000</cbc:ID>\n    </cac:PayeeFinancialAccount>\n  </cac:PaymentMeans>'
+  );
+  await page.fill('#ubl-input', withIban);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Payee.*IBANs valid/i, { timeout: 5_000 });
+  await expect(page.locator('#ubl-results')).toContainText(/ISO 13616/);
+});
+
+test('ubl: PayeeFinancialAccount IBAN cross-check flags a MOD-97 failure', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // A character flipped in the bank-code portion breaks MOD-97 while keeping
+  // the IBAN-shape regex match — exactly the failure mode the cross-check
+  // exists to catch.
+  const withBadIban = UBL_INVOICE.replace(
+    '</cac:LegalMonetaryTotal>',
+    '</cac:LegalMonetaryTotal>\n  <cac:PaymentMeans>\n    <cbc:PaymentMeansCode>30</cbc:PaymentMeansCode>\n    <cac:PayeeFinancialAccount>\n      <cbc:ID>DE89370400440532013001</cbc:ID>\n    </cac:PayeeFinancialAccount>\n  </cac:PaymentMeans>'
+  );
+  await page.fill('#ubl-input', withBadIban);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/failed.*MOD-97/i, { timeout: 5_000 });
+  await expect(page.locator('#ubl-results')).toContainText('DE89370400440532013001');
+});
+
 test('ubl: rejects non-UBL XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   await page.fill('#ubl-input', '<?xml version="1.0"?><Document/>');

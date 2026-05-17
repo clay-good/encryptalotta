@@ -4529,6 +4529,8 @@
                 'ubl.ok.taxConsistent': 'TaxExclusive + Σ TaxAmount = TaxInclusive',
                 'ubl.warn.taxMismatch': 'TaxExclusive + Σ TaxAmount = {computed} ≠ declared TaxInclusive {declared}',
                 'ubl.ok.ccyValid': 'Currency codes active per ISO 4217: {list}',
+                'ubl.ok.ibanValid': 'Payee/Payer financial account IBANs valid (ISO 13616 MOD-97) ({n})',
+                'ubl.warn.ibanInvalid': 'Payee/Payer IBAN failed ISO 13616 MOD-97 check: {iban}',
                 'ubl.warn.ccyInvalid': 'Currency code not active per ISO 4217: {code}',
                 'err.ublEmpty': 'XML input is empty.',
                 'err.ublParse': 'XML parse error: {detail}',
@@ -5647,6 +5649,8 @@
                 'ubl.ok.taxConsistent': 'TaxExclusive + Σ TaxAmount = TaxInclusive',
                 'ubl.warn.taxMismatch': 'TaxExclusive + Σ TaxAmount = {computed} ≠ TaxInclusive déclaré {declared}',
                 'ubl.ok.ccyValid': 'Codes monétaires actifs selon ISO 4217 : {list}',
+                'ubl.ok.ibanValid': 'IBAN des comptes Payee/Payer valides (ISO 13616 MOD-97) ({n})',
+                'ubl.warn.ibanInvalid': 'IBAN Payee/Payer échoue au contrôle ISO 13616 MOD-97 : {iban}',
                 'ubl.warn.ccyInvalid': 'Code monétaire non actif selon ISO 4217 : {code}',
                 'err.ublEmpty': 'Le XML d’entrée est vide.',
                 'err.ublParse': 'Erreur d’analyse XML : {detail}',
@@ -6735,6 +6739,8 @@
                 'ubl.ok.taxConsistent': 'TaxExclusive + Σ TaxAmount = TaxInclusive',
                 'ubl.warn.taxMismatch': 'TaxExclusive + Σ TaxAmount = {computed} ≠ 声明的 TaxInclusive {declared}',
                 'ubl.ok.ccyValid': '币种代码按 ISO 4217 有效：{list}',
+                'ubl.ok.ibanValid': '收款方/付款方账户 IBAN 通过 ISO 13616 MOD-97 校验（{n}）',
+                'ubl.warn.ibanInvalid': '收款方/付款方 IBAN 未通过 ISO 13616 MOD-97 校验：{iban}',
                 'ubl.warn.ccyInvalid': '币种代码不在 ISO 4217 现行清单中：{code}',
                 'err.ublEmpty': 'XML 输入为空。',
                 'err.ublParse': 'XML 解析错误：{detail}',
@@ -7838,6 +7844,8 @@
                 'ubl.ok.taxConsistent': 'TaxExclusive + Σ TaxAmount = TaxInclusive',
                 'ubl.warn.taxMismatch': 'TaxExclusive + Σ TaxAmount = {computed} ≠ deklarierter TaxInclusive {declared}',
                 'ubl.ok.ccyValid': 'Währungscodes nach ISO 4217 aktiv: {list}',
+                'ubl.ok.ibanValid': 'IBANs der Payee-/Payer-Konten gültig (ISO 13616 MOD-97) ({n})',
+                'ubl.warn.ibanInvalid': 'Payee-/Payer-IBAN scheitert an ISO-13616-MOD-97-Prüfung: {iban}',
                 'ubl.warn.ccyInvalid': 'Währungscode nicht aktiv nach ISO 4217: {code}',
                 'err.ublEmpty': 'XML-Eingabe ist leer.',
                 'err.ublParse': 'XML-Analysefehler: {detail}',
@@ -8926,6 +8934,8 @@
                 'ubl.ok.taxConsistent': 'TaxExclusive + Σ TaxAmount = TaxInclusive',
                 'ubl.warn.taxMismatch': 'TaxExclusive + Σ TaxAmount = {computed} ≠ घोषित TaxInclusive {declared}',
                 'ubl.ok.ccyValid': 'मुद्रा कोड ISO 4217 के अनुसार सक्रिय: {list}',
+                'ubl.ok.ibanValid': 'भुगतानकर्ता/प्राप्तकर्ता खाते के IBAN वैध (ISO 13616 MOD-97) ({n})',
+                'ubl.warn.ibanInvalid': 'भुगतानकर्ता/प्राप्तकर्ता IBAN ISO 13616 MOD-97 जाँच में विफल: {iban}',
                 'ubl.warn.ccyInvalid': 'मुद्रा कोड ISO 4217 में सक्रिय नहीं: {code}',
                 'err.ublEmpty': 'XML इनपुट खाली है।',
                 'err.ublParse': 'XML पार्स त्रुटि: {detail}',
@@ -16786,6 +16796,51 @@
             }
         }
 
+        // PEPPOL BIS Billing 3.0 / EN 16931 invoices carry the payee's bank
+        // coordinates in <cac:PayeeFinancialAccount> (most common) or
+        // <cac:PayerFinancialAccount> (self-billing). The account identifier
+        // lives in the child <cbc:ID> element — IBAN when the supplier banks
+        // in IBAN-land, a bank-specific account number otherwise (the schema
+        // doesn't enforce IBAN). To avoid false positives on non-IBAN account
+        // numbers we run MOD-97 only on values that look like IBANs
+        // (CC + 2 digits + 11-30 alnum, length 15-34 per ISO 13616). Values
+        // outside that shape are silently skipped — they're not the wrong
+        // kind of identifier, just a different one.
+        function ublCollectIbans(doc) {
+            const out = [];
+            const ibanLike = /^[A-Z]{2}[0-9]{2}[A-Z0-9]{11,30}$/;
+            for (const name of ['PayeeFinancialAccount', 'PayerFinancialAccount']) {
+                for (const acct of doc.getElementsByTagNameNS('*', name)) {
+                    for (const id of acct.getElementsByTagNameNS('*', 'ID')) {
+                        const v = (id.textContent || '').trim().replace(/\s+/g, '').toUpperCase();
+                        if (ibanLike.test(v) && !out.includes(v)) out.push(v);
+                    }
+                }
+            }
+            return out;
+        }
+
+        function ublCheckIbans(out, doc) {
+            const ibans = ublCollectIbans(doc);
+            if (!ibans.length) return;
+            const bad = [];
+            for (const iban of ibans) {
+                try {
+                    const r = ibanValidate(iban);
+                    if (!r || !r.ok) bad.push(iban);
+                } catch (e) {
+                    bad.push(iban);
+                }
+            }
+            if (bad.length === 0) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + tFormat('ubl.ok.ibanValid', { n: intlNumber(ibans.length) }));
+            } else {
+                for (const iban of bad) {
+                    tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + tFormat('ubl.warn.ibanInvalid', { iban }));
+                }
+            }
+        }
+
         document.getElementById('btn-ubl-parse').addEventListener('click', () => {
             const out = document.getElementById('ubl-results');
             while (out.firstChild) out.removeChild(out.firstChild);
@@ -16798,6 +16853,7 @@
                 ublRenderTaxBreakdown(out, detected);
                 ublCheckTotals(out, detected);
                 ublCheckCurrencies(out, doc);
+                ublCheckIbans(out, doc);
             } catch (e) {
                 tlsRenderRow(out, t('ubl.row.error'), e.message);
             }
