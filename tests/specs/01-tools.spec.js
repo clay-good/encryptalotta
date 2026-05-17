@@ -1422,6 +1422,37 @@ test('ubl: copy-as-CSV exposes a row per line item with the correct columns', as
   expect(rows[1]).toMatch(/^1,Widget Pro,2,C62,50\.00,EUR,100\.00,EUR$/);
 });
 
+test('ubl: totals consistency passes on a well-formed Invoice', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  // Both EN 16931 invariants should pass for the fixture.
+  await expect(page.locator('#ubl-results')).toContainText(/Line totals sum matches/i, { timeout: 5_000 });
+  await expect(page.locator('#ubl-results')).toContainText(/TaxExclusive \+ Σ TaxAmount = TaxInclusive/i);
+});
+
+test('ubl: totals consistency flags a line-sum mismatch', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Stomp the declared LineExtensionAmount in LegalMonetaryTotal so the sum (100.00)
+  // no longer matches the declared (90.00).
+  const bad = UBL_INVOICE.replace(
+    '<cbc:LineExtensionAmount currencyID="EUR">100.00</cbc:LineExtensionAmount>\n    <cbc:TaxExclusiveAmount',
+    '<cbc:LineExtensionAmount currencyID="EUR">90.00</cbc:LineExtensionAmount>\n    <cbc:TaxExclusiveAmount'
+  );
+  await page.fill('#ubl-input', bad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Line sum 100\.00 EUR ≠ declared LineExtensionAmount 90\.00 EUR/i, { timeout: 5_000 });
+});
+
+test('ubl: totals consistency flags a tax-inclusive mismatch', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Stomp the declared TaxInclusiveAmount so TaxExcl (100) + TaxAmount (19) ≠ declared (120).
+  const bad = UBL_INVOICE.replace('119.00</cbc:TaxInclusiveAmount>', '120.00</cbc:TaxInclusiveAmount>');
+  await page.fill('#ubl-input', bad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/TaxExclusive \+ Σ TaxAmount = 119\.00 EUR ≠ declared TaxInclusive 120\.00 EUR/i, { timeout: 5_000 });
+});
+
 test('ubl: rejects non-UBL XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   await page.fill('#ubl-input', '<?xml version="1.0"?><Document/>');

@@ -4511,6 +4511,11 @@
                 'ubl.tax.taxable': 'Taxable amount',
                 'ubl.tax.amount': 'Tax amount',
                 'ubl.row.error': 'Parse error',
+                'ubl.row.warning': 'Warning',
+                'ubl.ok.lineTotals': 'Line totals sum matches LegalMonetaryTotal/LineExtensionAmount',
+                'ubl.warn.lineTotalsMismatch': 'Line sum {sum} ≠ declared LineExtensionAmount {declared}',
+                'ubl.ok.taxConsistent': 'TaxExclusive + Σ TaxAmount = TaxInclusive',
+                'ubl.warn.taxMismatch': 'TaxExclusive + Σ TaxAmount = {computed} ≠ declared TaxInclusive {declared}',
                 'err.ublEmpty': 'XML input is empty.',
                 'err.ublParse': 'XML parse error: {detail}',
                 'err.ublNoRoot': 'No <Invoice> or <CreditNote> root element found — is this an OASIS UBL 2.1 XML file?',
@@ -5607,6 +5612,11 @@
                 'ubl.tax.taxable': 'Base imposable',
                 'ubl.tax.amount': 'Montant de la taxe',
                 'ubl.row.error': 'Erreur d’analyse',
+                'ubl.row.warning': 'Avertissement',
+                'ubl.ok.lineTotals': 'La somme des lignes correspond à LegalMonetaryTotal/LineExtensionAmount',
+                'ubl.warn.lineTotalsMismatch': 'Somme des lignes {sum} ≠ LineExtensionAmount déclaré {declared}',
+                'ubl.ok.taxConsistent': 'TaxExclusive + Σ TaxAmount = TaxInclusive',
+                'ubl.warn.taxMismatch': 'TaxExclusive + Σ TaxAmount = {computed} ≠ TaxInclusive déclaré {declared}',
                 'err.ublEmpty': 'Le XML d’entrée est vide.',
                 'err.ublParse': 'Erreur d’analyse XML : {detail}',
                 'err.ublNoRoot': 'Aucun élément racine <Invoice> ou <CreditNote> trouvé — s’agit-il d’un fichier OASIS UBL 2.1 ?',
@@ -6673,6 +6683,11 @@
                 'ubl.tax.taxable': '应税金额',
                 'ubl.tax.amount': '税额',
                 'ubl.row.error': '解析错误',
+                'ubl.row.warning': '警告',
+                'ubl.ok.lineTotals': '明细行合计与 LegalMonetaryTotal/LineExtensionAmount 一致',
+                'ubl.warn.lineTotalsMismatch': '明细行合计 {sum} ≠ 声明的 LineExtensionAmount {declared}',
+                'ubl.ok.taxConsistent': 'TaxExclusive + Σ TaxAmount = TaxInclusive',
+                'ubl.warn.taxMismatch': 'TaxExclusive + Σ TaxAmount = {computed} ≠ 声明的 TaxInclusive {declared}',
                 'err.ublEmpty': 'XML 输入为空。',
                 'err.ublParse': 'XML 解析错误：{detail}',
                 'err.ublNoRoot': '未找到 <Invoice> 或 <CreditNote> 根元素 — 这是 OASIS UBL 2.1 XML 文件吗？',
@@ -7754,6 +7769,11 @@
                 'ubl.tax.taxable': 'Steuerbarer Betrag',
                 'ubl.tax.amount': 'Steuerbetrag',
                 'ubl.row.error': 'Analysefehler',
+                'ubl.row.warning': 'Warnung',
+                'ubl.ok.lineTotals': 'Summe der Positionen stimmt mit LegalMonetaryTotal/LineExtensionAmount überein',
+                'ubl.warn.lineTotalsMismatch': 'Positionssumme {sum} ≠ deklarierter LineExtensionAmount {declared}',
+                'ubl.ok.taxConsistent': 'TaxExclusive + Σ TaxAmount = TaxInclusive',
+                'ubl.warn.taxMismatch': 'TaxExclusive + Σ TaxAmount = {computed} ≠ deklarierter TaxInclusive {declared}',
                 'err.ublEmpty': 'XML-Eingabe ist leer.',
                 'err.ublParse': 'XML-Analysefehler: {detail}',
                 'err.ublNoRoot': 'Kein <Invoice>- oder <CreditNote>-Wurzelelement gefunden — handelt es sich wirklich um ein OASIS-UBL-2.1-XML?',
@@ -8820,6 +8840,11 @@
                 'ubl.tax.taxable': 'कर योग्य राशि',
                 'ubl.tax.amount': 'कर राशि',
                 'ubl.row.error': 'पार्स त्रुटि',
+                'ubl.row.warning': 'चेतावनी',
+                'ubl.ok.lineTotals': 'पंक्तियों का योग LegalMonetaryTotal/LineExtensionAmount से मेल खाता है',
+                'ubl.warn.lineTotalsMismatch': 'पंक्तियों का योग {sum} ≠ घोषित LineExtensionAmount {declared}',
+                'ubl.ok.taxConsistent': 'TaxExclusive + Σ TaxAmount = TaxInclusive',
+                'ubl.warn.taxMismatch': 'TaxExclusive + Σ TaxAmount = {computed} ≠ घोषित TaxInclusive {declared}',
                 'err.ublEmpty': 'XML इनपुट खाली है।',
                 'err.ublParse': 'XML पार्स त्रुटि: {detail}',
                 'err.ublNoRoot': 'कोई <Invoice> या <CreditNote> रूट तत्व नहीं मिला — क्या यह OASIS UBL 2.1 XML फ़ाइल है?',
@@ -16373,6 +16398,90 @@
             });
         }
 
+        // EN 16931 totals consistency check. Two invariants are independent of any
+        // PrepaidAmount / PayableRoundingAmount complications and catch the
+        // overwhelming majority of real-world arithmetic errors:
+        //   (1) Σ InvoiceLine/LineExtensionAmount === LegalMonetaryTotal/LineExtensionAmount
+        //   (2) LegalMonetaryTotal/TaxExclusiveAmount + Σ TaxTotal/TaxAmount
+        //       === LegalMonetaryTotal/TaxInclusiveAmount
+        // We compare in integer cents (round-half-away-from-zero) to dodge FP error,
+        // and tolerate ±1 cent of drift per individual rounding (the EN 16931 published
+        // tolerance for line / total rounding).
+        function ublParseCents(raw) {
+            if (typeof raw !== 'string') return null;
+            const s = raw.trim();
+            if (!s) return null;
+            // EN 16931 amounts: signed decimal, dot separator, ≤2 fraction digits.
+            if (!/^-?\d+(\.\d+)?$/.test(s)) return null;
+            const n = Number(s);
+            if (!Number.isFinite(n)) return null;
+            return Math.round(n * 100);
+        }
+        function ublCheckTotals(out, detected) {
+            const r = detected.root;
+            const lmt = sepaFirst(r, 'LegalMonetaryTotal');
+            if (!lmt) return;
+            const wantLocal = detected.type === 'Invoice' ? 'InvoiceLine' : 'CreditNoteLine';
+
+            // Invariant 1: Σ line-level LineExtensionAmount.
+            const lines = sepaAllLocal(r, wantLocal);
+            if (lines.length) {
+                let sumCents = 0;
+                let allParsed = true;
+                let lineCcy = '';
+                for (const line of lines) {
+                    const el = sepaFirst(line, 'LineExtensionAmount');
+                    const cents = el ? ublParseCents(el.textContent) : null;
+                    if (cents == null) { allParsed = false; break; }
+                    sumCents += cents;
+                    if (!lineCcy && el) lineCcy = el.getAttribute('currencyID') || '';
+                }
+                const declaredEl = sepaFirst(lmt, 'LineExtensionAmount');
+                const declaredCents = declaredEl ? ublParseCents(declaredEl.textContent) : null;
+                if (allParsed && declaredCents != null) {
+                    const drift = Math.abs(sumCents - declaredCents);
+                    if (drift <= 1) {
+                        tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + t('ubl.ok.lineTotals'));
+                    } else {
+                        const fmt = (c) => (c / 100).toFixed(2) + (lineCcy ? ' ' + lineCcy : '');
+                        tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + tFormat('ubl.warn.lineTotalsMismatch', { sum: fmt(sumCents), declared: fmt(declaredCents) }));
+                    }
+                }
+            }
+
+            // Invariant 2: TaxExclusive + Σ TaxAmount === TaxInclusive.
+            const taxExclEl = sepaFirst(lmt, 'TaxExclusiveAmount');
+            const taxInclEl = sepaFirst(lmt, 'TaxInclusiveAmount');
+            const taxExcl = taxExclEl ? ublParseCents(taxExclEl.textContent) : null;
+            const taxIncl = taxInclEl ? ublParseCents(taxInclEl.textContent) : null;
+            if (taxExcl != null && taxIncl != null) {
+                let totalTax = 0;
+                let allParsed = true;
+                let taxCcy = '';
+                for (const tt of sepaAllLocal(r, 'TaxTotal')) {
+                    // Sum each TaxTotal/TaxAmount (one per tax scheme; usually a single VAT total).
+                    for (const ta of sepaAllLocal(tt, 'TaxAmount')) {
+                        // Skip TaxAmount that lives inside a TaxSubtotal (those are per-rate sub-rows).
+                        if (ta.parentNode && ta.parentNode.localName === 'TaxSubtotal') continue;
+                        const cents = ublParseCents(ta.textContent);
+                        if (cents == null) { allParsed = false; break; }
+                        totalTax += cents;
+                        if (!taxCcy) taxCcy = ta.getAttribute('currencyID') || '';
+                    }
+                    if (!allParsed) break;
+                }
+                if (allParsed) {
+                    const drift = Math.abs((taxExcl + totalTax) - taxIncl);
+                    if (drift <= 1) {
+                        tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + t('ubl.ok.taxConsistent'));
+                    } else {
+                        const fmt = (c) => (c / 100).toFixed(2) + (taxCcy ? ' ' + taxCcy : '');
+                        tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + tFormat('ubl.warn.taxMismatch', { computed: fmt(taxExcl + totalTax), declared: fmt(taxIncl) }));
+                    }
+                }
+            }
+        }
+
         document.getElementById('btn-ubl-parse').addEventListener('click', () => {
             const out = document.getElementById('ubl-results');
             while (out.firstChild) out.removeChild(out.firstChild);
@@ -16383,6 +16492,7 @@
                 ublRenderTotals(out, detected);
                 ublRenderLines(out, detected);
                 ublRenderTaxBreakdown(out, detected);
+                ublCheckTotals(out, detected);
             } catch (e) {
                 tlsRenderRow(out, t('ubl.row.error'), e.message);
             }
