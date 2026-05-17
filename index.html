@@ -3477,6 +3477,8 @@
                 'jwt.nbf.active': 'Active since {iso} (nbf)',
                 'jwt.iat.issued': 'Issued at {iso} (iat)',
                 'jwt.sub.subject': 'Subject (sub): {value}',
+                'jwt.jti.id': 'JWT ID (jti): {value}',
+                'jwt.kid.id': 'Key ID (kid): {value}',
                 'jwt.alg.none.warn': 'Header alg is "none" — RFC 8725 §3.1 forbids unsecured JWTs in production; reject unless this is a known test fixture',
                 'jwt.expectSummary': 'Verifier checks (optional)',
                 'jwt.expectGroupJwt': 'JWT (RFC 7519)',
@@ -4793,6 +4795,8 @@
                 'jwt.nbf.active': 'Actif depuis le {iso} (nbf)',
                 'jwt.iat.issued': 'Émis le {iso} (iat)',
                 'jwt.sub.subject': 'Sujet (sub) : {value}',
+                'jwt.jti.id': 'ID du JWT (jti) : {value}',
+                'jwt.kid.id': 'ID de clé (kid) : {value}',
                 'jwt.alg.none.warn': 'L’en-tête alg est « none » — la RFC 8725 §3.1 interdit les JWT non sécurisés en production ; à rejeter sauf s’il s’agit d’un fixture de test connu',
                 'jwt.expectSummary': 'Vérifications côté vérificateur (optionnel)',
                 'jwt.expectGroupJwt': 'JWT (RFC 7519)',
@@ -5885,6 +5889,8 @@
                 'jwt.nbf.active': '自 {iso} 起生效 (nbf)',
                 'jwt.iat.issued': '签发于 {iso} (iat)',
                 'jwt.sub.subject': '主体 (sub)：{value}',
+                'jwt.jti.id': 'JWT ID (jti)：{value}',
+                'jwt.kid.id': '密钥 ID (kid)：{value}',
                 'jwt.alg.none.warn': '头部 alg 为 "none" — RFC 8725 §3.1 禁止生产环境使用未签名 JWT；除非确认为已知测试样本，否则应拒绝',
                 'jwt.expectSummary': '验证方校验（可选）',
                 'jwt.expectGroupJwt': 'JWT (RFC 7519)',
@@ -6962,6 +6968,8 @@
                 'jwt.nbf.active': 'Aktiv seit {iso} (nbf)',
                 'jwt.iat.issued': 'Ausgestellt am {iso} (iat)',
                 'jwt.sub.subject': 'Subjekt (sub): {value}',
+                'jwt.jti.id': 'JWT-ID (jti): {value}',
+                'jwt.kid.id': 'Schlüssel-ID (kid): {value}',
                 'jwt.alg.none.warn': 'Header-alg ist „none“ — RFC 8725 §3.1 verbietet ungesicherte JWTs in der Produktion; ablehnen, sofern es sich nicht um einen bekannten Test-Fixture handelt',
                 'jwt.expectSummary': 'Verifier-Prüfungen (optional)',
                 'jwt.expectGroupJwt': 'JWT (RFC 7519)',
@@ -8054,6 +8062,8 @@
                 'jwt.nbf.active': '{iso} से सक्रिय (nbf)',
                 'jwt.iat.issued': '{iso} पर जारी (iat)',
                 'jwt.sub.subject': 'विषय (sub): {value}',
+                'jwt.jti.id': 'JWT ID (jti): {value}',
+                'jwt.kid.id': 'कुंजी ID (kid): {value}',
                 'jwt.alg.none.warn': 'हेडर alg "none" है — RFC 8725 §3.1 उत्पादन में असुरक्षित JWT वर्जित करता है; जब तक यह ज्ञात परीक्षण फ़िक्सचर न हो, अस्वीकार करें',
                 'jwt.expectSummary': 'सत्यापनकर्ता जाँच (वैकल्पिक)',
                 'jwt.expectGroupJwt': 'JWT (RFC 7519)',
@@ -13192,6 +13202,15 @@
                 renderClaimBadge('danger', '✗ ' + t('jwt.alg.none.warn'));
             }
 
+            // `kid` (key ID, RFC 7515 §4.1.4): hint the verifier uses to pick
+            // the right key from a JWKS. Informational here — the verify path
+            // below requires the user to paste the matching key explicitly, so
+            // surfacing kid lets a maintainer cross-reference it against a JWKS
+            // URL without eyeballing the raw header JSON.
+            if (header && (typeof header.kid === 'string' || typeof header.kid === 'number') && String(header.kid).length) {
+                renderClaimBadge('muted', tFormat('jwt.kid.id', { value: String(header.kid) }));
+            }
+
             if (payload && typeof payload.exp === 'number') {
                 const exp = new Date(payload.exp * 1000);
                 const expired = exp.getTime() < Date.now();
@@ -13222,6 +13241,14 @@
             // to eyeball the raw JSON to find the user it identifies.
             if (payload && (typeof payload.sub === 'string' || typeof payload.sub === 'number') && String(payload.sub).length) {
                 renderClaimBadge('muted', tFormat('jwt.sub.subject', { value: String(payload.sub) }));
+            }
+
+            // `jti` (JWT ID, RFC 7519 §4.1.7): unique identifier issuers attach
+            // for replay-defense and audit. Informational row — surfacing it
+            // lets a maintainer correlate a token with issuer-side audit logs
+            // without parsing the raw payload JSON by eye.
+            if (payload && (typeof payload.jti === 'string' || typeof payload.jti === 'number') && String(payload.jti).length) {
+                renderClaimBadge('muted', tFormat('jwt.jti.id', { value: String(payload.jti) }));
             }
 
             // Verifier-side `iss` / `aud` cross-checks against user-supplied

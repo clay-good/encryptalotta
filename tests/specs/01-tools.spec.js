@@ -317,6 +317,21 @@ test('jwt: alg=none surfaces an RFC 8725 §3.1 warning row', async ({ page }) =>
   await expect(page.locator('#jwt-results')).toContainText(/Header alg is "none"/i);
 });
 
+test('jwt: jti + kid surface as their own informational rows', async ({ page }) => {
+  const errs=[]; autoDismissDialogs(page, errs);
+  await page.goto('/index.html'); await gotoTool(page, 'jwt');
+  function b64u(o) { return Buffer.from(JSON.stringify(o)).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+  // jti is RFC 7519 §4.1.7 (replay defense); kid is RFC 7515 §4.1.4 (JWKS key
+  // selector). Both are informational here; surface them so a maintainer
+  // doesn't have to grep the raw JSON to read them.
+  const header = b64u({ alg: 'HS256', typ: 'JWT', kid: 'signing-key-2024-q2' });
+  const payload = b64u({ sub: 'u-1', jti: '550e8400-e29b-41d4-a716-446655440000' });
+  await page.fill('#jwt-input', `${header}.${payload}.AAAA`);
+  await page.click('#btn-jwt-decode');
+  await expect(page.locator('#jwt-results')).toContainText(/Key ID \(kid\): signing-key-2024-q2/i, { timeout: 5_000 });
+  await expect(page.locator('#jwt-results')).toContainText(/JWT ID \(jti\): 550e8400-e29b-41d4-a716-446655440000/i);
+});
+
 test('jwt: sub claim surfaces as its own informational row', async ({ page }) => {
   const errs=[]; autoDismissDialogs(page, errs);
   await page.goto('/index.html'); await gotoTool(page, 'jwt');
