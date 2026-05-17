@@ -4424,6 +4424,8 @@
                 'sepa.row.warning': 'Warnings',
                 'sepa.ok.ibanValid': 'IBAN MOD-97 valid',
                 'sepa.warn.ibanInvalid': 'IBAN MOD-97 check failed: {iban}',
+                'sepa.ok.bicValid': 'BIC format valid (ISO 9362)',
+                'sepa.warn.bicInvalid': 'BIC format check failed: {bic}',
                 'sepa.warn.unknownDoc': 'Unrecognized ISO 20022 root element — partial parse only.',
                 'err.sepaEmpty': 'XML input is empty.',
                 'err.sepaParse': 'XML parse error: {detail}',
@@ -5528,6 +5530,8 @@
                 'sepa.row.warning': 'Avertissements',
                 'sepa.ok.ibanValid': 'IBAN MOD-97 valide',
                 'sepa.warn.ibanInvalid': 'Échec de la vérification MOD-97 de l’IBAN : {iban}',
+                'sepa.ok.bicValid': 'Format BIC valide (ISO 9362)',
+                'sepa.warn.bicInvalid': 'Échec du contrôle de format BIC : {bic}',
                 'sepa.warn.unknownDoc': 'Élément racine ISO 20022 non reconnu — analyse partielle uniquement.',
                 'err.sepaEmpty': 'Le XML d’entrée est vide.',
                 'err.sepaParse': 'Erreur d’analyse XML : {detail}',
@@ -6592,6 +6596,8 @@
                 'sepa.row.warning': '警告',
                 'sepa.ok.ibanValid': 'IBAN MOD-97 有效',
                 'sepa.warn.ibanInvalid': 'IBAN MOD-97 校验失败：{iban}',
+                'sepa.ok.bicValid': 'BIC 格式有效（ISO 9362）',
+                'sepa.warn.bicInvalid': 'BIC 格式校验失败：{bic}',
                 'sepa.warn.unknownDoc': '无法识别的 ISO 20022 根元素 — 仅部分解析。',
                 'err.sepaEmpty': 'XML 输入为空。',
                 'err.sepaParse': 'XML 解析错误：{detail}',
@@ -7671,6 +7677,8 @@
                 'sepa.row.warning': 'Warnungen',
                 'sepa.ok.ibanValid': 'IBAN MOD-97 gültig',
                 'sepa.warn.ibanInvalid': 'IBAN-MOD-97-Prüfung fehlgeschlagen: {iban}',
+                'sepa.ok.bicValid': 'BIC-Format gültig (ISO 9362)',
+                'sepa.warn.bicInvalid': 'BIC-Formatprüfung fehlgeschlagen: {bic}',
                 'sepa.warn.unknownDoc': 'Unbekanntes ISO-20022-Wurzelelement — nur Teilanalyse.',
                 'err.sepaEmpty': 'Die XML-Eingabe ist leer.',
                 'err.sepaParse': 'XML-Analysefehler: {detail}',
@@ -8735,6 +8743,8 @@
                 'sepa.row.warning': 'चेतावनियाँ',
                 'sepa.ok.ibanValid': 'IBAN MOD-97 वैध',
                 'sepa.warn.ibanInvalid': 'IBAN MOD-97 जाँच विफल: {iban}',
+                'sepa.ok.bicValid': 'BIC प्रारूप वैध (ISO 9362)',
+                'sepa.warn.bicInvalid': 'BIC प्रारूप जाँच विफल: {bic}',
                 'sepa.warn.unknownDoc': 'अज्ञात ISO 20022 रूट तत्व — केवल आंशिक पार्सिंग।',
                 'err.sepaEmpty': 'XML इनपुट खाली है।',
                 'err.sepaParse': 'XML पार्स त्रुटि: {detail}',
@@ -15939,6 +15949,43 @@
             }
         }
 
+        // Walk every <BIC> and <BICFI> element (ISO 20022 uses <BICFI> in the
+        // 2009+ schema variants while older pain.001.001.03 files used <BIC>)
+        // and run each value through the same bicValidate() that powers the
+        // top-level BIC tool. Same surfacing semantics as sepaCheckIbans: one
+        // confirmation row on full success, one warning row per bad BIC.
+        function sepaCollectBics(doc) {
+            const out = [];
+            for (const name of ['BIC', 'BICFI']) {
+                for (const el of doc.getElementsByTagNameNS('*', name)) {
+                    const v = (el.textContent || '').trim();
+                    if (v && !out.includes(v)) out.push(v);
+                }
+            }
+            return out;
+        }
+
+        function sepaCheckBics(out, doc) {
+            const bics = sepaCollectBics(doc);
+            if (!bics.length) return;
+            const bad = [];
+            for (const bic of bics) {
+                try {
+                    const r = bicValidate(bic);
+                    if (!r || !r.ok) bad.push(bic);
+                } catch (e) {
+                    bad.push(bic);
+                }
+            }
+            if (bad.length === 0) {
+                tlsRenderRow(out, t('sepa.row.warning'), t('sepa.ok.bicValid') + '  (' + intlNumber(bics.length) + ')');
+            } else {
+                for (const bic of bad) {
+                    tlsRenderRow(out, t('sepa.row.warning'), tFormat('sepa.warn.bicInvalid', { bic }));
+                }
+            }
+        }
+
         document.getElementById('btn-sepa-parse').addEventListener('click', () => {
             const out = document.getElementById('sepa-results');
             while (out.firstChild) out.removeChild(out.firstChild);
@@ -15952,6 +15999,7 @@
                     tlsRenderRow(out, t('sepa.row.warning'), t('sepa.warn.unknownDoc'));
                 }
                 sepaCheckIbans(out, doc);
+                sepaCheckBics(out, doc);
             } catch (e) {
                 tlsRenderRow(out, t('sepa.row.error'), e.message);
             }

@@ -1136,6 +1136,23 @@ test('sepa: surfaces schema version (pain.001.001.03) in document banner', async
   await expect(page.locator('#sepa-results')).toContainText('pain.001.001.03', { timeout: 5_000 });
 });
 
+test('sepa: BIC format check passes for valid BICs in pain.001', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  await page.fill('#sepa-input', SEPA_PAIN001);
+  await page.click('#btn-sepa-parse');
+  // The fixture carries COBADEFFXXX and DEUTDEFFXXX — both valid ISO 9362.
+  await expect(page.locator('#sepa-results')).toContainText(/BIC format valid \(ISO 9362\)/i, { timeout: 5_000 });
+});
+
+test('sepa: BIC format check flags a malformed BIC', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Stomp the debtor BIC's first segment so it fails the bank-code regex.
+  const bad = SEPA_PAIN001.replace('COBADEFFXXX', '123ADEFFXXX');
+  await page.fill('#sepa-input', bad);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/BIC format check failed.*123ADEFFXXX/i, { timeout: 5_000 });
+});
+
 test('sepa: surfaces per-transaction InstrId alongside EndToEndId', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'sepa');
   const withInstrId = SEPA_PAIN001.replace(
