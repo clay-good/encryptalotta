@@ -387,6 +387,42 @@ test('sd-jwt: surfaces a key-binding JWT when present', async ({ page }) => {
   await expect(page.locator('#jwt-results')).toContainText('nonce-42');
 });
 
+test('sd-jwt: KB-JWT aud cross-check accepts a matching expected audience', async ({ page }) => {
+  const errs=[]; autoDismissDialogs(page, errs);
+  await page.goto('/index.html'); await gotoTool(page, 'jwt');
+  const sdjwt = buildSdJwtWithSignedKb([['s', 'given_name', 'Eve']]);
+  await page.fill('#jwt-input', sdjwt);
+  await page.locator('#jwt-kb-aud').evaluate(el => el.closest('details').open = true);
+  await page.fill('#jwt-kb-aud', 'https://verifier.example');
+  await page.click('#btn-jwt-decode');
+  await expect(page.locator('#jwt-results')).toContainText(/KB-JWT audience/i, { timeout: 5_000 });
+  await expect(page.locator('#jwt-results')).toContainText(/matches expected audience/i);
+});
+
+test('sd-jwt: KB-JWT aud cross-check flags a wrong expected audience', async ({ page }) => {
+  const errs=[]; autoDismissDialogs(page, errs);
+  await page.goto('/index.html'); await gotoTool(page, 'jwt');
+  const sdjwt = buildSdJwtWithSignedKb([['s', 'given_name', 'Eve']]);
+  await page.fill('#jwt-input', sdjwt);
+  await page.locator('#jwt-kb-aud').evaluate(el => el.closest('details').open = true);
+  await page.fill('#jwt-kb-aud', 'https://attacker.example');
+  await page.click('#btn-jwt-decode');
+  await expect(page.locator('#jwt-results')).toContainText(/KB-JWT audience/i, { timeout: 5_000 });
+  await expect(page.locator('#jwt-results')).toContainText(/does not match expected.*https:\/\/verifier\.example/i);
+});
+
+test('sd-jwt: KB-JWT nonce cross-check flags a replayed nonce', async ({ page }) => {
+  const errs=[]; autoDismissDialogs(page, errs);
+  await page.goto('/index.html'); await gotoTool(page, 'jwt');
+  const sdjwt = buildSdJwtWithSignedKb([['s', 'given_name', 'Eve']]);
+  await page.fill('#jwt-input', sdjwt);
+  await page.locator('#jwt-kb-nonce').evaluate(el => el.closest('details').open = true);
+  await page.fill('#jwt-kb-nonce', 'fresh-nonce');
+  await page.click('#btn-jwt-decode');
+  await expect(page.locator('#jwt-results')).toContainText(/KB-JWT nonce/i, { timeout: 5_000 });
+  await expect(page.locator('#jwt-results')).toContainText(/does not match expected.*nonce-42/i);
+});
+
 // =============== UTILITIES ===============
 
 test('passwords: generates count', async ({ page }) => {
