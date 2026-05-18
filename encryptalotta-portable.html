@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <!--
   encryptalotta — single-file portable build
-  Source mtime: 2026-05-17T23:23:44.953Z
-  Source: index.html (SHA-256: d74d441760cb31a899d410ebbd037869d52643dd589f00f2a31ad99e49a62ddd)
+  Source mtime: 2026-05-18T00:02:28.753Z
+  Source: index.html (SHA-256: 845c80d544112fc02a917f89903b00c19baf35d7ccd803619daebc4bf44890d8)
   All vendored JavaScript inlined; favicons inlined as data: URIs.
   Identical functionality to the live site at https://encryptalotta.com.
   Runs from file://, USB stick, chat attachment, anywhere. No network calls.
@@ -6756,6 +6756,8 @@ var qrcode = function() {
                 'sepa.warn.chrgBr': 'ChrgBr mismatch: PmtInf #{idx} declares {actual} but EPC SEPA Rulebook requires SLEV (charges shared, allocated by local law)',
                 'sepa.ok.e2eUnique': 'EndToEndId values are unique across the file ({n} transaction(s)) per EPC SEPA Rulebook',
                 'sepa.warn.e2eDup': 'EndToEndId duplicated within file: {id} appears {count} times — EPC SEPA Rulebook requires uniqueness per Originator (ISO 20022 / EPC SCT/SDD)',
+                'sepa.ok.svcLvl': 'SvcLvl matches EPC SEPA Rulebook: {n} PmtInf block(s) declare SEPA (standard SCT/SDD service level)',
+                'sepa.warn.svcLvl': 'SvcLvl mismatch: PmtInf #{idx} declares {actual} but EPC SEPA Rulebook requires SEPA (ISO 20022 / EPC SCT/SDD)',
                 'sepa.warn.ccyInvalid': 'Currency code not active per ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unrecognized ISO 20022 root element — partial parse only.',
                 'err.sepaEmpty': 'XML input is empty.',
@@ -6847,6 +6849,8 @@ var qrcode = function() {
                 'ubl.warn.lineTotalsMismatch': 'Line sum {sum} ≠ declared LineExtensionAmount {declared}',
                 'ubl.ok.taxConsistent': 'TaxExclusive + Σ TaxAmount = TaxInclusive',
                 'ubl.warn.taxMismatch': 'TaxExclusive + Σ TaxAmount = {computed} ≠ declared TaxInclusive {declared}',
+                'ubl.ok.payable': 'PayableAmount {amount} matches TaxInclusive − Prepaid + PayableRounding (EN 16931 BR-CO-16)',
+                'ubl.warn.payableMismatch': 'PayableAmount mismatch: TaxInclusive − Prepaid + PayableRounding = {computed} ≠ declared PayableAmount {declared} (EN 16931 BR-CO-16)',
                 'ubl.ok.ccyValid': 'Currency codes active per ISO 4217: {list}',
                 'ubl.ok.ibanValid': 'Payee/Payer financial account IBANs valid (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'Payee/Payer IBAN failed ISO 13616 MOD-97 check: {iban}',
@@ -7900,6 +7904,8 @@ var qrcode = function() {
                 'sepa.warn.chrgBr': 'ChrgBr non conforme : le bloc PmtInf n°{idx} déclare {actual} alors que les règles EPC SEPA exigent SLEV (frais partagés, selon la loi locale)',
                 'sepa.ok.e2eUnique': 'Les identifiants EndToEndId sont uniques dans le fichier ({n} transaction(s)) conformément aux règles EPC SEPA',
                 'sepa.warn.e2eDup': 'EndToEndId dupliqué dans le fichier : {id} apparaît {count} fois — les règles EPC SEPA exigent l’unicité par donneur d’ordre (ISO 20022 / EPC SCT/SDD)',
+                'sepa.ok.svcLvl': 'SvcLvl conforme aux règles EPC SEPA : {n} bloc(s) PmtInf déclarent SEPA (niveau de service standard SCT/SDD)',
+                'sepa.warn.svcLvl': 'SvcLvl non conforme : le bloc PmtInf n°{idx} déclare {actual} alors que les règles EPC SEPA exigent SEPA (ISO 20022 / EPC SCT/SDD)',
                 'sepa.warn.ccyInvalid': 'Code monétaire non actif selon ISO 4217 : {code}',
                 'sepa.warn.unknownDoc': 'Élément racine ISO 20022 non reconnu — analyse partielle uniquement.',
                 'err.sepaEmpty': 'Le XML d’entrée est vide.',
@@ -7981,6 +7987,8 @@ var qrcode = function() {
                 'ubl.warn.lineTotalsMismatch': 'Somme des lignes {sum} ≠ LineExtensionAmount déclaré {declared}',
                 'ubl.ok.taxConsistent': 'TaxExclusive + Σ TaxAmount = TaxInclusive',
                 'ubl.warn.taxMismatch': 'TaxExclusive + Σ TaxAmount = {computed} ≠ TaxInclusive déclaré {declared}',
+                'ubl.ok.payable': 'PayableAmount {amount} correspond à TaxInclusive − Prepaid + PayableRounding (EN 16931 BR-CO-16)',
+                'ubl.warn.payableMismatch': 'PayableAmount incohérent : TaxInclusive − Prepaid + PayableRounding = {computed} ≠ PayableAmount déclaré {declared} (EN 16931 BR-CO-16)',
                 'ubl.ok.ccyValid': 'Codes monétaires actifs selon ISO 4217 : {list}',
                 'ubl.ok.ibanValid': 'IBAN des comptes Payee/Payer valides (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'IBAN Payee/Payer échoue au contrôle ISO 13616 MOD-97 : {iban}',
@@ -9004,6 +9012,8 @@ var qrcode = function() {
                 'sepa.warn.chrgBr': 'ChrgBr 不一致：PmtInf 第 {idx} 项声明 {actual}，但 EPC SEPA 规则书要求 SLEV（费用按当地法律分担）',
                 'sepa.ok.e2eUnique': 'EndToEndId 在整个文件中唯一（{n} 笔交易），符合 EPC SEPA 规则书要求',
                 'sepa.warn.e2eDup': 'EndToEndId 在文件中重复：{id} 出现 {count} 次 — EPC SEPA 规则书要求按发起人保持唯一（ISO 20022 / EPC SCT/SDD）',
+                'sepa.ok.svcLvl': 'SvcLvl 符合 EPC SEPA 规则书：{n} 个 PmtInf 块均声明 SEPA（标准 SCT/SDD 服务等级）',
+                'sepa.warn.svcLvl': 'SvcLvl 不一致：PmtInf 第 {idx} 项声明 {actual}，但 EPC SEPA 规则书要求 SEPA（ISO 20022 / EPC SCT/SDD）',
                 'sepa.warn.ccyInvalid': '币种代码不在 ISO 4217 现行清单中：{code}',
                 'sepa.warn.unknownDoc': '无法识别的 ISO 20022 根元素 — 仅部分解析。',
                 'err.sepaEmpty': 'XML 输入为空。',
@@ -9085,6 +9095,8 @@ var qrcode = function() {
                 'ubl.warn.lineTotalsMismatch': '明细行合计 {sum} ≠ 声明的 LineExtensionAmount {declared}',
                 'ubl.ok.taxConsistent': 'TaxExclusive + Σ TaxAmount = TaxInclusive',
                 'ubl.warn.taxMismatch': 'TaxExclusive + Σ TaxAmount = {computed} ≠ 声明的 TaxInclusive {declared}',
+                'ubl.ok.payable': 'PayableAmount {amount} 与 TaxInclusive − Prepaid + PayableRounding 一致（EN 16931 BR-CO-16）',
+                'ubl.warn.payableMismatch': 'PayableAmount 不一致：TaxInclusive − Prepaid + PayableRounding = {computed} ≠ 声明的 PayableAmount {declared}（EN 16931 BR-CO-16）',
                 'ubl.ok.ccyValid': '币种代码按 ISO 4217 有效：{list}',
                 'ubl.ok.ibanValid': '收款方/付款方账户 IBAN 通过 ISO 13616 MOD-97 校验（{n}）',
                 'ubl.warn.ibanInvalid': '收款方/付款方 IBAN 未通过 ISO 13616 MOD-97 校验：{iban}',
@@ -10123,6 +10135,8 @@ var qrcode = function() {
                 'sepa.warn.chrgBr': 'ChrgBr-Abweichung: PmtInf Nr. {idx} deklariert {actual}, das EPC-SEPA-Rulebook verlangt jedoch SLEV (Entgelte nach lokalem Recht geteilt)',
                 'sepa.ok.e2eUnique': 'EndToEndId-Werte sind dateiweit eindeutig ({n} Transaktion(en)) gemäß EPC-SEPA-Rulebook',
                 'sepa.warn.e2eDup': 'EndToEndId in der Datei doppelt vergeben: {id} kommt {count}-mal vor — das EPC-SEPA-Rulebook verlangt Eindeutigkeit je Auftraggeber (ISO 20022 / EPC SCT/SDD)',
+                'sepa.ok.svcLvl': 'SvcLvl entspricht EPC-SEPA-Rulebook: {n} PmtInf-Block(s) deklarieren SEPA (Standard-Service-Level für SCT/SDD)',
+                'sepa.warn.svcLvl': 'SvcLvl-Abweichung: PmtInf Nr. {idx} deklariert {actual}, das EPC-SEPA-Rulebook verlangt jedoch SEPA (ISO 20022 / EPC SCT/SDD)',
                 'sepa.warn.ccyInvalid': 'Währungscode nicht aktiv nach ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unbekanntes ISO-20022-Wurzelelement — nur Teilanalyse.',
                 'err.sepaEmpty': 'Die XML-Eingabe ist leer.',
@@ -10204,6 +10218,8 @@ var qrcode = function() {
                 'ubl.warn.lineTotalsMismatch': 'Positionssumme {sum} ≠ deklarierter LineExtensionAmount {declared}',
                 'ubl.ok.taxConsistent': 'TaxExclusive + Σ TaxAmount = TaxInclusive',
                 'ubl.warn.taxMismatch': 'TaxExclusive + Σ TaxAmount = {computed} ≠ deklarierter TaxInclusive {declared}',
+                'ubl.ok.payable': 'PayableAmount {amount} entspricht TaxInclusive − Prepaid + PayableRounding (EN 16931 BR-CO-16)',
+                'ubl.warn.payableMismatch': 'PayableAmount-Abweichung: TaxInclusive − Prepaid + PayableRounding = {computed} ≠ deklarierter PayableAmount {declared} (EN 16931 BR-CO-16)',
                 'ubl.ok.ccyValid': 'Währungscodes nach ISO 4217 aktiv: {list}',
                 'ubl.ok.ibanValid': 'IBANs der Payee-/Payer-Konten gültig (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'Payee-/Payer-IBAN scheitert an ISO-13616-MOD-97-Prüfung: {iban}',
@@ -11227,6 +11243,8 @@ var qrcode = function() {
                 'sepa.warn.chrgBr': 'ChrgBr बेमेल: PmtInf #{idx} ने {actual} घोषित किया, परन्तु EPC SEPA रूलबुक SLEV (शुल्क स्थानीय कानून के अनुसार साझा) आवश्यक है',
                 'sepa.ok.e2eUnique': 'EndToEndId मान फ़ाइल में अद्वितीय हैं ({n} लेन-देन), EPC SEPA रूलबुक के अनुसार',
                 'sepa.warn.e2eDup': 'EndToEndId फ़ाइल में दोहराया गया: {id} {count} बार दिखाई देता है — EPC SEPA रूलबुक प्रति आरंभकर्ता अद्वितीयता आवश्यक करता है (ISO 20022 / EPC SCT/SDD)',
+                'sepa.ok.svcLvl': 'SvcLvl EPC SEPA रूलबुक के अनुरूप: {n} PmtInf ब्लॉक SEPA (मानक SCT/SDD सेवा-स्तर) घोषित करते हैं',
+                'sepa.warn.svcLvl': 'SvcLvl बेमेल: PmtInf #{idx} ने {actual} घोषित किया, परन्तु EPC SEPA रूलबुक SEPA आवश्यक है (ISO 20022 / EPC SCT/SDD)',
                 'sepa.warn.ccyInvalid': 'मुद्रा कोड ISO 4217 में सक्रिय नहीं: {code}',
                 'sepa.warn.unknownDoc': 'अज्ञात ISO 20022 रूट तत्व — केवल आंशिक पार्सिंग।',
                 'err.sepaEmpty': 'XML इनपुट खाली है।',
@@ -11308,6 +11326,8 @@ var qrcode = function() {
                 'ubl.warn.lineTotalsMismatch': 'पंक्तियों का योग {sum} ≠ घोषित LineExtensionAmount {declared}',
                 'ubl.ok.taxConsistent': 'TaxExclusive + Σ TaxAmount = TaxInclusive',
                 'ubl.warn.taxMismatch': 'TaxExclusive + Σ TaxAmount = {computed} ≠ घोषित TaxInclusive {declared}',
+                'ubl.ok.payable': 'PayableAmount {amount} TaxInclusive − Prepaid + PayableRounding से मेल खाता है (EN 16931 BR-CO-16)',
+                'ubl.warn.payableMismatch': 'PayableAmount बेमेल: TaxInclusive − Prepaid + PayableRounding = {computed} ≠ घोषित PayableAmount {declared} (EN 16931 BR-CO-16)',
                 'ubl.ok.ccyValid': 'मुद्रा कोड ISO 4217 के अनुसार सक्रिय: {list}',
                 'ubl.ok.ibanValid': 'भुगतानकर्ता/प्राप्तकर्ता खाते के IBAN वैध (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'भुगतानकर्ता/प्राप्तकर्ता IBAN ISO 13616 MOD-97 जाँच में विफल: {iban}',
@@ -18802,6 +18822,42 @@ var qrcode = function() {
             }
         }
 
+        // EPC SEPA Rulebook SvcLvl (service level) enforcement: both pain.001
+        // (SCT) and pain.008 (SDD) require PmtTpInf/SvcLvl/Cd=SEPA for the
+        // standard SEPA service level. ISO 20022 allows the field to carry any
+        // 4-character code (e.g. NURG for non-urgent, URGP for urgent, PRPT for
+        // priority), but the EPC SEPA Rulebooks pin it to SEPA — clearing
+        // systems reject a non-SEPA value at the rail-level service-level
+        // gate. SvcLvl is optional at the schema level; blocks that omit it
+        // skip silently (no PmtTpInf at all is also a valid omission).
+        function sepaCheckSvcLvl(out, doc, detected) {
+            if (detected.type !== 'pain.001' && detected.type !== 'pain.008') return;
+            const w = detected.wrapper;
+            if (!w) return;
+            const pmtInfs = sepaAllLocal(w, 'PmtInf');
+            if (!pmtInfs.length) return;
+            const bad = [];
+            let seen = 0;
+            pmtInfs.forEach((pi, i) => {
+                const tpInf = sepaFirst(pi, 'PmtTpInf');
+                if (!tpInf) return;
+                const svcLvl = sepaFirst(tpInf, 'SvcLvl');
+                if (!svcLvl) return;
+                const declared = (sepaTextOf(svcLvl, 'Cd') || '').trim().toUpperCase();
+                if (!declared) return;
+                seen++;
+                if (declared !== 'SEPA') bad.push({ idx: i + 1, actual: declared });
+            });
+            if (!seen) return;
+            if (bad.length === 0) {
+                tlsRenderRow(out, t('sepa.row.warning'), '✓ ' + tFormat('sepa.ok.svcLvl', { n: intlNumber(seen) }));
+            } else {
+                for (const b of bad) {
+                    tlsRenderRow(out, t('sepa.row.warning'), '✗ ' + tFormat('sepa.warn.svcLvl', { idx: intlNumber(b.idx), actual: b.actual }));
+                }
+            }
+        }
+
         function sepaCheckBics(out, doc) {
             const bics = sepaCollectBics(doc);
             if (!bics.length) return;
@@ -18843,6 +18899,7 @@ var qrcode = function() {
                 sepaCheckPmtMtd(out, doc, detected);
                 sepaCheckChrgBr(out, doc, detected);
                 sepaCheckE2eIdUnique(out, doc, detected);
+                sepaCheckSvcLvl(out, doc, detected);
             } catch (e) {
                 tlsRenderRow(out, t('sepa.row.error'), e.message);
             }
@@ -19462,6 +19519,41 @@ var qrcode = function() {
             }
         }
 
+        // EN 16931 BR-CO-16: the LegalMonetaryTotal/PayableAmount MUST equal
+        //   TaxInclusiveAmount − PrepaidAmount + PayableRoundingAmount
+        // (PrepaidAmount and PayableRoundingAmount default to 0 when absent).
+        // This is the third file-wide accounting gate, alongside the line-sum
+        // and tax-inclusive invariants from draft 28 — it catches mismatches
+        // between the declared tax-inclusive total and what the buyer is
+        // actually asked to pay (the most common cause: a prepaid amount
+        // applied in the buyer's accounting but not subtracted from
+        // PayableAmount, so the invoice asks for the wrong figure).
+        function ublCheckPayable(out, detected) {
+            const r = detected.root;
+            const lmt = sepaFirst(r, 'LegalMonetaryTotal');
+            if (!lmt) return;
+            const taxInclEl  = sepaFirst(lmt, 'TaxInclusiveAmount');
+            const payableEl  = sepaFirst(lmt, 'PayableAmount');
+            if (!taxInclEl || !payableEl) return;
+            const taxIncl = ublParseCents(taxInclEl.textContent);
+            const payable = ublParseCents(payableEl.textContent);
+            if (taxIncl == null || payable == null) return;
+            const prepaidEl = sepaFirst(lmt, 'PrepaidAmount');
+            const roundEl   = sepaFirst(lmt, 'PayableRoundingAmount');
+            const prepaid = prepaidEl ? ublParseCents(prepaidEl.textContent) : 0;
+            const rounding = roundEl ? ublParseCents(roundEl.textContent) : 0;
+            if (prepaid == null || rounding == null) return;
+            const expected = taxIncl - prepaid + rounding;
+            const drift = Math.abs(expected - payable);
+            const ccy = payableEl.getAttribute('currencyID') || taxInclEl.getAttribute('currencyID') || '';
+            const fmt = (c) => (c / 100).toFixed(2) + (ccy ? ' ' + ccy : '');
+            if (drift <= 1) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + tFormat('ubl.ok.payable', { amount: fmt(payable) }));
+            } else {
+                tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + tFormat('ubl.warn.payableMismatch', { computed: fmt(expected), declared: fmt(payable) }));
+            }
+        }
+
         function ublCheckIbans(out, doc) {
             const ibans = ublCollectIbans(doc);
             if (!ibans.length) return;
@@ -19498,6 +19590,7 @@ var qrcode = function() {
                 ublCheckVatRates(out, detected);
                 ublCheckVatCategories(out, detected);
                 ublCheckDates(out, detected);
+                ublCheckPayable(out, detected);
                 ublCheckIbans(out, doc);
             } catch (e) {
                 tlsRenderRow(out, t('ubl.row.error'), e.message);

@@ -1411,6 +1411,24 @@ test('sepa: EndToEndId uniqueness flags a duplicated id within the file', async 
   await expect(page.locator('#sepa-results')).toContainText(/EndToEndId duplicated within file.*E2E-001.*2 times.*uniqueness per Originator/i, { timeout: 5_000 });
 });
 
+test('sepa: SvcLvl enforcement confirms SEPA on a SEPA-compliant pain.001', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // EPC SEPA Rulebooks require PmtTpInf/SvcLvl/Cd=SEPA — inject it into the PmtInf block.
+  const good = SEPA_PAIN001.replace('<PmtMtd>TRF</PmtMtd>', '<PmtMtd>TRF</PmtMtd>\n      <PmtTpInf><SvcLvl><Cd>SEPA</Cd></SvcLvl></PmtTpInf>');
+  await page.fill('#sepa-input', good);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/SvcLvl matches EPC SEPA Rulebook.*SEPA/i, { timeout: 5_000 });
+});
+
+test('sepa: SvcLvl enforcement flags NURG inside a SEPA pain.001', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // NURG is schema-valid ISO 20022 but EPC SEPA forbids anything except SEPA.
+  const bad = SEPA_PAIN001.replace('<PmtMtd>TRF</PmtMtd>', '<PmtMtd>TRF</PmtMtd>\n      <PmtTpInf><SvcLvl><Cd>NURG</Cd></SvcLvl></PmtTpInf>');
+  await page.fill('#sepa-input', bad);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/SvcLvl mismatch.*declares NURG.*SEPA/i, { timeout: 5_000 });
+});
+
 test('sepa: rejects non-ISO 20022 XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'sepa');
   await page.fill('#sepa-input', '<?xml version="1.0"?><foo><bar/></foo>');
@@ -1788,6 +1806,24 @@ test('ubl: VAT category code flags an unknown letter', async ({ page }) => {
   await page.fill('#ubl-input', bad);
   await page.click('#btn-ubl-parse');
   await expect(page.locator('#ubl-results')).toContainText(/Unknown VAT category code XX/i, { timeout: 5_000 });
+});
+
+test('ubl: PayableAmount consistency confirms on a well-formed Invoice', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // UBL_INVOICE has TaxInclusiveAmount = PayableAmount = 119.00, no Prepaid or rounding.
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/PayableAmount 119\.00 EUR matches.*BR-CO-16/i, { timeout: 5_000 });
+});
+
+test('ubl: PayableAmount consistency flags a mismatch against TaxInclusive', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Bump PayableAmount to 120.00 while leaving TaxInclusive at 119.00 — EN 16931 BR-CO-16
+  // says PayableAmount must equal TaxInclusive − Prepaid + PayableRounding.
+  const bad = UBL_INVOICE.replace('119.00</cbc:PayableAmount>', '120.00</cbc:PayableAmount>');
+  await page.fill('#ubl-input', bad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/PayableAmount mismatch.*119\.00 EUR.*120\.00 EUR.*BR-CO-16/i, { timeout: 5_000 });
 });
 
 test('ubl: rejects non-UBL XML', async ({ page }) => {
