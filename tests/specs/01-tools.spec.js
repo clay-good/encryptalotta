@@ -2392,6 +2392,54 @@ test('ubl: TaxCurrencyCode check flags a historical / typo ISO 4217 code', async
   await expect(page.locator('#ubl-results')).toContainText(/TaxCurrencyCode ITL is not active per ISO 4217 — EN 16931 BT-6/i, { timeout: 5_000 });
 });
 
+test('sepa: PstlAdr/Ctry check confirms on a valid ISO 3166-1 alpha-2 code', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Inject a clean ISO 3166-1 alpha-2 country code (DE — Germany) into the debtor postal address.
+  const withCtry = SEPA_PAIN001.replace(
+    '<Dbtr><Nm>ACME Corp</Nm></Dbtr>',
+    '<Dbtr><Nm>ACME Corp</Nm><PstlAdr><Ctry>DE</Ctry></PstlAdr></Dbtr>'
+  );
+  await page.fill('#sepa-input', withCtry);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Country codes \(PstlAdr\/Ctry\) are all valid ISO 3166-1 alpha-2/i, { timeout: 5_000 });
+});
+
+test('sepa: PstlAdr/Ctry check flags UK (not an ISO code — Great Britain is GB)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // `UK` is the canonical real-world mistake — schema-valid `[A-Z]{2}` but not ISO 3166-1 alpha-2.
+  const withCtry = SEPA_PAIN001.replace(
+    '<Dbtr><Nm>ACME Corp</Nm></Dbtr>',
+    '<Dbtr><Nm>ACME Corp</Nm><PstlAdr><Ctry>UK</Ctry></PstlAdr></Dbtr>'
+  );
+  await page.fill('#sepa-input', withCtry);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/PstlAdr\/Ctry "UK" is not a valid ISO 3166-1 alpha-2 code/i, { timeout: 5_000 });
+});
+
+test('ubl: Country/IdentificationCode check confirms on a valid ISO 3166-1 alpha-2 code', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Inject a supplier PostalAddress with a clean ISO 3166-1 alpha-2 country code (DE).
+  const withCountry = UBL_INVOICE.replace(
+    '<cac:PartyLegalEntity><cbc:RegistrationName>ACME Widgets GmbH</cbc:RegistrationName></cac:PartyLegalEntity>',
+    '<cac:PostalAddress><cac:Country><cbc:IdentificationCode>DE</cbc:IdentificationCode></cac:Country></cac:PostalAddress>\n      <cac:PartyLegalEntity><cbc:RegistrationName>ACME Widgets GmbH</cbc:RegistrationName></cac:PartyLegalEntity>'
+  );
+  await page.fill('#ubl-input', withCountry);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Party country codes \(PostalAddress\/Country\/IdentificationCode\) are all valid ISO 3166-1 alpha-2/i, { timeout: 5_000 });
+});
+
+test('ubl: Country/IdentificationCode check flags UK (not an ISO code — Great Britain is GB)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // `UK` passes UBL 2.1's plain-text declaration but PEPPOL access points reject it at the schematron gate.
+  const withCountry = UBL_INVOICE.replace(
+    '<cac:PartyLegalEntity><cbc:RegistrationName>ACME Widgets GmbH</cbc:RegistrationName></cac:PartyLegalEntity>',
+    '<cac:PostalAddress><cac:Country><cbc:IdentificationCode>UK</cbc:IdentificationCode></cac:Country></cac:PostalAddress>\n      <cac:PartyLegalEntity><cbc:RegistrationName>ACME Widgets GmbH</cbc:RegistrationName></cac:PartyLegalEntity>'
+  );
+  await page.fill('#ubl-input', withCountry);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Country\/IdentificationCode "UK" is not a valid ISO 3166-1 alpha-2 code/i, { timeout: 5_000 });
+});
+
 test('ubl: rejects non-UBL XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   await page.fill('#ubl-input', '<?xml version="1.0"?><Document/>');

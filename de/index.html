@@ -4469,6 +4469,8 @@
                 'sepa.warn.twnNmCharset': 'PstlAdr/TwnNm "{v}" contains characters outside the EPC SEPA Rulebook allowed set (A-Z a-z 0-9 / - ? : ( ) . , \' + space) — clearing systems strip or reject the town name carried on the rail statement',
                 'sepa.ok.pstCdCharset': 'Postal codes (PstlAdr/PstCd) use only EPC SEPA Rulebook allowed characters across all {n} code(s) (A-Z a-z 0-9 / - ? : ( ) . , \' + space)',
                 'sepa.warn.pstCdCharset': 'PstlAdr/PstCd "{v}" contains characters outside the EPC SEPA Rulebook allowed set (A-Z a-z 0-9 / - ? : ( ) . , \' + space) — clearing systems strip or reject the postal code carried on the rail statement',
+                'sepa.ok.ctry': 'Country codes (PstlAdr/Ctry) are all valid ISO 3166-1 alpha-2 across all {n} code(s) (EPC SEPA Rulebook / ISO 20022)',
+                'sepa.warn.ctry': 'PstlAdr/Ctry "{v}" is not a valid ISO 3166-1 alpha-2 code — EPC SEPA Rulebook / ISO 20022 require a current alpha-2 code (e.g. GB, not UK); clearing systems reject the address at the country-code gate',
                 'sepa.warn.ccyInvalid': 'Currency code not active per ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unrecognized ISO 20022 root element — partial parse only.',
                 'err.sepaEmpty': 'XML input is empty.',
@@ -4584,6 +4586,8 @@
                 'ubl.warn.ccyMismatch': 'Monetary @currencyID {code} does not match the document currency {doc} — EN 16931 BR-CO-04 requires every amount to be expressed in BT-5 (DocumentCurrencyCode); PEPPOL access points reject at the schematron gate',
                 'ubl.ok.taxCcy': 'TaxCurrencyCode {code} is a current ISO 4217 active code (EN 16931 BT-6 / PEPPOL BIS Billing 3.0)',
                 'ubl.warn.taxCcy': 'TaxCurrencyCode {code} is not active per ISO 4217 — EN 16931 BT-6 / PEPPOL BIS Billing 3.0 requires a current ISO 4217 code (typos or historical codes are rejected at the schematron gate)',
+                'ubl.ok.countryCode': 'Party country codes (PostalAddress/Country/IdentificationCode) are all valid ISO 3166-1 alpha-2 across all {n} party address(es) (EN 16931 BT-40 / BT-55 / PEPPOL BIS Billing 3.0)',
+                'ubl.warn.countryCode': 'Country/IdentificationCode "{code}" is not a valid ISO 3166-1 alpha-2 code — EN 16931 BT-40 / BT-55 / PEPPOL BIS Billing 3.0 require a current alpha-2 code (e.g. GB, not UK); PEPPOL access points reject the document at the schematron gate',
                 'ubl.ok.ccyValid': 'Currency codes active per ISO 4217: {list}',
                 'ubl.ok.ibanValid': 'Payee/Payer financial account IBANs valid (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'Payee/Payer IBAN failed ISO 13616 MOD-97 check: {iban}',
@@ -5661,6 +5665,8 @@
                 'sepa.warn.twnNmCharset': 'PstlAdr/TwnNm « {v} » contient des caractères hors de l’ensemble autorisé par les règles EPC SEPA (A-Z a-z 0-9 / - ? : ( ) . , \' + espace) — les systèmes de compensation suppriment ou rejettent le nom de ville figurant sur le relevé interbancaire',
                 'sepa.ok.pstCdCharset': 'Les codes postaux (PstlAdr/PstCd) n’utilisent que les caractères autorisés par les règles EPC SEPA sur l’ensemble des {n} code(s) (A-Z a-z 0-9 / - ? : ( ) . , \' + espace)',
                 'sepa.warn.pstCdCharset': 'PstlAdr/PstCd « {v} » contient des caractères hors de l’ensemble autorisé par les règles EPC SEPA (A-Z a-z 0-9 / - ? : ( ) . , \' + espace) — les systèmes de compensation suppriment ou rejettent le code postal figurant sur le relevé interbancaire',
+                'sepa.ok.ctry': 'Les codes pays (PstlAdr/Ctry) sont tous des codes ISO 3166-1 alpha-2 valides sur l’ensemble des {n} code(s) (règles EPC SEPA / ISO 20022)',
+                'sepa.warn.ctry': 'PstlAdr/Ctry « {v} » n’est pas un code ISO 3166-1 alpha-2 valide — les règles EPC SEPA et ISO 20022 exigent un code alpha-2 en vigueur (par exemple GB, et non UK) ; les systèmes de compensation rejettent l’adresse au contrôle du code pays',
                 'sepa.warn.ccyInvalid': 'Code monétaire non actif selon ISO 4217 : {code}',
                 'sepa.warn.unknownDoc': 'Élément racine ISO 20022 non reconnu — analyse partielle uniquement.',
                 'err.sepaEmpty': 'Le XML d’entrée est vide.',
@@ -5766,6 +5772,8 @@
                 'ubl.warn.ccyMismatch': 'L’attribut @currencyID {code} ne correspond pas à la devise du document {doc} — EN 16931 BR-CO-04 exige que chaque montant soit exprimé dans BT-5 (DocumentCurrencyCode) ; les points d’accès PEPPOL rejettent au contrôle schematron',
                 'ubl.ok.taxCcy': 'TaxCurrencyCode {code} est un code ISO 4217 actuellement actif (EN 16931 BT-6 / PEPPOL BIS Billing 3.0)',
                 'ubl.warn.taxCcy': 'TaxCurrencyCode {code} n’est pas actif selon ISO 4217 — EN 16931 BT-6 / PEPPOL BIS Billing 3.0 exige un code ISO 4217 actuel (les fautes de frappe ou codes historiques sont rejetés au contrôle schematron)',
+                'ubl.ok.countryCode': 'Les codes pays des parties (PostalAddress/Country/IdentificationCode) sont tous des codes ISO 3166-1 alpha-2 valides sur l’ensemble des {n} adresse(s) (EN 16931 BT-40 / BT-55 / PEPPOL BIS Billing 3.0)',
+                'ubl.warn.countryCode': 'Country/IdentificationCode « {code} » n’est pas un code ISO 3166-1 alpha-2 valide — EN 16931 BT-40 / BT-55 / PEPPOL BIS Billing 3.0 exigent un code alpha-2 en vigueur (par exemple GB, et non UK) ; les points d’accès PEPPOL rejettent le document au contrôle schematron',
                 'ubl.ok.ccyValid': 'Codes monétaires actifs selon ISO 4217 : {list}',
                 'ubl.ok.ibanValid': 'IBAN des comptes Payee/Payer valides (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'IBAN Payee/Payer échoue au contrôle ISO 13616 MOD-97 : {iban}',
@@ -6813,6 +6821,8 @@
                 'sepa.warn.twnNmCharset': 'PstlAdr/TwnNm “{v}” 含有 EPC SEPA 规则书允许字符集（A-Z a-z 0-9 / - ? : ( ) . , \' + 空格）之外的字符——清算系统会剥除或拒绝在跨行报文中携带的城市名称',
                 'sepa.ok.pstCdCharset': '所有 {n} 个邮政编码（PstlAdr/PstCd）仅使用 EPC SEPA 规则书允许字符集（A-Z a-z 0-9 / - ? : ( ) . , \' + 空格）',
                 'sepa.warn.pstCdCharset': 'PstlAdr/PstCd “{v}” 含有 EPC SEPA 规则书允许字符集（A-Z a-z 0-9 / - ? : ( ) . , \' + 空格）之外的字符——清算系统会剥除或拒绝在跨行报文中携带的邮政编码',
+                'sepa.ok.ctry': '所有 {n} 个国家代码（PstlAdr/Ctry）均为有效的 ISO 3166-1 alpha-2 代码（EPC SEPA 规则书 / ISO 20022）',
+                'sepa.warn.ctry': 'PstlAdr/Ctry “{v}” 不是有效的 ISO 3166-1 alpha-2 代码——EPC SEPA 规则书 / ISO 20022 要求使用当前 alpha-2 代码（例如 GB，而非 UK）；清算系统会在国家代码校验环节拒绝该地址',
                 'sepa.warn.ccyInvalid': '币种代码不在 ISO 4217 现行清单中：{code}',
                 'sepa.warn.unknownDoc': '无法识别的 ISO 20022 根元素 — 仅部分解析。',
                 'err.sepaEmpty': 'XML 输入为空。',
@@ -6918,6 +6928,8 @@
                 'ubl.warn.ccyMismatch': '金额 @currencyID {code} 与文档币种 {doc} 不一致——EN 16931 BR-CO-04 要求每笔金额均以 BT-5（DocumentCurrencyCode）表示，PEPPOL 接入点会在 schematron 检查时拒绝',
                 'ubl.ok.taxCcy': 'TaxCurrencyCode {code} 为 ISO 4217 现行有效代码（EN 16931 BT-6 / PEPPOL BIS Billing 3.0）',
                 'ubl.warn.taxCcy': 'TaxCurrencyCode {code} 不在 ISO 4217 现行清单中——EN 16931 BT-6 / PEPPOL BIS Billing 3.0 要求当前 ISO 4217 代码（拼写错误或历史代码会在 schematron 检查时被拒绝）',
+                'ubl.ok.countryCode': '所有 {n} 个交易方地址（PostalAddress/Country/IdentificationCode）的国家代码均为有效的 ISO 3166-1 alpha-2（EN 16931 BT-40 / BT-55 / PEPPOL BIS Billing 3.0）',
+                'ubl.warn.countryCode': 'Country/IdentificationCode “{code}” 不是有效的 ISO 3166-1 alpha-2 代码——EN 16931 BT-40 / BT-55 / PEPPOL BIS Billing 3.0 要求使用当前 alpha-2 代码（例如 GB，而非 UK）；PEPPOL 接入点会在 schematron 检查时拒绝该文件',
                 'ubl.ok.ccyValid': '币种代码按 ISO 4217 有效：{list}',
                 'ubl.ok.ibanValid': '收款方/付款方账户 IBAN 通过 ISO 13616 MOD-97 校验（{n}）',
                 'ubl.warn.ibanInvalid': '收款方/付款方 IBAN 未通过 ISO 13616 MOD-97 校验：{iban}',
@@ -7980,6 +7992,8 @@
                 'sepa.warn.twnNmCharset': 'PstlAdr/TwnNm „{v}“ enthält Zeichen außerhalb des vom EPC-SEPA-Rulebook erlaubten Zeichensatzes (A-Z a-z 0-9 / - ? : ( ) . , \' + Leerzeichen) — Clearing-Systeme entfernen oder verwerfen den Ortsnamen, der auf dem Interbanken-Auszug erscheint',
                 'sepa.ok.pstCdCharset': 'Postleitzahlen (PstlAdr/PstCd) nutzen für alle {n} Postleitzahl(en) ausschließlich vom EPC-SEPA-Rulebook erlaubte Zeichen (A-Z a-z 0-9 / - ? : ( ) . , \' + Leerzeichen)',
                 'sepa.warn.pstCdCharset': 'PstlAdr/PstCd „{v}“ enthält Zeichen außerhalb des vom EPC-SEPA-Rulebook erlaubten Zeichensatzes (A-Z a-z 0-9 / - ? : ( ) . , \' + Leerzeichen) — Clearing-Systeme entfernen oder verwerfen die Postleitzahl, die auf dem Interbanken-Auszug erscheint',
+                'sepa.ok.ctry': 'Ländercodes (PstlAdr/Ctry) sind über alle {n} Code(s) gültige ISO-3166-1-alpha-2-Codes (EPC-SEPA-Rulebook / ISO 20022)',
+                'sepa.warn.ctry': 'PstlAdr/Ctry „{v}“ ist kein gültiger ISO-3166-1-alpha-2-Code — EPC-SEPA-Rulebook und ISO 20022 verlangen einen aktuellen alpha-2-Code (z. B. GB, nicht UK); Clearing-Systeme verwerfen die Adresse am Ländercode-Gate',
                 'sepa.warn.ccyInvalid': 'Währungscode nicht aktiv nach ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unbekanntes ISO-20022-Wurzelelement — nur Teilanalyse.',
                 'err.sepaEmpty': 'Die XML-Eingabe ist leer.',
@@ -8085,6 +8099,8 @@
                 'ubl.warn.ccyMismatch': 'Betrags-@currencyID {code} stimmt nicht mit der Belegwährung {doc} überein — EN 16931 BR-CO-04 verlangt, dass jeder Betrag in BT-5 (DocumentCurrencyCode) ausgedrückt wird; PEPPOL-Access-Points lehnen am Schematron-Gate ab',
                 'ubl.ok.taxCcy': 'TaxCurrencyCode {code} ist ein nach ISO 4217 aktiver Code (EN 16931 BT-6 / PEPPOL BIS Billing 3.0)',
                 'ubl.warn.taxCcy': 'TaxCurrencyCode {code} ist nicht nach ISO 4217 aktiv — EN 16931 BT-6 / PEPPOL BIS Billing 3.0 verlangt einen aktuellen ISO-4217-Code (Tippfehler oder historische Codes werden am Schematron-Gate abgelehnt)',
+                'ubl.ok.countryCode': 'Ländercodes der Parteien (PostalAddress/Country/IdentificationCode) sind über alle {n} Parteiadresse(n) gültige ISO-3166-1-alpha-2-Codes (EN 16931 BT-40 / BT-55 / PEPPOL BIS Billing 3.0)',
+                'ubl.warn.countryCode': 'Country/IdentificationCode „{code}“ ist kein gültiger ISO-3166-1-alpha-2-Code — EN 16931 BT-40 / BT-55 / PEPPOL BIS Billing 3.0 verlangen einen aktuellen alpha-2-Code (z. B. GB, nicht UK); PEPPOL-Access-Points lehnen das Dokument am Schematron-Gate ab',
                 'ubl.ok.ccyValid': 'Währungscodes nach ISO 4217 aktiv: {list}',
                 'ubl.ok.ibanValid': 'IBANs der Payee-/Payer-Konten gültig (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'Payee-/Payer-IBAN scheitert an ISO-13616-MOD-97-Prüfung: {iban}',
@@ -9132,6 +9148,8 @@
                 'sepa.warn.twnNmCharset': 'PstlAdr/TwnNm "{v}" में EPC SEPA रूलबुक अनुमत वर्ण-सेट (A-Z a-z 0-9 / - ? : ( ) . , \' + स्पेस) से बाहर के वर्ण हैं — क्लियरिंग सिस्टम अंतरबैंक विवरण पर दर्शाए जाने वाले शहर के नाम को हटा देते हैं या अस्वीकार करते हैं',
                 'sepa.ok.pstCdCharset': 'सभी {n} पिन कोडों (PstlAdr/PstCd) में केवल EPC SEPA रूलबुक अनुमत वर्णों का उपयोग होता है (A-Z a-z 0-9 / - ? : ( ) . , \' + स्पेस)',
                 'sepa.warn.pstCdCharset': 'PstlAdr/PstCd "{v}" में EPC SEPA रूलबुक अनुमत वर्ण-सेट (A-Z a-z 0-9 / - ? : ( ) . , \' + स्पेस) से बाहर के वर्ण हैं — क्लियरिंग सिस्टम अंतरबैंक विवरण पर दर्शाए जाने वाले पिन कोड को हटा देते हैं या अस्वीकार करते हैं',
+                'sepa.ok.ctry': 'सभी {n} देश कोड (PstlAdr/Ctry) मान्य ISO 3166-1 alpha-2 कोड हैं (EPC SEPA रूलबुक / ISO 20022)',
+                'sepa.warn.ctry': 'PstlAdr/Ctry "{v}" मान्य ISO 3166-1 alpha-2 कोड नहीं है — EPC SEPA रूलबुक / ISO 20022 के लिए वर्तमान alpha-2 कोड आवश्यक है (उदाहरण: GB, न कि UK); क्लियरिंग सिस्टम देश-कोड गेट पर इस पते को अस्वीकार कर देते हैं',
                 'sepa.warn.ccyInvalid': 'मुद्रा कोड ISO 4217 में सक्रिय नहीं: {code}',
                 'sepa.warn.unknownDoc': 'अज्ञात ISO 20022 रूट तत्व — केवल आंशिक पार्सिंग।',
                 'err.sepaEmpty': 'XML इनपुट खाली है।',
@@ -9237,6 +9255,8 @@
                 'ubl.warn.ccyMismatch': 'मौद्रिक @currencyID {code} दस्तावेज़ की मुद्रा {doc} से मेल नहीं खाती — EN 16931 BR-CO-04 के लिए प्रत्येक राशि BT-5 (DocumentCurrencyCode) में दर्शाना आवश्यक है, PEPPOL एक्सेस पॉइंट schematron गेट पर अस्वीकार करते हैं',
                 'ubl.ok.taxCcy': 'TaxCurrencyCode {code} ISO 4217 के अनुसार वर्तमान सक्रिय कोड है (EN 16931 BT-6 / PEPPOL BIS Billing 3.0)',
                 'ubl.warn.taxCcy': 'TaxCurrencyCode {code} ISO 4217 के अनुसार सक्रिय नहीं है — EN 16931 BT-6 / PEPPOL BIS Billing 3.0 के लिए वर्तमान ISO 4217 कोड आवश्यक है (टाइपो या ऐतिहासिक कोड schematron गेट पर अस्वीकार किए जाते हैं)',
+                'ubl.ok.countryCode': 'सभी {n} पक्ष-पते (PostalAddress/Country/IdentificationCode) में देश कोड मान्य ISO 3166-1 alpha-2 हैं (EN 16931 BT-40 / BT-55 / PEPPOL BIS Billing 3.0)',
+                'ubl.warn.countryCode': 'Country/IdentificationCode "{code}" मान्य ISO 3166-1 alpha-2 कोड नहीं है — EN 16931 BT-40 / BT-55 / PEPPOL BIS Billing 3.0 के लिए वर्तमान alpha-2 कोड आवश्यक है (उदाहरण: GB, न कि UK); PEPPOL एक्सेस पॉइंट schematron गेट पर दस्तावेज़ को अस्वीकार कर देते हैं',
                 'ubl.ok.ccyValid': 'मुद्रा कोड ISO 4217 के अनुसार सक्रिय: {list}',
                 'ubl.ok.ibanValid': 'भुगतानकर्ता/प्राप्तकर्ता खाते के IBAN वैध (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'भुगतानकर्ता/प्राप्तकर्ता IBAN ISO 13616 MOD-97 जाँच में विफल: {iban}',
@@ -16475,6 +16495,31 @@
             'ZMW','ZWG'
         ]);
 
+        // ISO 3166-1 alpha-2 country codes (2025 list). The set is shared between the SEPA
+        // `PstlAdr/Ctry` check (ISO 20022 declares Ctry as `[A-Z]{2}` pattern, EPC SEPA rulebooks
+        // narrow to ISO 3166-1 alpha-2) and the UBL `Country/IdentificationCode` check (EN 16931
+        // BT-40 / BT-55, PEPPOL BIS Billing 3.0 BR-08 / BR-55 require a valid ISO 3166-1 alpha-2
+        // code). Canonical real-world failure: `UK` for `GB`, or trailing-whitespace artefacts
+        // pasted from a CRM template, or `EN` / `XX` typos that still pass the schema regex.
+        const ISO_3166_1_ALPHA2 = new Set([
+            'AD','AE','AF','AG','AI','AL','AM','AO','AQ','AR','AS','AT','AU','AW','AX','AZ',
+            'BA','BB','BD','BE','BF','BG','BH','BI','BJ','BL','BM','BN','BO','BQ','BR','BS',
+            'BT','BV','BW','BY','BZ','CA','CC','CD','CF','CG','CH','CI','CK','CL','CM','CN',
+            'CO','CR','CU','CV','CW','CX','CY','CZ','DE','DJ','DK','DM','DO','DZ','EC','EE',
+            'EG','EH','ER','ES','ET','FI','FJ','FK','FM','FO','FR','GA','GB','GD','GE','GF',
+            'GG','GH','GI','GL','GM','GN','GP','GQ','GR','GS','GT','GU','GW','GY','HK','HM',
+            'HN','HR','HT','HU','ID','IE','IL','IM','IN','IO','IQ','IR','IS','IT','JE','JM',
+            'JO','JP','KE','KG','KH','KI','KM','KN','KP','KR','KW','KY','KZ','LA','LB','LC',
+            'LI','LK','LR','LS','LT','LU','LV','LY','MA','MC','MD','ME','MF','MG','MH','MK',
+            'ML','MM','MN','MO','MP','MQ','MR','MS','MT','MU','MV','MW','MX','MY','MZ','NA',
+            'NC','NE','NF','NG','NI','NL','NO','NP','NR','NU','NZ','OM','PA','PE','PF','PG',
+            'PH','PK','PL','PM','PN','PR','PS','PT','PW','PY','QA','RE','RO','RS','RU','RW',
+            'SA','SB','SC','SD','SE','SG','SH','SI','SJ','SK','SL','SM','SN','SO','SR','SS',
+            'ST','SV','SX','SY','SZ','TC','TD','TF','TG','TH','TJ','TK','TL','TM','TN','TO',
+            'TR','TT','TV','TW','TZ','UA','UG','UM','US','UY','UZ','VA','VC','VE','VG','VI',
+            'VN','VU','WF','WS','YE','YT','ZA','ZM','ZW'
+        ]);
+
         // Walk every element that carries a `Ccy` attribute (Amt, InstdAmt, NtryAmt, Bal/Amt,
         // EqvtAmt, etc.) and verify the currency code is currently active per ISO 4217. We
         // intentionally cross-check the codes themselves, not the values — a wire-format with
@@ -17198,6 +17243,36 @@
             }
         }
 
+        // EPC SEPA Rulebook / ISO 20022: `PstlAdr/Ctry` carries the country code
+        // of the postal address. ISO 20022 declares Ctry as type CountryCode with
+        // the pattern `[A-Z]{2}`; the EPC SEPA rulebooks narrow the value to a
+        // valid ISO 3166-1 alpha-2 code. The classic real-world mistake is `UK`
+        // (not an ISO code — Great Britain is `GB`) carried in a Dbtr or Cdtr
+        // postal address; rail-level processors reject the value at the country-
+        // code gate, so the inspector should surface it before the file leaves
+        // the originator. Walks every <Ctry> reachable in the pain.001 / pain.008
+        // wrapper (camt.053 is statement-side and out of scope), trims + upper-
+        // cases, and validates against ISO_3166_1_ALPHA2.
+        function sepaCheckCtry(out, doc, detected) {
+            if (detected.type !== 'pain.001' && detected.type !== 'pain.008') return;
+            const w = detected.wrapper;
+            if (!w) return;
+            const codes = [];
+            for (const c of sepaAllLocal(w, 'Ctry')) {
+                const v = (c.textContent || '').trim();
+                if (v) codes.push(v);
+            }
+            if (!codes.length) return;
+            const bad = codes.filter(v => !ISO_3166_1_ALPHA2.has(v.toUpperCase()));
+            if (bad.length === 0) {
+                tlsRenderRow(out, t('sepa.row.warning'), '✓ ' + tFormat('sepa.ok.ctry', { n: intlNumber(codes.length) }));
+            } else {
+                for (const v of bad) {
+                    tlsRenderRow(out, t('sepa.row.warning'), '✗ ' + tFormat('sepa.warn.ctry', { v }));
+                }
+            }
+        }
+
         function sepaCheckBics(out, doc) {
             const bics = sepaCollectBics(doc);
             if (!bics.length) return;
@@ -17251,6 +17326,7 @@
                 sepaCheckAdrLineCharset(out, doc, detected);
                 sepaCheckTwnNmCharset(out, doc, detected);
                 sepaCheckPstCdCharset(out, doc, detected);
+                sepaCheckCtry(out, doc, detected);
             } catch (e) {
                 tlsRenderRow(out, t('sepa.row.error'), e.message);
             }
@@ -18263,6 +18339,43 @@
             }
         }
 
+        // EN 16931 BT-40 (supplier country) / BT-55 (customer country) /
+        // PEPPOL BIS Billing 3.0 BR-08 + BR-55: the postal address of each
+        // party MUST carry a country code in
+        // `cac:PostalAddress/cac:Country/cbc:IdentificationCode`, and the value
+        // MUST be a valid ISO 3166-1 alpha-2 code. UBL 2.1 declares the element
+        // as plain text with no enumeration; `UK` (not an ISO code — Great
+        // Britain is `GB`) is the canonical real-world mistake, alongside
+        // `EN` / `XX` / typo fallout from templates repurposed across PEPPOL and
+        // non-PEPPOL flows. PEPPOL access points reject the document at the
+        // schematron gate. Parallel to draft 67's SEPA Ctry check on the rail
+        // side — same ISO 3166-1 alpha-2 set, same surfacing semantics.
+        function ublCheckCountryCode(out, detected) {
+            const r = detected.root;
+            const seen = [];
+            for (const partyEl of ['AccountingSupplierParty', 'AccountingCustomerParty']) {
+                const acct = sepaFirst(r, partyEl);
+                if (!acct) continue;
+                const party = sepaFirst(acct, 'Party');
+                if (!party) continue;
+                const addr = sepaFirst(party, 'PostalAddress');
+                if (!addr) continue;
+                const country = sepaFirst(addr, 'Country');
+                if (!country) continue;
+                const code = (sepaTextOf(country, 'IdentificationCode') || '').trim();
+                if (code) seen.push(code);
+            }
+            if (!seen.length) return;
+            const bad = seen.filter(v => !ISO_3166_1_ALPHA2.has(v.toUpperCase()));
+            if (bad.length === 0) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + tFormat('ubl.ok.countryCode', { n: intlNumber(seen.length) }));
+            } else {
+                for (const v of bad) {
+                    tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + tFormat('ubl.warn.countryCode', { code: v }));
+                }
+            }
+        }
+
         function ublCheckIbans(out, doc) {
             const ibans = ublCollectIbans(doc);
             if (!ibans.length) return;
@@ -18311,6 +18424,7 @@
                 ublCheckPaymentMeansCode(out, detected);
                 ublCheckCurrencyConsistency(out, detected, doc);
                 ublCheckTaxCurrencyCode(out, detected);
+                ublCheckCountryCode(out, detected);
                 ublCheckIbans(out, doc);
             } catch (e) {
                 tlsRenderRow(out, t('ubl.row.error'), e.message);
