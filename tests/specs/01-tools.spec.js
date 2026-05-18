@@ -2169,6 +2169,47 @@ test('ubl: Seller VAT identifier flags a malformed value', async ({ page }) => {
   await expect(page.locator('#ubl-results')).toContainText(/Seller VAT identifier 123456789 invalid — PEPPOL BIS Billing 3\.0 \/ EN 16931 BT-31/i, { timeout: 5_000 });
 });
 
+test('ubl: Buyer VAT identifier confirms a valid FR VAT ID', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // EN 16931 BT-48: Buyer VAT identifier lives in AccountingCustomerParty/
+  // Party/PartyTaxScheme/CompanyID with TaxScheme/ID=VAT. FR40303265045 is
+  // the canonical FR example with a passing (12 + 3*(SIREN%97))%97 checksum.
+  const withVat = UBL_INVOICE.replace(
+    '<cac:PartyName><cbc:Name>Beispiel SARL</cbc:Name></cac:PartyName>\n    </cac:Party>\n  </cac:AccountingCustomerParty>',
+    '<cac:PartyName><cbc:Name>Beispiel SARL</cbc:Name></cac:PartyName>\n      <cac:PartyTaxScheme><cbc:CompanyID>FR40303265045</cbc:CompanyID><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:PartyTaxScheme>\n    </cac:Party>\n  </cac:AccountingCustomerParty>'
+  );
+  await page.fill('#ubl-input', withVat);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Buyer VAT identifier FR40303265045 valid per ISO 3166-1 alpha-2/i, { timeout: 5_000 });
+});
+
+test('ubl: Buyer VAT identifier flags a malformed value', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  const withVat = UBL_INVOICE.replace(
+    '<cac:PartyName><cbc:Name>Beispiel SARL</cbc:Name></cac:PartyName>\n    </cac:Party>\n  </cac:AccountingCustomerParty>',
+    '<cac:PartyName><cbc:Name>Beispiel SARL</cbc:Name></cac:PartyName>\n      <cac:PartyTaxScheme><cbc:CompanyID>987654321</cbc:CompanyID><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:PartyTaxScheme>\n    </cac:Party>\n  </cac:AccountingCustomerParty>'
+  );
+  await page.fill('#ubl-input', withVat);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Buyer VAT identifier 987654321 invalid — PEPPOL BIS Billing 3\.0 \/ EN 16931 BT-48/i, { timeout: 5_000 });
+});
+
+test('sepa: Ustrd character-set check confirms on a Rulebook-clean batch', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // SEPA_PAIN001 already declares <Ustrd>Invoice 2024-001</Ustrd> — clean ASCII.
+  await page.fill('#sepa-input', SEPA_PAIN001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/RmtInf\/Ustrd values use only EPC SEPA Rulebook allowed characters across all 1 unstructured remittance entry/i, { timeout: 5_000 });
+});
+
+test('sepa: Ustrd character-set check flags a non-Latin character', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  const bad = SEPA_PAIN001.replace('Invoice 2024-001', 'Rechnung Müller 2024');
+  await page.fill('#sepa-input', bad);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/RmtInf\/Ustrd "Rechnung Müller 2024" contains characters outside the EPC SEPA Rulebook allowed set/i, { timeout: 5_000 });
+});
+
 test('ubl: rejects non-UBL XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   await page.fill('#ubl-input', '<?xml version="1.0"?><Document/>');
