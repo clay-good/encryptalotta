@@ -2210,6 +2210,47 @@ test('sepa: Ustrd character-set check flags a non-Latin character', async ({ pag
   await expect(page.locator('#sepa-results')).toContainText(/RmtInf\/Ustrd "Rechnung Müller 2024" contains characters outside the EPC SEPA Rulebook allowed set/i, { timeout: 5_000 });
 });
 
+test('ubl: InvoicePeriod confirms when EndDate is after StartDate', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // EN 16931 BR-29 / BR-CO-19: when an InvoicePeriod block is present,
+  // StartDate must be ≤ EndDate. Insert one with a sane month-long window.
+  const withPeriod = UBL_INVOICE.replace(
+    '<cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>',
+    '<cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>\n  <cac:InvoicePeriod><cbc:StartDate>2024-03-01</cbc:StartDate><cbc:EndDate>2024-03-31</cbc:EndDate></cac:InvoicePeriod>'
+  );
+  await page.fill('#ubl-input', withPeriod);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/InvoicePeriod EndDate 2024-03-31 is on or after StartDate 2024-03-01 \(EN 16931 BR-29 \/ BR-CO-19\)/i, { timeout: 5_000 });
+});
+
+test('ubl: InvoicePeriod flags an inverted window', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // StartDate after EndDate — common template-swap mistake.
+  const withPeriod = UBL_INVOICE.replace(
+    '<cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>',
+    '<cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>\n  <cac:InvoicePeriod><cbc:StartDate>2024-03-31</cbc:StartDate><cbc:EndDate>2024-03-01</cbc:EndDate></cac:InvoicePeriod>'
+  );
+  await page.fill('#ubl-input', withPeriod);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/InvoicePeriod EndDate 2024-03-01 precedes StartDate 2024-03-31 — EN 16931 BR-29 \/ BR-CO-19/i, { timeout: 5_000 });
+});
+
+test('sepa: party-Nm character-set check confirms on a Rulebook-clean batch', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // SEPA_PAIN001 carries ACME Corp / debtor / creditor names — all ASCII.
+  await page.fill('#sepa-input', SEPA_PAIN001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Party name \(InitgPty\/Cdtr\/Dbtr Nm\) values use only EPC SEPA Rulebook allowed characters/i, { timeout: 5_000 });
+});
+
+test('sepa: party-Nm character-set check flags an umlaut in InitgPty/Nm', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  const bad = SEPA_PAIN001.replace('<InitgPty><Nm>ACME Corp</Nm></InitgPty>', '<InitgPty><Nm>Müller GmbH</Nm></InitgPty>');
+  await page.fill('#sepa-input', bad);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Party name "Müller GmbH" contains characters outside the EPC SEPA Rulebook allowed set/i, { timeout: 5_000 });
+});
+
 test('ubl: rejects non-UBL XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   await page.fill('#ubl-input', '<?xml version="1.0"?><Document/>');

@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <!--
   encryptalotta — single-file portable build
-  Source mtime: 2026-05-18T15:28:47.009Z
-  Source: index.html (SHA-256: 679dc70e55d20f891adc8208df9229ff85c5447c17f0c07db0499832a347bc47)
+  Source mtime: 2026-05-18T16:36:29.909Z
+  Source: index.html (SHA-256: e1a5a97f1d986022e3794ae9046d6e52d43ca48bead3cd2aa836f04d6a10d575)
   All vendored JavaScript inlined; favicons inlined as data: URIs.
   Identical functionality to the live site at https://encryptalotta.com.
   Runs from file://, USB stick, chat attachment, anywhere. No network calls.
@@ -6772,6 +6772,8 @@ var qrcode = function() {
                 'sepa.warn.pmtInfIdCharset': 'PmtInfId {id} contains characters outside the EPC SEPA Rulebook allowed set (A-Z a-z 0-9 / - ? : ( ) . , \' + space) — clearing systems strip or reject the per-block payment-information identifier',
                 'sepa.ok.ustrdCharset': 'RmtInf/Ustrd values use only EPC SEPA Rulebook allowed characters across all {n} unstructured remittance entry(ies) (A-Z a-z 0-9 / - ? : ( ) . , \' + space)',
                 'sepa.warn.ustrdCharset': 'RmtInf/Ustrd "{v}" contains characters outside the EPC SEPA Rulebook allowed set (A-Z a-z 0-9 / - ? : ( ) . , \' + space) — clearing systems strip or reject the remittance reference the beneficiary uses to reconcile the payment',
+                'sepa.ok.partyNmCharset': 'Party name (InitgPty/Cdtr/Dbtr Nm) values use only EPC SEPA Rulebook allowed characters across all {n} name(s) (A-Z a-z 0-9 / - ? : ( ) . , \' + space)',
+                'sepa.warn.partyNmCharset': 'Party name "{v}" contains characters outside the EPC SEPA Rulebook allowed set (A-Z a-z 0-9 / - ? : ( ) . , \' + space) — clearing systems strip or reject the party name carried on the rail statement',
                 'sepa.warn.ccyInvalid': 'Currency code not active per ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unrecognized ISO 20022 root element — partial parse only.',
                 'err.sepaEmpty': 'XML input is empty.',
@@ -6879,6 +6881,8 @@ var qrcode = function() {
                 'ubl.warn.sellerVat': 'Seller VAT identifier {vat} invalid — PEPPOL BIS Billing 3.0 / EN 16931 BT-31 requires a valid ISO 3166-1 alpha-2 country prefix + EU VAT format',
                 'ubl.ok.buyerVat': 'Buyer VAT identifier {vat} valid per ISO 3166-1 alpha-2 + EU VAT format (EN 16931 BT-48 / PEPPOL BIS Billing 3.0)',
                 'ubl.warn.buyerVat': 'Buyer VAT identifier {vat} invalid — PEPPOL BIS Billing 3.0 / EN 16931 BT-48 requires a valid ISO 3166-1 alpha-2 country prefix + EU VAT format',
+                'ubl.ok.invoicePeriod': 'InvoicePeriod EndDate {end} is on or after StartDate {start} (EN 16931 BR-29 / BR-CO-19)',
+                'ubl.warn.invoicePeriod': 'InvoicePeriod EndDate {end} precedes StartDate {start} — EN 16931 BR-29 / BR-CO-19 requires StartDate ≤ EndDate, PEPPOL access points reject at the schematron gate',
                 'ubl.ok.ccyValid': 'Currency codes active per ISO 4217: {list}',
                 'ubl.ok.ibanValid': 'Payee/Payer financial account IBANs valid (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'Payee/Payer IBAN failed ISO 13616 MOD-97 check: {iban}',
@@ -7948,6 +7952,8 @@ var qrcode = function() {
                 'sepa.warn.pmtInfIdCharset': 'PmtInfId {id} contient des caractères hors de l’ensemble autorisé par les règles EPC SEPA (A-Z a-z 0-9 / - ? : ( ) . , \' + espace) — les systèmes de compensation suppriment ou rejettent l’identifiant du bloc de paiement',
                 'sepa.ok.ustrdCharset': 'Les valeurs RmtInf/Ustrd n’utilisent que les caractères autorisés par les règles EPC SEPA sur l’ensemble des {n} entrée(s) de remise non structurée (A-Z a-z 0-9 / - ? : ( ) . , \' + espace)',
                 'sepa.warn.ustrdCharset': 'RmtInf/Ustrd « {v} » contient des caractères hors de l’ensemble autorisé par les règles EPC SEPA (A-Z a-z 0-9 / - ? : ( ) . , \' + espace) — les systèmes de compensation suppriment ou rejettent la référence de remise utilisée par le bénéficiaire pour rapprocher le paiement',
+                'sepa.ok.partyNmCharset': 'Les noms de partie (Nm de InitgPty/Cdtr/Dbtr) n’utilisent que les caractères autorisés par les règles EPC SEPA sur l’ensemble des {n} nom(s) (A-Z a-z 0-9 / - ? : ( ) . , \' + espace)',
+                'sepa.warn.partyNmCharset': 'Le nom de partie « {v} » contient des caractères hors de l’ensemble autorisé par les règles EPC SEPA (A-Z a-z 0-9 / - ? : ( ) . , \' + espace) — les systèmes de compensation suppriment ou rejettent le nom de partie figurant sur le relevé interbancaire',
                 'sepa.warn.ccyInvalid': 'Code monétaire non actif selon ISO 4217 : {code}',
                 'sepa.warn.unknownDoc': 'Élément racine ISO 20022 non reconnu — analyse partielle uniquement.',
                 'err.sepaEmpty': 'Le XML d’entrée est vide.',
@@ -8045,6 +8051,8 @@ var qrcode = function() {
                 'ubl.warn.sellerVat': 'Identifiant TVA du vendeur {vat} invalide — PEPPOL BIS Billing 3.0 / EN 16931 BT-31 exige un préfixe ISO 3166-1 alpha-2 valide + format TVA UE',
                 'ubl.ok.buyerVat': 'Identifiant TVA de l’acheteur {vat} valide selon ISO 3166-1 alpha-2 + format TVA UE (EN 16931 BT-48 / PEPPOL BIS Billing 3.0)',
                 'ubl.warn.buyerVat': 'Identifiant TVA de l’acheteur {vat} invalide — PEPPOL BIS Billing 3.0 / EN 16931 BT-48 exige un préfixe ISO 3166-1 alpha-2 valide + format TVA UE',
+                'ubl.ok.invoicePeriod': 'Fin de période de facturation {end} postérieure ou égale au début {start} (EN 16931 BR-29 / BR-CO-19)',
+                'ubl.warn.invoicePeriod': 'Fin de période de facturation {end} antérieure au début {start} — EN 16931 BR-29 / BR-CO-19 exige StartDate ≤ EndDate, les points d’accès PEPPOL rejettent au contrôle schematron',
                 'ubl.ok.ccyValid': 'Codes monétaires actifs selon ISO 4217 : {list}',
                 'ubl.ok.ibanValid': 'IBAN des comptes Payee/Payer valides (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'IBAN Payee/Payer échoue au contrôle ISO 13616 MOD-97 : {iban}',
@@ -9084,6 +9092,8 @@ var qrcode = function() {
                 'sepa.warn.pmtInfIdCharset': 'PmtInfId {id} 含有 EPC SEPA 规则书允许字符集（A-Z a-z 0-9 / - ? : ( ) . , \' + 空格）之外的字符——清算系统会剥除或拒绝支付信息块标识',
                 'sepa.ok.ustrdCharset': '所有 {n} 个非结构化汇款条目的 RmtInf/Ustrd 仅使用 EPC SEPA 规则书允许字符集（A-Z a-z 0-9 / - ? : ( ) . , \' + 空格）',
                 'sepa.warn.ustrdCharset': 'RmtInf/Ustrd “{v}” 含有 EPC SEPA 规则书允许字符集（A-Z a-z 0-9 / - ? : ( ) . , \' + 空格）之外的字符——清算系统会剥除或拒绝受益人用于对账的汇款引用',
+                'sepa.ok.partyNmCharset': '所有 {n} 个当事人名称（InitgPty/Cdtr/Dbtr 的 Nm）仅使用 EPC SEPA 规则书允许字符集（A-Z a-z 0-9 / - ? : ( ) . , \' + 空格）',
+                'sepa.warn.partyNmCharset': '当事人名称 “{v}” 含有 EPC SEPA 规则书允许字符集（A-Z a-z 0-9 / - ? : ( ) . , \' + 空格）之外的字符——清算系统会剥除或拒绝在跨行报文中携带的当事人名称',
                 'sepa.warn.ccyInvalid': '币种代码不在 ISO 4217 现行清单中：{code}',
                 'sepa.warn.unknownDoc': '无法识别的 ISO 20022 根元素 — 仅部分解析。',
                 'err.sepaEmpty': 'XML 输入为空。',
@@ -9181,6 +9191,8 @@ var qrcode = function() {
                 'ubl.warn.sellerVat': '卖方 VAT 标识 {vat} 无效——PEPPOL BIS Billing 3.0 / EN 16931 BT-31 要求有效的 ISO 3166-1 alpha-2 国家前缀 + 欧盟 VAT 格式',
                 'ubl.ok.buyerVat': '买方 VAT 标识 {vat} 符合 ISO 3166-1 alpha-2 + 欧盟 VAT 格式（EN 16931 BT-48 / PEPPOL BIS Billing 3.0）',
                 'ubl.warn.buyerVat': '买方 VAT 标识 {vat} 无效——PEPPOL BIS Billing 3.0 / EN 16931 BT-48 要求有效的 ISO 3166-1 alpha-2 国家前缀 + 欧盟 VAT 格式',
+                'ubl.ok.invoicePeriod': '发票周期结束日 {end} 不早于开始日 {start}（EN 16931 BR-29 / BR-CO-19）',
+                'ubl.warn.invoicePeriod': '发票周期结束日 {end} 早于开始日 {start}——EN 16931 BR-29 / BR-CO-19 要求 StartDate ≤ EndDate，PEPPOL 接入点会在 schematron 检查时拒绝',
                 'ubl.ok.ccyValid': '币种代码按 ISO 4217 有效：{list}',
                 'ubl.ok.ibanValid': '收款方/付款方账户 IBAN 通过 ISO 13616 MOD-97 校验（{n}）',
                 'ubl.warn.ibanInvalid': '收款方/付款方 IBAN 未通过 ISO 13616 MOD-97 校验：{iban}',
@@ -10235,6 +10247,8 @@ var qrcode = function() {
                 'sepa.warn.pmtInfIdCharset': 'PmtInfId {id} enthält Zeichen außerhalb des vom EPC-SEPA-Rulebook erlaubten Zeichensatzes (A-Z a-z 0-9 / - ? : ( ) . , \' + Leerzeichen) — Clearing-Systeme entfernen oder verwerfen die PmtInf-Block-Kennung',
                 'sepa.ok.ustrdCharset': 'RmtInf/Ustrd-Werte nutzen für alle {n} unstrukturierten Verwendungszweck-Eintrag/e ausschließlich vom EPC-SEPA-Rulebook erlaubte Zeichen (A-Z a-z 0-9 / - ? : ( ) . , \' + Leerzeichen)',
                 'sepa.warn.ustrdCharset': 'RmtInf/Ustrd „{v}“ enthält Zeichen außerhalb des vom EPC-SEPA-Rulebook erlaubten Zeichensatzes (A-Z a-z 0-9 / - ? : ( ) . , \' + Leerzeichen) — Clearing-Systeme entfernen oder verwerfen die Verwendungszweck-Referenz, die der Begünstigte zur Zuordnung der Zahlung nutzt',
+                'sepa.ok.partyNmCharset': 'Parteinamen (Nm von InitgPty/Cdtr/Dbtr) nutzen für alle {n} Name(n) ausschließlich vom EPC-SEPA-Rulebook erlaubte Zeichen (A-Z a-z 0-9 / - ? : ( ) . , \' + Leerzeichen)',
+                'sepa.warn.partyNmCharset': 'Parteiname „{v}“ enthält Zeichen außerhalb des vom EPC-SEPA-Rulebook erlaubten Zeichensatzes (A-Z a-z 0-9 / - ? : ( ) . , \' + Leerzeichen) — Clearing-Systeme entfernen oder verwerfen den Parteinamen, der auf dem Interbanken-Auszug erscheint',
                 'sepa.warn.ccyInvalid': 'Währungscode nicht aktiv nach ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unbekanntes ISO-20022-Wurzelelement — nur Teilanalyse.',
                 'err.sepaEmpty': 'Die XML-Eingabe ist leer.',
@@ -10332,6 +10346,8 @@ var qrcode = function() {
                 'ubl.warn.sellerVat': 'Verkäufer-USt-IdNr. {vat} ungültig — PEPPOL BIS Billing 3.0 / EN 16931 BT-31 verlangt ein gültiges ISO-3166-1-alpha-2-Länderpräfix + EU-USt-Format',
                 'ubl.ok.buyerVat': 'Käufer-USt-IdNr. {vat} gültig nach ISO 3166-1 alpha-2 + EU-USt-Format (EN 16931 BT-48 / PEPPOL BIS Billing 3.0)',
                 'ubl.warn.buyerVat': 'Käufer-USt-IdNr. {vat} ungültig — PEPPOL BIS Billing 3.0 / EN 16931 BT-48 verlangt ein gültiges ISO-3166-1-alpha-2-Länderpräfix + EU-USt-Format',
+                'ubl.ok.invoicePeriod': 'Rechnungszeitraum-Enddatum {end} liegt am oder nach dem Startdatum {start} (EN 16931 BR-29 / BR-CO-19)',
+                'ubl.warn.invoicePeriod': 'Rechnungszeitraum-Enddatum {end} liegt vor dem Startdatum {start} — EN 16931 BR-29 / BR-CO-19 verlangt StartDate ≤ EndDate, PEPPOL-Access-Points lehnen am Schematron-Gate ab',
                 'ubl.ok.ccyValid': 'Währungscodes nach ISO 4217 aktiv: {list}',
                 'ubl.ok.ibanValid': 'IBANs der Payee-/Payer-Konten gültig (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'Payee-/Payer-IBAN scheitert an ISO-13616-MOD-97-Prüfung: {iban}',
@@ -11371,6 +11387,8 @@ var qrcode = function() {
                 'sepa.warn.pmtInfIdCharset': 'PmtInfId {id} में EPC SEPA रूलबुक अनुमत वर्ण-सेट (A-Z a-z 0-9 / - ? : ( ) . , \' + स्पेस) से बाहर के वर्ण हैं — क्लियरिंग सिस्टम भुगतान सूचना ब्लॉक पहचान को हटा देते हैं या अस्वीकार करते हैं',
                 'sepa.ok.ustrdCharset': 'सभी {n} असंरचित प्रेषण प्रविष्टि(यों) में RmtInf/Ustrd केवल EPC SEPA रूलबुक अनुमत वर्णों का उपयोग करते हैं (A-Z a-z 0-9 / - ? : ( ) . , \' + स्पेस)',
                 'sepa.warn.ustrdCharset': 'RmtInf/Ustrd "{v}" में EPC SEPA रूलबुक अनुमत वर्ण-सेट (A-Z a-z 0-9 / - ? : ( ) . , \' + स्पेस) से बाहर के वर्ण हैं — क्लियरिंग सिस्टम लाभार्थी द्वारा भुगतान मिलान के लिए उपयोग किए जाने वाले प्रेषण संदर्भ को हटा देते हैं या अस्वीकार करते हैं',
+                'sepa.ok.partyNmCharset': 'सभी {n} पक्ष नामों (InitgPty/Cdtr/Dbtr का Nm) में केवल EPC SEPA रूलबुक अनुमत वर्णों का उपयोग होता है (A-Z a-z 0-9 / - ? : ( ) . , \' + स्पेस)',
+                'sepa.warn.partyNmCharset': 'पक्ष नाम "{v}" में EPC SEPA रूलबुक अनुमत वर्ण-सेट (A-Z a-z 0-9 / - ? : ( ) . , \' + स्पेस) से बाहर के वर्ण हैं — क्लियरिंग सिस्टम अंतरबैंक विवरण पर दर्शाए जाने वाले पक्ष नाम को हटा देते हैं या अस्वीकार करते हैं',
                 'sepa.warn.ccyInvalid': 'मुद्रा कोड ISO 4217 में सक्रिय नहीं: {code}',
                 'sepa.warn.unknownDoc': 'अज्ञात ISO 20022 रूट तत्व — केवल आंशिक पार्सिंग।',
                 'err.sepaEmpty': 'XML इनपुट खाली है।',
@@ -11468,6 +11486,8 @@ var qrcode = function() {
                 'ubl.warn.sellerVat': 'विक्रेता VAT पहचानकर्ता {vat} अमान्य — PEPPOL BIS Billing 3.0 / EN 16931 BT-31 के लिए वैध ISO 3166-1 alpha-2 देश उपसर्ग + EU VAT प्रारूप आवश्यक है',
                 'ubl.ok.buyerVat': 'क्रेता VAT पहचानकर्ता {vat} ISO 3166-1 alpha-2 + EU VAT प्रारूप के अनुसार वैध (EN 16931 BT-48 / PEPPOL BIS Billing 3.0)',
                 'ubl.warn.buyerVat': 'क्रेता VAT पहचानकर्ता {vat} अमान्य — PEPPOL BIS Billing 3.0 / EN 16931 BT-48 के लिए वैध ISO 3166-1 alpha-2 देश उपसर्ग + EU VAT प्रारूप आवश्यक है',
+                'ubl.ok.invoicePeriod': 'चालान अवधि की समाप्ति तिथि {end} प्रारंभ तिथि {start} पर या उसके बाद है (EN 16931 BR-29 / BR-CO-19)',
+                'ubl.warn.invoicePeriod': 'चालान अवधि की समाप्ति तिथि {end} प्रारंभ तिथि {start} से पहले है — EN 16931 BR-29 / BR-CO-19 के लिए StartDate ≤ EndDate आवश्यक है, PEPPOL एक्सेस पॉइंट schematron गेट पर अस्वीकार करते हैं',
                 'ubl.ok.ccyValid': 'मुद्रा कोड ISO 4217 के अनुसार सक्रिय: {list}',
                 'ubl.ok.ibanValid': 'भुगतानकर्ता/प्राप्तकर्ता खाते के IBAN वैध (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'भुगतानकर्ता/प्राप्तकर्ता IBAN ISO 13616 MOD-97 जाँच में विफल: {iban}',
@@ -19259,6 +19279,65 @@ var qrcode = function() {
             }
         }
 
+        // Extend the EPC SEPA Rulebook character-set rule (drafts 49 / 51 /
+        // 53 / 55 / 56 / 59) from identifiers + Ustrd to party-name fields:
+        // GrpHdr/InitgPty/Nm (the initiating-party name carried at file
+        // level), per-PmtInf Dbtr/Nm (the debtor name on credit transfers)
+        // and Cdtr/Nm (the creditor name on direct debits, present once per
+        // PmtInf), plus per-transaction Cdtr/Nm (the beneficiary name on
+        // credit transfers) and Dbtr/Nm (the payer name on direct debits).
+        // ISO 20022 declares Nm as Max70Text — any Unicode codepoints up to
+        // 70 chars pass the schema — but the EPC SEPA Credit Transfer and
+        // SEPA Direct Debit Rulebooks both pin the basic SEPA character set
+        // (A-Z a-z 0-9 / - ? : ( ) . , ' + space) across every free-text
+        // field, names included. Party names are the second-most common
+        // entry point for non-Latin characters into a SEPA file after Ustrd
+        // (draft 59); a Müller, Görtz, or Bénéteau folded into a Dbtr/Nm or
+        // Cdtr/Nm is schema-valid but rail-broken — clearing systems either
+        // strip the accented characters (so the beneficiary's bank shows a
+        // mangled name on the statement) or hard-reject at the rail-level
+        // character-set gate. Walks every Nm value reachable through these
+        // anchors; camt.053 is statement-side and out of scope.
+        function sepaCheckPartyNmCharset(out, doc, detected) {
+            if (detected.type !== 'pain.001' && detected.type !== 'pain.008') return;
+            const w = detected.wrapper;
+            if (!w) return;
+            const names = [];
+            const grpHdr = sepaFirst(w, 'GrpHdr');
+            if (grpHdr) {
+                const initg = sepaFirst(grpHdr, 'InitgPty');
+                if (initg) {
+                    const v = (sepaTextOf(initg, 'Nm') || '').trim();
+                    if (v) names.push(v);
+                }
+            }
+            for (const pmtInf of sepaAllLocal(w, 'PmtInf')) {
+                for (const role of ['Dbtr', 'Cdtr']) {
+                    const party = sepaFirst(pmtInf, role);
+                    if (!party) continue;
+                    const v = (sepaTextOf(party, 'Nm') || '').trim();
+                    if (v) names.push(v);
+                }
+            }
+            for (const tx of [...sepaAllLocal(w, 'CdtTrfTxInf'), ...sepaAllLocal(w, 'DrctDbtTxInf')]) {
+                for (const role of ['Cdtr', 'Dbtr']) {
+                    const party = sepaFirst(tx, role);
+                    if (!party) continue;
+                    const v = (sepaTextOf(party, 'Nm') || '').trim();
+                    if (v) names.push(v);
+                }
+            }
+            if (!names.length) return;
+            const bad = names.filter(n => !SEPA_CHARSET_RE.test(n));
+            if (bad.length === 0) {
+                tlsRenderRow(out, t('sepa.row.warning'), '✓ ' + tFormat('sepa.ok.partyNmCharset', { n: intlNumber(names.length) }));
+            } else {
+                for (const v of bad) {
+                    tlsRenderRow(out, t('sepa.row.warning'), '✗ ' + tFormat('sepa.warn.partyNmCharset', { v }));
+                }
+            }
+        }
+
         function sepaCheckBics(out, doc) {
             const bics = sepaCollectBics(doc);
             if (!bics.length) return;
@@ -19308,6 +19387,7 @@ var qrcode = function() {
                 sepaCheckMndtIdCharset(out, doc, detected);
                 sepaCheckPmtInfIdCharset(out, doc, detected);
                 sepaCheckUstrdCharset(out, doc, detected);
+                sepaCheckPartyNmCharset(out, doc, detected);
             } catch (e) {
                 tlsRenderRow(out, t('sepa.row.error'), e.message);
             }
@@ -19898,6 +19978,33 @@ var qrcode = function() {
             }
         }
 
+        // EN 16931 BR-29 / BR-CO-19: when <cac:InvoicePeriod> is present at
+        // the document level (BT-73 StartDate, BT-74 EndDate — the billing
+        // period the invoice covers, used for subscriptions, utilities, and
+        // any recurring supply), the StartDate must be on or before the
+        // EndDate. UBL 2.1 declares both as plain xs:date, so an inverted
+        // period passes the schema but is rejected by PEPPOL access points
+        // at the BR-29 schematron gate. The typical real-world cause is a
+        // template repurposed across billing cycles where the date swap was
+        // missed. Skips silently when either bound is missing or unparseable
+        // — those degenerate cases are caught by the schema-validation step
+        // a real implementation would run upstream.
+        function ublCheckInvoicePeriod(out, detected) {
+            const period = sepaFirst(detected.root, 'InvoicePeriod');
+            if (!period) return;
+            const startStr = (sepaTextOf(period, 'StartDate') || '').trim();
+            const endStr   = (sepaTextOf(period, 'EndDate')   || '').trim();
+            if (!startStr || !endStr) return;
+            const startTs = Date.parse(startStr);
+            const endTs   = Date.parse(endStr);
+            if (!Number.isFinite(startTs) || !Number.isFinite(endTs)) return;
+            if (endTs >= startTs) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + tFormat('ubl.ok.invoicePeriod', { end: endStr, start: startStr }));
+            } else {
+                tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + tFormat('ubl.warn.invoicePeriod', { end: endStr, start: startStr }));
+            }
+        }
+
         // EN 16931 / UNCL 5305 VAT category-code validation. The allowed letters
         // come from the EN 16931 BR-S/Z/E/AE/K/G/O/L/M rule families; values
         // outside this set are schema-valid plain strings but rail-broken — a
@@ -20233,6 +20340,7 @@ var qrcode = function() {
                 ublCheckTaxScheme(out, detected);
                 ublCheckSellerVat(out, detected);
                 ublCheckBuyerVat(out, detected);
+                ublCheckInvoicePeriod(out, detected);
                 ublCheckIbans(out, doc);
             } catch (e) {
                 tlsRenderRow(out, t('ubl.row.error'), e.message);
