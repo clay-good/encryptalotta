@@ -2251,6 +2251,54 @@ test('sepa: party-Nm character-set check flags an umlaut in InitgPty/Nm', async 
   await expect(page.locator('#sepa-results')).toContainText(/Party name "Müller GmbH" contains characters outside the EPC SEPA Rulebook allowed set/i, { timeout: 5_000 });
 });
 
+test('sepa: AdrLine character-set check confirms on a Rulebook-clean batch', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Inject a clean PstlAdr/AdrLine inside the debtor block — ASCII only.
+  const withAdr = SEPA_PAIN001.replace(
+    '<Dbtr><Nm>ACME Corp</Nm></Dbtr>',
+    '<Dbtr><Nm>ACME Corp</Nm><PstlAdr><AdrLine>123 Main Street</AdrLine><AdrLine>Berlin 10115</AdrLine></PstlAdr></Dbtr>'
+  );
+  await page.fill('#sepa-input', withAdr);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Postal address lines \(PstlAdr\/AdrLine\) use only EPC SEPA Rulebook allowed characters across all 2 line/i, { timeout: 5_000 });
+});
+
+test('sepa: AdrLine character-set check flags an accented street name', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // "Königsallee 12" carries an umlaut — schema-valid Max70Text but rail-broken.
+  const withAdr = SEPA_PAIN001.replace(
+    '<Dbtr><Nm>ACME Corp</Nm></Dbtr>',
+    '<Dbtr><Nm>ACME Corp</Nm><PstlAdr><AdrLine>Königsallee 12</AdrLine></PstlAdr></Dbtr>'
+  );
+  await page.fill('#sepa-input', withAdr);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/PstlAdr\/AdrLine "Königsallee 12" contains characters outside the EPC SEPA Rulebook allowed set/i, { timeout: 5_000 });
+});
+
+test('ubl: PaymentMeansCode confirms on an EN 16931 allowed code (30 Credit transfer)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Inject a PaymentMeans block carrying the canonical credit-transfer code 30.
+  const withPm = UBL_INVOICE.replace(
+    '</cac:LegalMonetaryTotal>',
+    '</cac:LegalMonetaryTotal>\n  <cac:PaymentMeans><cbc:PaymentMeansCode>30</cbc:PaymentMeansCode></cac:PaymentMeans>'
+  );
+  await page.fill('#ubl-input', withPm);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/PaymentMeansCode values allowed by EN 16931 \/ PEPPOL BIS Billing 3\.0 \(UNCL 4461 subset\):.*30/i, { timeout: 5_000 });
+});
+
+test('ubl: PaymentMeansCode flags a code outside the EN 16931 / PEPPOL subset', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // UNCL 4461 "70" Bankers draft is schema-valid but rejected by PEPPOL access points.
+  const withPm = UBL_INVOICE.replace(
+    '</cac:LegalMonetaryTotal>',
+    '</cac:LegalMonetaryTotal>\n  <cac:PaymentMeans><cbc:PaymentMeansCode>70</cbc:PaymentMeansCode></cac:PaymentMeans>'
+  );
+  await page.fill('#ubl-input', withPm);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/PaymentMeansCode 70 is not in the EN 16931 \/ PEPPOL BIS Billing 3\.0 allowed UNCL 4461 subset/i, { timeout: 5_000 });
+});
+
 test('ubl: rejects non-UBL XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   await page.fill('#ubl-input', '<?xml version="1.0"?><Document/>');
