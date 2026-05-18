@@ -2043,6 +2043,85 @@ test('sepa: InstrId character-set check flags a non-Latin character', async ({ p
   await expect(page.locator('#sepa-results')).toContainText(/InstrId INSTR-Übergabe contains characters outside the EPC SEPA Rulebook allowed set/i, { timeout: 5_000 });
 });
 
+test('ubl: TaxScheme/ID confirms when every TaxCategory declares VAT', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // UBL_INVOICE already declares <cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme>.
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/TaxScheme\/ID = VAT across every TaxCategory.*PEPPOL BIS Billing 3\.0/i, { timeout: 5_000 });
+});
+
+test('ubl: TaxScheme/ID flags a non-VAT code (e.g. GST)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // A template repurposed from a non-EU UBL flow may carry GST — schema-valid,
+  // PEPPOL-broken.
+  const bad = UBL_INVOICE.replace('<cbc:ID>VAT</cbc:ID>', '<cbc:ID>GST</cbc:ID>');
+  await page.fill('#ubl-input', bad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/TaxScheme\/ID GST is not VAT — PEPPOL BIS Billing 3\.0/i, { timeout: 5_000 });
+});
+
+test('sepa: MndtId character-set check confirms on a Rulebook-clean pain.008', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // The existing pain.008 fixture declares <MndtId>MANDATE-2024-XYZ</MndtId> — clean ASCII.
+  const pain008 = `<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.008.001.02">
+  <CstmrDrctDbtInitn>
+    <GrpHdr><MsgId>DD-99</MsgId><CreDtTm>2024-05-15T09:00:00</CreDtTm><NbOfTxs>1</NbOfTxs><InitgPty><Nm>X</Nm></InitgPty></GrpHdr>
+    <PmtInf>
+      <PmtInfId>DD-1</PmtInfId>
+      <PmtMtd>DD</PmtMtd>
+      <PmtTpInf><SeqTp>FRST</SeqTp></PmtTpInf>
+      <ReqdColltnDt>2024-06-01</ReqdColltnDt>
+      <Cdtr><Nm>C</Nm></Cdtr>
+      <CdtrAcct><Id><IBAN>DE91100000000123456789</IBAN></Id></CdtrAcct>
+      <CdtrAgt><FinInstnId><BIC>DEUTDEFFXXX</BIC></FinInstnId></CdtrAgt>
+      <DrctDbtTxInf>
+        <PmtId><EndToEndId>E2E-1</EndToEndId></PmtId>
+        <InstdAmt Ccy="EUR">10.00</InstdAmt>
+        <DrctDbtTx><MndtRltdInf><MndtId>MNDT-2024-001</MndtId></MndtRltdInf></DrctDbtTx>
+        <DbtrAgt><FinInstnId><BIC>COBADEFFXXX</BIC></FinInstnId></DbtrAgt>
+        <Dbtr><Nm>D</Nm></Dbtr>
+        <DbtrAcct><Id><IBAN>DE89370400440532013000</IBAN></Id></DbtrAcct>
+      </DrctDbtTxInf>
+    </PmtInf>
+  </CstmrDrctDbtInitn>
+</Document>`;
+  await page.fill('#sepa-input', pain008);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/MndtId values use only EPC SDD Rulebook allowed characters across all 1 direct-debit transaction/i, { timeout: 5_000 });
+});
+
+test('sepa: MndtId character-set check flags a non-Latin character', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  const pain008 = `<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.008.001.02">
+  <CstmrDrctDbtInitn>
+    <GrpHdr><MsgId>DD-99</MsgId><CreDtTm>2024-05-15T09:00:00</CreDtTm><NbOfTxs>1</NbOfTxs><InitgPty><Nm>X</Nm></InitgPty></GrpHdr>
+    <PmtInf>
+      <PmtInfId>DD-1</PmtInfId>
+      <PmtMtd>DD</PmtMtd>
+      <PmtTpInf><SeqTp>FRST</SeqTp></PmtTpInf>
+      <ReqdColltnDt>2024-06-01</ReqdColltnDt>
+      <Cdtr><Nm>C</Nm></Cdtr>
+      <CdtrAcct><Id><IBAN>DE91100000000123456789</IBAN></Id></CdtrAcct>
+      <CdtrAgt><FinInstnId><BIC>DEUTDEFFXXX</BIC></FinInstnId></CdtrAgt>
+      <DrctDbtTxInf>
+        <PmtId><EndToEndId>E2E-1</EndToEndId></PmtId>
+        <InstdAmt Ccy="EUR">10.00</InstdAmt>
+        <DrctDbtTx><MndtRltdInf><MndtId>MNDT-Müller-001</MndtId></MndtRltdInf></DrctDbtTx>
+        <DbtrAgt><FinInstnId><BIC>COBADEFFXXX</BIC></FinInstnId></DbtrAgt>
+        <Dbtr><Nm>D</Nm></Dbtr>
+        <DbtrAcct><Id><IBAN>DE89370400440532013000</IBAN></Id></DbtrAcct>
+      </DrctDbtTxInf>
+    </PmtInf>
+  </CstmrDrctDbtInitn>
+</Document>`;
+  await page.fill('#sepa-input', pain008);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/MndtId MNDT-Müller-001 contains characters outside the EPC SDD Rulebook allowed set/i, { timeout: 5_000 });
+});
+
 test('ubl: rejects non-UBL XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   await page.fill('#ubl-input', '<?xml version="1.0"?><Document/>');
