@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <!--
   encryptalotta — single-file portable build
-  Source mtime: 2026-05-18T00:02:28.753Z
-  Source: index.html (SHA-256: 845c80d544112fc02a917f89903b00c19baf35d7ccd803619daebc4bf44890d8)
+  Source mtime: 2026-05-18T00:19:24.126Z
+  Source: index.html (SHA-256: ff160abdc1d597c9b3733ea92c0c263c9b8af58b75103a4b711c3834e77f00ed)
   All vendored JavaScript inlined; favicons inlined as data: URIs.
   Identical functionality to the live site at https://encryptalotta.com.
   Runs from file://, USB stick, chat attachment, anywhere. No network calls.
@@ -6758,6 +6758,8 @@ var qrcode = function() {
                 'sepa.warn.e2eDup': 'EndToEndId duplicated within file: {id} appears {count} times — EPC SEPA Rulebook requires uniqueness per Originator (ISO 20022 / EPC SCT/SDD)',
                 'sepa.ok.svcLvl': 'SvcLvl matches EPC SEPA Rulebook: {n} PmtInf block(s) declare SEPA (standard SCT/SDD service level)',
                 'sepa.warn.svcLvl': 'SvcLvl mismatch: PmtInf #{idx} declares {actual} but EPC SEPA Rulebook requires SEPA (ISO 20022 / EPC SCT/SDD)',
+                'sepa.ok.seqTp': 'SeqTp valid per EPC SDD Rulebook: {n} PmtInf block(s) declare one of FRST / RCUR / OOFF / FNAL',
+                'sepa.warn.seqTp': 'SeqTp invalid: PmtInf #{idx} declares {actual} but EPC SDD Rulebook allows only FRST / RCUR / OOFF / FNAL (ISO 20022 / EPC SDD)',
                 'sepa.warn.ccyInvalid': 'Currency code not active per ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unrecognized ISO 20022 root element — partial parse only.',
                 'err.sepaEmpty': 'XML input is empty.',
@@ -6851,6 +6853,8 @@ var qrcode = function() {
                 'ubl.warn.taxMismatch': 'TaxExclusive + Σ TaxAmount = {computed} ≠ declared TaxInclusive {declared}',
                 'ubl.ok.payable': 'PayableAmount {amount} matches TaxInclusive − Prepaid + PayableRounding (EN 16931 BR-CO-16)',
                 'ubl.warn.payableMismatch': 'PayableAmount mismatch: TaxInclusive − Prepaid + PayableRounding = {computed} ≠ declared PayableAmount {declared} (EN 16931 BR-CO-16)',
+                'ubl.ok.docType': 'Document type code {code} is allowed by PEPPOL BIS Billing 3.0 / EN 16931 (UNCL 1001)',
+                'ubl.warn.docType': 'Document type code {code} is not in the PEPPOL BIS Billing 3.0 allowed set ({allowed}) (UNCL 1001 / EN 16931)',
                 'ubl.ok.ccyValid': 'Currency codes active per ISO 4217: {list}',
                 'ubl.ok.ibanValid': 'Payee/Payer financial account IBANs valid (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'Payee/Payer IBAN failed ISO 13616 MOD-97 check: {iban}',
@@ -7906,6 +7910,8 @@ var qrcode = function() {
                 'sepa.warn.e2eDup': 'EndToEndId dupliqué dans le fichier : {id} apparaît {count} fois — les règles EPC SEPA exigent l’unicité par donneur d’ordre (ISO 20022 / EPC SCT/SDD)',
                 'sepa.ok.svcLvl': 'SvcLvl conforme aux règles EPC SEPA : {n} bloc(s) PmtInf déclarent SEPA (niveau de service standard SCT/SDD)',
                 'sepa.warn.svcLvl': 'SvcLvl non conforme : le bloc PmtInf n°{idx} déclare {actual} alors que les règles EPC SEPA exigent SEPA (ISO 20022 / EPC SCT/SDD)',
+                'sepa.ok.seqTp': 'SeqTp conforme aux règles EPC SDD : {n} bloc(s) PmtInf déclarent FRST, RCUR, OOFF ou FNAL',
+                'sepa.warn.seqTp': 'SeqTp invalide : le bloc PmtInf n°{idx} déclare {actual} alors que les règles EPC SDD n’autorisent que FRST / RCUR / OOFF / FNAL (ISO 20022 / EPC SDD)',
                 'sepa.warn.ccyInvalid': 'Code monétaire non actif selon ISO 4217 : {code}',
                 'sepa.warn.unknownDoc': 'Élément racine ISO 20022 non reconnu — analyse partielle uniquement.',
                 'err.sepaEmpty': 'Le XML d’entrée est vide.',
@@ -7989,6 +7995,8 @@ var qrcode = function() {
                 'ubl.warn.taxMismatch': 'TaxExclusive + Σ TaxAmount = {computed} ≠ TaxInclusive déclaré {declared}',
                 'ubl.ok.payable': 'PayableAmount {amount} correspond à TaxInclusive − Prepaid + PayableRounding (EN 16931 BR-CO-16)',
                 'ubl.warn.payableMismatch': 'PayableAmount incohérent : TaxInclusive − Prepaid + PayableRounding = {computed} ≠ PayableAmount déclaré {declared} (EN 16931 BR-CO-16)',
+                'ubl.ok.docType': 'Code de type de document {code} accepté par PEPPOL BIS Billing 3.0 / EN 16931 (UNCL 1001)',
+                'ubl.warn.docType': 'Code de type de document {code} hors de l’ensemble autorisé par PEPPOL BIS Billing 3.0 ({allowed}) (UNCL 1001 / EN 16931)',
                 'ubl.ok.ccyValid': 'Codes monétaires actifs selon ISO 4217 : {list}',
                 'ubl.ok.ibanValid': 'IBAN des comptes Payee/Payer valides (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'IBAN Payee/Payer échoue au contrôle ISO 13616 MOD-97 : {iban}',
@@ -9014,6 +9022,8 @@ var qrcode = function() {
                 'sepa.warn.e2eDup': 'EndToEndId 在文件中重复：{id} 出现 {count} 次 — EPC SEPA 规则书要求按发起人保持唯一（ISO 20022 / EPC SCT/SDD）',
                 'sepa.ok.svcLvl': 'SvcLvl 符合 EPC SEPA 规则书：{n} 个 PmtInf 块均声明 SEPA（标准 SCT/SDD 服务等级）',
                 'sepa.warn.svcLvl': 'SvcLvl 不一致：PmtInf 第 {idx} 项声明 {actual}，但 EPC SEPA 规则书要求 SEPA（ISO 20022 / EPC SCT/SDD）',
+                'sepa.ok.seqTp': 'SeqTp 符合 EPC SDD 规则书：{n} 个 PmtInf 块声明为 FRST / RCUR / OOFF / FNAL 之一',
+                'sepa.warn.seqTp': 'SeqTp 不合法：PmtInf 第 {idx} 项声明 {actual}，但 EPC SDD 规则书仅允许 FRST / RCUR / OOFF / FNAL（ISO 20022 / EPC SDD）',
                 'sepa.warn.ccyInvalid': '币种代码不在 ISO 4217 现行清单中：{code}',
                 'sepa.warn.unknownDoc': '无法识别的 ISO 20022 根元素 — 仅部分解析。',
                 'err.sepaEmpty': 'XML 输入为空。',
@@ -9097,6 +9107,8 @@ var qrcode = function() {
                 'ubl.warn.taxMismatch': 'TaxExclusive + Σ TaxAmount = {computed} ≠ 声明的 TaxInclusive {declared}',
                 'ubl.ok.payable': 'PayableAmount {amount} 与 TaxInclusive − Prepaid + PayableRounding 一致（EN 16931 BR-CO-16）',
                 'ubl.warn.payableMismatch': 'PayableAmount 不一致：TaxInclusive − Prepaid + PayableRounding = {computed} ≠ 声明的 PayableAmount {declared}（EN 16931 BR-CO-16）',
+                'ubl.ok.docType': '文档类型代码 {code} 符合 PEPPOL BIS Billing 3.0 / EN 16931 允许集合（UNCL 1001）',
+                'ubl.warn.docType': '文档类型代码 {code} 不在 PEPPOL BIS Billing 3.0 允许集合中（{allowed}）（UNCL 1001 / EN 16931）',
                 'ubl.ok.ccyValid': '币种代码按 ISO 4217 有效：{list}',
                 'ubl.ok.ibanValid': '收款方/付款方账户 IBAN 通过 ISO 13616 MOD-97 校验（{n}）',
                 'ubl.warn.ibanInvalid': '收款方/付款方 IBAN 未通过 ISO 13616 MOD-97 校验：{iban}',
@@ -10137,6 +10149,8 @@ var qrcode = function() {
                 'sepa.warn.e2eDup': 'EndToEndId in der Datei doppelt vergeben: {id} kommt {count}-mal vor — das EPC-SEPA-Rulebook verlangt Eindeutigkeit je Auftraggeber (ISO 20022 / EPC SCT/SDD)',
                 'sepa.ok.svcLvl': 'SvcLvl entspricht EPC-SEPA-Rulebook: {n} PmtInf-Block(s) deklarieren SEPA (Standard-Service-Level für SCT/SDD)',
                 'sepa.warn.svcLvl': 'SvcLvl-Abweichung: PmtInf Nr. {idx} deklariert {actual}, das EPC-SEPA-Rulebook verlangt jedoch SEPA (ISO 20022 / EPC SCT/SDD)',
+                'sepa.ok.seqTp': 'SeqTp gemäß EPC-SDD-Rulebook gültig: {n} PmtInf-Block(s) deklarieren FRST, RCUR, OOFF oder FNAL',
+                'sepa.warn.seqTp': 'SeqTp ungültig: PmtInf Nr. {idx} deklariert {actual}, das EPC-SDD-Rulebook erlaubt jedoch nur FRST / RCUR / OOFF / FNAL (ISO 20022 / EPC SDD)',
                 'sepa.warn.ccyInvalid': 'Währungscode nicht aktiv nach ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unbekanntes ISO-20022-Wurzelelement — nur Teilanalyse.',
                 'err.sepaEmpty': 'Die XML-Eingabe ist leer.',
@@ -10220,6 +10234,8 @@ var qrcode = function() {
                 'ubl.warn.taxMismatch': 'TaxExclusive + Σ TaxAmount = {computed} ≠ deklarierter TaxInclusive {declared}',
                 'ubl.ok.payable': 'PayableAmount {amount} entspricht TaxInclusive − Prepaid + PayableRounding (EN 16931 BR-CO-16)',
                 'ubl.warn.payableMismatch': 'PayableAmount-Abweichung: TaxInclusive − Prepaid + PayableRounding = {computed} ≠ deklarierter PayableAmount {declared} (EN 16931 BR-CO-16)',
+                'ubl.ok.docType': 'Dokumenttyp-Code {code} ist in PEPPOL BIS Billing 3.0 / EN 16931 zulässig (UNCL 1001)',
+                'ubl.warn.docType': 'Dokumenttyp-Code {code} liegt außerhalb der von PEPPOL BIS Billing 3.0 erlaubten Menge ({allowed}) (UNCL 1001 / EN 16931)',
                 'ubl.ok.ccyValid': 'Währungscodes nach ISO 4217 aktiv: {list}',
                 'ubl.ok.ibanValid': 'IBANs der Payee-/Payer-Konten gültig (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'Payee-/Payer-IBAN scheitert an ISO-13616-MOD-97-Prüfung: {iban}',
@@ -11245,6 +11261,8 @@ var qrcode = function() {
                 'sepa.warn.e2eDup': 'EndToEndId फ़ाइल में दोहराया गया: {id} {count} बार दिखाई देता है — EPC SEPA रूलबुक प्रति आरंभकर्ता अद्वितीयता आवश्यक करता है (ISO 20022 / EPC SCT/SDD)',
                 'sepa.ok.svcLvl': 'SvcLvl EPC SEPA रूलबुक के अनुरूप: {n} PmtInf ब्लॉक SEPA (मानक SCT/SDD सेवा-स्तर) घोषित करते हैं',
                 'sepa.warn.svcLvl': 'SvcLvl बेमेल: PmtInf #{idx} ने {actual} घोषित किया, परन्तु EPC SEPA रूलबुक SEPA आवश्यक है (ISO 20022 / EPC SCT/SDD)',
+                'sepa.ok.seqTp': 'SeqTp EPC SDD रूलबुक के अनुरूप: {n} PmtInf ब्लॉक FRST / RCUR / OOFF / FNAL में से एक घोषित करते हैं',
+                'sepa.warn.seqTp': 'SeqTp अमान्य: PmtInf #{idx} ने {actual} घोषित किया, परन्तु EPC SDD रूलबुक केवल FRST / RCUR / OOFF / FNAL की अनुमति देता है (ISO 20022 / EPC SDD)',
                 'sepa.warn.ccyInvalid': 'मुद्रा कोड ISO 4217 में सक्रिय नहीं: {code}',
                 'sepa.warn.unknownDoc': 'अज्ञात ISO 20022 रूट तत्व — केवल आंशिक पार्सिंग।',
                 'err.sepaEmpty': 'XML इनपुट खाली है।',
@@ -11328,6 +11346,8 @@ var qrcode = function() {
                 'ubl.warn.taxMismatch': 'TaxExclusive + Σ TaxAmount = {computed} ≠ घोषित TaxInclusive {declared}',
                 'ubl.ok.payable': 'PayableAmount {amount} TaxInclusive − Prepaid + PayableRounding से मेल खाता है (EN 16931 BR-CO-16)',
                 'ubl.warn.payableMismatch': 'PayableAmount बेमेल: TaxInclusive − Prepaid + PayableRounding = {computed} ≠ घोषित PayableAmount {declared} (EN 16931 BR-CO-16)',
+                'ubl.ok.docType': 'दस्तावेज़ प्रकार कोड {code} PEPPOL BIS Billing 3.0 / EN 16931 (UNCL 1001) में अनुमत है',
+                'ubl.warn.docType': 'दस्तावेज़ प्रकार कोड {code} PEPPOL BIS Billing 3.0 अनुमत समुच्चय ({allowed}) में नहीं है (UNCL 1001 / EN 16931)',
                 'ubl.ok.ccyValid': 'मुद्रा कोड ISO 4217 के अनुसार सक्रिय: {list}',
                 'ubl.ok.ibanValid': 'भुगतानकर्ता/प्राप्तकर्ता खाते के IBAN वैध (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'भुगतानकर्ता/प्राप्तकर्ता IBAN ISO 13616 MOD-97 जाँच में विफल: {iban}',
@@ -18858,6 +18878,40 @@ var qrcode = function() {
             }
         }
 
+        // EPC SEPA Direct Debit Rulebook restricts the per-PmtInf SeqTp
+        // (Sequence Type) to one of FRST (first), RCUR (recurring), OOFF
+        // (one-off), or FNAL (final). ISO 20022 allows the field to carry
+        // any Max4Text value, so a value like `RECR` or a typo passes the
+        // schema but is rejected by clearing systems at the rail-level gate.
+        // Parallel to sepaCheckPmtMtd / ChrgBr / SvcLvl: pain.008-only, since
+        // SeqTp is a direct-debit construct; absent SeqTp elements skip silently.
+        function sepaCheckSeqTp(out, doc, detected) {
+            if (detected.type !== 'pain.008') return;
+            const w = detected.wrapper;
+            if (!w) return;
+            const pmtInfs = sepaAllLocal(w, 'PmtInf');
+            if (!pmtInfs.length) return;
+            const allowed = new Set(['FRST', 'RCUR', 'OOFF', 'FNAL']);
+            const bad = [];
+            let seen = 0;
+            pmtInfs.forEach((pi, i) => {
+                const tpInf = sepaFirst(pi, 'PmtTpInf');
+                if (!tpInf) return;
+                const declared = (sepaTextOf(tpInf, 'SeqTp') || '').trim().toUpperCase();
+                if (!declared) return;
+                seen++;
+                if (!allowed.has(declared)) bad.push({ idx: i + 1, actual: declared });
+            });
+            if (!seen) return;
+            if (bad.length === 0) {
+                tlsRenderRow(out, t('sepa.row.warning'), '✓ ' + tFormat('sepa.ok.seqTp', { n: intlNumber(seen) }));
+            } else {
+                for (const b of bad) {
+                    tlsRenderRow(out, t('sepa.row.warning'), '✗ ' + tFormat('sepa.warn.seqTp', { idx: intlNumber(b.idx), actual: b.actual }));
+                }
+            }
+        }
+
         function sepaCheckBics(out, doc) {
             const bics = sepaCollectBics(doc);
             if (!bics.length) return;
@@ -18900,6 +18954,7 @@ var qrcode = function() {
                 sepaCheckChrgBr(out, doc, detected);
                 sepaCheckE2eIdUnique(out, doc, detected);
                 sepaCheckSvcLvl(out, doc, detected);
+                sepaCheckSeqTp(out, doc, detected);
             } catch (e) {
                 tlsRenderRow(out, t('sepa.row.error'), e.message);
             }
@@ -19554,6 +19609,33 @@ var qrcode = function() {
             }
         }
 
+        // PEPPOL BIS Billing 3.0 (EN 16931) constrains the UNCL 1001 document
+        // type code to a small allowed set: <cbc:InvoiceTypeCode> on Invoice
+        // documents may carry 380 (Commercial invoice), 381 (Credit note —
+        // rare in this slot), 384 (Corrected invoice), 389 (Self-billed),
+        // 875 / 876 / 877 (Construction); <cbc:CreditNoteTypeCode> on
+        // CreditNote documents may carry 381 (Credit note), 396 (Factored
+        // credit note), 532 (Forwarders credit note). Values outside these
+        // sets are schema-valid plain integers but PEPPOL access points
+        // reject the document at the type-code check. Missing element skips
+        // silently — the existing header rendering already surfaces what's
+        // declared, and BR-02 absence is caught elsewhere.
+        const UBL_INVOICE_TYPE_CODES = ['380', '381', '384', '389', '875', '876', '877'];
+        const UBL_CREDITNOTE_TYPE_CODES = ['381', '396', '532'];
+        function ublCheckDocumentTypeCode(out, detected) {
+            const r = detected.root;
+            const isCreditNote = detected.type === 'CreditNote';
+            const elName = isCreditNote ? 'CreditNoteTypeCode' : 'InvoiceTypeCode';
+            const allowed = isCreditNote ? UBL_CREDITNOTE_TYPE_CODES : UBL_INVOICE_TYPE_CODES;
+            const raw = (sepaTextOf(r, elName) || '').trim();
+            if (!raw) return;
+            if (allowed.includes(raw)) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + tFormat('ubl.ok.docType', { code: raw }));
+            } else {
+                tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + tFormat('ubl.warn.docType', { code: raw, allowed: intlList(allowed) }));
+            }
+        }
+
         function ublCheckIbans(out, doc) {
             const ibans = ublCollectIbans(doc);
             if (!ibans.length) return;
@@ -19591,6 +19673,7 @@ var qrcode = function() {
                 ublCheckVatCategories(out, detected);
                 ublCheckDates(out, detected);
                 ublCheckPayable(out, detected);
+                ublCheckDocumentTypeCode(out, detected);
                 ublCheckIbans(out, doc);
             } catch (e) {
                 tlsRenderRow(out, t('ubl.row.error'), e.message);

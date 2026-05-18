@@ -1429,6 +1429,68 @@ test('sepa: SvcLvl enforcement flags NURG inside a SEPA pain.001', async ({ page
   await expect(page.locator('#sepa-results')).toContainText(/SvcLvl mismatch.*declares NURG.*SEPA/i, { timeout: 5_000 });
 });
 
+test('sepa: SeqTp enforcement confirms FRST on a SEPA-compliant pain.008', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // EPC SDD Rulebook allows SeqTp ∈ {FRST, RCUR, OOFF, FNAL}. Inject FRST and assert confirmation.
+  const pain008 = `<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.008.001.02">
+  <CstmrDrctDbtInitn>
+    <GrpHdr><MsgId>DD-99</MsgId><CreDtTm>2024-05-15T09:00:00</CreDtTm><NbOfTxs>1</NbOfTxs><InitgPty><Nm>X</Nm></InitgPty></GrpHdr>
+    <PmtInf>
+      <PmtInfId>DD-1</PmtInfId>
+      <PmtMtd>DD</PmtMtd>
+      <PmtTpInf><SeqTp>FRST</SeqTp></PmtTpInf>
+      <ReqdColltnDt>2024-06-01</ReqdColltnDt>
+      <Cdtr><Nm>C</Nm></Cdtr>
+      <CdtrAcct><Id><IBAN>DE91100000000123456789</IBAN></Id></CdtrAcct>
+      <CdtrAgt><FinInstnId><BIC>DEUTDEFFXXX</BIC></FinInstnId></CdtrAgt>
+      <DrctDbtTxInf>
+        <PmtId><EndToEndId>E2E-1</EndToEndId></PmtId>
+        <InstdAmt Ccy="EUR">10.00</InstdAmt>
+        <DrctDbtTx><MndtRltdInf><MndtId>M-1</MndtId></MndtRltdInf></DrctDbtTx>
+        <DbtrAgt><FinInstnId><BIC>COBADEFFXXX</BIC></FinInstnId></DbtrAgt>
+        <Dbtr><Nm>D</Nm></Dbtr>
+        <DbtrAcct><Id><IBAN>DE89370400440532013000</IBAN></Id></DbtrAcct>
+      </DrctDbtTxInf>
+    </PmtInf>
+  </CstmrDrctDbtInitn>
+</Document>`;
+  await page.fill('#sepa-input', pain008);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/SeqTp valid per EPC SDD Rulebook.*FRST/i, { timeout: 5_000 });
+});
+
+test('sepa: SeqTp enforcement flags RECR (typo) in a pain.008', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // RECR is a common typo for RCUR — schema-valid Max4Text, rulebook-broken.
+  const pain008 = `<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.008.001.02">
+  <CstmrDrctDbtInitn>
+    <GrpHdr><MsgId>DD-99</MsgId><CreDtTm>2024-05-15T09:00:00</CreDtTm><NbOfTxs>1</NbOfTxs><InitgPty><Nm>X</Nm></InitgPty></GrpHdr>
+    <PmtInf>
+      <PmtInfId>DD-1</PmtInfId>
+      <PmtMtd>DD</PmtMtd>
+      <PmtTpInf><SeqTp>RECR</SeqTp></PmtTpInf>
+      <ReqdColltnDt>2024-06-01</ReqdColltnDt>
+      <Cdtr><Nm>C</Nm></Cdtr>
+      <CdtrAcct><Id><IBAN>DE91100000000123456789</IBAN></Id></CdtrAcct>
+      <CdtrAgt><FinInstnId><BIC>DEUTDEFFXXX</BIC></FinInstnId></CdtrAgt>
+      <DrctDbtTxInf>
+        <PmtId><EndToEndId>E2E-1</EndToEndId></PmtId>
+        <InstdAmt Ccy="EUR">10.00</InstdAmt>
+        <DrctDbtTx><MndtRltdInf><MndtId>M-1</MndtId></MndtRltdInf></DrctDbtTx>
+        <DbtrAgt><FinInstnId><BIC>COBADEFFXXX</BIC></FinInstnId></DbtrAgt>
+        <Dbtr><Nm>D</Nm></Dbtr>
+        <DbtrAcct><Id><IBAN>DE89370400440532013000</IBAN></Id></DbtrAcct>
+      </DrctDbtTxInf>
+    </PmtInf>
+  </CstmrDrctDbtInitn>
+</Document>`;
+  await page.fill('#sepa-input', pain008);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/SeqTp invalid.*declares RECR.*FRST \/ RCUR \/ OOFF \/ FNAL/i, { timeout: 5_000 });
+});
+
 test('sepa: rejects non-ISO 20022 XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'sepa');
   await page.fill('#sepa-input', '<?xml version="1.0"?><foo><bar/></foo>');
@@ -1824,6 +1886,32 @@ test('ubl: PayableAmount consistency flags a mismatch against TaxInclusive', asy
   await page.fill('#ubl-input', bad);
   await page.click('#btn-ubl-parse');
   await expect(page.locator('#ubl-results')).toContainText(/PayableAmount mismatch.*119\.00 EUR.*120\.00 EUR.*BR-CO-16/i, { timeout: 5_000 });
+});
+
+test('ubl: InvoiceTypeCode confirms when set to PEPPOL-allowed 380', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // PEPPOL BIS Billing 3.0 allows InvoiceTypeCode ∈ {380, 381, 384, 389, 875, 876, 877};
+  // 380 (Commercial invoice) is by far the most common.
+  const good = UBL_INVOICE.replace(
+    '<cbc:DueDate>2024-05-01</cbc:DueDate>',
+    '<cbc:DueDate>2024-05-01</cbc:DueDate>\n  <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>'
+  );
+  await page.fill('#ubl-input', good);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Document type code 380.*PEPPOL BIS Billing 3\.0.*UNCL 1001/i, { timeout: 5_000 });
+});
+
+test('ubl: InvoiceTypeCode flags a value outside the PEPPOL allowed set', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // 999 is schema-valid plain integer text but rail-broken — PEPPOL rejects it.
+  const bad = UBL_INVOICE.replace(
+    '<cbc:DueDate>2024-05-01</cbc:DueDate>',
+    '<cbc:DueDate>2024-05-01</cbc:DueDate>\n  <cbc:InvoiceTypeCode>999</cbc:InvoiceTypeCode>'
+  );
+  await page.fill('#ubl-input', bad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Document type code 999 is not in the PEPPOL BIS Billing 3\.0 allowed set/i, { timeout: 5_000 });
+  await expect(page.locator('#ubl-results')).toContainText(/380/);
 });
 
 test('ubl: rejects non-UBL XML', async ({ page }) => {
