@@ -4449,6 +4449,8 @@
                 'sepa.warn.svcLvl': 'SvcLvl mismatch: PmtInf #{idx} declares {actual} but EPC SEPA Rulebook requires SEPA (ISO 20022 / EPC SCT/SDD)',
                 'sepa.ok.seqTp': 'SeqTp valid per EPC SDD Rulebook: {n} PmtInf block(s) declare one of FRST / RCUR / OOFF / FNAL',
                 'sepa.warn.seqTp': 'SeqTp invalid: PmtInf #{idx} declares {actual} but EPC SDD Rulebook allows only FRST / RCUR / OOFF / FNAL (ISO 20022 / EPC SDD)',
+                'sepa.ok.msgIdCharset': 'GrpHdr/MsgId {msgId} uses only EPC SEPA Rulebook allowed characters (A-Z a-z 0-9 / - ? : ( ) . , \' + space)',
+                'sepa.warn.msgIdCharset': 'GrpHdr/MsgId {msgId} contains characters outside the EPC SEPA Rulebook allowed set (A-Z a-z 0-9 / - ? : ( ) . , \' + space) — clearing systems strip or reject',
                 'sepa.warn.ccyInvalid': 'Currency code not active per ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unrecognized ISO 20022 root element — partial parse only.',
                 'err.sepaEmpty': 'XML input is empty.',
@@ -4544,6 +4546,8 @@
                 'ubl.warn.payableMismatch': 'PayableAmount mismatch: TaxInclusive − Prepaid + PayableRounding = {computed} ≠ declared PayableAmount {declared} (EN 16931 BR-CO-16)',
                 'ubl.ok.docType': 'Document type code {code} is allowed by PEPPOL BIS Billing 3.0 / EN 16931 (UNCL 1001)',
                 'ubl.warn.docType': 'Document type code {code} is not in the PEPPOL BIS Billing 3.0 allowed set ({allowed}) (UNCL 1001 / EN 16931)',
+                'ubl.ok.lineIdUnique': 'Line IDs unique across the document ({n} line(s)) per EN 16931 BR-21 / PEPPOL BIS Billing 3.0',
+                'ubl.warn.lineIdDup': 'Line ID duplicated within document: {id} appears {n} times — EN 16931 BR-21 / PEPPOL BIS Billing 3.0 requires unique line identifiers',
                 'ubl.ok.ccyValid': 'Currency codes active per ISO 4217: {list}',
                 'ubl.ok.ibanValid': 'Payee/Payer financial account IBANs valid (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'Payee/Payer IBAN failed ISO 13616 MOD-97 check: {iban}',
@@ -5601,6 +5605,8 @@
                 'sepa.warn.svcLvl': 'SvcLvl non conforme : le bloc PmtInf n°{idx} déclare {actual} alors que les règles EPC SEPA exigent SEPA (ISO 20022 / EPC SCT/SDD)',
                 'sepa.ok.seqTp': 'SeqTp conforme aux règles EPC SDD : {n} bloc(s) PmtInf déclarent FRST, RCUR, OOFF ou FNAL',
                 'sepa.warn.seqTp': 'SeqTp invalide : le bloc PmtInf n°{idx} déclare {actual} alors que les règles EPC SDD n’autorisent que FRST / RCUR / OOFF / FNAL (ISO 20022 / EPC SDD)',
+                'sepa.ok.msgIdCharset': 'GrpHdr/MsgId {msgId} n’utilise que les caractères autorisés par les règles EPC SEPA (A-Z a-z 0-9 / - ? : ( ) . , \' + espace)',
+                'sepa.warn.msgIdCharset': 'GrpHdr/MsgId {msgId} contient des caractères hors de l’ensemble autorisé par les règles EPC SEPA (A-Z a-z 0-9 / - ? : ( ) . , \' + espace) — les systèmes de compensation les suppriment ou les rejettent',
                 'sepa.warn.ccyInvalid': 'Code monétaire non actif selon ISO 4217 : {code}',
                 'sepa.warn.unknownDoc': 'Élément racine ISO 20022 non reconnu — analyse partielle uniquement.',
                 'err.sepaEmpty': 'Le XML d’entrée est vide.',
@@ -5686,6 +5692,8 @@
                 'ubl.warn.payableMismatch': 'PayableAmount incohérent : TaxInclusive − Prepaid + PayableRounding = {computed} ≠ PayableAmount déclaré {declared} (EN 16931 BR-CO-16)',
                 'ubl.ok.docType': 'Code de type de document {code} accepté par PEPPOL BIS Billing 3.0 / EN 16931 (UNCL 1001)',
                 'ubl.warn.docType': 'Code de type de document {code} hors de l’ensemble autorisé par PEPPOL BIS Billing 3.0 ({allowed}) (UNCL 1001 / EN 16931)',
+                'ubl.ok.lineIdUnique': 'Identifiants de ligne uniques dans le document ({n} ligne(s)) selon EN 16931 BR-21 / PEPPOL BIS Billing 3.0',
+                'ubl.warn.lineIdDup': 'Identifiant de ligne dupliqué dans le document : {id} apparaît {n} fois — EN 16931 BR-21 / PEPPOL BIS Billing 3.0 exige des identifiants uniques',
                 'ubl.ok.ccyValid': 'Codes monétaires actifs selon ISO 4217 : {list}',
                 'ubl.ok.ibanValid': 'IBAN des comptes Payee/Payer valides (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'IBAN Payee/Payer échoue au contrôle ISO 13616 MOD-97 : {iban}',
@@ -6713,6 +6721,8 @@
                 'sepa.warn.svcLvl': 'SvcLvl 不一致：PmtInf 第 {idx} 项声明 {actual}，但 EPC SEPA 规则书要求 SEPA（ISO 20022 / EPC SCT/SDD）',
                 'sepa.ok.seqTp': 'SeqTp 符合 EPC SDD 规则书：{n} 个 PmtInf 块声明为 FRST / RCUR / OOFF / FNAL 之一',
                 'sepa.warn.seqTp': 'SeqTp 不合法：PmtInf 第 {idx} 项声明 {actual}，但 EPC SDD 规则书仅允许 FRST / RCUR / OOFF / FNAL（ISO 20022 / EPC SDD）',
+                'sepa.ok.msgIdCharset': 'GrpHdr/MsgId {msgId} 仅使用 EPC SEPA 规则书允许的字符集（A-Z a-z 0-9 / - ? : ( ) . , \' + 空格）',
+                'sepa.warn.msgIdCharset': 'GrpHdr/MsgId {msgId} 含有 EPC SEPA 规则书允许字符集（A-Z a-z 0-9 / - ? : ( ) . , \' + 空格）之外的字符——清算系统会剥除或拒绝',
                 'sepa.warn.ccyInvalid': '币种代码不在 ISO 4217 现行清单中：{code}',
                 'sepa.warn.unknownDoc': '无法识别的 ISO 20022 根元素 — 仅部分解析。',
                 'err.sepaEmpty': 'XML 输入为空。',
@@ -6798,6 +6808,8 @@
                 'ubl.warn.payableMismatch': 'PayableAmount 不一致：TaxInclusive − Prepaid + PayableRounding = {computed} ≠ 声明的 PayableAmount {declared}（EN 16931 BR-CO-16）',
                 'ubl.ok.docType': '文档类型代码 {code} 符合 PEPPOL BIS Billing 3.0 / EN 16931 允许集合（UNCL 1001）',
                 'ubl.warn.docType': '文档类型代码 {code} 不在 PEPPOL BIS Billing 3.0 允许集合中（{allowed}）（UNCL 1001 / EN 16931）',
+                'ubl.ok.lineIdUnique': '文档内行标识符均唯一（共 {n} 行），符合 EN 16931 BR-21 / PEPPOL BIS Billing 3.0',
+                'ubl.warn.lineIdDup': '文档内行标识符重复：{id} 出现了 {n} 次——EN 16931 BR-21 / PEPPOL BIS Billing 3.0 要求行标识符唯一',
                 'ubl.ok.ccyValid': '币种代码按 ISO 4217 有效：{list}',
                 'ubl.ok.ibanValid': '收款方/付款方账户 IBAN 通过 ISO 13616 MOD-97 校验（{n}）',
                 'ubl.warn.ibanInvalid': '收款方/付款方 IBAN 未通过 ISO 13616 MOD-97 校验：{iban}',
@@ -7840,6 +7852,8 @@
                 'sepa.warn.svcLvl': 'SvcLvl-Abweichung: PmtInf Nr. {idx} deklariert {actual}, das EPC-SEPA-Rulebook verlangt jedoch SEPA (ISO 20022 / EPC SCT/SDD)',
                 'sepa.ok.seqTp': 'SeqTp gemäß EPC-SDD-Rulebook gültig: {n} PmtInf-Block(s) deklarieren FRST, RCUR, OOFF oder FNAL',
                 'sepa.warn.seqTp': 'SeqTp ungültig: PmtInf Nr. {idx} deklariert {actual}, das EPC-SDD-Rulebook erlaubt jedoch nur FRST / RCUR / OOFF / FNAL (ISO 20022 / EPC SDD)',
+                'sepa.ok.msgIdCharset': 'GrpHdr/MsgId {msgId} nutzt ausschließlich vom EPC-SEPA-Rulebook erlaubte Zeichen (A-Z a-z 0-9 / - ? : ( ) . , \' + Leerzeichen)',
+                'sepa.warn.msgIdCharset': 'GrpHdr/MsgId {msgId} enthält Zeichen außerhalb des vom EPC-SEPA-Rulebook erlaubten Zeichensatzes (A-Z a-z 0-9 / - ? : ( ) . , \' + Leerzeichen) — Clearing-Systeme entfernen sie oder weisen die Datei ab',
                 'sepa.warn.ccyInvalid': 'Währungscode nicht aktiv nach ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unbekanntes ISO-20022-Wurzelelement — nur Teilanalyse.',
                 'err.sepaEmpty': 'Die XML-Eingabe ist leer.',
@@ -7925,6 +7939,8 @@
                 'ubl.warn.payableMismatch': 'PayableAmount-Abweichung: TaxInclusive − Prepaid + PayableRounding = {computed} ≠ deklarierter PayableAmount {declared} (EN 16931 BR-CO-16)',
                 'ubl.ok.docType': 'Dokumenttyp-Code {code} ist in PEPPOL BIS Billing 3.0 / EN 16931 zulässig (UNCL 1001)',
                 'ubl.warn.docType': 'Dokumenttyp-Code {code} liegt außerhalb der von PEPPOL BIS Billing 3.0 erlaubten Menge ({allowed}) (UNCL 1001 / EN 16931)',
+                'ubl.ok.lineIdUnique': 'Zeilen-IDs im Dokument sind eindeutig ({n} Zeile(n)) gemäß EN 16931 BR-21 / PEPPOL BIS Billing 3.0',
+                'ubl.warn.lineIdDup': 'Zeilen-ID im Dokument doppelt vergeben: {id} erscheint {n}-mal — EN 16931 BR-21 / PEPPOL BIS Billing 3.0 verlangt eindeutige Zeilenkennungen',
                 'ubl.ok.ccyValid': 'Währungscodes nach ISO 4217 aktiv: {list}',
                 'ubl.ok.ibanValid': 'IBANs der Payee-/Payer-Konten gültig (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'Payee-/Payer-IBAN scheitert an ISO-13616-MOD-97-Prüfung: {iban}',
@@ -8952,6 +8968,8 @@
                 'sepa.warn.svcLvl': 'SvcLvl बेमेल: PmtInf #{idx} ने {actual} घोषित किया, परन्तु EPC SEPA रूलबुक SEPA आवश्यक है (ISO 20022 / EPC SCT/SDD)',
                 'sepa.ok.seqTp': 'SeqTp EPC SDD रूलबुक के अनुरूप: {n} PmtInf ब्लॉक FRST / RCUR / OOFF / FNAL में से एक घोषित करते हैं',
                 'sepa.warn.seqTp': 'SeqTp अमान्य: PmtInf #{idx} ने {actual} घोषित किया, परन्तु EPC SDD रूलबुक केवल FRST / RCUR / OOFF / FNAL की अनुमति देता है (ISO 20022 / EPC SDD)',
+                'sepa.ok.msgIdCharset': 'GrpHdr/MsgId {msgId} केवल EPC SEPA रूलबुक द्वारा अनुमत वर्णों का उपयोग करता है (A-Z a-z 0-9 / - ? : ( ) . , \' + स्पेस)',
+                'sepa.warn.msgIdCharset': 'GrpHdr/MsgId {msgId} में EPC SEPA रूलबुक अनुमत वर्ण-सेट (A-Z a-z 0-9 / - ? : ( ) . , \' + स्पेस) से बाहर के वर्ण हैं — क्लियरिंग सिस्टम उन्हें हटा देते हैं या फ़ाइल अस्वीकार करते हैं',
                 'sepa.warn.ccyInvalid': 'मुद्रा कोड ISO 4217 में सक्रिय नहीं: {code}',
                 'sepa.warn.unknownDoc': 'अज्ञात ISO 20022 रूट तत्व — केवल आंशिक पार्सिंग।',
                 'err.sepaEmpty': 'XML इनपुट खाली है।',
@@ -9037,6 +9055,8 @@
                 'ubl.warn.payableMismatch': 'PayableAmount बेमेल: TaxInclusive − Prepaid + PayableRounding = {computed} ≠ घोषित PayableAmount {declared} (EN 16931 BR-CO-16)',
                 'ubl.ok.docType': 'दस्तावेज़ प्रकार कोड {code} PEPPOL BIS Billing 3.0 / EN 16931 (UNCL 1001) में अनुमत है',
                 'ubl.warn.docType': 'दस्तावेज़ प्रकार कोड {code} PEPPOL BIS Billing 3.0 अनुमत समुच्चय ({allowed}) में नहीं है (UNCL 1001 / EN 16931)',
+                'ubl.ok.lineIdUnique': 'दस्तावेज़ में लाइन आईडी अद्वितीय हैं ({n} लाइन) — EN 16931 BR-21 / PEPPOL BIS Billing 3.0 के अनुसार',
+                'ubl.warn.lineIdDup': 'दस्तावेज़ में लाइन आईडी दोहराई गई: {id} {n} बार उपस्थित — EN 16931 BR-21 / PEPPOL BIS Billing 3.0 अद्वितीय लाइन पहचानकर्ता आवश्यक करता है',
                 'ubl.ok.ccyValid': 'मुद्रा कोड ISO 4217 के अनुसार सक्रिय: {list}',
                 'ubl.ok.ibanValid': 'भुगतानकर्ता/प्राप्तकर्ता खाते के IBAN वैध (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'भुगतानकर्ता/प्राप्तकर्ता IBAN ISO 13616 MOD-97 जाँच में विफल: {iban}',
@@ -16601,6 +16621,35 @@
             }
         }
 
+        // EPC SEPA Rulebook (§AT-43 in the SCT Rulebook, parallel section in the
+        // SDD Rulebook) restricts the SEPA character set for free-text fields and
+        // identifiers to a subset of ISO 20022 BasicLatin:
+        //   A-Z a-z 0-9 / - ? : ( ) . , ' + and space.
+        // A `<MsgId>` carrying characters outside this set (most commonly accented
+        // letters, em-dashes, or emoji pasted from a CRM template) is schema-valid
+        // ISO 20022 XML but rail-broken — clearing systems (EBA STEP2, STET, RT1)
+        // either reject the file at the character-set gate or strip the bad chars
+        // before forwarding, which destroys the reconciliation reference. We only
+        // check `GrpHdr/MsgId` here because it is the document-level key; the
+        // transaction-level identifiers (EndToEndId, InstrId) have their own
+        // uniqueness and presence gates from drafts 43 / 19 and the character-set
+        // failure mode is dominated by the header field in practice.
+        const SEPA_CHARSET_RE = /^[A-Za-z0-9/\-?:().,'+ ]+$/;
+        function sepaCheckMsgIdCharset(out, doc, detected) {
+            if (detected.type !== 'pain.001' && detected.type !== 'pain.008') return;
+            const w = detected.wrapper;
+            if (!w) return;
+            const grpHdr = sepaFirst(w, 'GrpHdr');
+            if (!grpHdr) return;
+            const msgId = (sepaTextOf(grpHdr, 'MsgId') || '').trim();
+            if (!msgId) return;
+            if (SEPA_CHARSET_RE.test(msgId)) {
+                tlsRenderRow(out, t('sepa.row.warning'), '✓ ' + tFormat('sepa.ok.msgIdCharset', { msgId }));
+            } else {
+                tlsRenderRow(out, t('sepa.row.warning'), '✗ ' + tFormat('sepa.warn.msgIdCharset', { msgId }));
+            }
+        }
+
         function sepaCheckBics(out, doc) {
             const bics = sepaCollectBics(doc);
             if (!bics.length) return;
@@ -16644,6 +16693,7 @@
                 sepaCheckE2eIdUnique(out, doc, detected);
                 sepaCheckSvcLvl(out, doc, detected);
                 sepaCheckSeqTp(out, doc, detected);
+                sepaCheckMsgIdCharset(out, doc, detected);
             } catch (e) {
                 tlsRenderRow(out, t('sepa.row.error'), e.message);
             }
@@ -17325,6 +17375,41 @@
             }
         }
 
+        // PEPPOL BIS Billing 3.0 / EN 16931: each <cac:InvoiceLine>/<cac:CreditNoteLine>
+        // is identified by its <cbc:ID> child (EN 16931 BR-21 names the field as the
+        // line identifier). Schema-valid plain text per UBL 2.1, but a duplicate ID
+        // across two different lines is rail-broken — PEPPOL access points reject
+        // the document because downstream processors key per-line allowances,
+        // charges, and dispute references off the ID, so a duplicate causes silent
+        // reconciliation collisions. The canonical real-world cause is a batch
+        // generator that iterates over line items without advancing the sequence
+        // counter. Parallel in shape to the SEPA EndToEndId uniqueness gate from
+        // draft 43.
+        function ublCheckLineIdUnique(out, detected) {
+            const r = detected.root;
+            const isCreditNote = detected.type === 'CreditNote';
+            const elName = isCreditNote ? 'CreditNoteLine' : 'InvoiceLine';
+            const lines = sepaAllLocal(r, elName);
+            const counts = new Map();
+            let withId = 0;
+            for (const ln of lines) {
+                const id = (sepaTextOf(ln, 'ID') || '').trim();
+                if (!id) continue;
+                withId++;
+                counts.set(id, (counts.get(id) || 0) + 1);
+            }
+            if (withId < 2) return;
+            const dups = [];
+            for (const [id, n] of counts) if (n > 1) dups.push({ id, n });
+            if (dups.length === 0) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + tFormat('ubl.ok.lineIdUnique', { n: intlNumber(withId) }));
+            } else {
+                for (const d of dups) {
+                    tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + tFormat('ubl.warn.lineIdDup', { id: d.id, n: intlNumber(d.n) }));
+                }
+            }
+        }
+
         function ublCheckIbans(out, doc) {
             const ibans = ublCollectIbans(doc);
             if (!ibans.length) return;
@@ -17363,6 +17448,7 @@
                 ublCheckDates(out, detected);
                 ublCheckPayable(out, detected);
                 ublCheckDocumentTypeCode(out, detected);
+                ublCheckLineIdUnique(out, detected);
                 ublCheckIbans(out, doc);
             } catch (e) {
                 tlsRenderRow(out, t('ubl.row.error'), e.message);

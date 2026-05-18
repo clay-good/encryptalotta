@@ -1914,6 +1914,52 @@ test('ubl: InvoiceTypeCode flags a value outside the PEPPOL allowed set', async 
   await expect(page.locator('#ubl-results')).toContainText(/380/);
 });
 
+test('ubl: line-ID uniqueness confirms when each InvoiceLine carries a distinct cbc:ID', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Add a second InvoiceLine with a distinct ID so the uniqueness check has
+  // two values to compare. UBL_INVOICE already declares cbc:ID=1 on its single
+  // line; the duplicate fixture below appends a sibling with cbc:ID=2.
+  const twoLines = UBL_INVOICE.replace(
+    '</cac:InvoiceLine>\n</Invoice>',
+    `</cac:InvoiceLine>\n  <cac:InvoiceLine>\n    <cbc:ID>2</cbc:ID>\n    <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>\n    <cbc:LineExtensionAmount currencyID="EUR">0.00</cbc:LineExtensionAmount>\n    <cac:Item><cbc:Name>Filler</cbc:Name></cac:Item>\n    <cac:Price><cbc:PriceAmount currencyID="EUR">0.00</cbc:PriceAmount></cac:Price>\n  </cac:InvoiceLine>\n</Invoice>`
+  );
+  await page.fill('#ubl-input', twoLines);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Line IDs unique across the document \(2 line\(s\)\).*BR-21/i, { timeout: 5_000 });
+});
+
+test('ubl: line-ID uniqueness flags a duplicated cbc:ID across two InvoiceLines', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Two InvoiceLines that both declare cbc:ID=1 — the canonical batch-generator
+  // bug the uniqueness gate exists to catch.
+  const dupLines = UBL_INVOICE.replace(
+    '</cac:InvoiceLine>\n</Invoice>',
+    `</cac:InvoiceLine>\n  <cac:InvoiceLine>\n    <cbc:ID>1</cbc:ID>\n    <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>\n    <cbc:LineExtensionAmount currencyID="EUR">0.00</cbc:LineExtensionAmount>\n    <cac:Item><cbc:Name>Filler</cbc:Name></cac:Item>\n    <cac:Price><cbc:PriceAmount currencyID="EUR">0.00</cbc:PriceAmount></cac:Price>\n  </cac:InvoiceLine>\n</Invoice>`
+  );
+  await page.fill('#ubl-input', dupLines);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Line ID duplicated within document: 1 appears 2 times.*BR-21/i, { timeout: 5_000 });
+});
+
+test('sepa: MsgId character-set check confirms on a Rulebook-clean identifier', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // SEPA_PAIN001 declares MsgId=MSG-2024-001 — all chars in the EPC allowed set.
+  await page.fill('#sepa-input', SEPA_PAIN001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/MsgId MSG-2024-001 uses only EPC SEPA Rulebook allowed characters/i, { timeout: 5_000 });
+});
+
+test('sepa: MsgId character-set check flags a non-Latin character', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Inject an accented character that is schema-valid Max35Text but outside
+  // the EPC SEPA Rulebook allowed character set. Clearing systems either
+  // reject the file or strip the bad characters silently.
+  const bad = SEPA_PAIN001.replace('MSG-2024-001', 'MSG-2024-Ää');
+  await page.fill('#sepa-input', bad);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/MsgId MSG-2024-Ää contains characters outside the EPC SEPA Rulebook allowed set/i, { timeout: 5_000 });
+});
+
 test('ubl: rejects non-UBL XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   await page.fill('#ubl-input', '<?xml version="1.0"?><Document/>');
