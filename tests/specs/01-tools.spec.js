@@ -2343,6 +2343,55 @@ test('sepa: TwnNm character-set check flags an umlaut in a town name', async ({ 
   await expect(page.locator('#sepa-results')).toContainText(/PstlAdr\/TwnNm "München" contains characters outside the EPC SEPA Rulebook allowed set/i, { timeout: 5_000 });
 });
 
+test('sepa: PstCd character-set check confirms on a Rulebook-clean postal code', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Clean ASCII PstCd inside the debtor postal address — `10115` (Berlin) passes the EPC set.
+  const withPst = SEPA_PAIN001.replace(
+    '<Dbtr><Nm>ACME Corp</Nm></Dbtr>',
+    '<Dbtr><Nm>ACME Corp</Nm><PstlAdr><PstCd>10115</PstCd></PstlAdr></Dbtr>'
+  );
+  await page.fill('#sepa-input', withPst);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Postal codes \(PstlAdr\/PstCd\) use only EPC SEPA Rulebook allowed characters across all 1 code/i, { timeout: 5_000 });
+});
+
+test('sepa: PstCd character-set check flags non-ASCII characters in a postal code', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // "10115§" carries `§` (section sign) — Max16Text-valid but outside the EPC SEPA character set.
+  const withPst = SEPA_PAIN001.replace(
+    '<Dbtr><Nm>ACME Corp</Nm></Dbtr>',
+    '<Dbtr><Nm>ACME Corp</Nm><PstlAdr><PstCd>10115§</PstCd></PstlAdr></Dbtr>'
+  );
+  await page.fill('#sepa-input', withPst);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/PstlAdr\/PstCd "10115§" contains characters outside the EPC SEPA Rulebook allowed set/i, { timeout: 5_000 });
+});
+
+test('ubl: TaxCurrencyCode check confirms on an active ISO 4217 code', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Inject TaxCurrencyCode=EUR — an active ISO 4217 code. PEPPOL BIS Billing 3.0 / BT-6 accepts.
+  const withTax = UBL_INVOICE.replace(
+    '<cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>',
+    '<cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>\n  <cbc:TaxCurrencyCode>EUR</cbc:TaxCurrencyCode>'
+  );
+  await page.fill('#ubl-input', withTax);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/TaxCurrencyCode EUR is a current ISO 4217 active code \(EN 16931 BT-6/i, { timeout: 5_000 });
+});
+
+test('ubl: TaxCurrencyCode check flags a historical / typo ISO 4217 code', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // `ITL` (Italian lira) is a historical ISO 4217 code — schema-valid as plain text but
+  // PEPPOL access points reject it at the schematron gate.
+  const withTax = UBL_INVOICE.replace(
+    '<cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>',
+    '<cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>\n  <cbc:TaxCurrencyCode>ITL</cbc:TaxCurrencyCode>'
+  );
+  await page.fill('#ubl-input', withTax);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/TaxCurrencyCode ITL is not active per ISO 4217 — EN 16931 BT-6/i, { timeout: 5_000 });
+});
+
 test('ubl: rejects non-UBL XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   await page.fill('#ubl-input', '<?xml version="1.0"?><Document/>');
