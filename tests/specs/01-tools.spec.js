@@ -2122,6 +2122,53 @@ test('sepa: MndtId character-set check flags a non-Latin character', async ({ pa
   await expect(page.locator('#sepa-results')).toContainText(/MndtId MNDT-Müller-001 contains characters outside the EPC SDD Rulebook allowed set/i, { timeout: 5_000 });
 });
 
+test('sepa: PmtInfId character-set check confirms on a Rulebook-clean pain.001', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // SEPA_PAIN001 declares <PmtInfId>PAY-001</PmtInfId> — clean ASCII.
+  await page.fill('#sepa-input', SEPA_PAIN001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/PmtInfId values use only EPC SEPA Rulebook allowed characters across all 1 PmtInf block/i, { timeout: 5_000 });
+});
+
+test('sepa: PmtInfId character-set check flags a non-Latin character', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // A batch generator interpolating a company name (Übermäßig GmbH) into the
+  // per-block identifier — schema-valid Max35Text, rail-broken per the EPC
+  // SEPA Rulebook character set.
+  const bad = SEPA_PAIN001.replace('<PmtInfId>PAY-001</PmtInfId>', '<PmtInfId>PAY-Übermäßig</PmtInfId>');
+  await page.fill('#sepa-input', bad);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/PmtInfId PAY-Übermäßig contains characters outside the EPC SEPA Rulebook allowed set/i, { timeout: 5_000 });
+});
+
+test('ubl: Seller VAT identifier confirms a valid DE VAT ID', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // PEPPOL BIS Billing 3.0 requires the supplier VAT identifier (EN 16931
+  // BT-31) in AccountingSupplierParty/Party/PartyTaxScheme/CompanyID, paired
+  // with TaxScheme/cbc:ID=VAT. DE136695976 is the canonical DE example with
+  // a passing ISO 7064 MOD 11,10 checksum.
+  const withVat = UBL_INVOICE.replace(
+    '<cac:PartyLegalEntity><cbc:RegistrationName>ACME Widgets GmbH</cbc:RegistrationName></cac:PartyLegalEntity>\n    </cac:Party>',
+    '<cac:PartyLegalEntity><cbc:RegistrationName>ACME Widgets GmbH</cbc:RegistrationName></cac:PartyLegalEntity>\n      <cac:PartyTaxScheme><cbc:CompanyID>DE136695976</cbc:CompanyID><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:PartyTaxScheme>\n    </cac:Party>'
+  );
+  await page.fill('#ubl-input', withVat);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Seller VAT identifier DE136695976 valid per ISO 3166-1 alpha-2/i, { timeout: 5_000 });
+});
+
+test('ubl: Seller VAT identifier flags a malformed value', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Missing country prefix — UBL 2.1 accepts the bare identifier text, but
+  // PEPPOL BIS Billing 3.0 / EN 16931 BT-31 reject it at the schematron gate.
+  const withVat = UBL_INVOICE.replace(
+    '<cac:PartyLegalEntity><cbc:RegistrationName>ACME Widgets GmbH</cbc:RegistrationName></cac:PartyLegalEntity>\n    </cac:Party>',
+    '<cac:PartyLegalEntity><cbc:RegistrationName>ACME Widgets GmbH</cbc:RegistrationName></cac:PartyLegalEntity>\n      <cac:PartyTaxScheme><cbc:CompanyID>123456789</cbc:CompanyID><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:PartyTaxScheme>\n    </cac:Party>'
+  );
+  await page.fill('#ubl-input', withVat);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Seller VAT identifier 123456789 invalid — PEPPOL BIS Billing 3\.0 \/ EN 16931 BT-31/i, { timeout: 5_000 });
+});
+
 test('ubl: rejects non-UBL XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   await page.fill('#ubl-input', '<?xml version="1.0"?><Document/>');
