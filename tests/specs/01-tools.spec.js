@@ -1960,6 +1960,44 @@ test('sepa: MsgId character-set check flags a non-Latin character', async ({ pag
   await expect(page.locator('#sepa-results')).toContainText(/MsgId MSG-2024-Ää contains characters outside the EPC SEPA Rulebook allowed set/i, { timeout: 5_000 });
 });
 
+test('ubl: PEPPOL CustomizationID confirms when the BIS Billing 3.0 URN is declared', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // UBL_INVOICE already declares the canonical PEPPOL BIS Billing 3.0 URN.
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/CustomizationID declares PEPPOL BIS Billing 3\.0 conformance/i, { timeout: 5_000 });
+});
+
+test('ubl: PEPPOL CustomizationID flags a non-PEPPOL URN', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Repurposed generic UBL invoice — schema-valid but rejected by PEPPOL access points.
+  const bad = UBL_INVOICE.replace(
+    'urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0',
+    'urn:cen.eu:en16931:2017'
+  );
+  await page.fill('#ubl-input', bad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/CustomizationID urn:cen\.eu:en16931:2017 does not match PEPPOL BIS Billing 3\.0/i, { timeout: 5_000 });
+});
+
+test('sepa: EndToEndId character-set check confirms on a Rulebook-clean batch', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // SEPA_PAIN001 declares EndToEndId=E2E-001 — all chars in the EPC allowed set.
+  await page.fill('#sepa-input', SEPA_PAIN001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/EndToEndId values use only EPC SEPA Rulebook allowed characters across all 1 transaction/i, { timeout: 5_000 });
+});
+
+test('sepa: EndToEndId character-set check flags a non-Latin character', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Inject an emoji into the EndToEndId — Max35Text-valid (no length problem)
+  // but outside the EPC SEPA Rulebook allowed character set.
+  const bad = SEPA_PAIN001.replace('E2E-001', 'E2E-Müller');
+  await page.fill('#sepa-input', bad);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/EndToEndId E2E-Müller contains characters outside the EPC SEPA Rulebook allowed set/i, { timeout: 5_000 });
+});
+
 test('ubl: rejects non-UBL XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   await page.fill('#ubl-input', '<?xml version="1.0"?><Document/>');
