@@ -2299,6 +2299,50 @@ test('ubl: PaymentMeansCode flags a code outside the EN 16931 / PEPPOL subset', 
   await expect(page.locator('#ubl-results')).toContainText(/PaymentMeansCode 70 is not in the EN 16931 \/ PEPPOL BIS Billing 3\.0 allowed UNCL 4461 subset/i, { timeout: 5_000 });
 });
 
+test('ubl: DocumentCurrencyCode consistency confirms when every @currencyID matches BT-5', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Canonical UBL_INVOICE declares EUR throughout — the consistency gate should pass.
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/All monetary @currencyID attributes match the document currency EUR \(EN 16931 BR-CO-04/i, { timeout: 5_000 });
+});
+
+test('ubl: DocumentCurrencyCode consistency flags a mismatched @currencyID', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Flip a single line-extension @currencyID to USD — schema-valid, but BR-CO-04 broken.
+  const bad = UBL_INVOICE.replace(
+    '<cbc:LineExtensionAmount currencyID="EUR">100.00</cbc:LineExtensionAmount>\n    <cac:Item>',
+    '<cbc:LineExtensionAmount currencyID="USD">100.00</cbc:LineExtensionAmount>\n    <cac:Item>'
+  );
+  await page.fill('#ubl-input', bad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Monetary @currencyID USD does not match the document currency EUR — EN 16931 BR-CO-04/i, { timeout: 5_000 });
+});
+
+test('sepa: TwnNm character-set check confirms on a Rulebook-clean town name', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Inject a clean ASCII TwnNm inside the debtor postal address.
+  const withTwn = SEPA_PAIN001.replace(
+    '<Dbtr><Nm>ACME Corp</Nm></Dbtr>',
+    '<Dbtr><Nm>ACME Corp</Nm><PstlAdr><TwnNm>Berlin</TwnNm></PstlAdr></Dbtr>'
+  );
+  await page.fill('#sepa-input', withTwn);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Town names \(PstlAdr\/TwnNm\) use only EPC SEPA Rulebook allowed characters across all 1 town/i, { timeout: 5_000 });
+});
+
+test('sepa: TwnNm character-set check flags an umlaut in a town name', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // "München" carries an umlaut — schema-valid Max35Text but rail-broken.
+  const withTwn = SEPA_PAIN001.replace(
+    '<Dbtr><Nm>ACME Corp</Nm></Dbtr>',
+    '<Dbtr><Nm>ACME Corp</Nm><PstlAdr><TwnNm>München</TwnNm></PstlAdr></Dbtr>'
+  );
+  await page.fill('#sepa-input', withTwn);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/PstlAdr\/TwnNm "München" contains characters outside the EPC SEPA Rulebook allowed set/i, { timeout: 5_000 });
+});
+
 test('ubl: rejects non-UBL XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   await page.fill('#ubl-input', '<?xml version="1.0"?><Document/>');
