@@ -2440,6 +2440,52 @@ test('ubl: Country/IdentificationCode check flags UK (not an ISO code — Great 
   await expect(page.locator('#ubl-results')).toContainText(/Country\/IdentificationCode "UK" is not a valid ISO 3166-1 alpha-2 code/i, { timeout: 5_000 });
 });
 
+test('sepa: CtryOfRes check confirms on a valid ISO 3166-1 alpha-2 code', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Inject a CtryOfRes element under the debtor party with a clean alpha-2 code (DE).
+  const withRes = SEPA_PAIN001.replace(
+    '<Dbtr><Nm>ACME Corp</Nm></Dbtr>',
+    '<Dbtr><Nm>ACME Corp</Nm><CtryOfRes>DE</CtryOfRes></Dbtr>'
+  );
+  await page.fill('#sepa-input', withRes);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Country of residence codes \(Dbtr\/Cdtr CtryOfRes\) are all valid ISO 3166-1 alpha-2/i, { timeout: 5_000 });
+});
+
+test('sepa: CtryOfRes check flags UK (not an ISO code — Great Britain is GB)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  const withRes = SEPA_PAIN001.replace(
+    '<Dbtr><Nm>ACME Corp</Nm></Dbtr>',
+    '<Dbtr><Nm>ACME Corp</Nm><CtryOfRes>UK</CtryOfRes></Dbtr>'
+  );
+  await page.fill('#sepa-input', withRes);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/CtryOfRes "UK" is not a valid ISO 3166-1 alpha-2 code/i, { timeout: 5_000 });
+});
+
+test('ubl: Item OriginCountry/IdentificationCode check confirms on a valid ISO 3166-1 alpha-2 code', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Inject a cac:OriginCountry block under the Item — EN 16931 BT-159 country of origin.
+  const withOrigin = UBL_INVOICE.replace(
+    '<cac:Item><cbc:Name>Widget Pro</cbc:Name></cac:Item>',
+    '<cac:Item><cbc:Name>Widget Pro</cbc:Name><cac:OriginCountry><cbc:IdentificationCode>DE</cbc:IdentificationCode></cac:OriginCountry></cac:Item>'
+  );
+  await page.fill('#ubl-input', withOrigin);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Item country-of-origin codes \(Item\/OriginCountry\/IdentificationCode\) are all valid ISO 3166-1 alpha-2/i, { timeout: 5_000 });
+});
+
+test('ubl: Item OriginCountry/IdentificationCode check flags UK (not an ISO code — Great Britain is GB)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  const withOrigin = UBL_INVOICE.replace(
+    '<cac:Item><cbc:Name>Widget Pro</cbc:Name></cac:Item>',
+    '<cac:Item><cbc:Name>Widget Pro</cbc:Name><cac:OriginCountry><cbc:IdentificationCode>UK</cbc:IdentificationCode></cac:OriginCountry></cac:Item>'
+  );
+  await page.fill('#ubl-input', withOrigin);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Item\/OriginCountry\/IdentificationCode "UK" is not a valid ISO 3166-1 alpha-2 code/i, { timeout: 5_000 });
+});
+
 test('ubl: rejects non-UBL XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   await page.fill('#ubl-input', '<?xml version="1.0"?><Document/>');
