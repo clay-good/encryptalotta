@@ -2992,6 +2992,52 @@ test('ubl: TaxPointDate ordering check flags a TaxPointDate after IssueDate', as
   await expect(page.locator('#ubl-results')).toContainText(/TaxPointDate 2024-05-15 is later than IssueDate 2024-04-01/i, { timeout: 5_000 });
 });
 
+test('sepa: CdtrRefInf/Ref ISO 11649 check confirms on a valid RF reference', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // RF18539007547034 — canonical ISO 11649 example, MOD-97-10 passes.
+  const withRef = SEPA_PAIN001.replace(
+    '<RmtInf><Ustrd>Invoice 2024-001</Ustrd></RmtInf>',
+    '<RmtInf><Strd><CdtrRefInf><Tp><CdOrPrtry><Cd>SCOR</Cd></CdOrPrtry></Tp><Ref>RF18539007547034</Ref></CdtrRefInf></Strd></RmtInf>'
+  );
+  await page.fill('#sepa-input', withRef);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Structured Creditor Reference\(s\) valid \(ISO 11649 MOD-97-10\)/i, { timeout: 5_000 });
+});
+
+test('sepa: CdtrRefInf/Ref ISO 11649 check flags a typo\'d RF reference', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Last digit flipped 4 → 5: RF18539007547035 — MOD-97 now fails.
+  const withBadRef = SEPA_PAIN001.replace(
+    '<RmtInf><Ustrd>Invoice 2024-001</Ustrd></RmtInf>',
+    '<RmtInf><Strd><CdtrRefInf><Tp><CdOrPrtry><Cd>SCOR</Cd></CdOrPrtry></Tp><Ref>RF18539007547035</Ref></CdtrRefInf></Strd></RmtInf>'
+  );
+  await page.fill('#sepa-input', withBadRef);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Structured Creditor Reference "RF18539007547035" failed ISO 11649 MOD-97-10 check/i, { timeout: 5_000 });
+});
+
+test('ubl: PaymentID ISO 11649 check confirms on a valid RF reference', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  const withRef = UBL_INVOICE.replace(
+    '</cac:LegalMonetaryTotal>',
+    '</cac:LegalMonetaryTotal>\n  <cac:PaymentMeans>\n    <cbc:PaymentMeansCode>30</cbc:PaymentMeansCode>\n    <cbc:PaymentID>RF18539007547034</cbc:PaymentID>\n  </cac:PaymentMeans>'
+  );
+  await page.fill('#ubl-input', withRef);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/PaymentID Structured Creditor Reference\(s\) valid \(ISO 11649 MOD-97-10\)/i, { timeout: 5_000 });
+});
+
+test('ubl: PaymentID ISO 11649 check flags a typo\'d RF reference', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  const withBadRef = UBL_INVOICE.replace(
+    '</cac:LegalMonetaryTotal>',
+    '</cac:LegalMonetaryTotal>\n  <cac:PaymentMeans>\n    <cbc:PaymentMeansCode>30</cbc:PaymentMeansCode>\n    <cbc:PaymentID>RF18539007547035</cbc:PaymentID>\n  </cac:PaymentMeans>'
+  );
+  await page.fill('#ubl-input', withBadRef);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/PaymentID "RF18539007547035" failed ISO 11649 MOD-97-10 check/i, { timeout: 5_000 });
+});
+
 test('ubl: rejects non-UBL XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   await page.fill('#ubl-input', '<?xml version="1.0"?><Document/>');

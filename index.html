@@ -4500,6 +4500,8 @@
                 'sepa.warn.pmtInfNbTx': 'PmtInf #{idx} NbOfTxs mismatch: block declares {declared} but contains {actual} transaction(s) — clearing systems reject the file at the per-PmtInf schematron gate (a common cause is a batch generator that refreshes the group-header counts but not the per-block counts when a transaction is added or removed)',
                 'sepa.ok.pmtInfCtrlSum': 'PmtInf/CtrlSum values match the per-block sum of transaction amounts across all {n} PmtInf block(s) (ISO 20022 / EPC SEPA Rulebook, ±1¢ tolerance)',
                 'sepa.warn.pmtInfCtrlSum': 'PmtInf #{idx} CtrlSum mismatch: block declares {declared} but transaction amounts sum to {actual} — clearing systems reject the file at the per-PmtInf schematron gate (a common cause is a batch generator that refreshes the group-header sum but not the per-block sum when an amount changes)',
+                'sepa.ok.cdtrRefRf': 'Structured Creditor Reference(s) valid (ISO 11649 MOD-97-10) across all {n} reference(s)',
+                'sepa.warn.cdtrRefRf': 'Structured Creditor Reference "{ref}" failed ISO 11649 MOD-97-10 check — schema-valid Max35Text but the creditor\'s downstream reconciliation silently fails to match the payment to the open receivable (a common cause is a CRM exporting the reference with a typo\'d digit)',
                 'sepa.warn.ccyInvalid': 'Currency code not active per ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unrecognized ISO 20022 root element — partial parse only.',
                 'err.sepaEmpty': 'XML input is empty.',
@@ -4643,6 +4645,8 @@
                 'ubl.warn.buyerRefLen': 'BuyerReference "{ref}" exceeds the 35-character cap ({len}/35 characters) — EN 16931 BT-10 is routinely copied verbatim into SEPA EndToEndId (ISO 20022 Max35Text); a longer value forces downstream SEPA generators to truncate (silent data loss across the reconciliation key) or to fail the file at the schema-validation gate',
                 'ubl.ok.taxPointDateOrder': 'TaxPointDate {tpd} is on or before IssueDate {issue} (EN 16931 BT-7 / BT-2 — VAT cannot become accountable after the invoice is issued)',
                 'ubl.warn.taxPointDateOrder': 'TaxPointDate {tpd} is later than IssueDate {issue} — EN 16931 BT-7 records when VAT becomes accountable and BT-2 records when the invoice was issued; a tax point after the issue date implies the supplier is declaring VAT for a period that has not yet started (data-entry error or template field-swap)',
+                'ubl.ok.paymentIdRf': 'PaymentID Structured Creditor Reference(s) valid (ISO 11649 MOD-97-10) across all {n} reference(s) (EN 16931 BT-83 / PEPPOL BIS Billing 3.0)',
+                'ubl.warn.paymentIdRf': 'PaymentID "{ref}" failed ISO 11649 MOD-97-10 check — schema-valid Identifier text but the downstream SEPA generator copies the value into <CdtrRefInf>/<Ref>, where the creditor\'s bank-statement matching silently fails to reconcile the payment to the open receivable (a common cause is a CRM exporting the reference with a typo\'d digit)',
                 'ubl.ok.ccyValid': 'Currency codes active per ISO 4217: {list}',
                 'ubl.ok.ibanValid': 'Payee/Payer financial account IBANs valid (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'Payee/Payer IBAN failed ISO 13616 MOD-97 check: {iban}',
@@ -5748,6 +5752,8 @@
                 'sepa.warn.pmtInfNbTx': 'Discordance PmtInf #{idx} NbOfTxs : le bloc déclare {declared} mais contient {actual} transaction(s) — les systèmes de compensation rejettent le fichier au contrôle schematron par bloc (cause fréquente : un générateur de lots qui rafraîchit les compteurs de l’en-tête mais pas ceux des blocs lors de l’ajout ou de la suppression d’une transaction)',
                 'sepa.ok.pmtInfCtrlSum': 'Les valeurs PmtInf/CtrlSum correspondent à la somme des montants par bloc sur l’ensemble des {n} bloc(s) PmtInf (ISO 20022 / EPC SEPA Rulebook, tolérance ±1¢)',
                 'sepa.warn.pmtInfCtrlSum': 'Discordance PmtInf #{idx} CtrlSum : le bloc déclare {declared} mais la somme des montants vaut {actual} — les systèmes de compensation rejettent le fichier au contrôle schematron par bloc (cause fréquente : un générateur de lots qui rafraîchit la somme de l’en-tête mais pas celle des blocs lors d’une modification de montant)',
+                'sepa.ok.cdtrRefRf': 'Référence(s) créancier structurée(s) valide(s) (ISO 11649 MOD-97-10) sur {n} référence(s)',
+                'sepa.warn.cdtrRefRf': 'La référence créancier structurée « {ref} » a échoué au contrôle ISO 11649 MOD-97-10 — Max35Text conforme au schéma mais le rapprochement aval du créancier échoue silencieusement (cause fréquente : un CRM exportant la référence avec un chiffre erroné)',
                 'sepa.warn.ccyInvalid': 'Code monétaire non actif selon ISO 4217 : {code}',
                 'sepa.warn.unknownDoc': 'Élément racine ISO 20022 non reconnu — analyse partielle uniquement.',
                 'err.sepaEmpty': 'Le XML d’entrée est vide.',
@@ -5881,6 +5887,8 @@
                 'ubl.warn.buyerRefLen': 'BuyerReference « {ref} » dépasse la limite de 35 caractères ({len}/35) — EN 16931 BT-10 est régulièrement recopié tel quel dans SEPA EndToEndId (ISO 20022 Max35Text) ; une valeur plus longue force les générateurs SEPA en aval à tronquer (perte silencieuse de la clé de rapprochement) ou à rejeter le fichier au contrôle de schéma',
                 'ubl.ok.taxPointDateOrder': 'TaxPointDate {tpd} est antérieure ou égale à IssueDate {issue} (EN 16931 BT-7 / BT-2 — la TVA ne peut devenir exigible après l’émission de la facture)',
                 'ubl.warn.taxPointDateOrder': 'TaxPointDate {tpd} est postérieure à IssueDate {issue} — EN 16931 BT-7 indique la date d’exigibilité de la TVA et BT-2 la date d’émission de la facture ; un point de TVA postérieur à l’émission implique que le fournisseur déclare la TVA pour une période non encore commencée (erreur de saisie ou inversion de champ dans le modèle)',
+                'ubl.ok.paymentIdRf': 'Référence(s) créancier structurée(s) PaymentID valide(s) (ISO 11649 MOD-97-10) sur {n} référence(s) (EN 16931 BT-83 / PEPPOL BIS Billing 3.0)',
+                'ubl.warn.paymentIdRf': 'PaymentID « {ref} » a échoué au contrôle ISO 11649 MOD-97-10 — texte Identifier conforme au schéma mais le générateur SEPA en aval recopie la valeur dans <CdtrRefInf>/<Ref>, où le rapprochement bancaire du créancier échoue silencieusement (cause fréquente : un CRM exportant la référence avec un chiffre erroné)',
                 'ubl.ok.ccyValid': 'Codes monétaires actifs selon ISO 4217 : {list}',
                 'ubl.ok.ibanValid': 'IBAN des comptes Payee/Payer valides (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'IBAN Payee/Payer échoue au contrôle ISO 13616 MOD-97 : {iban}',
@@ -6956,6 +6964,8 @@
                 'sepa.warn.pmtInfNbTx': 'PmtInf #{idx} NbOfTxs 不匹配：该块声明 {declared}，但实际包含 {actual} 笔交易——清算系统会在 PmtInf 级别的 schematron 检查中拒绝该文件（常见原因是批量生成器在添加或删除交易后只刷新了组头计数而未刷新各块计数）',
                 'sepa.ok.pmtInfCtrlSum': '所有 {n} 个 PmtInf 块的 PmtInf/CtrlSum 值均与各块的交易金额之和一致（ISO 20022 / EPC SEPA Rulebook，±1¢ 容差）',
                 'sepa.warn.pmtInfCtrlSum': 'PmtInf #{idx} CtrlSum 不匹配：该块声明 {declared}，但交易金额合计为 {actual}——清算系统会在 PmtInf 级别的 schematron 检查中拒绝该文件（常见原因是批量生成器在金额变更后只刷新了组头合计而未刷新各块合计）',
+                'sepa.ok.cdtrRefRf': '所有 {n} 条结构化收款人参考（CdtrRefInf/Ref）均通过 ISO 11649 MOD-97-10 校验',
+                'sepa.warn.cdtrRefRf': '结构化收款人参考 "{ref}" 未通过 ISO 11649 MOD-97-10 校验——符合 Max35Text 模式，但收款方下游对账会默默无法将付款匹配到未结应收账款（常见原因是 CRM 导出参考时录入了错误的数字）',
                 'sepa.warn.ccyInvalid': '币种代码不在 ISO 4217 现行清单中：{code}',
                 'sepa.warn.unknownDoc': '无法识别的 ISO 20022 根元素 — 仅部分解析。',
                 'err.sepaEmpty': 'XML 输入为空。',
@@ -7089,6 +7099,8 @@
                 'ubl.warn.buyerRefLen': 'BuyerReference "{ref}" 超出 35 字符上限（{len}/35）——EN 16931 BT-10 经常被原样复制到 SEPA EndToEndId（ISO 20022 Max35Text）中；较长的值会迫使下游 SEPA 生成器截断（对账主键发生隐性数据丢失）或在模式校验阶段拒绝该文件',
                 'ubl.ok.taxPointDateOrder': 'TaxPointDate {tpd} 不晚于 IssueDate {issue}（EN 16931 BT-7 / BT-2——增值税不可在发票开具之后才变得应缴）',
                 'ubl.warn.taxPointDateOrder': 'TaxPointDate {tpd} 晚于 IssueDate {issue}——EN 16931 BT-7 记录增值税变得应缴的日期，BT-2 记录发票开具日期；增值税触发日期晚于开具日期意味着供应商在为尚未开始的期间申报增值税（数据录入错误或模板字段互换）',
+                'ubl.ok.paymentIdRf': '所有 {n} 条 PaymentID 结构化收款人参考均通过 ISO 11649 MOD-97-10 校验（EN 16931 BT-83 / PEPPOL BIS Billing 3.0）',
+                'ubl.warn.paymentIdRf': 'PaymentID "{ref}" 未通过 ISO 11649 MOD-97-10 校验——符合 Identifier 文本规范，但下游 SEPA 生成器会将该值复制到 <CdtrRefInf>/<Ref>，导致收款方的银行对账默默无法将付款匹配到未结应收账款（常见原因是 CRM 导出参考时录入了错误的数字）',
                 'ubl.ok.ccyValid': '币种代码按 ISO 4217 有效：{list}',
                 'ubl.ok.ibanValid': '收款方/付款方账户 IBAN 通过 ISO 13616 MOD-97 校验（{n}）',
                 'ubl.warn.ibanInvalid': '收款方/付款方 IBAN 未通过 ISO 13616 MOD-97 校验：{iban}',
@@ -8179,6 +8191,8 @@
                 'sepa.warn.pmtInfNbTx': 'PmtInf #{idx} NbOfTxs-Abweichung: Block deklariert {declared}, enthält jedoch {actual} Transaktion(en) — Clearing-Systeme weisen die Datei am PmtInf-Schematron-Gate ab (häufige Ursache: ein Batch-Generator, der die Zähler im Group-Header, aber nicht die pro Block aktualisiert, wenn eine Transaktion hinzugefügt oder entfernt wird)',
                 'sepa.ok.pmtInfCtrlSum': 'PmtInf/CtrlSum-Werte stimmen über alle {n} PmtInf-Block(s) mit der Summe der Transaktionsbeträge pro Block überein (ISO 20022 / EPC SEPA Rulebook, ±1¢ Toleranz)',
                 'sepa.warn.pmtInfCtrlSum': 'PmtInf #{idx} CtrlSum-Abweichung: Block deklariert {declared}, die Transaktionsbeträge summieren sich jedoch auf {actual} — Clearing-Systeme weisen die Datei am PmtInf-Schematron-Gate ab (häufige Ursache: ein Batch-Generator, der die Summe im Group-Header, aber nicht die pro Block aktualisiert, wenn sich ein Betrag ändert)',
+                'sepa.ok.cdtrRefRf': 'Strukturierte Gläubiger-Referenz(en) gültig (ISO 11649 MOD-97-10) über alle {n} Referenz(en)',
+                'sepa.warn.cdtrRefRf': 'Strukturierte Gläubiger-Referenz „{ref}“ hat die ISO-11649-MOD-97-10-Prüfung nicht bestanden — Max35Text-schemakonform, aber die nachgelagerte Abstimmung des Gläubigers ordnet die Zahlung der offenen Forderung stillschweigend nicht zu (häufige Ursache: ein CRM, das die Referenz mit einer fehlerhaften Ziffer exportiert)',
                 'sepa.warn.ccyInvalid': 'Währungscode nicht aktiv nach ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unbekanntes ISO-20022-Wurzelelement — nur Teilanalyse.',
                 'err.sepaEmpty': 'Die XML-Eingabe ist leer.',
@@ -8312,6 +8326,8 @@
                 'ubl.warn.buyerRefLen': 'BuyerReference „{ref}“ überschreitet die 35-Zeichen-Grenze ({len}/35) — EN 16931 BT-10 wird routinemäßig unverändert in SEPA EndToEndId (ISO 20022 Max35Text) übernommen; ein längerer Wert zwingt nachgelagerte SEPA-Generatoren zum Abschneiden (stiller Datenverlust am Abstimmungsschlüssel) oder zur Ablehnung der Datei am Schema-Validierungs-Gate',
                 'ubl.ok.taxPointDateOrder': 'TaxPointDate {tpd} liegt am oder vor dem IssueDate {issue} (EN 16931 BT-7 / BT-2 — die Mehrwertsteuer kann nicht nach Ausstellung der Rechnung fällig werden)',
                 'ubl.warn.taxPointDateOrder': 'TaxPointDate {tpd} liegt nach IssueDate {issue} — EN 16931 BT-7 erfasst, wann die Mehrwertsteuer fällig wird, und BT-2 erfasst das Ausstellungsdatum der Rechnung; ein Steuerstichtag nach dem Ausstellungsdatum bedeutet, dass der Lieferant Mehrwertsteuer für einen noch nicht begonnenen Zeitraum deklariert (Erfassungsfehler oder Feldvertauschung in der Vorlage)',
+                'ubl.ok.paymentIdRf': 'PaymentID-strukturierte Gläubiger-Referenz(en) gültig (ISO 11649 MOD-97-10) über alle {n} Referenz(en) (EN 16931 BT-83 / PEPPOL BIS Billing 3.0)',
+                'ubl.warn.paymentIdRf': 'PaymentID „{ref}“ hat die ISO-11649-MOD-97-10-Prüfung nicht bestanden — als Identifier-Text schemakonform, aber der nachgelagerte SEPA-Generator übernimmt den Wert in <CdtrRefInf>/<Ref>, wo die Bankauszugs-Abstimmung des Gläubigers die Zahlung der offenen Forderung stillschweigend nicht zuordnet (häufige Ursache: ein CRM, das die Referenz mit einer fehlerhaften Ziffer exportiert)',
                 'ubl.ok.ccyValid': 'Währungscodes nach ISO 4217 aktiv: {list}',
                 'ubl.ok.ibanValid': 'IBANs der Payee-/Payer-Konten gültig (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'Payee-/Payer-IBAN scheitert an ISO-13616-MOD-97-Prüfung: {iban}',
@@ -9387,6 +9403,8 @@
                 'sepa.warn.pmtInfNbTx': 'PmtInf #{idx} NbOfTxs बेमेल: ब्लॉक {declared} घोषित करता है लेकिन उसमें {actual} लेन-देन हैं — क्लियरिंग सिस्टम फ़ाइल को PmtInf-स्तरीय schematron गेट पर अस्वीकार करते हैं (आम कारण: बैच जनरेटर जो लेन-देन जोड़ने या हटाने पर ग्रुप-हेडर की गणना को तो रिफ़्रेश करता है पर प्रति-ब्लॉक गणना को नहीं)',
                 'sepa.ok.pmtInfCtrlSum': 'सभी {n} PmtInf ब्लॉक में PmtInf/CtrlSum मान प्रत्येक ब्लॉक की लेन-देन राशियों के योग से मेल खाते हैं (ISO 20022 / EPC SEPA Rulebook, ±1¢ सहिष्णुता)',
                 'sepa.warn.pmtInfCtrlSum': 'PmtInf #{idx} CtrlSum बेमेल: ब्लॉक {declared} घोषित करता है लेकिन लेन-देन राशियों का योग {actual} है — क्लियरिंग सिस्टम फ़ाइल को PmtInf-स्तरीय schematron गेट पर अस्वीकार करते हैं (आम कारण: बैच जनरेटर जो राशि बदलने पर ग्रुप-हेडर के योग को तो रिफ़्रेश करता है पर प्रति-ब्लॉक के योग को नहीं)',
+                'sepa.ok.cdtrRefRf': 'सभी {n} संदर्भों में संरचित लेनदार संदर्भ ISO 11649 MOD-97-10 जाँच पास करते हैं',
+                'sepa.warn.cdtrRefRf': 'संरचित लेनदार संदर्भ "{ref}" ISO 11649 MOD-97-10 जाँच में विफल — Max35Text के अनुरूप, लेकिन लेनदार का डाउनस्ट्रीम मिलान भुगतान को बकाया प्राप्य खाते से मूक रूप से मिलाने में विफल रहता है (आम कारण: CRM द्वारा गलत अंक के साथ संदर्भ निर्यात)',
                 'sepa.warn.ccyInvalid': 'मुद्रा कोड ISO 4217 में सक्रिय नहीं: {code}',
                 'sepa.warn.unknownDoc': 'अज्ञात ISO 20022 रूट तत्व — केवल आंशिक पार्सिंग।',
                 'err.sepaEmpty': 'XML इनपुट खाली है।',
@@ -9520,6 +9538,8 @@
                 'ubl.warn.buyerRefLen': 'BuyerReference "{ref}" 35-अक्षर सीमा से अधिक है ({len}/35) — EN 16931 BT-10 को नियमित रूप से SEPA EndToEndId (ISO 20022 Max35Text) में ज्यों का त्यों कॉपी किया जाता है; लंबा मान निचले स्तर के SEPA जनरेटरों को छाँटने (मिलान कुंजी पर मौन डेटा हानि) या फ़ाइल को स्कीमा-वैलिडेशन गेट पर अस्वीकार करने के लिए मजबूर करता है',
                 'ubl.ok.taxPointDateOrder': 'TaxPointDate {tpd} IssueDate {issue} के पहले या उसी दिन है (EN 16931 BT-7 / BT-2 — चालान जारी होने के बाद VAT देय नहीं हो सकता)',
                 'ubl.warn.taxPointDateOrder': 'TaxPointDate {tpd} IssueDate {issue} के बाद है — EN 16931 BT-7 उस तिथि को दर्ज करता है जब VAT देय होता है और BT-2 चालान जारी होने की तिथि दर्ज करता है; जारी होने की तिथि के बाद का कर बिंदु यह दर्शाता है कि आपूर्तिकर्ता एक ऐसी अवधि के लिए VAT घोषित कर रहा है जो अभी शुरू भी नहीं हुई (डेटा-एंट्री त्रुटि या टेम्पलेट फ़ील्ड अदला-बदली)',
+                'ubl.ok.paymentIdRf': 'सभी {n} संदर्भों में PaymentID संरचित लेनदार संदर्भ ISO 11649 MOD-97-10 जाँच पास करते हैं (EN 16931 BT-83 / PEPPOL BIS Billing 3.0)',
+                'ubl.warn.paymentIdRf': 'PaymentID "{ref}" ISO 11649 MOD-97-10 जाँच में विफल — Identifier पाठ के अनुरूप, लेकिन डाउनस्ट्रीम SEPA जनरेटर मान को <CdtrRefInf>/<Ref> में कॉपी करता है, जहाँ लेनदार का बैंक-स्टेटमेंट मिलान भुगतान को बकाया प्राप्य खाते से मूक रूप से मिलाने में विफल रहता है (आम कारण: CRM द्वारा गलत अंक के साथ संदर्भ निर्यात)',
                 'ubl.ok.ccyValid': 'मुद्रा कोड ISO 4217 के अनुसार सक्रिय: {list}',
                 'ubl.ok.ibanValid': 'भुगतानकर्ता/प्राप्तकर्ता खाते के IBAN वैध (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'भुगतानकर्ता/प्राप्तकर्ता IBAN ISO 13616 MOD-97 जाँच में विफल: {iban}',
@@ -18094,6 +18114,55 @@
             }
         }
 
+        // ISO 11649 Structured Creditor Reference MOD-97 validation
+        // (draft 94). The EPC SEPA Credit Transfer Rulebook structured
+        // remittance information slot — `<RmtInf>/<Strd>/<CdtrRefInf>/<Ref>`
+        // — carries the creditor's reconciliation key. When the value is
+        // shaped like an ISO 11649 reference (`RF` + 2 check digits + 1-21
+        // alphanumeric, total length 5-25), it MUST satisfy the same
+        // MOD-97-10 checksum that powers IBAN — rearrange so `RF` + check
+        // digits go at the end, convert letters A-Z to 10-35, run MOD 97,
+        // result must equal 1. ISO 20022 declares `<Ref>` as `Max35Text`,
+        // so a bad-checksum RF reference is schema-valid but rail-broken:
+        // the creditor's downstream reconciliation system silently fails
+        // to match the payment to the open receivable. Catches the
+        // canonical failure where a CRM exports the reference with a
+        // typo'd digit. Non-RF-shaped references (free-text, internal
+        // schemes) are silently skipped — they are not the wrong kind of
+        // identifier, just a different one. Reuses the existing
+        // `ibanMod97` walk (same algorithm; the only difference is the
+        // fixed `RF` country code).
+        const ISO_11649_RE = /^RF\d{2}[A-Z0-9]{1,21}$/;
+        function sepaCheckCdtrRefRf(out, doc, detected) {
+            if (detected.type !== 'pain.001' && detected.type !== 'pain.008') return;
+            const w = detected.wrapper;
+            if (!w) return;
+            const refs = [];
+            for (const cri of sepaAllLocal(w, 'CdtrRefInf')) {
+                const ref = (sepaTextOf(cri, 'Ref') || '').trim().replace(/\s+/g, '').toUpperCase();
+                if (!ref) continue;
+                if (!ISO_11649_RE.test(ref)) continue;
+                refs.push(ref);
+            }
+            if (!refs.length) return;
+            const bad = [];
+            for (const ref of refs) {
+                try {
+                    const rearranged = ref.slice(4) + ref.slice(0, 4);
+                    if (ibanMod97(rearranged) !== 1) bad.push(ref);
+                } catch (e) {
+                    bad.push(ref);
+                }
+            }
+            if (bad.length === 0) {
+                tlsRenderRow(out, t('sepa.row.warning'), '✓ ' + tFormat('sepa.ok.cdtrRefRf', { n: intlNumber(refs.length) }));
+            } else {
+                for (const ref of bad) {
+                    tlsRenderRow(out, t('sepa.row.warning'), '✗ ' + tFormat('sepa.warn.cdtrRefRf', { ref }));
+                }
+            }
+        }
+
         function sepaCheckBics(out, doc) {
             const bics = sepaCollectBics(doc);
             if (!bics.length) return;
@@ -18145,6 +18214,7 @@
                 sepaCheckPmtInfIdLength(out, doc, detected);
                 sepaCheckMndtIdLength(out, doc, detected);
                 sepaCheckInstrPrty(out, doc, detected);
+                sepaCheckCdtrRefRf(out, doc, detected);
                 sepaCheckE2eIdCharset(out, doc, detected);
                 sepaCheckInstrIdCharset(out, doc, detected);
                 sepaCheckMndtIdCharset(out, doc, detected);
@@ -19633,6 +19703,50 @@
             }
         }
 
+        // ISO 11649 Structured Creditor Reference MOD-97 validation on
+        // `cbc:PaymentID` (draft 95). EN 16931 BT-83 (Remittance information)
+        // is carried by UBL as `cac:PaymentMeans/cbc:PaymentID`; when the
+        // value is shaped like an ISO 11649 reference (`RF` + 2 check
+        // digits + 1-21 alphanumeric, total length 5-25) — the canonical
+        // form for EU-area structured remittance — it MUST satisfy the
+        // same MOD-97-10 checksum that powers IBAN. A PEPPOL invoice
+        // pasted with a typo'd RF reference passes the EN 16931 / PEPPOL
+        // schematron (`cbc:PaymentID` is plain Identifier text) but breaks
+        // the supplier's downstream reconciliation when the SEPA pain.001
+        // generator copies the value into `<RmtInf>/<Strd>/<CdtrRefInf>/<Ref>`
+        // and the creditor's bank-statement matching silently fails.
+        // Parallel in shape to draft 36's UBL IBAN cross-check and draft
+        // 94's SEPA RF check: same MOD-97 walk. Non-RF-shaped PaymentIDs
+        // (free-text, internal scheme references) are silently skipped.
+        function ublCheckPaymentIdRf(out, detected) {
+            const r = detected.root;
+            if (!r) return;
+            const refs = [];
+            for (const pm of sepaAllLocal(r, 'PaymentMeans')) {
+                const ref = (sepaTextOf(pm, 'PaymentID') || '').trim().replace(/\s+/g, '').toUpperCase();
+                if (!ref) continue;
+                if (!ISO_11649_RE.test(ref)) continue;
+                refs.push(ref);
+            }
+            if (!refs.length) return;
+            const bad = [];
+            for (const ref of refs) {
+                try {
+                    const rearranged = ref.slice(4) + ref.slice(0, 4);
+                    if (ibanMod97(rearranged) !== 1) bad.push(ref);
+                } catch (e) {
+                    bad.push(ref);
+                }
+            }
+            if (bad.length === 0) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + tFormat('ubl.ok.paymentIdRf', { n: intlNumber(refs.length) }));
+            } else {
+                for (const ref of bad) {
+                    tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + tFormat('ubl.warn.paymentIdRf', { ref }));
+                }
+            }
+        }
+
         // Walk every `cac:FinancialInstitutionBranch/cbc:ID` (and the legacy
         // UBL `cac:FinancialInstitution/cbc:ID`) under `cac:PaymentMeans` —
         // PEPPOL BIS Billing 3.0 / EN 16931 BT-86 names this element as the
@@ -19785,6 +19899,7 @@
                 ublCheckEndpointIds(out, detected);
                 ublCheckBuyerOrOrderRef(out, detected);
                 ublCheckBuyerRefLength(out, detected);
+                ublCheckPaymentIdRf(out, detected);
                 ublCheckLineAmount(out, detected);
             } catch (e) {
                 tlsRenderRow(out, t('ubl.row.error'), e.message);
