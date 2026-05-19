@@ -3038,6 +3038,52 @@ test('ubl: PaymentID ISO 11649 check flags a typo\'d RF reference', async ({ pag
   await expect(page.locator('#ubl-results')).toContainText(/PaymentID "RF18539007547035" failed ISO 11649 MOD-97-10 check/i, { timeout: 5_000 });
 });
 
+test('sepa: MndtRltdInf/DtOfSgntr xs:date check confirms on a canonical YYYY-MM-DD', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Extend the pain.008 fixture's MndtRltdInf with a DtOfSgntr.
+  const fixture = buildPain008('MANDATE-2024-001').replace(
+    '<MndtRltdInf><MndtId>MANDATE-2024-001</MndtId></MndtRltdInf>',
+    '<MndtRltdInf><MndtId>MANDATE-2024-001</MndtId><DtOfSgntr>2024-03-15</DtOfSgntr></MndtRltdInf>'
+  );
+  await page.fill('#sepa-input', fixture);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/MndtRltdInf\/DtOfSgntr values all match the xs:date YYYY-MM-DD form/i, { timeout: 5_000 });
+});
+
+test('sepa: MndtRltdInf/DtOfSgntr xs:date check flags a US-style MM/DD/YYYY', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  const fixture = buildPain008('MANDATE-2024-001').replace(
+    '<MndtRltdInf><MndtId>MANDATE-2024-001</MndtId></MndtRltdInf>',
+    '<MndtRltdInf><MndtId>MANDATE-2024-001</MndtId><DtOfSgntr>03/15/2024</DtOfSgntr></MndtRltdInf>'
+  );
+  await page.fill('#sepa-input', fixture);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/MndtRltdInf\/DtOfSgntr "03\/15\/2024" does not match the xs:date YYYY-MM-DD form/i, { timeout: 5_000 });
+});
+
+test('ubl: OrderReference/ID length check confirms when value fits the 35-char SEPA EndToEndId cap', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  const withRef = UBL_INVOICE.replace(
+    '<cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>',
+    '<cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>\n  <cac:OrderReference><cbc:ID>PO-2024-042</cbc:ID></cac:OrderReference>'
+  );
+  await page.fill('#ubl-input', withRef);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/OrderReference\/ID values .* fit within the 35-character SEPA EndToEndId cap/i, { timeout: 5_000 });
+});
+
+test('ubl: OrderReference/ID length check flags a value over the 35-char cap', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  const longRef = 'PO-2024-Subscription-Long-Customer-Ref-042';  // 42 chars
+  const withLong = UBL_INVOICE.replace(
+    '<cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>',
+    `<cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>\n  <cac:OrderReference><cbc:ID>${longRef}</cbc:ID></cac:OrderReference>`
+  );
+  await page.fill('#ubl-input', withLong);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(new RegExp(`OrderReference/ID "${longRef}" exceeds the 35-character cap`, 'i'), { timeout: 5_000 });
+});
+
 test('ubl: rejects non-UBL XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   await page.fill('#ubl-input', '<?xml version="1.0"?><Document/>');
