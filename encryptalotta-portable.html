@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <!--
   encryptalotta — single-file portable build
-  Source mtime: 2026-05-19T16:04:13.604Z
-  Source: index.html (SHA-256: 3b02cb474ff170677aed5abf19a18b13a40507c6f670fb6ab29b1ffd2cf0964c)
+  Source mtime: 2026-05-19T16:39:34.332Z
+  Source: index.html (SHA-256: 76f50db7a9f8492e4f806bc4e36075894170df6b2c6b51db761d93b2d60df561)
   All vendored JavaScript inlined; favicons inlined as data: URIs.
   Identical functionality to the live site at https://encryptalotta.com.
   Runs from file://, USB stick, chat attachment, anywhere. No network calls.
@@ -6798,6 +6798,8 @@ var qrcode = function() {
                 'sepa.warn.e2eIdLen': 'EndToEndId "{id}" exceeds ISO 20022 Max35Text ({len}/35 characters) — clearing systems reject the file at the schema-validation gate (a common cause is a CRM-supplied invoice / customer reference longer than the 35-character ISO 20022 cap)',
                 'sepa.ok.instrIdLen': 'InstrId values fit within ISO 20022 Max35Text across all {n} transaction(s) (each ≤35 characters)',
                 'sepa.warn.instrIdLen': 'InstrId "{id}" exceeds ISO 20022 Max35Text ({len}/35 characters) — clearing systems reject the file at the schema-validation gate (a common cause is an internal batch / sequence key longer than the 35-character ISO 20022 cap on the originator-side instruction identifier)',
+                'sepa.ok.pmtInfIdLen': 'PmtInfId values fit within ISO 20022 Max35Text across all {n} PmtInf block(s) (each ≤35 characters)',
+                'sepa.warn.pmtInfIdLen': 'PmtInfId "{id}" exceeds ISO 20022 Max35Text ({len}/35 characters) — clearing systems reject the file at the schema-validation gate (a common cause is a per-batch identifier interpolated from a long internal key on the per-payment-information-block identifier)',
                 'sepa.warn.ccyInvalid': 'Currency code not active per ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unrecognized ISO 20022 root element — partial parse only.',
                 'err.sepaEmpty': 'XML input is empty.',
@@ -6933,6 +6935,8 @@ var qrcode = function() {
                 'ubl.warn.deliveryCountry': 'Delivery country code (Delivery/DeliveryLocation/Address/Country/IdentificationCode) "{code}" is not a valid ISO 3166-1 alpha-2 code — EN 16931 BT-80 / PEPPOL BIS Billing 3.0 require the canonical alpha-2 code (a common cause is UK in place of the ISO code GB); PEPPOL access points reject at the schematron gate',
                 'ubl.ok.paymentDueDate': 'PaymentMeans/PaymentDueDate values all match the xs:date YYYY-MM-DD form across {n} PaymentMeans block(s) (EN 16931 BT-9 / PEPPOL BIS Billing 3.0)',
                 'ubl.warn.paymentDueDate': 'PaymentMeans/PaymentDueDate "{v}" does not match the xs:date YYYY-MM-DD form — EN 16931 BT-9 / PEPPOL BIS Billing 3.0 require the canonical xs:date form (e.g. 2024-05-01); PEPPOL access points reject at the schematron gate',
+                'ubl.ok.billingRefDate': 'BillingReference/InvoiceDocumentReference/IssueDate values all match the xs:date YYYY-MM-DD form across {n} preceding-invoice reference(s) (EN 16931 BT-26 / PEPPOL BIS Billing 3.0)',
+                'ubl.warn.billingRefDate': 'BillingReference/InvoiceDocumentReference/IssueDate "{v}" does not match the xs:date YYYY-MM-DD form — EN 16931 BT-26 / PEPPOL BIS Billing 3.0 require the canonical xs:date form (e.g. 2024-04-15); PEPPOL access points reject at the schematron gate',
                 'ubl.ok.ccyValid': 'Currency codes active per ISO 4217: {list}',
                 'ubl.ok.ibanValid': 'Payee/Payer financial account IBANs valid (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'Payee/Payer IBAN failed ISO 13616 MOD-97 check: {iban}',
@@ -8028,6 +8032,8 @@ var qrcode = function() {
                 'sepa.warn.e2eIdLen': 'EndToEndId « {id} » dépasse la limite ISO 20022 Max35Text ({len}/35 caractères) — les systèmes de compensation rejettent le fichier au contrôle de schéma (cause fréquente : une référence facture / client issue d’un CRM dépassant la limite ISO 20022 de 35 caractères)',
                 'sepa.ok.instrIdLen': 'Les valeurs InstrId respectent la limite ISO 20022 Max35Text sur l’ensemble des {n} transaction(s) (chacune ≤ 35 caractères)',
                 'sepa.warn.instrIdLen': 'InstrId « {id} » dépasse la limite ISO 20022 Max35Text ({len}/35 caractères) — les systèmes de compensation rejettent le fichier au contrôle de schéma (cause fréquente : une clé interne de séquence / lot dépassant la limite ISO 20022 de 35 caractères sur l’identifiant d’instruction émis par l’originateur)',
+                'sepa.ok.pmtInfIdLen': 'Les valeurs PmtInfId respectent la limite ISO 20022 Max35Text sur l’ensemble des {n} bloc(s) PmtInf (chacune ≤ 35 caractères)',
+                'sepa.warn.pmtInfIdLen': 'PmtInfId « {id} » dépasse la limite ISO 20022 Max35Text ({len}/35 caractères) — les systèmes de compensation rejettent le fichier au contrôle de schéma (cause fréquente : un identifiant de lot interpolé depuis une clé interne longue sur l’identifiant du bloc d’informations de paiement)',
                 'sepa.warn.ccyInvalid': 'Code monétaire non actif selon ISO 4217 : {code}',
                 'sepa.warn.unknownDoc': 'Élément racine ISO 20022 non reconnu — analyse partielle uniquement.',
                 'err.sepaEmpty': 'Le XML d’entrée est vide.',
@@ -8153,6 +8159,8 @@ var qrcode = function() {
                 'ubl.warn.deliveryCountry': 'Code pays de livraison (Delivery/DeliveryLocation/Address/Country/IdentificationCode) « {code} » n’est pas un code ISO 3166-1 alpha-2 valide — EN 16931 BT-80 / PEPPOL BIS Billing 3.0 exigent le code alpha-2 canonique (cause fréquente : UK au lieu du code ISO GB) ; les points d’accès PEPPOL rejettent au contrôle schematron',
                 'ubl.ok.paymentDueDate': 'Toutes les valeurs PaymentMeans/PaymentDueDate respectent la forme xs:date AAAA-MM-JJ sur les {n} bloc(s) PaymentMeans (EN 16931 BT-9 / PEPPOL BIS Billing 3.0)',
                 'ubl.warn.paymentDueDate': 'PaymentMeans/PaymentDueDate « {v} » ne respecte pas la forme xs:date AAAA-MM-JJ — EN 16931 BT-9 / PEPPOL BIS Billing 3.0 exigent la forme canonique xs:date (p. ex. 2024-05-01) ; les points d’accès PEPPOL rejettent au contrôle schematron',
+                'ubl.ok.billingRefDate': 'Toutes les valeurs BillingReference/InvoiceDocumentReference/IssueDate respectent la forme xs:date AAAA-MM-JJ sur les {n} référence(s) de facture antérieure (EN 16931 BT-26 / PEPPOL BIS Billing 3.0)',
+                'ubl.warn.billingRefDate': 'BillingReference/InvoiceDocumentReference/IssueDate « {v} » ne respecte pas la forme xs:date AAAA-MM-JJ — EN 16931 BT-26 / PEPPOL BIS Billing 3.0 exigent la forme canonique xs:date (p. ex. 2024-04-15) ; les points d’accès PEPPOL rejettent au contrôle schematron',
                 'ubl.ok.ccyValid': 'Codes monétaires actifs selon ISO 4217 : {list}',
                 'ubl.ok.ibanValid': 'IBAN des comptes Payee/Payer valides (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'IBAN Payee/Payer échoue au contrôle ISO 13616 MOD-97 : {iban}',
@@ -9218,6 +9226,8 @@ var qrcode = function() {
                 'sepa.warn.e2eIdLen': 'EndToEndId "{id}" 超出 ISO 20022 Max35Text 限制（{len}/35 字符）——清算系统会在模式校验阶段拒绝该文件（常见原因是 CRM 生成的发票 / 客户参考超过了 ISO 20022 的 35 字符上限）',
                 'sepa.ok.instrIdLen': '所有 {n} 笔交易的 InstrId 均在 ISO 20022 Max35Text 限制范围内（每个 ≤35 字符）',
                 'sepa.warn.instrIdLen': 'InstrId "{id}" 超出 ISO 20022 Max35Text 限制（{len}/35 字符）——清算系统会在模式校验阶段拒绝该文件（常见原因是内部批次 / 序列键超过了 ISO 20022 对原始方指令标识符的 35 字符上限）',
+                'sepa.ok.pmtInfIdLen': '所有 {n} 个 PmtInf 块的 PmtInfId 均在 ISO 20022 Max35Text 限制范围内（每个 ≤35 字符）',
+                'sepa.warn.pmtInfIdLen': 'PmtInfId "{id}" 超出 ISO 20022 Max35Text 限制（{len}/35 字符）——清算系统会在模式校验阶段拒绝该文件（常见原因是从内部长键拼接而成的批次标识符超过了 ISO 20022 对每个付款信息块标识符的 35 字符上限）',
                 'sepa.warn.ccyInvalid': '币种代码不在 ISO 4217 现行清单中：{code}',
                 'sepa.warn.unknownDoc': '无法识别的 ISO 20022 根元素 — 仅部分解析。',
                 'err.sepaEmpty': 'XML 输入为空。',
@@ -9343,6 +9353,8 @@ var qrcode = function() {
                 'ubl.warn.deliveryCountry': '交付地国别代码 (Delivery/DeliveryLocation/Address/Country/IdentificationCode) "{code}" 不是有效的 ISO 3166-1 alpha-2 代码——EN 16931 BT-80 / PEPPOL BIS Billing 3.0 要求规范的 alpha-2 代码（常见原因：用 UK 替代 ISO 代码 GB）；PEPPOL 接入点会在 schematron 校验时拒绝',
                 'ubl.ok.paymentDueDate': '所有 {n} 个 PaymentMeans 块的 PaymentMeans/PaymentDueDate 均符合 xs:date YYYY-MM-DD 形式（EN 16931 BT-9 / PEPPOL BIS Billing 3.0）',
                 'ubl.warn.paymentDueDate': 'PaymentMeans/PaymentDueDate "{v}" 不符合 xs:date YYYY-MM-DD 形式——EN 16931 BT-9 / PEPPOL BIS Billing 3.0 要求规范的 xs:date 形式（例如 2024-05-01）；PEPPOL 接入点会在 schematron 校验时拒绝',
+                'ubl.ok.billingRefDate': '所有 {n} 个前序发票引用的 BillingReference/InvoiceDocumentReference/IssueDate 均符合 xs:date YYYY-MM-DD 形式（EN 16931 BT-26 / PEPPOL BIS Billing 3.0）',
+                'ubl.warn.billingRefDate': 'BillingReference/InvoiceDocumentReference/IssueDate "{v}" 不符合 xs:date YYYY-MM-DD 形式——EN 16931 BT-26 / PEPPOL BIS Billing 3.0 要求规范的 xs:date 形式（例如 2024-04-15）；PEPPOL 接入点会在 schematron 校验时拒绝',
                 'ubl.ok.ccyValid': '币种代码按 ISO 4217 有效：{list}',
                 'ubl.ok.ibanValid': '收款方/付款方账户 IBAN 通过 ISO 13616 MOD-97 校验（{n}）',
                 'ubl.warn.ibanInvalid': '收款方/付款方 IBAN 未通过 ISO 13616 MOD-97 校验：{iban}',
@@ -10423,6 +10435,8 @@ var qrcode = function() {
                 'sepa.warn.e2eIdLen': 'EndToEndId „{id}“ überschreitet die ISO-20022-Max35Text-Grenze ({len}/35 Zeichen) — Clearing-Systeme weisen die Datei am Schema-Validierungs-Gate ab (häufige Ursache: eine aus einem CRM stammende Rechnungs- oder Kundenreferenz, die die ISO-20022-Grenze von 35 Zeichen überschreitet)',
                 'sepa.ok.instrIdLen': 'InstrId-Werte liegen über alle {n} Transaktion(en) innerhalb der ISO-20022-Max35Text-Grenze (jeweils ≤ 35 Zeichen)',
                 'sepa.warn.instrIdLen': 'InstrId „{id}“ überschreitet die ISO-20022-Max35Text-Grenze ({len}/35 Zeichen) — Clearing-Systeme weisen die Datei am Schema-Validierungs-Gate ab (häufige Ursache: ein interner Batch- oder Sequenzschlüssel, der die ISO-20022-Grenze von 35 Zeichen für den originatorseitigen Instruktionsidentifikator überschreitet)',
+                'sepa.ok.pmtInfIdLen': 'PmtInfId-Werte liegen über alle {n} PmtInf-Block(s) innerhalb der ISO-20022-Max35Text-Grenze (jeweils ≤ 35 Zeichen)',
+                'sepa.warn.pmtInfIdLen': 'PmtInfId „{id}“ überschreitet die ISO-20022-Max35Text-Grenze ({len}/35 Zeichen) — Clearing-Systeme weisen die Datei am Schema-Validierungs-Gate ab (häufige Ursache: ein aus einem langen internen Schlüssel interpolierter Batch-Identifikator, der die ISO-20022-Grenze von 35 Zeichen für den Identifikator des Zahlungsinformationsblocks überschreitet)',
                 'sepa.warn.ccyInvalid': 'Währungscode nicht aktiv nach ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unbekanntes ISO-20022-Wurzelelement — nur Teilanalyse.',
                 'err.sepaEmpty': 'Die XML-Eingabe ist leer.',
@@ -10548,6 +10562,8 @@ var qrcode = function() {
                 'ubl.warn.deliveryCountry': 'Lieferland-Code (Delivery/DeliveryLocation/Address/Country/IdentificationCode) „{code}“ ist kein gültiger ISO-3166-1-Alpha-2-Code — EN 16931 BT-80 / PEPPOL BIS Billing 3.0 verlangen den kanonischen Alpha-2-Code (häufige Ursache: UK statt des ISO-Codes GB); PEPPOL-Access-Points lehnen am Schematron-Gate ab',
                 'ubl.ok.paymentDueDate': 'PaymentMeans/PaymentDueDate-Werte entsprechen über alle {n} PaymentMeans-Block(s) der xs:date-Form JJJJ-MM-TT (EN 16931 BT-9 / PEPPOL BIS Billing 3.0)',
                 'ubl.warn.paymentDueDate': 'PaymentMeans/PaymentDueDate „{v}“ entspricht nicht der xs:date-Form JJJJ-MM-TT — EN 16931 BT-9 / PEPPOL BIS Billing 3.0 verlangen die kanonische xs:date-Form (z. B. 2024-05-01); PEPPOL-Access-Points lehnen am Schematron-Gate ab',
+                'ubl.ok.billingRefDate': 'BillingReference/InvoiceDocumentReference/IssueDate-Werte entsprechen über alle {n} Verweis(e) auf vorhergehende Rechnungen der xs:date-Form JJJJ-MM-TT (EN 16931 BT-26 / PEPPOL BIS Billing 3.0)',
+                'ubl.warn.billingRefDate': 'BillingReference/InvoiceDocumentReference/IssueDate „{v}“ entspricht nicht der xs:date-Form JJJJ-MM-TT — EN 16931 BT-26 / PEPPOL BIS Billing 3.0 verlangen die kanonische xs:date-Form (z. B. 2024-04-15); PEPPOL-Access-Points lehnen am Schematron-Gate ab',
                 'ubl.ok.ccyValid': 'Währungscodes nach ISO 4217 aktiv: {list}',
                 'ubl.ok.ibanValid': 'IBANs der Payee-/Payer-Konten gültig (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'Payee-/Payer-IBAN scheitert an ISO-13616-MOD-97-Prüfung: {iban}',
@@ -11613,6 +11629,8 @@ var qrcode = function() {
                 'sepa.warn.e2eIdLen': 'EndToEndId "{id}" ISO 20022 Max35Text सीमा से अधिक है ({len}/35 अक्षर) — क्लियरिंग सिस्टम फ़ाइल को स्कीमा-वैलिडेशन गेट पर अस्वीकार करते हैं (आम कारण: CRM द्वारा प्रदत्त चालान / ग्राहक संदर्भ जो ISO 20022 की 35 अक्षर सीमा से अधिक हो)',
                 'sepa.ok.instrIdLen': 'सभी {n} लेन-देन में InstrId मान ISO 20022 Max35Text सीमा के भीतर हैं (प्रत्येक ≤35 अक्षर)',
                 'sepa.warn.instrIdLen': 'InstrId "{id}" ISO 20022 Max35Text सीमा से अधिक है ({len}/35 अक्षर) — क्लियरिंग सिस्टम फ़ाइल को स्कीमा-वैलिडेशन गेट पर अस्वीकार करते हैं (आम कारण: आंतरिक बैच / अनुक्रम कुंजी जो ISO 20022 की प्रवर्तक-पक्ष निर्देश पहचानकर्ता पर 35 अक्षर सीमा से अधिक हो)',
+                'sepa.ok.pmtInfIdLen': 'सभी {n} PmtInf ब्लॉक में PmtInfId मान ISO 20022 Max35Text सीमा के भीतर हैं (प्रत्येक ≤35 अक्षर)',
+                'sepa.warn.pmtInfIdLen': 'PmtInfId "{id}" ISO 20022 Max35Text सीमा से अधिक है ({len}/35 अक्षर) — क्लियरिंग सिस्टम फ़ाइल को स्कीमा-वैलिडेशन गेट पर अस्वीकार करते हैं (आम कारण: किसी लंबी आंतरिक कुंजी से जोड़ा गया प्रति-बैच पहचानकर्ता जो ISO 20022 की प्रति-भुगतान-सूचना-ब्लॉक पहचानकर्ता पर 35 अक्षर सीमा से अधिक हो)',
                 'sepa.warn.ccyInvalid': 'मुद्रा कोड ISO 4217 में सक्रिय नहीं: {code}',
                 'sepa.warn.unknownDoc': 'अज्ञात ISO 20022 रूट तत्व — केवल आंशिक पार्सिंग।',
                 'err.sepaEmpty': 'XML इनपुट खाली है।',
@@ -11738,6 +11756,8 @@ var qrcode = function() {
                 'ubl.warn.deliveryCountry': 'डिलीवरी देश कोड (Delivery/DeliveryLocation/Address/Country/IdentificationCode) "{code}" मान्य ISO 3166-1 alpha-2 कोड नहीं है — EN 16931 BT-80 / PEPPOL BIS Billing 3.0 के लिए कैनोनिकल alpha-2 कोड आवश्यक है (आम कारण: ISO कोड GB के स्थान पर UK); PEPPOL एक्सेस पॉइंट schematron गेट पर अस्वीकार कर देते हैं',
                 'ubl.ok.paymentDueDate': 'सभी {n} PaymentMeans ब्लॉक में PaymentMeans/PaymentDueDate मान xs:date YYYY-MM-DD स्वरूप के अनुरूप हैं (EN 16931 BT-9 / PEPPOL BIS Billing 3.0)',
                 'ubl.warn.paymentDueDate': 'PaymentMeans/PaymentDueDate "{v}" xs:date YYYY-MM-DD स्वरूप के अनुरूप नहीं है — EN 16931 BT-9 / PEPPOL BIS Billing 3.0 के लिए कैनोनिकल xs:date स्वरूप (उदा. 2024-05-01) आवश्यक है; PEPPOL एक्सेस पॉइंट schematron गेट पर अस्वीकार कर देते हैं',
+                'ubl.ok.billingRefDate': 'सभी {n} पूर्ववर्ती-चालान संदर्भों में BillingReference/InvoiceDocumentReference/IssueDate मान xs:date YYYY-MM-DD स्वरूप के अनुरूप हैं (EN 16931 BT-26 / PEPPOL BIS Billing 3.0)',
+                'ubl.warn.billingRefDate': 'BillingReference/InvoiceDocumentReference/IssueDate "{v}" xs:date YYYY-MM-DD स्वरूप के अनुरूप नहीं है — EN 16931 BT-26 / PEPPOL BIS Billing 3.0 के लिए कैनोनिकल xs:date स्वरूप (उदा. 2024-04-15) आवश्यक है; PEPPOL एक्सेस पॉइंट schematron गेट पर अस्वीकार कर देते हैं',
                 'ubl.ok.ccyValid': 'मुद्रा कोड ISO 4217 के अनुसार सक्रिय: {list}',
                 'ubl.ok.ibanValid': 'भुगतानकर्ता/प्राप्तकर्ता खाते के IBAN वैध (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'भुगतानकर्ता/प्राप्तकर्ता IBAN ISO 13616 MOD-97 जाँच में विफल: {iban}',
@@ -20119,6 +20139,40 @@ var qrcode = function() {
             }
         }
 
+        // ISO 20022 declares per-PmtInf-block `<PmtInfId>` as Max35Text
+        // (35-codepoint schema cap). Draft 56 covers the EPC SEPA character-
+        // set rule on the same field; this gate covers the orthogonal length
+        // rule, completing the length-side coverage for the four free-text
+        // identifier surfaces ISO 20022 caps to Max35Text (MsgId — draft 80,
+        // EndToEndId — draft 82, InstrId — draft 84, PmtInfId — here). The
+        // canonical real-world failure is a per-batch identifier interpolated
+        // from a long internal key (`BATCH-{originator-name}-{YYYY-MM-DD}-{seq}`
+        // busts the cap when the originator name alone runs long).
+        function sepaCheckPmtInfIdLength(out, doc, detected) {
+            if (detected.type !== 'pain.001' && detected.type !== 'pain.008') return;
+            const w = detected.wrapper;
+            if (!w) return;
+            const blocks = sepaAllLocal(w, 'PmtInf');
+            if (!blocks.length) return;
+            let seen = 0;
+            const bad = [];
+            for (const pi of blocks) {
+                const id = (sepaTextOf(pi, 'PmtInfId') || '').trim();
+                if (!id) continue;
+                seen++;
+                const len = [...id].length;
+                if (len > 35) bad.push({ id, len });
+            }
+            if (!seen) return;
+            if (bad.length === 0) {
+                tlsRenderRow(out, t('sepa.row.warning'), '✓ ' + tFormat('sepa.ok.pmtInfIdLen', { n: intlNumber(seen) }));
+            } else {
+                for (const b of bad) {
+                    tlsRenderRow(out, t('sepa.row.warning'), '✗ ' + tFormat('sepa.warn.pmtInfIdLen', { id: b.id, len: intlNumber(b.len) }));
+                }
+            }
+        }
+
         function sepaCheckBics(out, doc) {
             const bics = sepaCollectBics(doc);
             if (!bics.length) return;
@@ -20166,6 +20220,7 @@ var qrcode = function() {
                 sepaCheckMsgIdLength(out, doc, detected);
                 sepaCheckE2eIdLength(out, doc, detected);
                 sepaCheckInstrIdLength(out, doc, detected);
+                sepaCheckPmtInfIdLength(out, doc, detected);
                 sepaCheckE2eIdCharset(out, doc, detected);
                 sepaCheckInstrIdCharset(out, doc, detected);
                 sepaCheckMndtIdCharset(out, doc, detected);
@@ -21515,6 +21570,49 @@ var qrcode = function() {
             }
         }
 
+        // EN 16931 BT-26 (Preceding Invoice issue date): UBL declares the
+        // field as `cac:BillingReference/cac:InvoiceDocumentReference/cbc:IssueDate`,
+        // plain xs:date. Credit notes carry this anchor to point at the
+        // invoice being credited; correction-invoices (UNCL 1001 code 384)
+        // carry it to point at the invoice being corrected. A document may
+        // reference multiple preceding invoices via repeated
+        // <cac:BillingReference> blocks. This gate extends the xs:date regex
+        // from drafts 75 / 81 / 85 to this fourth distinct anchor — same
+        // canonical failure modes (US-style MM/DD/YYYY, slash-separated,
+        // datetime in the date slot), schema-valid plain text but rejected
+        // by PEPPOL access points at the xs:date schematron gate.
+        function ublCheckBillingRefDate(out, detected) {
+            const r = detected.root;
+            const refs = sepaAllLocal(r, 'BillingReference');
+            if (!refs.length) return;
+            const values = [];
+            for (const br of refs) {
+                const idr = sepaFirst(br, 'InvoiceDocumentReference');
+                if (!idr) continue;
+                const v = (sepaTextOf(idr, 'IssueDate') || '').trim();
+                if (v) values.push(v);
+            }
+            if (!values.length) return;
+            const bad = [];
+            for (const v of values) {
+                const m = UBL_DATE_RE.exec(v);
+                let ok = !!m;
+                if (ok) {
+                    const mo = Number(m[2]);
+                    const da = Number(m[3]);
+                    if (mo < 1 || mo > 12 || da < 1 || da > 31) ok = false;
+                }
+                if (!ok) bad.push(v);
+            }
+            if (bad.length === 0) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + tFormat('ubl.ok.billingRefDate', { n: intlNumber(values.length) }));
+            } else {
+                for (const v of bad) {
+                    tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + tFormat('ubl.warn.billingRefDate', { v }));
+                }
+            }
+        }
+
         // Walk every `cac:FinancialInstitutionBranch/cbc:ID` (and the legacy
         // UBL `cac:FinancialInstitution/cbc:ID`) under `cac:PaymentMeans` —
         // PEPPOL BIS Billing 3.0 / EN 16931 BT-86 names this element as the
@@ -21661,6 +21759,7 @@ var qrcode = function() {
                 ublCheckDeliveryDate(out, detected);
                 ublCheckDeliveryCountry(out, detected);
                 ublCheckPaymentDueDate(out, detected);
+                ublCheckBillingRefDate(out, detected);
                 ublCheckEndpointIds(out, detected);
                 ublCheckBuyerOrOrderRef(out, detected);
                 ublCheckLineAmount(out, detected);

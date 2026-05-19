@@ -2794,6 +2794,48 @@ test('ubl: PaymentMeans/PaymentDueDate xs:date check flags a US-style MM/DD/YYYY
   await expect(page.locator('#ubl-results')).toContainText(/PaymentMeans\/PaymentDueDate "05\/01\/2024" does not match the xs:date YYYY-MM-DD form/i, { timeout: 5_000 });
 });
 
+test('sepa: PmtInfId Max35Text length check confirms when every value fits', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Canonical fixture carries <PmtInfId>PAY-001</PmtInfId> — 7 chars, well within Max35Text.
+  await page.fill('#sepa-input', SEPA_PAIN001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/PmtInfId values fit within ISO 20022 Max35Text/i, { timeout: 5_000 });
+});
+
+test('sepa: PmtInfId Max35Text length check flags a 40-char per-batch identifier', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  const longPmt = 'BATCH-ACME-CORP-2024-04-15-SEQ-00000001';  // 39 chars
+  const withLong = SEPA_PAIN001.replace(
+    '<PmtInfId>PAY-001</PmtInfId>',
+    `<PmtInfId>${longPmt}-X</PmtInfId>`
+  );
+  await page.fill('#sepa-input', withLong);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(new RegExp(`PmtInfId "${longPmt}-X" exceeds ISO 20022 Max35Text`, 'i'), { timeout: 5_000 });
+});
+
+test('ubl: BillingReference/InvoiceDocumentReference/IssueDate xs:date check confirms on a canonical YYYY-MM-DD', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  const withRef = UBL_INVOICE.replace(
+    '<cbc:IssueDate>2024-04-01</cbc:IssueDate>',
+    '<cbc:IssueDate>2024-04-01</cbc:IssueDate>\n  <cac:BillingReference><cac:InvoiceDocumentReference><cbc:ID>INV-2024-039</cbc:ID><cbc:IssueDate>2024-03-15</cbc:IssueDate></cac:InvoiceDocumentReference></cac:BillingReference>'
+  );
+  await page.fill('#ubl-input', withRef);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/BillingReference\/InvoiceDocumentReference\/IssueDate values all match the xs:date YYYY-MM-DD form/i, { timeout: 5_000 });
+});
+
+test('ubl: BillingReference/InvoiceDocumentReference/IssueDate xs:date check flags a US-style MM/DD/YYYY', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  const withBadRef = UBL_INVOICE.replace(
+    '<cbc:IssueDate>2024-04-01</cbc:IssueDate>',
+    '<cbc:IssueDate>2024-04-01</cbc:IssueDate>\n  <cac:BillingReference><cac:InvoiceDocumentReference><cbc:ID>INV-2024-039</cbc:ID><cbc:IssueDate>03/15/2024</cbc:IssueDate></cac:InvoiceDocumentReference></cac:BillingReference>'
+  );
+  await page.fill('#ubl-input', withBadRef);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/BillingReference\/InvoiceDocumentReference\/IssueDate "03\/15\/2024" does not match the xs:date YYYY-MM-DD form/i, { timeout: 5_000 });
+});
+
 test('ubl: rejects non-UBL XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   await page.fill('#ubl-input', '<?xml version="1.0"?><Document/>');
