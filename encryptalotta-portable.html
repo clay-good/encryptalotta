@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <!--
   encryptalotta — single-file portable build
-  Source mtime: 2026-05-19T16:59:24.986Z
-  Source: index.html (SHA-256: 1603786460e65f5a328956543912da5504317a41169475ba6abc039dd991e989)
+  Source mtime: 2026-05-19T19:47:35.778Z
+  Source: index.html (SHA-256: 16711935d04aefa64859442a1fae2309cf4ecb10b29a8809951d3e9596d14be4)
   All vendored JavaScript inlined; favicons inlined as data: URIs.
   Identical functionality to the live site at https://encryptalotta.com.
   Runs from file://, USB stick, chat attachment, anywhere. No network calls.
@@ -6802,6 +6802,8 @@ var qrcode = function() {
                 'sepa.warn.pmtInfIdLen': 'PmtInfId "{id}" exceeds ISO 20022 Max35Text ({len}/35 characters) — clearing systems reject the file at the schema-validation gate (a common cause is a per-batch identifier interpolated from a long internal key on the per-payment-information-block identifier)',
                 'sepa.ok.mndtIdLen': 'MndtId values fit within ISO 20022 Max35Text across all {n} direct-debit transaction(s) (each ≤35 characters)',
                 'sepa.warn.mndtIdLen': 'MndtId "{id}" exceeds ISO 20022 Max35Text ({len}/35 characters) — clearing systems reject the file at the schema-validation gate (a common cause is a debtor name folded into the mandate reference pushing the value past the 35-character ISO 20022 cap)',
+                'sepa.ok.instrPrty': 'PmtTpInf/InstrPrty values match ISO 20022 Priority2Code (HIGH or NORM) across all {n} PmtInf block(s)',
+                'sepa.warn.instrPrty': 'PmtTpInf/InstrPrty mismatch: PmtInf #{idx} declares {actual} but ISO 20022 Priority2Code only allows HIGH or NORM — clearing systems reject the file at the schema-validation gate',
                 'sepa.warn.ccyInvalid': 'Currency code not active per ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unrecognized ISO 20022 root element — partial parse only.',
                 'err.sepaEmpty': 'XML input is empty.',
@@ -6941,6 +6943,8 @@ var qrcode = function() {
                 'ubl.warn.billingRefDate': 'BillingReference/InvoiceDocumentReference/IssueDate "{v}" does not match the xs:date YYYY-MM-DD form — EN 16931 BT-26 / PEPPOL BIS Billing 3.0 require the canonical xs:date form (e.g. 2024-04-15); PEPPOL access points reject at the schematron gate',
                 'ubl.ok.mandateIdLen': 'PaymentMeans/PaymentMandate/ID values (EN 16931 BT-89 Mandate reference) all fit within the 35-character cap across {n} mandate(s) (each ≤35 characters)',
                 'ubl.warn.mandateIdLen': 'PaymentMeans/PaymentMandate/ID "{id}" exceeds the 35-character cap ({len}/35 characters) — EN 16931 BT-89 mirrors SEPA SDD MndtId (ISO 20022 Max35Text); PEPPOL access points reject the mandate reference and downstream rail-level processors strip or reject values over the cap',
+                'ubl.ok.buyerRefLen': 'BuyerReference values (EN 16931 BT-10) all fit within the 35-character SEPA EndToEndId cap across {n} reference(s) (each ≤35 characters)',
+                'ubl.warn.buyerRefLen': 'BuyerReference "{ref}" exceeds the 35-character cap ({len}/35 characters) — EN 16931 BT-10 is routinely copied verbatim into SEPA EndToEndId (ISO 20022 Max35Text); a longer value forces downstream SEPA generators to truncate (silent data loss across the reconciliation key) or to fail the file at the schema-validation gate',
                 'ubl.ok.ccyValid': 'Currency codes active per ISO 4217: {list}',
                 'ubl.ok.ibanValid': 'Payee/Payer financial account IBANs valid (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'Payee/Payer IBAN failed ISO 13616 MOD-97 check: {iban}',
@@ -8040,6 +8044,8 @@ var qrcode = function() {
                 'sepa.warn.pmtInfIdLen': 'PmtInfId « {id} » dépasse la limite ISO 20022 Max35Text ({len}/35 caractères) — les systèmes de compensation rejettent le fichier au contrôle de schéma (cause fréquente : un identifiant de lot interpolé depuis une clé interne longue sur l’identifiant du bloc d’informations de paiement)',
                 'sepa.ok.mndtIdLen': 'Les valeurs MndtId respectent la limite ISO 20022 Max35Text sur l’ensemble des {n} transaction(s) de prélèvement (chacune ≤ 35 caractères)',
                 'sepa.warn.mndtIdLen': 'MndtId « {id} » dépasse la limite ISO 20022 Max35Text ({len}/35 caractères) — les systèmes de compensation rejettent le fichier au contrôle de schéma (cause fréquente : un nom de débiteur intégré à la référence de mandat dépassant la limite ISO 20022 de 35 caractères)',
+                'sepa.ok.instrPrty': 'Les valeurs PmtTpInf/InstrPrty respectent ISO 20022 Priority2Code (HIGH ou NORM) sur l’ensemble des {n} bloc(s) PmtInf',
+                'sepa.warn.instrPrty': 'Discordance PmtTpInf/InstrPrty : PmtInf #{idx} déclare {actual} mais ISO 20022 Priority2Code n’autorise que HIGH ou NORM — les systèmes de compensation rejettent le fichier au contrôle de schéma',
                 'sepa.warn.ccyInvalid': 'Code monétaire non actif selon ISO 4217 : {code}',
                 'sepa.warn.unknownDoc': 'Élément racine ISO 20022 non reconnu — analyse partielle uniquement.',
                 'err.sepaEmpty': 'Le XML d’entrée est vide.',
@@ -8169,6 +8175,8 @@ var qrcode = function() {
                 'ubl.warn.billingRefDate': 'BillingReference/InvoiceDocumentReference/IssueDate « {v} » ne respecte pas la forme xs:date AAAA-MM-JJ — EN 16931 BT-26 / PEPPOL BIS Billing 3.0 exigent la forme canonique xs:date (p. ex. 2024-04-15) ; les points d’accès PEPPOL rejettent au contrôle schematron',
                 'ubl.ok.mandateIdLen': 'Toutes les valeurs PaymentMeans/PaymentMandate/ID (EN 16931 BT-89 Référence de mandat) respectent la limite de 35 caractères sur {n} mandat(s) (chacune ≤ 35 caractères)',
                 'ubl.warn.mandateIdLen': 'PaymentMeans/PaymentMandate/ID « {id} » dépasse la limite de 35 caractères ({len}/35) — EN 16931 BT-89 reflète SEPA SDD MndtId (ISO 20022 Max35Text) ; les points d’accès PEPPOL rejettent la référence de mandat et les processeurs en aval suppriment ou rejettent les valeurs au-delà de la limite',
+                'ubl.ok.buyerRefLen': 'Toutes les valeurs BuyerReference (EN 16931 BT-10) respectent la limite de 35 caractères de SEPA EndToEndId sur {n} référence(s) (chacune ≤ 35 caractères)',
+                'ubl.warn.buyerRefLen': 'BuyerReference « {ref} » dépasse la limite de 35 caractères ({len}/35) — EN 16931 BT-10 est régulièrement recopié tel quel dans SEPA EndToEndId (ISO 20022 Max35Text) ; une valeur plus longue force les générateurs SEPA en aval à tronquer (perte silencieuse de la clé de rapprochement) ou à rejeter le fichier au contrôle de schéma',
                 'ubl.ok.ccyValid': 'Codes monétaires actifs selon ISO 4217 : {list}',
                 'ubl.ok.ibanValid': 'IBAN des comptes Payee/Payer valides (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'IBAN Payee/Payer échoue au contrôle ISO 13616 MOD-97 : {iban}',
@@ -9238,6 +9246,8 @@ var qrcode = function() {
                 'sepa.warn.pmtInfIdLen': 'PmtInfId "{id}" 超出 ISO 20022 Max35Text 限制（{len}/35 字符）——清算系统会在模式校验阶段拒绝该文件（常见原因是从内部长键拼接而成的批次标识符超过了 ISO 20022 对每个付款信息块标识符的 35 字符上限）',
                 'sepa.ok.mndtIdLen': '所有 {n} 笔直接借记交易的 MndtId 均在 ISO 20022 Max35Text 限制范围内（每个 ≤35 字符）',
                 'sepa.warn.mndtIdLen': 'MndtId "{id}" 超出 ISO 20022 Max35Text 限制（{len}/35 字符）——清算系统会在模式校验阶段拒绝该文件（常见原因是债务人名称合并入授权参考导致超出 ISO 20022 的 35 字符上限）',
+                'sepa.ok.instrPrty': '所有 {n} 个 PmtInf 块的 PmtTpInf/InstrPrty 值均符合 ISO 20022 Priority2Code（HIGH 或 NORM）',
+                'sepa.warn.instrPrty': 'PmtTpInf/InstrPrty 不匹配：PmtInf #{idx} 声明 {actual}，但 ISO 20022 Priority2Code 仅允许 HIGH 或 NORM——清算系统会在模式校验阶段拒绝该文件',
                 'sepa.warn.ccyInvalid': '币种代码不在 ISO 4217 现行清单中：{code}',
                 'sepa.warn.unknownDoc': '无法识别的 ISO 20022 根元素 — 仅部分解析。',
                 'err.sepaEmpty': 'XML 输入为空。',
@@ -9367,6 +9377,8 @@ var qrcode = function() {
                 'ubl.warn.billingRefDate': 'BillingReference/InvoiceDocumentReference/IssueDate "{v}" 不符合 xs:date YYYY-MM-DD 形式——EN 16931 BT-26 / PEPPOL BIS Billing 3.0 要求规范的 xs:date 形式（例如 2024-04-15）；PEPPOL 接入点会在 schematron 校验时拒绝',
                 'ubl.ok.mandateIdLen': '所有 {n} 个授权的 PaymentMeans/PaymentMandate/ID 值（EN 16931 BT-89 授权参考）均在 35 字符上限范围内（每个 ≤35 字符）',
                 'ubl.warn.mandateIdLen': 'PaymentMeans/PaymentMandate/ID "{id}" 超出 35 字符上限（{len}/35）——EN 16931 BT-89 与 SEPA SDD MndtId 对齐（ISO 20022 Max35Text）；PEPPOL 接入点会拒绝该授权参考，下游清算处理器会剥除或拒绝超过上限的值',
+                'ubl.ok.buyerRefLen': '所有 {n} 条 BuyerReference 值（EN 16931 BT-10）均在 SEPA EndToEndId 的 35 字符上限范围内（每个 ≤35 字符）',
+                'ubl.warn.buyerRefLen': 'BuyerReference "{ref}" 超出 35 字符上限（{len}/35）——EN 16931 BT-10 经常被原样复制到 SEPA EndToEndId（ISO 20022 Max35Text）中；较长的值会迫使下游 SEPA 生成器截断（对账主键发生隐性数据丢失）或在模式校验阶段拒绝该文件',
                 'ubl.ok.ccyValid': '币种代码按 ISO 4217 有效：{list}',
                 'ubl.ok.ibanValid': '收款方/付款方账户 IBAN 通过 ISO 13616 MOD-97 校验（{n}）',
                 'ubl.warn.ibanInvalid': '收款方/付款方 IBAN 未通过 ISO 13616 MOD-97 校验：{iban}',
@@ -10451,6 +10463,8 @@ var qrcode = function() {
                 'sepa.warn.pmtInfIdLen': 'PmtInfId „{id}“ überschreitet die ISO-20022-Max35Text-Grenze ({len}/35 Zeichen) — Clearing-Systeme weisen die Datei am Schema-Validierungs-Gate ab (häufige Ursache: ein aus einem langen internen Schlüssel interpolierter Batch-Identifikator, der die ISO-20022-Grenze von 35 Zeichen für den Identifikator des Zahlungsinformationsblocks überschreitet)',
                 'sepa.ok.mndtIdLen': 'MndtId-Werte liegen über alle {n} Lastschrift-Transaktion(en) innerhalb der ISO-20022-Max35Text-Grenze (jeweils ≤ 35 Zeichen)',
                 'sepa.warn.mndtIdLen': 'MndtId „{id}“ überschreitet die ISO-20022-Max35Text-Grenze ({len}/35 Zeichen) — Clearing-Systeme weisen die Datei am Schema-Validierungs-Gate ab (häufige Ursache: ein in die Mandatsreferenz integrierter Schuldnername, der die ISO-20022-Grenze von 35 Zeichen überschreitet)',
+                'sepa.ok.instrPrty': 'PmtTpInf/InstrPrty-Werte entsprechen ISO 20022 Priority2Code (HIGH oder NORM) über alle {n} PmtInf-Block(s)',
+                'sepa.warn.instrPrty': 'PmtTpInf/InstrPrty-Abweichung: PmtInf #{idx} deklariert {actual}, aber ISO 20022 Priority2Code erlaubt nur HIGH oder NORM — Clearing-Systeme weisen die Datei am Schema-Validierungs-Gate ab',
                 'sepa.warn.ccyInvalid': 'Währungscode nicht aktiv nach ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unbekanntes ISO-20022-Wurzelelement — nur Teilanalyse.',
                 'err.sepaEmpty': 'Die XML-Eingabe ist leer.',
@@ -10580,6 +10594,8 @@ var qrcode = function() {
                 'ubl.warn.billingRefDate': 'BillingReference/InvoiceDocumentReference/IssueDate „{v}“ entspricht nicht der xs:date-Form JJJJ-MM-TT — EN 16931 BT-26 / PEPPOL BIS Billing 3.0 verlangen die kanonische xs:date-Form (z. B. 2024-04-15); PEPPOL-Access-Points lehnen am Schematron-Gate ab',
                 'ubl.ok.mandateIdLen': 'PaymentMeans/PaymentMandate/ID-Werte (EN 16931 BT-89 Mandatsreferenz) liegen über alle {n} Mandat(e) innerhalb der 35-Zeichen-Grenze (jeweils ≤ 35 Zeichen)',
                 'ubl.warn.mandateIdLen': 'PaymentMeans/PaymentMandate/ID „{id}“ überschreitet die 35-Zeichen-Grenze ({len}/35) — EN 16931 BT-89 entspricht SEPA-SDD-MndtId (ISO 20022 Max35Text); PEPPOL-Access-Points lehnen die Mandatsreferenz ab und nachgelagerte Clearing-Prozessoren entfernen oder verwerfen Werte über der Grenze',
+                'ubl.ok.buyerRefLen': 'BuyerReference-Werte (EN 16931 BT-10) liegen über alle {n} Referenz(en) innerhalb der 35-Zeichen-Grenze von SEPA EndToEndId (jeweils ≤ 35 Zeichen)',
+                'ubl.warn.buyerRefLen': 'BuyerReference „{ref}“ überschreitet die 35-Zeichen-Grenze ({len}/35) — EN 16931 BT-10 wird routinemäßig unverändert in SEPA EndToEndId (ISO 20022 Max35Text) übernommen; ein längerer Wert zwingt nachgelagerte SEPA-Generatoren zum Abschneiden (stiller Datenverlust am Abstimmungsschlüssel) oder zur Ablehnung der Datei am Schema-Validierungs-Gate',
                 'ubl.ok.ccyValid': 'Währungscodes nach ISO 4217 aktiv: {list}',
                 'ubl.ok.ibanValid': 'IBANs der Payee-/Payer-Konten gültig (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'Payee-/Payer-IBAN scheitert an ISO-13616-MOD-97-Prüfung: {iban}',
@@ -11649,6 +11665,8 @@ var qrcode = function() {
                 'sepa.warn.pmtInfIdLen': 'PmtInfId "{id}" ISO 20022 Max35Text सीमा से अधिक है ({len}/35 अक्षर) — क्लियरिंग सिस्टम फ़ाइल को स्कीमा-वैलिडेशन गेट पर अस्वीकार करते हैं (आम कारण: किसी लंबी आंतरिक कुंजी से जोड़ा गया प्रति-बैच पहचानकर्ता जो ISO 20022 की प्रति-भुगतान-सूचना-ब्लॉक पहचानकर्ता पर 35 अक्षर सीमा से अधिक हो)',
                 'sepa.ok.mndtIdLen': 'सभी {n} डायरेक्ट-डेबिट लेन-देन में MndtId मान ISO 20022 Max35Text सीमा के भीतर हैं (प्रत्येक ≤35 अक्षर)',
                 'sepa.warn.mndtIdLen': 'MndtId "{id}" ISO 20022 Max35Text सीमा से अधिक है ({len}/35 अक्षर) — क्लियरिंग सिस्टम फ़ाइल को स्कीमा-वैलिडेशन गेट पर अस्वीकार करते हैं (आम कारण: देनदार का नाम मैंडेट संदर्भ में जोड़ने से ISO 20022 की 35 अक्षर सीमा से अधिक हो जाता है)',
+                'sepa.ok.instrPrty': 'सभी {n} PmtInf ब्लॉक में PmtTpInf/InstrPrty मान ISO 20022 Priority2Code (HIGH या NORM) के अनुरूप हैं',
+                'sepa.warn.instrPrty': 'PmtTpInf/InstrPrty बेमेल: PmtInf #{idx} {actual} घोषित करता है, लेकिन ISO 20022 Priority2Code केवल HIGH या NORM की अनुमति देता है — क्लियरिंग सिस्टम फ़ाइल को स्कीमा-वैलिडेशन गेट पर अस्वीकार करते हैं',
                 'sepa.warn.ccyInvalid': 'मुद्रा कोड ISO 4217 में सक्रिय नहीं: {code}',
                 'sepa.warn.unknownDoc': 'अज्ञात ISO 20022 रूट तत्व — केवल आंशिक पार्सिंग।',
                 'err.sepaEmpty': 'XML इनपुट खाली है।',
@@ -11778,6 +11796,8 @@ var qrcode = function() {
                 'ubl.warn.billingRefDate': 'BillingReference/InvoiceDocumentReference/IssueDate "{v}" xs:date YYYY-MM-DD स्वरूप के अनुरूप नहीं है — EN 16931 BT-26 / PEPPOL BIS Billing 3.0 के लिए कैनोनिकल xs:date स्वरूप (उदा. 2024-04-15) आवश्यक है; PEPPOL एक्सेस पॉइंट schematron गेट पर अस्वीकार कर देते हैं',
                 'ubl.ok.mandateIdLen': 'सभी {n} मैंडेट में PaymentMeans/PaymentMandate/ID मान (EN 16931 BT-89 मैंडेट संदर्भ) 35 अक्षर सीमा के भीतर हैं (प्रत्येक ≤35 अक्षर)',
                 'ubl.warn.mandateIdLen': 'PaymentMeans/PaymentMandate/ID "{id}" 35 अक्षर सीमा से अधिक है ({len}/35) — EN 16931 BT-89, SEPA SDD MndtId (ISO 20022 Max35Text) से मेल खाता है; PEPPOL एक्सेस पॉइंट मैंडेट संदर्भ अस्वीकार कर देते हैं और निचले स्तर के क्लियरिंग प्रोसेसर सीमा से अधिक मानों को हटा देते हैं या अस्वीकार कर देते हैं',
+                'ubl.ok.buyerRefLen': 'सभी {n} संदर्भ में BuyerReference मान (EN 16931 BT-10) SEPA EndToEndId की 35-अक्षर सीमा के भीतर हैं (प्रत्येक ≤35 अक्षर)',
+                'ubl.warn.buyerRefLen': 'BuyerReference "{ref}" 35-अक्षर सीमा से अधिक है ({len}/35) — EN 16931 BT-10 को नियमित रूप से SEPA EndToEndId (ISO 20022 Max35Text) में ज्यों का त्यों कॉपी किया जाता है; लंबा मान निचले स्तर के SEPA जनरेटरों को छाँटने (मिलान कुंजी पर मौन डेटा हानि) या फ़ाइल को स्कीमा-वैलिडेशन गेट पर अस्वीकार करने के लिए मजबूर करता है',
                 'ubl.ok.ccyValid': 'मुद्रा कोड ISO 4217 के अनुसार सक्रिय: {list}',
                 'ubl.ok.ibanValid': 'भुगतानकर्ता/प्राप्तकर्ता खाते के IBAN वैध (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'भुगतानकर्ता/प्राप्तकर्ता IBAN ISO 13616 MOD-97 जाँच में विफल: {iban}',
@@ -20231,6 +20251,44 @@ var qrcode = function() {
             }
         }
 
+        // ISO 20022 / EPC SEPA Rulebook `InstrPrty` validation (draft 90):
+        // the optional `<PmtInf>/<PmtTpInf>/<InstrPrty>` element declares
+        // the instruction priority. ISO 20022 declares the field as
+        // Priority2Code, a closed enumeration of exactly two values —
+        // `HIGH` and `NORM`. Anything else (the canonical mistake is a
+        // template repurposed from a non-SEPA wire-instruction flow that
+        // carried `URGT` / `URGP` / lowercase `high`) is schema-invalid;
+        // clearing systems reject the file at the xs:schema gate before
+        // any rail-level check fires. Parallel in shape to the other
+        // PmtInf-level scalar enum gates (PmtMtd / ChrgBr / SvcLvl /
+        // SeqTp / CtgyPurp); optional element so absent blocks skip
+        // silently.
+        function sepaCheckInstrPrty(out, doc, detected) {
+            if (detected.type !== 'pain.001' && detected.type !== 'pain.008') return;
+            const w = detected.wrapper;
+            if (!w) return;
+            const pmtInfs = sepaAllLocal(w, 'PmtInf');
+            if (!pmtInfs.length) return;
+            const bad = [];
+            let seen = 0;
+            pmtInfs.forEach((pi, i) => {
+                const tpInf = sepaFirst(pi, 'PmtTpInf');
+                if (!tpInf) return;
+                const declared = (sepaTextOf(tpInf, 'InstrPrty') || '').trim().toUpperCase();
+                if (!declared) return;
+                seen++;
+                if (declared !== 'HIGH' && declared !== 'NORM') bad.push({ idx: i + 1, actual: declared });
+            });
+            if (!seen) return;
+            if (bad.length === 0) {
+                tlsRenderRow(out, t('sepa.row.warning'), '✓ ' + tFormat('sepa.ok.instrPrty', { n: intlNumber(seen) }));
+            } else {
+                for (const b of bad) {
+                    tlsRenderRow(out, t('sepa.row.warning'), '✗ ' + tFormat('sepa.warn.instrPrty', { idx: intlNumber(b.idx), actual: b.actual }));
+                }
+            }
+        }
+
         function sepaCheckBics(out, doc) {
             const bics = sepaCollectBics(doc);
             if (!bics.length) return;
@@ -20280,6 +20338,7 @@ var qrcode = function() {
                 sepaCheckInstrIdLength(out, doc, detected);
                 sepaCheckPmtInfIdLength(out, doc, detected);
                 sepaCheckMndtIdLength(out, doc, detected);
+                sepaCheckInstrPrty(out, doc, detected);
                 sepaCheckE2eIdCharset(out, doc, detected);
                 sepaCheckInstrIdCharset(out, doc, detected);
                 sepaCheckMndtIdCharset(out, doc, detected);
@@ -21711,6 +21770,33 @@ var qrcode = function() {
             }
         }
 
+        // EN 16931 BT-10 (Buyer reference) length check (draft 91):
+        // UBL declares `cbc:BuyerReference` at the document root as plain
+        // text with no schema-level length cap, but the value is routinely
+        // copied verbatim into the SEPA `<EndToEndId>` (ISO 20022 Max35Text,
+        // 35-codepoint cap) by downstream pain.001 generators when the
+        // PEPPOL invoice is settled over SEPA rails. A BuyerReference
+        // longer than 35 characters forces the SEPA generator either to
+        // truncate (silent data loss across the reconciliation key) or to
+        // fail at the Max35Text gate. Parallel in shape to draft 89's
+        // PaymentMandate/ID length check (same "rail downstream caps the
+        // value the UBL field carries" pattern). Skips silently when the
+        // optional BuyerReference is absent — draft 79's presence gate
+        // (BuyerReference OR OrderReference) already covers the absence
+        // case.
+        function ublCheckBuyerRefLength(out, detected) {
+            const r = detected.root;
+            if (!r) return;
+            const ref = (sepaTextOf(r, 'BuyerReference') || '').trim();
+            if (!ref) return;
+            const len = [...ref].length;
+            if (len <= 35) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + tFormat('ubl.ok.buyerRefLen', { n: intlNumber(1) }));
+            } else {
+                tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + tFormat('ubl.warn.buyerRefLen', { ref, len: intlNumber(len) }));
+            }
+        }
+
         // Walk every `cac:FinancialInstitutionBranch/cbc:ID` (and the legacy
         // UBL `cac:FinancialInstitution/cbc:ID`) under `cac:PaymentMeans` —
         // PEPPOL BIS Billing 3.0 / EN 16931 BT-86 names this element as the
@@ -21861,6 +21947,7 @@ var qrcode = function() {
                 ublCheckMandateIdLength(out, detected);
                 ublCheckEndpointIds(out, detected);
                 ublCheckBuyerOrOrderRef(out, detected);
+                ublCheckBuyerRefLength(out, detected);
                 ublCheckLineAmount(out, detected);
             } catch (e) {
                 tlsRenderRow(out, t('ubl.row.error'), e.message);

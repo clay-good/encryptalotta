@@ -2898,6 +2898,51 @@ test('ubl: PaymentMandate/ID length check flags a long mandate reference', async
   await expect(page.locator('#ubl-results')).toContainText(new RegExp(`PaymentMeans/PaymentMandate/ID "${longMandate}" exceeds the 35-character cap`, 'i'), { timeout: 5_000 });
 });
 
+test('sepa: InstrPrty enum check confirms on a canonical Priority2Code (NORM)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  const withPrty = SEPA_PAIN001.replace(
+    '<ReqdExctnDt>2024-01-20</ReqdExctnDt>',
+    '<PmtTpInf><InstrPrty>NORM</InstrPrty></PmtTpInf><ReqdExctnDt>2024-01-20</ReqdExctnDt>'
+  );
+  await page.fill('#sepa-input', withPrty);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/PmtTpInf\/InstrPrty values match ISO 20022 Priority2Code/i, { timeout: 5_000 });
+});
+
+test('sepa: InstrPrty enum check flags a non-Priority2Code value (URGT)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  const withBadPrty = SEPA_PAIN001.replace(
+    '<ReqdExctnDt>2024-01-20</ReqdExctnDt>',
+    '<PmtTpInf><InstrPrty>URGT</InstrPrty></PmtTpInf><ReqdExctnDt>2024-01-20</ReqdExctnDt>'
+  );
+  await page.fill('#sepa-input', withBadPrty);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/PmtTpInf\/InstrPrty mismatch: PmtInf #1 declares URGT/i, { timeout: 5_000 });
+});
+
+test('ubl: BuyerReference length check confirms when value fits the 35-char SEPA EndToEndId cap', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  const withRef = UBL_INVOICE.replace(
+    '<cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>',
+    '<cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>\n  <cbc:BuyerReference>PO-2024-042</cbc:BuyerReference>'
+  );
+  await page.fill('#ubl-input', withRef);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/BuyerReference values .* fit within the 35-character SEPA EndToEndId cap/i, { timeout: 5_000 });
+});
+
+test('ubl: BuyerReference length check flags a value over the 35-char cap', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  const longRef = 'PO-2024-Subscription-Long-Customer-Ref-042';  // 42 chars
+  const withLong = UBL_INVOICE.replace(
+    '<cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>',
+    `<cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>\n  <cbc:BuyerReference>${longRef}</cbc:BuyerReference>`
+  );
+  await page.fill('#ubl-input', withLong);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(new RegExp(`BuyerReference "${longRef}" exceeds the 35-character cap`, 'i'), { timeout: 5_000 });
+});
+
 test('ubl: rejects non-UBL XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   await page.fill('#ubl-input', '<?xml version="1.0"?><Document/>');
