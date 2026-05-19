@@ -3084,6 +3084,42 @@ test('ubl: OrderReference/ID length check flags a value over the 35-char cap', a
   await expect(page.locator('#ubl-results')).toContainText(new RegExp(`OrderReference/ID "${longRef}" exceeds the 35-character cap`, 'i'), { timeout: 5_000 });
 });
 
+test('sepa: EPC SEPA Rulebook EUR-only check confirms when every Ccy attribute declares EUR', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // The canonical SEPA_PAIN001 fixture already declares Ccy="EUR" on the single InstdAmt.
+  await page.fill('#sepa-input', SEPA_PAIN001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/All @Ccy attributes declare EUR/i, { timeout: 5_000 });
+});
+
+test('sepa: EPC SEPA Rulebook EUR-only check flags a non-EUR Ccy attribute', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  const withUsd = SEPA_PAIN001.replace('Ccy="EUR"', 'Ccy="USD"');
+  await page.fill('#sepa-input', withUsd);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Non-EUR currency code @Ccy="USD" declared/i, { timeout: 5_000 });
+});
+
+test('ubl: line quantity presence check confirms when every line declares an InvoicedQuantity', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Canonical UBL_INVOICE has a single InvoiceLine with InvoicedQuantity already declared.
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Every line declares a InvoicedQuantity across all 1 line\(s\)/i, { timeout: 5_000 });
+});
+
+test('ubl: line quantity presence check flags a line that omits InvoicedQuantity', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Strip the InvoicedQuantity element from the single line in the fixture.
+  const noQty = UBL_INVOICE.replace(
+    /<cbc:InvoicedQuantity unitCode="C62">2<\/cbc:InvoicedQuantity>\s*/,
+    ''
+  );
+  await page.fill('#ubl-input', noQty);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Line #1 is missing a InvoicedQuantity/i, { timeout: 5_000 });
+});
+
 test('ubl: rejects non-UBL XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   await page.fill('#ubl-input', '<?xml version="1.0"?><Document/>');
