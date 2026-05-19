@@ -2943,6 +2943,55 @@ test('ubl: BuyerReference length check flags a value over the 35-char cap', asyn
   await expect(page.locator('#ubl-results')).toContainText(new RegExp(`BuyerReference "${longRef}" exceeds the 35-character cap`, 'i'), { timeout: 5_000 });
 });
 
+test('sepa: per-PmtInf NbOfTxs/CtrlSum invariants confirm when block-level totals match the transactions', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  const withTotals = SEPA_PAIN001.replace(
+    '<PmtInfId>PAY-001</PmtInfId>',
+    '<PmtInfId>PAY-001</PmtInfId>\n      <NbOfTxs>1</NbOfTxs>\n      <CtrlSum>100.00</CtrlSum>'
+  );
+  await page.fill('#sepa-input', withTotals);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/PmtInf\/NbOfTxs values match the per-block transaction count/i, { timeout: 5_000 });
+  await expect(page.locator('#sepa-results')).toContainText(/PmtInf\/CtrlSum values match the per-block sum of transaction amounts/i, { timeout: 5_000 });
+});
+
+test('sepa: per-PmtInf NbOfTxs/CtrlSum invariants flag block-level mismatches', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Block-level totals declare 2 / 200.00 but the block only contains a single 100.00 EUR transaction.
+  const withBadTotals = SEPA_PAIN001.replace(
+    '<PmtInfId>PAY-001</PmtInfId>',
+    '<PmtInfId>PAY-001</PmtInfId>\n      <NbOfTxs>2</NbOfTxs>\n      <CtrlSum>200.00</CtrlSum>'
+  );
+  await page.fill('#sepa-input', withBadTotals);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/PmtInf #1 NbOfTxs mismatch: block declares 2 but contains 1 transaction/i, { timeout: 5_000 });
+  await expect(page.locator('#sepa-results')).toContainText(/PmtInf #1 CtrlSum mismatch: block declares 200\.00 but transaction amounts sum to 100\.00/i, { timeout: 5_000 });
+});
+
+test('ubl: TaxPointDate ordering check confirms when TaxPointDate is on or before IssueDate', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // IssueDate=2024-04-01; TaxPointDate=2024-03-15 (before issue) — the happy path.
+  const withTpd = UBL_INVOICE.replace(
+    '<cbc:IssueDate>2024-04-01</cbc:IssueDate>',
+    '<cbc:IssueDate>2024-04-01</cbc:IssueDate>\n  <cbc:TaxPointDate>2024-03-15</cbc:TaxPointDate>'
+  );
+  await page.fill('#ubl-input', withTpd);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/TaxPointDate 2024-03-15 is on or before IssueDate 2024-04-01/i, { timeout: 5_000 });
+});
+
+test('ubl: TaxPointDate ordering check flags a TaxPointDate after IssueDate', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // TaxPointDate=2024-05-15 (after the 2024-04-01 issue date) — the failure path.
+  const withBadTpd = UBL_INVOICE.replace(
+    '<cbc:IssueDate>2024-04-01</cbc:IssueDate>',
+    '<cbc:IssueDate>2024-04-01</cbc:IssueDate>\n  <cbc:TaxPointDate>2024-05-15</cbc:TaxPointDate>'
+  );
+  await page.fill('#ubl-input', withBadTpd);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/TaxPointDate 2024-05-15 is later than IssueDate 2024-04-01/i, { timeout: 5_000 });
+});
+
 test('ubl: rejects non-UBL XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   await page.fill('#ubl-input', '<?xml version="1.0"?><Document/>');

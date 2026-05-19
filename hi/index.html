@@ -4493,6 +4493,10 @@
                 'sepa.warn.mndtIdLen': 'MndtId "{id}" exceeds ISO 20022 Max35Text ({len}/35 characters) — clearing systems reject the file at the schema-validation gate (a common cause is a debtor name folded into the mandate reference pushing the value past the 35-character ISO 20022 cap)',
                 'sepa.ok.instrPrty': 'PmtTpInf/InstrPrty values match ISO 20022 Priority2Code (HIGH or NORM) across all {n} PmtInf block(s)',
                 'sepa.warn.instrPrty': 'PmtTpInf/InstrPrty mismatch: PmtInf #{idx} declares {actual} but ISO 20022 Priority2Code only allows HIGH or NORM — clearing systems reject the file at the schema-validation gate',
+                'sepa.ok.pmtInfNbTx': 'PmtInf/NbOfTxs values match the per-block transaction count across all {n} PmtInf block(s) (ISO 20022 / EPC SEPA Rulebook)',
+                'sepa.warn.pmtInfNbTx': 'PmtInf #{idx} NbOfTxs mismatch: block declares {declared} but contains {actual} transaction(s) — clearing systems reject the file at the per-PmtInf schematron gate (a common cause is a batch generator that refreshes the group-header counts but not the per-block counts when a transaction is added or removed)',
+                'sepa.ok.pmtInfCtrlSum': 'PmtInf/CtrlSum values match the per-block sum of transaction amounts across all {n} PmtInf block(s) (ISO 20022 / EPC SEPA Rulebook, ±1¢ tolerance)',
+                'sepa.warn.pmtInfCtrlSum': 'PmtInf #{idx} CtrlSum mismatch: block declares {declared} but transaction amounts sum to {actual} — clearing systems reject the file at the per-PmtInf schematron gate (a common cause is a batch generator that refreshes the group-header sum but not the per-block sum when an amount changes)',
                 'sepa.warn.ccyInvalid': 'Currency code not active per ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unrecognized ISO 20022 root element — partial parse only.',
                 'err.sepaEmpty': 'XML input is empty.',
@@ -4634,6 +4638,8 @@
                 'ubl.warn.mandateIdLen': 'PaymentMeans/PaymentMandate/ID "{id}" exceeds the 35-character cap ({len}/35 characters) — EN 16931 BT-89 mirrors SEPA SDD MndtId (ISO 20022 Max35Text); PEPPOL access points reject the mandate reference and downstream rail-level processors strip or reject values over the cap',
                 'ubl.ok.buyerRefLen': 'BuyerReference values (EN 16931 BT-10) all fit within the 35-character SEPA EndToEndId cap across {n} reference(s) (each ≤35 characters)',
                 'ubl.warn.buyerRefLen': 'BuyerReference "{ref}" exceeds the 35-character cap ({len}/35 characters) — EN 16931 BT-10 is routinely copied verbatim into SEPA EndToEndId (ISO 20022 Max35Text); a longer value forces downstream SEPA generators to truncate (silent data loss across the reconciliation key) or to fail the file at the schema-validation gate',
+                'ubl.ok.taxPointDateOrder': 'TaxPointDate {tpd} is on or before IssueDate {issue} (EN 16931 BT-7 / BT-2 — VAT cannot become accountable after the invoice is issued)',
+                'ubl.warn.taxPointDateOrder': 'TaxPointDate {tpd} is later than IssueDate {issue} — EN 16931 BT-7 records when VAT becomes accountable and BT-2 records when the invoice was issued; a tax point after the issue date implies the supplier is declaring VAT for a period that has not yet started (data-entry error or template field-swap)',
                 'ubl.ok.ccyValid': 'Currency codes active per ISO 4217: {list}',
                 'ubl.ok.ibanValid': 'Payee/Payer financial account IBANs valid (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'Payee/Payer IBAN failed ISO 13616 MOD-97 check: {iban}',
@@ -5735,6 +5741,10 @@
                 'sepa.warn.mndtIdLen': 'MndtId « {id} » dépasse la limite ISO 20022 Max35Text ({len}/35 caractères) — les systèmes de compensation rejettent le fichier au contrôle de schéma (cause fréquente : un nom de débiteur intégré à la référence de mandat dépassant la limite ISO 20022 de 35 caractères)',
                 'sepa.ok.instrPrty': 'Les valeurs PmtTpInf/InstrPrty respectent ISO 20022 Priority2Code (HIGH ou NORM) sur l’ensemble des {n} bloc(s) PmtInf',
                 'sepa.warn.instrPrty': 'Discordance PmtTpInf/InstrPrty : PmtInf #{idx} déclare {actual} mais ISO 20022 Priority2Code n’autorise que HIGH ou NORM — les systèmes de compensation rejettent le fichier au contrôle de schéma',
+                'sepa.ok.pmtInfNbTx': 'Les valeurs PmtInf/NbOfTxs correspondent au nombre de transactions par bloc sur l’ensemble des {n} bloc(s) PmtInf (ISO 20022 / EPC SEPA Rulebook)',
+                'sepa.warn.pmtInfNbTx': 'Discordance PmtInf #{idx} NbOfTxs : le bloc déclare {declared} mais contient {actual} transaction(s) — les systèmes de compensation rejettent le fichier au contrôle schematron par bloc (cause fréquente : un générateur de lots qui rafraîchit les compteurs de l’en-tête mais pas ceux des blocs lors de l’ajout ou de la suppression d’une transaction)',
+                'sepa.ok.pmtInfCtrlSum': 'Les valeurs PmtInf/CtrlSum correspondent à la somme des montants par bloc sur l’ensemble des {n} bloc(s) PmtInf (ISO 20022 / EPC SEPA Rulebook, tolérance ±1¢)',
+                'sepa.warn.pmtInfCtrlSum': 'Discordance PmtInf #{idx} CtrlSum : le bloc déclare {declared} mais la somme des montants vaut {actual} — les systèmes de compensation rejettent le fichier au contrôle schematron par bloc (cause fréquente : un générateur de lots qui rafraîchit la somme de l’en-tête mais pas celle des blocs lors d’une modification de montant)',
                 'sepa.warn.ccyInvalid': 'Code monétaire non actif selon ISO 4217 : {code}',
                 'sepa.warn.unknownDoc': 'Élément racine ISO 20022 non reconnu — analyse partielle uniquement.',
                 'err.sepaEmpty': 'Le XML d’entrée est vide.',
@@ -5866,6 +5876,8 @@
                 'ubl.warn.mandateIdLen': 'PaymentMeans/PaymentMandate/ID « {id} » dépasse la limite de 35 caractères ({len}/35) — EN 16931 BT-89 reflète SEPA SDD MndtId (ISO 20022 Max35Text) ; les points d’accès PEPPOL rejettent la référence de mandat et les processeurs en aval suppriment ou rejettent les valeurs au-delà de la limite',
                 'ubl.ok.buyerRefLen': 'Toutes les valeurs BuyerReference (EN 16931 BT-10) respectent la limite de 35 caractères de SEPA EndToEndId sur {n} référence(s) (chacune ≤ 35 caractères)',
                 'ubl.warn.buyerRefLen': 'BuyerReference « {ref} » dépasse la limite de 35 caractères ({len}/35) — EN 16931 BT-10 est régulièrement recopié tel quel dans SEPA EndToEndId (ISO 20022 Max35Text) ; une valeur plus longue force les générateurs SEPA en aval à tronquer (perte silencieuse de la clé de rapprochement) ou à rejeter le fichier au contrôle de schéma',
+                'ubl.ok.taxPointDateOrder': 'TaxPointDate {tpd} est antérieure ou égale à IssueDate {issue} (EN 16931 BT-7 / BT-2 — la TVA ne peut devenir exigible après l’émission de la facture)',
+                'ubl.warn.taxPointDateOrder': 'TaxPointDate {tpd} est postérieure à IssueDate {issue} — EN 16931 BT-7 indique la date d’exigibilité de la TVA et BT-2 la date d’émission de la facture ; un point de TVA postérieur à l’émission implique que le fournisseur déclare la TVA pour une période non encore commencée (erreur de saisie ou inversion de champ dans le modèle)',
                 'ubl.ok.ccyValid': 'Codes monétaires actifs selon ISO 4217 : {list}',
                 'ubl.ok.ibanValid': 'IBAN des comptes Payee/Payer valides (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'IBAN Payee/Payer échoue au contrôle ISO 13616 MOD-97 : {iban}',
@@ -6937,6 +6949,10 @@
                 'sepa.warn.mndtIdLen': 'MndtId "{id}" 超出 ISO 20022 Max35Text 限制（{len}/35 字符）——清算系统会在模式校验阶段拒绝该文件（常见原因是债务人名称合并入授权参考导致超出 ISO 20022 的 35 字符上限）',
                 'sepa.ok.instrPrty': '所有 {n} 个 PmtInf 块的 PmtTpInf/InstrPrty 值均符合 ISO 20022 Priority2Code（HIGH 或 NORM）',
                 'sepa.warn.instrPrty': 'PmtTpInf/InstrPrty 不匹配：PmtInf #{idx} 声明 {actual}，但 ISO 20022 Priority2Code 仅允许 HIGH 或 NORM——清算系统会在模式校验阶段拒绝该文件',
+                'sepa.ok.pmtInfNbTx': '所有 {n} 个 PmtInf 块的 PmtInf/NbOfTxs 值均与各块的交易数量一致（ISO 20022 / EPC SEPA Rulebook）',
+                'sepa.warn.pmtInfNbTx': 'PmtInf #{idx} NbOfTxs 不匹配：该块声明 {declared}，但实际包含 {actual} 笔交易——清算系统会在 PmtInf 级别的 schematron 检查中拒绝该文件（常见原因是批量生成器在添加或删除交易后只刷新了组头计数而未刷新各块计数）',
+                'sepa.ok.pmtInfCtrlSum': '所有 {n} 个 PmtInf 块的 PmtInf/CtrlSum 值均与各块的交易金额之和一致（ISO 20022 / EPC SEPA Rulebook，±1¢ 容差）',
+                'sepa.warn.pmtInfCtrlSum': 'PmtInf #{idx} CtrlSum 不匹配：该块声明 {declared}，但交易金额合计为 {actual}——清算系统会在 PmtInf 级别的 schematron 检查中拒绝该文件（常见原因是批量生成器在金额变更后只刷新了组头合计而未刷新各块合计）',
                 'sepa.warn.ccyInvalid': '币种代码不在 ISO 4217 现行清单中：{code}',
                 'sepa.warn.unknownDoc': '无法识别的 ISO 20022 根元素 — 仅部分解析。',
                 'err.sepaEmpty': 'XML 输入为空。',
@@ -7068,6 +7084,8 @@
                 'ubl.warn.mandateIdLen': 'PaymentMeans/PaymentMandate/ID "{id}" 超出 35 字符上限（{len}/35）——EN 16931 BT-89 与 SEPA SDD MndtId 对齐（ISO 20022 Max35Text）；PEPPOL 接入点会拒绝该授权参考，下游清算处理器会剥除或拒绝超过上限的值',
                 'ubl.ok.buyerRefLen': '所有 {n} 条 BuyerReference 值（EN 16931 BT-10）均在 SEPA EndToEndId 的 35 字符上限范围内（每个 ≤35 字符）',
                 'ubl.warn.buyerRefLen': 'BuyerReference "{ref}" 超出 35 字符上限（{len}/35）——EN 16931 BT-10 经常被原样复制到 SEPA EndToEndId（ISO 20022 Max35Text）中；较长的值会迫使下游 SEPA 生成器截断（对账主键发生隐性数据丢失）或在模式校验阶段拒绝该文件',
+                'ubl.ok.taxPointDateOrder': 'TaxPointDate {tpd} 不晚于 IssueDate {issue}（EN 16931 BT-7 / BT-2——增值税不可在发票开具之后才变得应缴）',
+                'ubl.warn.taxPointDateOrder': 'TaxPointDate {tpd} 晚于 IssueDate {issue}——EN 16931 BT-7 记录增值税变得应缴的日期，BT-2 记录发票开具日期；增值税触发日期晚于开具日期意味着供应商在为尚未开始的期间申报增值税（数据录入错误或模板字段互换）',
                 'ubl.ok.ccyValid': '币种代码按 ISO 4217 有效：{list}',
                 'ubl.ok.ibanValid': '收款方/付款方账户 IBAN 通过 ISO 13616 MOD-97 校验（{n}）',
                 'ubl.warn.ibanInvalid': '收款方/付款方 IBAN 未通过 ISO 13616 MOD-97 校验：{iban}',
@@ -8154,6 +8172,10 @@
                 'sepa.warn.mndtIdLen': 'MndtId „{id}“ überschreitet die ISO-20022-Max35Text-Grenze ({len}/35 Zeichen) — Clearing-Systeme weisen die Datei am Schema-Validierungs-Gate ab (häufige Ursache: ein in die Mandatsreferenz integrierter Schuldnername, der die ISO-20022-Grenze von 35 Zeichen überschreitet)',
                 'sepa.ok.instrPrty': 'PmtTpInf/InstrPrty-Werte entsprechen ISO 20022 Priority2Code (HIGH oder NORM) über alle {n} PmtInf-Block(s)',
                 'sepa.warn.instrPrty': 'PmtTpInf/InstrPrty-Abweichung: PmtInf #{idx} deklariert {actual}, aber ISO 20022 Priority2Code erlaubt nur HIGH oder NORM — Clearing-Systeme weisen die Datei am Schema-Validierungs-Gate ab',
+                'sepa.ok.pmtInfNbTx': 'PmtInf/NbOfTxs-Werte stimmen über alle {n} PmtInf-Block(s) mit der jeweiligen Transaktionsanzahl pro Block überein (ISO 20022 / EPC SEPA Rulebook)',
+                'sepa.warn.pmtInfNbTx': 'PmtInf #{idx} NbOfTxs-Abweichung: Block deklariert {declared}, enthält jedoch {actual} Transaktion(en) — Clearing-Systeme weisen die Datei am PmtInf-Schematron-Gate ab (häufige Ursache: ein Batch-Generator, der die Zähler im Group-Header, aber nicht die pro Block aktualisiert, wenn eine Transaktion hinzugefügt oder entfernt wird)',
+                'sepa.ok.pmtInfCtrlSum': 'PmtInf/CtrlSum-Werte stimmen über alle {n} PmtInf-Block(s) mit der Summe der Transaktionsbeträge pro Block überein (ISO 20022 / EPC SEPA Rulebook, ±1¢ Toleranz)',
+                'sepa.warn.pmtInfCtrlSum': 'PmtInf #{idx} CtrlSum-Abweichung: Block deklariert {declared}, die Transaktionsbeträge summieren sich jedoch auf {actual} — Clearing-Systeme weisen die Datei am PmtInf-Schematron-Gate ab (häufige Ursache: ein Batch-Generator, der die Summe im Group-Header, aber nicht die pro Block aktualisiert, wenn sich ein Betrag ändert)',
                 'sepa.warn.ccyInvalid': 'Währungscode nicht aktiv nach ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unbekanntes ISO-20022-Wurzelelement — nur Teilanalyse.',
                 'err.sepaEmpty': 'Die XML-Eingabe ist leer.',
@@ -8285,6 +8307,8 @@
                 'ubl.warn.mandateIdLen': 'PaymentMeans/PaymentMandate/ID „{id}“ überschreitet die 35-Zeichen-Grenze ({len}/35) — EN 16931 BT-89 entspricht SEPA-SDD-MndtId (ISO 20022 Max35Text); PEPPOL-Access-Points lehnen die Mandatsreferenz ab und nachgelagerte Clearing-Prozessoren entfernen oder verwerfen Werte über der Grenze',
                 'ubl.ok.buyerRefLen': 'BuyerReference-Werte (EN 16931 BT-10) liegen über alle {n} Referenz(en) innerhalb der 35-Zeichen-Grenze von SEPA EndToEndId (jeweils ≤ 35 Zeichen)',
                 'ubl.warn.buyerRefLen': 'BuyerReference „{ref}“ überschreitet die 35-Zeichen-Grenze ({len}/35) — EN 16931 BT-10 wird routinemäßig unverändert in SEPA EndToEndId (ISO 20022 Max35Text) übernommen; ein längerer Wert zwingt nachgelagerte SEPA-Generatoren zum Abschneiden (stiller Datenverlust am Abstimmungsschlüssel) oder zur Ablehnung der Datei am Schema-Validierungs-Gate',
+                'ubl.ok.taxPointDateOrder': 'TaxPointDate {tpd} liegt am oder vor dem IssueDate {issue} (EN 16931 BT-7 / BT-2 — die Mehrwertsteuer kann nicht nach Ausstellung der Rechnung fällig werden)',
+                'ubl.warn.taxPointDateOrder': 'TaxPointDate {tpd} liegt nach IssueDate {issue} — EN 16931 BT-7 erfasst, wann die Mehrwertsteuer fällig wird, und BT-2 erfasst das Ausstellungsdatum der Rechnung; ein Steuerstichtag nach dem Ausstellungsdatum bedeutet, dass der Lieferant Mehrwertsteuer für einen noch nicht begonnenen Zeitraum deklariert (Erfassungsfehler oder Feldvertauschung in der Vorlage)',
                 'ubl.ok.ccyValid': 'Währungscodes nach ISO 4217 aktiv: {list}',
                 'ubl.ok.ibanValid': 'IBANs der Payee-/Payer-Konten gültig (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'Payee-/Payer-IBAN scheitert an ISO-13616-MOD-97-Prüfung: {iban}',
@@ -9356,6 +9380,10 @@
                 'sepa.warn.mndtIdLen': 'MndtId "{id}" ISO 20022 Max35Text सीमा से अधिक है ({len}/35 अक्षर) — क्लियरिंग सिस्टम फ़ाइल को स्कीमा-वैलिडेशन गेट पर अस्वीकार करते हैं (आम कारण: देनदार का नाम मैंडेट संदर्भ में जोड़ने से ISO 20022 की 35 अक्षर सीमा से अधिक हो जाता है)',
                 'sepa.ok.instrPrty': 'सभी {n} PmtInf ब्लॉक में PmtTpInf/InstrPrty मान ISO 20022 Priority2Code (HIGH या NORM) के अनुरूप हैं',
                 'sepa.warn.instrPrty': 'PmtTpInf/InstrPrty बेमेल: PmtInf #{idx} {actual} घोषित करता है, लेकिन ISO 20022 Priority2Code केवल HIGH या NORM की अनुमति देता है — क्लियरिंग सिस्टम फ़ाइल को स्कीमा-वैलिडेशन गेट पर अस्वीकार करते हैं',
+                'sepa.ok.pmtInfNbTx': 'सभी {n} PmtInf ब्लॉक में PmtInf/NbOfTxs मान प्रत्येक ब्लॉक की लेन-देन गणना से मेल खाते हैं (ISO 20022 / EPC SEPA Rulebook)',
+                'sepa.warn.pmtInfNbTx': 'PmtInf #{idx} NbOfTxs बेमेल: ब्लॉक {declared} घोषित करता है लेकिन उसमें {actual} लेन-देन हैं — क्लियरिंग सिस्टम फ़ाइल को PmtInf-स्तरीय schematron गेट पर अस्वीकार करते हैं (आम कारण: बैच जनरेटर जो लेन-देन जोड़ने या हटाने पर ग्रुप-हेडर की गणना को तो रिफ़्रेश करता है पर प्रति-ब्लॉक गणना को नहीं)',
+                'sepa.ok.pmtInfCtrlSum': 'सभी {n} PmtInf ब्लॉक में PmtInf/CtrlSum मान प्रत्येक ब्लॉक की लेन-देन राशियों के योग से मेल खाते हैं (ISO 20022 / EPC SEPA Rulebook, ±1¢ सहिष्णुता)',
+                'sepa.warn.pmtInfCtrlSum': 'PmtInf #{idx} CtrlSum बेमेल: ब्लॉक {declared} घोषित करता है लेकिन लेन-देन राशियों का योग {actual} है — क्लियरिंग सिस्टम फ़ाइल को PmtInf-स्तरीय schematron गेट पर अस्वीकार करते हैं (आम कारण: बैच जनरेटर जो राशि बदलने पर ग्रुप-हेडर के योग को तो रिफ़्रेश करता है पर प्रति-ब्लॉक के योग को नहीं)',
                 'sepa.warn.ccyInvalid': 'मुद्रा कोड ISO 4217 में सक्रिय नहीं: {code}',
                 'sepa.warn.unknownDoc': 'अज्ञात ISO 20022 रूट तत्व — केवल आंशिक पार्सिंग।',
                 'err.sepaEmpty': 'XML इनपुट खाली है।',
@@ -9487,6 +9515,8 @@
                 'ubl.warn.mandateIdLen': 'PaymentMeans/PaymentMandate/ID "{id}" 35 अक्षर सीमा से अधिक है ({len}/35) — EN 16931 BT-89, SEPA SDD MndtId (ISO 20022 Max35Text) से मेल खाता है; PEPPOL एक्सेस पॉइंट मैंडेट संदर्भ अस्वीकार कर देते हैं और निचले स्तर के क्लियरिंग प्रोसेसर सीमा से अधिक मानों को हटा देते हैं या अस्वीकार कर देते हैं',
                 'ubl.ok.buyerRefLen': 'सभी {n} संदर्भ में BuyerReference मान (EN 16931 BT-10) SEPA EndToEndId की 35-अक्षर सीमा के भीतर हैं (प्रत्येक ≤35 अक्षर)',
                 'ubl.warn.buyerRefLen': 'BuyerReference "{ref}" 35-अक्षर सीमा से अधिक है ({len}/35) — EN 16931 BT-10 को नियमित रूप से SEPA EndToEndId (ISO 20022 Max35Text) में ज्यों का त्यों कॉपी किया जाता है; लंबा मान निचले स्तर के SEPA जनरेटरों को छाँटने (मिलान कुंजी पर मौन डेटा हानि) या फ़ाइल को स्कीमा-वैलिडेशन गेट पर अस्वीकार करने के लिए मजबूर करता है',
+                'ubl.ok.taxPointDateOrder': 'TaxPointDate {tpd} IssueDate {issue} के पहले या उसी दिन है (EN 16931 BT-7 / BT-2 — चालान जारी होने के बाद VAT देय नहीं हो सकता)',
+                'ubl.warn.taxPointDateOrder': 'TaxPointDate {tpd} IssueDate {issue} के बाद है — EN 16931 BT-7 उस तिथि को दर्ज करता है जब VAT देय होता है और BT-2 चालान जारी होने की तिथि दर्ज करता है; जारी होने की तिथि के बाद का कर बिंदु यह दर्शाता है कि आपूर्तिकर्ता एक ऐसी अवधि के लिए VAT घोषित कर रहा है जो अभी शुरू भी नहीं हुई (डेटा-एंट्री त्रुटि या टेम्पलेट फ़ील्ड अदला-बदली)',
                 'ubl.ok.ccyValid': 'मुद्रा कोड ISO 4217 के अनुसार सक्रिय: {list}',
                 'ubl.ok.ibanValid': 'भुगतानकर्ता/प्राप्तकर्ता खाते के IBAN वैध (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'भुगतानकर्ता/प्राप्तकर्ता IBAN ISO 13616 MOD-97 जाँच में विफल: {iban}',
@@ -16900,6 +16930,89 @@
             }
         }
 
+        // Per-PmtInf NbOfTxs + CtrlSum invariants (draft 92): the same
+        // ISO 20022 invariants the group-header check from draft 35
+        // enforces, but down at the per-PmtInf level. ISO 20022 declares
+        // both `<PmtInf>/<NbOfTxs>` and `<PmtInf>/<CtrlSum>` as optional
+        // — when present they MUST equal the count / sum of the
+        // CdtTrfTxInf / DrctDbtTxInf children of that block. The
+        // canonical real-world failure is a batch generator that emits
+        // the group-header pair correctly but forgets to refresh the
+        // per-block pair after a transaction is added or removed; the
+        // file balances at the document level and fails at the per-PmtInf
+        // schematron gate. Parallel in shape to sepaCheckGrpHdrInvariants:
+        // ±1¢ tolerance per the ISO 20022 IG rounding policy; both gates
+        // fire independently per block.
+        function sepaCheckPmtInfInvariants(out, doc, detected) {
+            if (detected.type !== 'pain.001' && detected.type !== 'pain.008') return;
+            const w = detected.wrapper;
+            if (!w) return;
+            const pmtInfs = sepaAllLocal(w, 'PmtInf');
+            if (!pmtInfs.length) return;
+            let nbSeen = 0;
+            let csSeen = 0;
+            const nbBad = [];
+            const csBad = [];
+            pmtInfs.forEach((pi, i) => {
+                const txs = [
+                    ...sepaAllLocal(pi, 'CdtTrfTxInf'),
+                    ...sepaAllLocal(pi, 'DrctDbtTxInf')
+                ];
+                const declaredN = (sepaTextOf(pi, 'NbOfTxs') || '').trim();
+                if (declaredN) {
+                    const declared = Number(declaredN);
+                    if (Number.isFinite(declared)) {
+                        nbSeen++;
+                        if (declared !== txs.length) nbBad.push({ idx: i + 1, declared: intlNumber(declared), actual: intlNumber(txs.length) });
+                    }
+                }
+                const declaredSumStr = (sepaTextOf(pi, 'CtrlSum') || '').trim();
+                if (declaredSumStr) {
+                    const declaredSum = Number(declaredSumStr);
+                    if (Number.isFinite(declaredSum)) {
+                        let actualCents = 0;
+                        let summable = true;
+                        for (const tx of txs) {
+                            const el = sepaFirst(tx, 'InstdAmt') || sepaFirst(tx, 'Amt');
+                            if (!el) { summable = false; break; }
+                            const v = Number((el.textContent || '').trim());
+                            if (!Number.isFinite(v)) { summable = false; break; }
+                            actualCents += Math.round(v * 100);
+                        }
+                        if (summable) {
+                            csSeen++;
+                            const declaredCents = Math.round(declaredSum * 100);
+                            if (Math.abs(actualCents - declaredCents) > 1) {
+                                csBad.push({
+                                    idx: i + 1,
+                                    declared: intlNumber(declaredSum, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+                                    actual: intlNumber(actualCents / 100, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                                });
+                            }
+                        }
+                    }
+                }
+            });
+            if (nbSeen > 0) {
+                if (nbBad.length === 0) {
+                    tlsRenderRow(out, t('sepa.row.warning'), '✓ ' + tFormat('sepa.ok.pmtInfNbTx', { n: intlNumber(nbSeen) }));
+                } else {
+                    for (const b of nbBad) {
+                        tlsRenderRow(out, t('sepa.row.warning'), '✗ ' + tFormat('sepa.warn.pmtInfNbTx', b));
+                    }
+                }
+            }
+            if (csSeen > 0) {
+                if (csBad.length === 0) {
+                    tlsRenderRow(out, t('sepa.row.warning'), '✓ ' + tFormat('sepa.ok.pmtInfCtrlSum', { n: intlNumber(csSeen) }));
+                } else {
+                    for (const b of csBad) {
+                        tlsRenderRow(out, t('sepa.row.warning'), '✗ ' + tFormat('sepa.warn.pmtInfCtrlSum', b));
+                    }
+                }
+            }
+        }
+
         // ISO 20022 / EPC SEPA Rulebook PmtMtd consistency check:
         //   - pain.001 (customer credit-transfer initiation) → PmtMtd MUST be 'TRF'
         //   - pain.008 (customer direct-debit initiation)    → PmtMtd MUST be 'DD'
@@ -18015,6 +18128,7 @@
                 sepaCheckBics(out, doc);
                 sepaCheckCurrencies(out, doc);
                 sepaCheckGrpHdrInvariants(out, doc, detected);
+                sepaCheckPmtInfInvariants(out, doc, detected);
                 sepaCheckIbanBicCountryParity(out, doc, detected);
                 sepaCheckPmtMtd(out, doc, detected);
                 sepaCheckChrgBr(out, doc, detected);
@@ -18631,6 +18745,36 @@
                 tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + tFormat('ubl.ok.dueDate', { due: dueStr, issue: issueStr }));
             } else {
                 tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + tFormat('ubl.warn.dueDate', { due: dueStr, issue: issueStr }));
+            }
+        }
+
+        // TaxPointDate ≤ IssueDate temporal ordering (draft 93). EN 16931
+        // BT-7 (Value-added tax point date) records when VAT becomes
+        // accountable; BT-2 (IssueDate) records when the invoice was
+        // issued. Across every EU VAT regime the tax point precedes (or
+        // equals) issue — period-end VAT reporting bins the supply by
+        // tax point, so a tax-point date later than the issue date
+        // implies the supplier is declaring VAT for a period that hasn't
+        // happened yet (data-entry error, future-dating fraud pattern,
+        // or a template field-swap). UBL declares both as plain xs:date
+        // so the inversion passes schema. The form check (draft 75
+        // `ublCheckDateFormats`) already validates xs:date shape; this
+        // gate validates ordering. Mirror of draft 39's DueDate ≥
+        // IssueDate. Skips silently when either date is missing or
+        // unparseable — those degenerate cases are caught by the
+        // existing form gate upstream.
+        function ublCheckTaxPointDateOrder(out, detected) {
+            const r = detected.root;
+            const issueStr = (sepaTextOf(r, 'IssueDate') || '').trim();
+            const tpdStr   = (sepaTextOf(r, 'TaxPointDate') || '').trim();
+            if (!issueStr || !tpdStr) return;
+            const issueTs = Date.parse(issueStr);
+            const tpdTs   = Date.parse(tpdStr);
+            if (!Number.isFinite(issueTs) || !Number.isFinite(tpdTs)) return;
+            if (tpdTs <= issueTs) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + tFormat('ubl.ok.taxPointDateOrder', { tpd: tpdStr, issue: issueStr }));
+            } else {
+                tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + tFormat('ubl.warn.taxPointDateOrder', { tpd: tpdStr, issue: issueStr }));
             }
         }
 
@@ -19612,6 +19756,7 @@
                 ublCheckVatRates(out, detected);
                 ublCheckVatCategories(out, detected);
                 ublCheckDates(out, detected);
+                ublCheckTaxPointDateOrder(out, detected);
                 ublCheckPayable(out, detected);
                 ublCheckDocumentTypeCode(out, detected);
                 ublCheckLineIdUnique(out, detected);
