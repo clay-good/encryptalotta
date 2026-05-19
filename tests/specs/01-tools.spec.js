@@ -2486,6 +2486,53 @@ test('ubl: Item OriginCountry/IdentificationCode check flags UK (not an ISO code
   await expect(page.locator('#ubl-results')).toContainText(/Item\/OriginCountry\/IdentificationCode "UK" is not a valid ISO 3166-1 alpha-2 code/i, { timeout: 5_000 });
 });
 
+test('sepa: CtgyPurp/Cd check confirms on a canonical ExternalCategoryPurpose1Code (SALA)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Inject a PmtTpInf/CtgyPurp/Cd=SALA (salary payment) — canonical ISO 20022 code.
+  const withCtgy = SEPA_PAIN001.replace(
+    '<ReqdExctnDt>2024-01-20</ReqdExctnDt>',
+    '<PmtTpInf><CtgyPurp><Cd>SALA</Cd></CtgyPurp></PmtTpInf><ReqdExctnDt>2024-01-20</ReqdExctnDt>'
+  );
+  await page.fill('#sepa-input', withCtgy);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/CtgyPurp\/Cd is a valid ISO 20022 ExternalCategoryPurpose1Code/i, { timeout: 5_000 });
+});
+
+test('sepa: CtgyPurp/Cd check flags a typo against the canonical set (SALR for SALA)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  const withCtgy = SEPA_PAIN001.replace(
+    '<ReqdExctnDt>2024-01-20</ReqdExctnDt>',
+    '<PmtTpInf><CtgyPurp><Cd>SALR</Cd></CtgyPurp></PmtTpInf><ReqdExctnDt>2024-01-20</ReqdExctnDt>'
+  );
+  await page.fill('#sepa-input', withCtgy);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/CtgyPurp\/Cd mismatch: PmtInf #1 declares SALR/i, { timeout: 5_000 });
+});
+
+test('ubl: FinancialInstitutionBranch/ID BIC check confirms on a valid ISO 9362 BIC', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Inject a PaymentMeans with PayeeFinancialAccount + FinancialInstitutionBranch carrying a real BIC.
+  const withBic = UBL_INVOICE.replace(
+    '<cac:LegalMonetaryTotal>',
+    '<cac:PaymentMeans><cbc:PaymentMeansCode>30</cbc:PaymentMeansCode><cac:PayeeFinancialAccount><cbc:ID>DE89370400440532013000</cbc:ID><cac:FinancialInstitutionBranch><cbc:ID>COBADEFFXXX</cbc:ID></cac:FinancialInstitutionBranch></cac:PayeeFinancialAccount></cac:PaymentMeans>\n  <cac:LegalMonetaryTotal>'
+  );
+  await page.fill('#ubl-input', withBic);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Payment-service-provider BICs \(FinancialInstitutionBranch\/ID\) are all valid ISO 9362/i, { timeout: 5_000 });
+});
+
+test('ubl: FinancialInstitutionBranch/ID BIC check flags a malformed BIC', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // BICs are 8 or 11 characters; `COBADEFF1` (9 chars) is well-shaped at the start but the wrong length.
+  const withBic = UBL_INVOICE.replace(
+    '<cac:LegalMonetaryTotal>',
+    '<cac:PaymentMeans><cbc:PaymentMeansCode>30</cbc:PaymentMeansCode><cac:PayeeFinancialAccount><cbc:ID>DE89370400440532013000</cbc:ID><cac:FinancialInstitutionBranch><cbc:ID>COBADEFF1</cbc:ID></cac:FinancialInstitutionBranch></cac:PayeeFinancialAccount></cac:PaymentMeans>\n  <cac:LegalMonetaryTotal>'
+  );
+  await page.fill('#ubl-input', withBic);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/FinancialInstitutionBranch\/ID "COBADEFF1" is not a valid ISO 9362 BIC/i, { timeout: 5_000 });
+});
+
 test('ubl: rejects non-UBL XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   await page.fill('#ubl-input', '<?xml version="1.0"?><Document/>');
