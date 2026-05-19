@@ -2747,6 +2747,53 @@ test('ubl: Delivery country code check flags UK (not an ISO code — Great Brita
   await expect(page.locator('#ubl-results')).toContainText(/"UK" is not a valid ISO 3166-1 alpha-2 code/i, { timeout: 5_000 });
 });
 
+test('sepa: InstrId Max35Text length check confirms when every value fits', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Inject an InstrId of 12 chars — well within Max35Text.
+  const withInstr = SEPA_PAIN001.replace(
+    '<PmtId><EndToEndId>E2E-001</EndToEndId></PmtId>',
+    '<PmtId><InstrId>INSTR-000001</InstrId><EndToEndId>E2E-001</EndToEndId></PmtId>'
+  );
+  await page.fill('#sepa-input', withInstr);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/InstrId values fit within ISO 20022 Max35Text/i, { timeout: 5_000 });
+});
+
+test('sepa: InstrId Max35Text length check flags a 40-char internal batch key', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  const longInstr = 'BATCH-2024-Q2-SEQ-0001-SUBKEY-abc123XYZ';  // 39 chars
+  const withLong = SEPA_PAIN001.replace(
+    '<PmtId><EndToEndId>E2E-001</EndToEndId></PmtId>',
+    `<PmtId><InstrId>${longInstr}-X</InstrId><EndToEndId>E2E-001</EndToEndId></PmtId>`
+  );
+  await page.fill('#sepa-input', withLong);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(new RegExp(`InstrId "${longInstr}-X" exceeds ISO 20022 Max35Text`, 'i'), { timeout: 5_000 });
+});
+
+test('ubl: PaymentMeans/PaymentDueDate xs:date check confirms on a canonical YYYY-MM-DD', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Canonical fixture has no <cac:PaymentMeans>; inject one carrying PaymentDueDate.
+  const withPm = UBL_INVOICE.replace(
+    '</cac:LegalMonetaryTotal>',
+    '</cac:LegalMonetaryTotal>\n  <cac:PaymentMeans>\n    <cbc:PaymentMeansCode>30</cbc:PaymentMeansCode>\n    <cbc:PaymentDueDate>2024-05-01</cbc:PaymentDueDate>\n  </cac:PaymentMeans>'
+  );
+  await page.fill('#ubl-input', withPm);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/PaymentMeans\/PaymentDueDate values all match the xs:date YYYY-MM-DD form/i, { timeout: 5_000 });
+});
+
+test('ubl: PaymentMeans/PaymentDueDate xs:date check flags a US-style MM/DD/YYYY', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  const withBadPm = UBL_INVOICE.replace(
+    '</cac:LegalMonetaryTotal>',
+    '</cac:LegalMonetaryTotal>\n  <cac:PaymentMeans>\n    <cbc:PaymentMeansCode>30</cbc:PaymentMeansCode>\n    <cbc:PaymentDueDate>05/01/2024</cbc:PaymentDueDate>\n  </cac:PaymentMeans>'
+  );
+  await page.fill('#ubl-input', withBadPm);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/PaymentMeans\/PaymentDueDate "05\/01\/2024" does not match the xs:date YYYY-MM-DD form/i, { timeout: 5_000 });
+});
+
 test('ubl: rejects non-UBL XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   await page.fill('#ubl-input', '<?xml version="1.0"?><Document/>');
