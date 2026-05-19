@@ -2533,6 +2533,45 @@ test('ubl: FinancialInstitutionBranch/ID BIC check flags a malformed BIC', async
   await expect(page.locator('#ubl-results')).toContainText(/FinancialInstitutionBranch\/ID "COBADEFF1" is not a valid ISO 9362 BIC/i, { timeout: 5_000 });
 });
 
+test('sepa: CreDtTm format check confirms on a canonical xs:dateTime', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // SEPA_PAIN001 already carries <CreDtTm>2024-01-15T10:30:00</CreDtTm> (T separator + HH:MM:SS).
+  await page.fill('#sepa-input', SEPA_PAIN001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/GrpHdr\/CreDtTm 2024-01-15T10:30:00 matches ISO 20022 ISODateTime/i, { timeout: 5_000 });
+});
+
+test('sepa: CreDtTm format check flags a space-separator instead of T', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Common spreadsheet-export artefact: space separator instead of T.
+  const withBadDt = SEPA_PAIN001.replace(
+    '<CreDtTm>2024-01-15T10:30:00</CreDtTm>',
+    '<CreDtTm>2024-01-15 10:30:00</CreDtTm>'
+  );
+  await page.fill('#sepa-input', withBadDt);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/GrpHdr\/CreDtTm "2024-01-15 10:30:00" is not a valid ISO 20022 ISODateTime/i, { timeout: 5_000 });
+});
+
+test('ubl: date-format check confirms on canonical xs:date values', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // UBL_INVOICE already carries IssueDate=2024-04-01 and DueDate=2024-05-01 (both canonical).
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Date fields \(IssueDate \/ DueDate \/ TaxPointDate \/ InvoicePeriod bounds\) all match the xs:date YYYY-MM-DD form/i, { timeout: 5_000 });
+});
+
+test('ubl: date-format check flags a US-style MM/DD/YYYY value in IssueDate', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  const withBadDate = UBL_INVOICE.replace(
+    '<cbc:IssueDate>2024-04-01</cbc:IssueDate>',
+    '<cbc:IssueDate>04/01/2024</cbc:IssueDate>'
+  );
+  await page.fill('#ubl-input', withBadDate);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/IssueDate "04\/01\/2024" does not match the xs:date YYYY-MM-DD form/i, { timeout: 5_000 });
+});
+
 test('ubl: rejects non-UBL XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   await page.fill('#ubl-input', '<?xml version="1.0"?><Document/>');

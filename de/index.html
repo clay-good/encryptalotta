@@ -4475,6 +4475,8 @@
                 'sepa.warn.ctryOfRes': 'CtryOfRes "{v}" is not a valid ISO 3166-1 alpha-2 code — EPC SEPA Rulebook / ISO 20022 require a current alpha-2 code (e.g. GB, not UK); clearing systems reject the party at the country-code gate',
                 'sepa.ok.ctgyPurp': 'CtgyPurp/Cd is a valid ISO 20022 ExternalCategoryPurpose1Code across all {n} PmtInf block(s) (e.g. SALA / SUPP / TAXS)',
                 'sepa.warn.ctgyPurp': 'CtgyPurp/Cd mismatch: PmtInf #{idx} declares {actual} but ISO 20022 ExternalCategoryPurpose1Code allows only the canonical set (e.g. SALA, SUPP, TAXS, VATX); typos break downstream regulator-side automation',
+                'sepa.ok.creDtTm': 'GrpHdr/CreDtTm {v} matches ISO 20022 ISODateTime (xs:dateTime YYYY-MM-DDTHH:MM:SS[.fff][Z|±HH:MM])',
+                'sepa.warn.creDtTm': 'GrpHdr/CreDtTm "{v}" is not a valid ISO 20022 ISODateTime — required form is YYYY-MM-DDTHH:MM:SS[.fff][Z|±HH:MM] (T separator + explicit timezone); clearing systems reject the file at the xs:dateTime schema gate',
                 'sepa.warn.ccyInvalid': 'Currency code not active per ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unrecognized ISO 20022 root element — partial parse only.',
                 'err.sepaEmpty': 'XML input is empty.',
@@ -4596,6 +4598,8 @@
                 'ubl.warn.originCountry': 'Item/OriginCountry/IdentificationCode "{code}" is not a valid ISO 3166-1 alpha-2 code — EN 16931 BT-159 / PEPPOL BIS Billing 3.0 require a current alpha-2 code (e.g. GB, not UK); PEPPOL access points reject the document at the schematron gate',
                 'ubl.ok.bicValid': 'Payment-service-provider BICs (FinancialInstitutionBranch/ID) are all valid ISO 9362 across all {n} BIC(s) (EN 16931 BT-86 / PEPPOL BIS Billing 3.0)',
                 'ubl.warn.bicInvalid': 'FinancialInstitutionBranch/ID "{bic}" is not a valid ISO 9362 BIC — EN 16931 BT-86 / PEPPOL BIS Billing 3.0 require 8 or 11 alphanumeric characters with a fixed shape (4 bank, 2 country, 2 location, optional 3 branch)',
+                'ubl.ok.dateFormat': 'Date fields (IssueDate / DueDate / TaxPointDate / InvoicePeriod bounds) all match the xs:date YYYY-MM-DD form across all {n} field(s) (EN 16931 / PEPPOL BIS Billing 3.0)',
+                'ubl.warn.dateFormat': '{field} "{v}" does not match the xs:date YYYY-MM-DD form — EN 16931 / PEPPOL BIS Billing 3.0 require the canonical ISO 8601 calendar date (e.g. 2024-04-01); PEPPOL access points reject the document at the schema gate',
                 'ubl.ok.ccyValid': 'Currency codes active per ISO 4217: {list}',
                 'ubl.ok.ibanValid': 'Payee/Payer financial account IBANs valid (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'Payee/Payer IBAN failed ISO 13616 MOD-97 check: {iban}',
@@ -5679,6 +5683,8 @@
                 'sepa.warn.ctryOfRes': 'CtryOfRes « {v} » n’est pas un code ISO 3166-1 alpha-2 valide — les règles EPC SEPA et ISO 20022 exigent un code alpha-2 en vigueur (par exemple GB, et non UK) ; les systèmes de compensation rejettent la partie au contrôle du code pays',
                 'sepa.ok.ctgyPurp': 'CtgyPurp/Cd est un code ISO 20022 ExternalCategoryPurpose1Code valide sur l’ensemble des {n} bloc(s) PmtInf (par exemple SALA / SUPP / TAXS)',
                 'sepa.warn.ctgyPurp': 'Discordance CtgyPurp/Cd : le bloc PmtInf n°{idx} déclare {actual}, or ISO 20022 ExternalCategoryPurpose1Code n’autorise que l’ensemble canonique (par exemple SALA, SUPP, TAXS, VATX) ; les fautes de frappe cassent l’automatisation côté régulateur en aval',
+                'sepa.ok.creDtTm': 'GrpHdr/CreDtTm {v} respecte le format ISO 20022 ISODateTime (xs:dateTime YYYY-MM-DDTHH:MM:SS[.fff][Z|±HH:MM])',
+                'sepa.warn.creDtTm': 'GrpHdr/CreDtTm « {v} » n’est pas un ISO 20022 ISODateTime valide — la forme requise est YYYY-MM-DDTHH:MM:SS[.fff][Z|±HH:MM] (séparateur T + fuseau horaire explicite) ; les systèmes de compensation rejettent le fichier au contrôle de schéma xs:dateTime',
                 'sepa.warn.ccyInvalid': 'Code monétaire non actif selon ISO 4217 : {code}',
                 'sepa.warn.unknownDoc': 'Élément racine ISO 20022 non reconnu — analyse partielle uniquement.',
                 'err.sepaEmpty': 'Le XML d’entrée est vide.',
@@ -5790,6 +5796,8 @@
                 'ubl.warn.originCountry': 'Item/OriginCountry/IdentificationCode « {code} » n’est pas un code ISO 3166-1 alpha-2 valide — EN 16931 BT-159 / PEPPOL BIS Billing 3.0 exigent un code alpha-2 en vigueur (par exemple GB, et non UK) ; les points d’accès PEPPOL rejettent le document au contrôle schematron',
                 'ubl.ok.bicValid': 'Les BIC des prestataires de services de paiement (FinancialInstitutionBranch/ID) sont tous des BIC ISO 9362 valides sur l’ensemble des {n} BIC (EN 16931 BT-86 / PEPPOL BIS Billing 3.0)',
                 'ubl.warn.bicInvalid': 'FinancialInstitutionBranch/ID « {bic} » n’est pas un BIC ISO 9362 valide — EN 16931 BT-86 / PEPPOL BIS Billing 3.0 exigent 8 ou 11 caractères alphanumériques selon une structure fixe (4 banque, 2 pays, 2 localisation, 3 facultatifs pour la succursale)',
+                'ubl.ok.dateFormat': 'Les champs date (IssueDate / DueDate / TaxPointDate / bornes InvoicePeriod) respectent tous le format xs:date YYYY-MM-DD sur l’ensemble des {n} champ(s) (EN 16931 / PEPPOL BIS Billing 3.0)',
+                'ubl.warn.dateFormat': '{field} « {v} » ne respecte pas le format xs:date YYYY-MM-DD — EN 16931 / PEPPOL BIS Billing 3.0 exigent la date calendaire ISO 8601 canonique (par exemple 2024-04-01) ; les points d’accès PEPPOL rejettent le document au contrôle de schéma',
                 'ubl.ok.ccyValid': 'Codes monétaires actifs selon ISO 4217 : {list}',
                 'ubl.ok.ibanValid': 'IBAN des comptes Payee/Payer valides (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'IBAN Payee/Payer échoue au contrôle ISO 13616 MOD-97 : {iban}',
@@ -6843,6 +6851,8 @@
                 'sepa.warn.ctryOfRes': 'CtryOfRes “{v}” 不是有效的 ISO 3166-1 alpha-2 代码——EPC SEPA 规则书 / ISO 20022 要求使用当前 alpha-2 代码（例如 GB，而非 UK）；清算系统会在国家代码校验环节拒绝该交易方',
                 'sepa.ok.ctgyPurp': '所有 {n} 个 PmtInf 块的 CtgyPurp/Cd 均为有效的 ISO 20022 ExternalCategoryPurpose1Code（例如 SALA / SUPP / TAXS）',
                 'sepa.warn.ctgyPurp': 'CtgyPurp/Cd 不匹配：PmtInf 第 {idx} 块声明为 {actual}，但 ISO 20022 ExternalCategoryPurpose1Code 仅允许规范代码集（例如 SALA、SUPP、TAXS、VATX）；拼写错误会破坏下游监管侧的自动化处理',
+                'sepa.ok.creDtTm': 'GrpHdr/CreDtTm {v} 符合 ISO 20022 ISODateTime 格式（xs:dateTime YYYY-MM-DDTHH:MM:SS[.fff][Z|±HH:MM]）',
+                'sepa.warn.creDtTm': 'GrpHdr/CreDtTm “{v}” 不是有效的 ISO 20022 ISODateTime——要求格式为 YYYY-MM-DDTHH:MM:SS[.fff][Z|±HH:MM]（T 分隔符 + 显式时区）；清算系统会在 xs:dateTime 模式校验环节拒绝该文件',
                 'sepa.warn.ccyInvalid': '币种代码不在 ISO 4217 现行清单中：{code}',
                 'sepa.warn.unknownDoc': '无法识别的 ISO 20022 根元素 — 仅部分解析。',
                 'err.sepaEmpty': 'XML 输入为空。',
@@ -6954,6 +6964,8 @@
                 'ubl.warn.originCountry': 'Item/OriginCountry/IdentificationCode “{code}” 不是有效的 ISO 3166-1 alpha-2 代码——EN 16931 BT-159 / PEPPOL BIS Billing 3.0 要求使用当前 alpha-2 代码（例如 GB，而非 UK）；PEPPOL 接入点会在 schematron 检查时拒绝该文件',
                 'ubl.ok.bicValid': '所有 {n} 个支付服务提供商 BIC（FinancialInstitutionBranch/ID）均为有效的 ISO 9362 BIC（EN 16931 BT-86 / PEPPOL BIS Billing 3.0）',
                 'ubl.warn.bicInvalid': 'FinancialInstitutionBranch/ID “{bic}” 不是有效的 ISO 9362 BIC——EN 16931 BT-86 / PEPPOL BIS Billing 3.0 要求 8 位或 11 位字母数字字符并遵循固定结构（4 位银行、2 位国家、2 位位置，可选 3 位分行）',
+                'ubl.ok.dateFormat': '所有 {n} 个日期字段（IssueDate / DueDate / TaxPointDate / InvoicePeriod 起止）均符合 xs:date YYYY-MM-DD 格式（EN 16931 / PEPPOL BIS Billing 3.0）',
+                'ubl.warn.dateFormat': '{field} “{v}” 不符合 xs:date YYYY-MM-DD 格式——EN 16931 / PEPPOL BIS Billing 3.0 要求使用规范的 ISO 8601 历法日期（例如 2024-04-01）；PEPPOL 接入点会在模式校验时拒绝该文件',
                 'ubl.ok.ccyValid': '币种代码按 ISO 4217 有效：{list}',
                 'ubl.ok.ibanValid': '收款方/付款方账户 IBAN 通过 ISO 13616 MOD-97 校验（{n}）',
                 'ubl.warn.ibanInvalid': '收款方/付款方 IBAN 未通过 ISO 13616 MOD-97 校验：{iban}',
@@ -8022,6 +8034,8 @@
                 'sepa.warn.ctryOfRes': 'CtryOfRes „{v}“ ist kein gültiger ISO-3166-1-alpha-2-Code — EPC-SEPA-Rulebook und ISO 20022 verlangen einen aktuellen alpha-2-Code (z. B. GB, nicht UK); Clearing-Systeme verwerfen die Partei am Ländercode-Gate',
                 'sepa.ok.ctgyPurp': 'CtgyPurp/Cd ist über alle {n} PmtInf-Block(s) ein gültiger ISO-20022-ExternalCategoryPurpose1Code (z. B. SALA / SUPP / TAXS)',
                 'sepa.warn.ctgyPurp': 'CtgyPurp/Cd-Abweichung: PmtInf-Block Nr. {idx} deklariert {actual}, aber ISO 20022 ExternalCategoryPurpose1Code lässt nur den kanonischen Satz zu (z. B. SALA, SUPP, TAXS, VATX); Tippfehler brechen die nachgelagerte regulatorische Automatisierung',
+                'sepa.ok.creDtTm': 'GrpHdr/CreDtTm {v} entspricht ISO 20022 ISODateTime (xs:dateTime YYYY-MM-DDTHH:MM:SS[.fff][Z|±HH:MM])',
+                'sepa.warn.creDtTm': 'GrpHdr/CreDtTm „{v}“ ist kein gültiges ISO-20022-ISODateTime — erforderliche Form ist YYYY-MM-DDTHH:MM:SS[.fff][Z|±HH:MM] (T-Trennzeichen + explizite Zeitzone); Clearing-Systeme verwerfen die Datei am xs:dateTime-Schema-Gate',
                 'sepa.warn.ccyInvalid': 'Währungscode nicht aktiv nach ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unbekanntes ISO-20022-Wurzelelement — nur Teilanalyse.',
                 'err.sepaEmpty': 'Die XML-Eingabe ist leer.',
@@ -8133,6 +8147,8 @@
                 'ubl.warn.originCountry': 'Item/OriginCountry/IdentificationCode „{code}“ ist kein gültiger ISO-3166-1-alpha-2-Code — EN 16931 BT-159 / PEPPOL BIS Billing 3.0 verlangen einen aktuellen alpha-2-Code (z. B. GB, nicht UK); PEPPOL-Access-Points lehnen das Dokument am Schematron-Gate ab',
                 'ubl.ok.bicValid': 'BICs der Zahlungsdienstleister (FinancialInstitutionBranch/ID) sind über alle {n} BIC(s) gültige ISO-9362-BICs (EN 16931 BT-86 / PEPPOL BIS Billing 3.0)',
                 'ubl.warn.bicInvalid': 'FinancialInstitutionBranch/ID „{bic}“ ist kein gültiger ISO-9362-BIC — EN 16931 BT-86 / PEPPOL BIS Billing 3.0 verlangen 8 oder 11 alphanumerische Zeichen in fester Struktur (4 Bank, 2 Land, 2 Ort, optional 3 Filiale)',
+                'ubl.ok.dateFormat': 'Datumsfelder (IssueDate / DueDate / TaxPointDate / InvoicePeriod-Grenzen) entsprechen über alle {n} Feld(er) der xs:date-Form YYYY-MM-DD (EN 16931 / PEPPOL BIS Billing 3.0)',
+                'ubl.warn.dateFormat': '{field} „{v}“ entspricht nicht der xs:date-Form YYYY-MM-DD — EN 16931 / PEPPOL BIS Billing 3.0 verlangen das kanonische ISO-8601-Kalenderdatum (z. B. 2024-04-01); PEPPOL-Access-Points lehnen das Dokument am Schema-Gate ab',
                 'ubl.ok.ccyValid': 'Währungscodes nach ISO 4217 aktiv: {list}',
                 'ubl.ok.ibanValid': 'IBANs der Payee-/Payer-Konten gültig (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'Payee-/Payer-IBAN scheitert an ISO-13616-MOD-97-Prüfung: {iban}',
@@ -9186,6 +9202,8 @@
                 'sepa.warn.ctryOfRes': 'CtryOfRes "{v}" मान्य ISO 3166-1 alpha-2 कोड नहीं है — EPC SEPA रूलबुक / ISO 20022 के लिए वर्तमान alpha-2 कोड आवश्यक है (उदाहरण: GB, न कि UK); क्लियरिंग सिस्टम देश-कोड गेट पर इस पक्ष को अस्वीकार कर देते हैं',
                 'sepa.ok.ctgyPurp': 'सभी {n} PmtInf ब्लॉक(ों) में CtgyPurp/Cd मान्य ISO 20022 ExternalCategoryPurpose1Code है (उदाहरण: SALA / SUPP / TAXS)',
                 'sepa.warn.ctgyPurp': 'CtgyPurp/Cd मेल नहीं खाता: PmtInf #{idx} {actual} घोषित करता है, परंतु ISO 20022 ExternalCategoryPurpose1Code केवल मानक सेट की अनुमति देता है (उदाहरण: SALA, SUPP, TAXS, VATX); टाइप-त्रुटियाँ नीचे की ओर नियामक स्वचालन को तोड़ देती हैं',
+                'sepa.ok.creDtTm': 'GrpHdr/CreDtTm {v} ISO 20022 ISODateTime (xs:dateTime YYYY-MM-DDTHH:MM:SS[.fff][Z|±HH:MM]) के अनुरूप है',
+                'sepa.warn.creDtTm': 'GrpHdr/CreDtTm "{v}" मान्य ISO 20022 ISODateTime नहीं है — अपेक्षित रूप YYYY-MM-DDTHH:MM:SS[.fff][Z|±HH:MM] है (T विभाजक + स्पष्ट टाइमज़ोन); क्लियरिंग सिस्टम xs:dateTime स्कीमा गेट पर फ़ाइल को अस्वीकार कर देते हैं',
                 'sepa.warn.ccyInvalid': 'मुद्रा कोड ISO 4217 में सक्रिय नहीं: {code}',
                 'sepa.warn.unknownDoc': 'अज्ञात ISO 20022 रूट तत्व — केवल आंशिक पार्सिंग।',
                 'err.sepaEmpty': 'XML इनपुट खाली है।',
@@ -9297,6 +9315,8 @@
                 'ubl.warn.originCountry': 'Item/OriginCountry/IdentificationCode "{code}" मान्य ISO 3166-1 alpha-2 कोड नहीं है — EN 16931 BT-159 / PEPPOL BIS Billing 3.0 के लिए वर्तमान alpha-2 कोड आवश्यक है (उदाहरण: GB, न कि UK); PEPPOL एक्सेस पॉइंट schematron गेट पर दस्तावेज़ को अस्वीकार कर देते हैं',
                 'ubl.ok.bicValid': 'सभी {n} भुगतान सेवा प्रदाता BIC (FinancialInstitutionBranch/ID) मान्य ISO 9362 BIC हैं (EN 16931 BT-86 / PEPPOL BIS Billing 3.0)',
                 'ubl.warn.bicInvalid': 'FinancialInstitutionBranch/ID "{bic}" मान्य ISO 9362 BIC नहीं है — EN 16931 BT-86 / PEPPOL BIS Billing 3.0 के लिए 8 या 11 अल्फ़ान्यूमेरिक अक्षरों की निश्चित संरचना आवश्यक है (4 बैंक, 2 देश, 2 स्थान, वैकल्पिक 3 शाखा)',
+                'ubl.ok.dateFormat': 'सभी {n} दिनांक फ़ील्ड (IssueDate / DueDate / TaxPointDate / InvoicePeriod सीमाएँ) xs:date YYYY-MM-DD रूप के अनुरूप हैं (EN 16931 / PEPPOL BIS Billing 3.0)',
+                'ubl.warn.dateFormat': '{field} "{v}" xs:date YYYY-MM-DD रूप के अनुरूप नहीं है — EN 16931 / PEPPOL BIS Billing 3.0 के लिए मानक ISO 8601 कैलेंडर दिनांक आवश्यक है (उदाहरण: 2024-04-01); PEPPOL एक्सेस पॉइंट स्कीमा गेट पर दस्तावेज़ को अस्वीकार कर देते हैं',
                 'ubl.ok.ccyValid': 'मुद्रा कोड ISO 4217 के अनुसार सक्रिय: {list}',
                 'ubl.ok.ibanValid': 'भुगतानकर्ता/प्राप्तकर्ता खाते के IBAN वैध (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'भुगतानकर्ता/प्राप्तकर्ता IBAN ISO 13616 MOD-97 जाँच में विफल: {iban}',
@@ -17313,6 +17333,38 @@
             }
         }
 
+        // ISO 20022 / EPC SEPA Rulebook `GrpHdr/CreDtTm` xs:dateTime format
+        // check. ISO 20022 declares CreDtTm as ISODateTime (xs:dateTime), which
+        // requires the canonical `YYYY-MM-DDTHH:MM:SS[.fff][Z|±HH:MM]` form —
+        // T separator, hours/minutes/seconds, and a timezone designator. The
+        // canonical real-world failure modes are (a) a space separator
+        // (`2024-04-01 12:30:45` — common when the value is exported from a
+        // spreadsheet column), (b) a date-only value (`2024-04-01` — pasted
+        // from a different field), (c) missing timezone (`2024-04-01T12:30:45`
+        // with no Z / ±HH:MM — schema-valid xs:dateTime in some parsers but
+        // ISO 20022 requires the explicit timezone for unambiguous rail
+        // timestamps), or (d) US-style ordering (`04/01/2024 12:30:45`). All
+        // four pass downstream string consumers but break ISO 20022 schema
+        // validation at clearing-system entry. The new gate strictly validates
+        // the canonical form via a single regex; the existing header rendering
+        // (`sepa.row.creDtTm`) continues to surface the raw value alongside.
+        // Header-only — per-PmtInf CreDtTm doesn't exist in pain.001 / pain.008.
+        const SEPA_DATETIME_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})?$/;
+        function sepaCheckCreDtTm(out, doc, detected) {
+            if (detected.type !== 'pain.001' && detected.type !== 'pain.008') return;
+            const w = detected.wrapper;
+            if (!w) return;
+            const grpHdr = sepaFirst(w, 'GrpHdr');
+            if (!grpHdr) return;
+            const raw = (sepaTextOf(grpHdr, 'CreDtTm') || '').trim();
+            if (!raw) return;
+            if (SEPA_DATETIME_RE.test(raw)) {
+                tlsRenderRow(out, t('sepa.row.warning'), '✓ ' + tFormat('sepa.ok.creDtTm', { v: raw }));
+            } else {
+                tlsRenderRow(out, t('sepa.row.warning'), '✗ ' + tFormat('sepa.warn.creDtTm', { v: raw }));
+            }
+        }
+
         // ISO 20022 ExternalCategoryPurpose1Code — the canonical set of values
         // the `<CtgyPurp>/<Cd>` element under `<PmtInf>/<PmtTpInf>` may carry.
         // The element classifies the high-level purpose of every transaction in
@@ -17455,6 +17507,7 @@
                 sepaCheckCtry(out, doc, detected);
                 sepaCheckCtryOfRes(out, doc, detected);
                 sepaCheckCtgyPurp(out, doc, detected);
+                sepaCheckCreDtTm(out, doc, detected);
             } catch (e) {
                 tlsRenderRow(out, t('sepa.row.error'), e.message);
             }
@@ -18504,6 +18557,56 @@
             }
         }
 
+        // EN 16931 BT-2 (IssueDate) / BT-9 (DueDate) / BT-72 (TaxPointDate) /
+        // PEPPOL BIS Billing 3.0: UBL 2.1 declares each date field as plain
+        // xs:date, which requires the canonical `YYYY-MM-DD` form. The
+        // existing `ublCheckDates()` (draft 39) and `ublCheckInvoicePeriod()`
+        // (draft 56-ish) compare values via `Date.parse()`, which is lenient
+        // and accepts US-style `04/01/2024`, slash-separated `2024/04/01`,
+        // and timestamp variants — schema-valid in some downstream parsers
+        // but rejected by PEPPOL access points at the xs:date schematron gate.
+        // The new `ublCheckDateFormats()` strictly validates every date-bearing
+        // root-level element (`IssueDate`, `DueDate`, `TaxPointDate`) plus the
+        // `InvoicePeriod` bounds (StartDate / EndDate) against a single
+        // `YYYY-MM-DD` regex, with an additional sanity gate on month
+        // (01-12) and day (01-31) so `2024-13-01` doesn't slip through.
+        // Emits one green confirmation row across all clean dates or one red
+        // row per offending value naming the field and the canonical form.
+        // Pairs naturally with the existing semantic checks: this gate covers
+        // form, those cover ordering and presence.
+        const UBL_DATE_RE = /^(\d{4})-(\d{2})-(\d{2})$/;
+        function ublCheckDateFormats(out, detected) {
+            const r = detected.root;
+            const fields = [];
+            for (const name of ['IssueDate', 'DueDate', 'TaxPointDate']) {
+                const v = (sepaTextOf(r, name) || '').trim();
+                if (v) fields.push({ name, v });
+            }
+            const period = sepaFirst(r, 'InvoicePeriod');
+            if (period) {
+                for (const name of ['StartDate', 'EndDate']) {
+                    const v = (sepaTextOf(period, name) || '').trim();
+                    if (v) fields.push({ name: 'InvoicePeriod/' + name, v });
+                }
+            }
+            if (!fields.length) return;
+            const bad = [];
+            for (const f of fields) {
+                const m = UBL_DATE_RE.exec(f.v);
+                if (!m) { bad.push(f); continue; }
+                const mo = Number(m[2]);
+                const da = Number(m[3]);
+                if (mo < 1 || mo > 12 || da < 1 || da > 31) bad.push(f);
+            }
+            if (bad.length === 0) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + tFormat('ubl.ok.dateFormat', { n: intlNumber(fields.length) }));
+            } else {
+                for (const f of bad) {
+                    tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + tFormat('ubl.warn.dateFormat', { field: f.name, v: f.v }));
+                }
+            }
+        }
+
         // Walk every `cac:FinancialInstitutionBranch/cbc:ID` (and the legacy
         // UBL `cac:FinancialInstitution/cbc:ID`) under `cac:PaymentMeans` —
         // PEPPOL BIS Billing 3.0 / EN 16931 BT-86 names this element as the
@@ -18646,6 +18749,7 @@
                 ublCheckOriginCountry(out, detected);
                 ublCheckIbans(out, doc);
                 ublCheckBics(out, doc);
+                ublCheckDateFormats(out, detected);
             } catch (e) {
                 tlsRenderRow(out, t('ubl.row.error'), e.message);
             }
