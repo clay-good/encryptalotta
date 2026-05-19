@@ -2572,6 +2572,54 @@ test('ubl: date-format check flags a US-style MM/DD/YYYY value in IssueDate', as
   await expect(page.locator('#ubl-results')).toContainText(/IssueDate "04\/01\/2024" does not match the xs:date YYYY-MM-DD form/i, { timeout: 5_000 });
 });
 
+test('sepa: ReqdExctnDt format check confirms on a canonical xs:date', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // SEPA_PAIN001 already carries <ReqdExctnDt>2024-01-20</ReqdExctnDt> (canonical xs:date).
+  await page.fill('#sepa-input', SEPA_PAIN001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/ReqdExctnDt matches the xs:date YYYY-MM-DD form/i, { timeout: 5_000 });
+});
+
+test('sepa: ReqdExctnDt format check flags a US-style MM/DD/YYYY value', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  const withBadDate = SEPA_PAIN001.replace(
+    '<ReqdExctnDt>2024-01-20</ReqdExctnDt>',
+    '<ReqdExctnDt>01/20/2024</ReqdExctnDt>'
+  );
+  await page.fill('#sepa-input', withBadDate);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/ReqdExctnDt mismatch: PmtInf #1 declares "01\/20\/2024"/i, { timeout: 5_000 });
+});
+
+test('ubl: EndpointID presence check confirms when both supplier and customer declare it', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Inject EndpointID elements into both AccountingSupplierParty and AccountingCustomerParty.
+  const withEps = UBL_INVOICE
+    .replace(
+      '<cac:AccountingSupplierParty>\n    <cac:Party>\n      <cac:PartyName>',
+      '<cac:AccountingSupplierParty>\n    <cac:Party>\n      <cbc:EndpointID schemeID="0088">7300010000001</cbc:EndpointID>\n      <cac:PartyName>'
+    )
+    .replace(
+      '<cac:AccountingCustomerParty>\n    <cac:Party>\n      <cac:PartyName>',
+      '<cac:AccountingCustomerParty>\n    <cac:Party>\n      <cbc:EndpointID schemeID="0088">7300010000002</cbc:EndpointID>\n      <cac:PartyName>'
+    );
+  await page.fill('#ubl-input', withEps);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Both supplier and customer Party\/EndpointID are declared/i, { timeout: 5_000 });
+});
+
+test('ubl: EndpointID presence check flags a missing supplier EndpointID', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Customer has EndpointID; supplier doesn't — flag the supplier (BR-62).
+  const withEps = UBL_INVOICE.replace(
+    '<cac:AccountingCustomerParty>\n    <cac:Party>\n      <cac:PartyName>',
+    '<cac:AccountingCustomerParty>\n    <cac:Party>\n      <cbc:EndpointID schemeID="0088">7300010000002</cbc:EndpointID>\n      <cac:PartyName>'
+  );
+  await page.fill('#ubl-input', withEps);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Party\/EndpointID is missing — PEPPOL BIS Billing 3\.0 BR-62/i, { timeout: 5_000 });
+});
+
 test('ubl: rejects non-UBL XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   await page.fill('#ubl-input', '<?xml version="1.0"?><Document/>');
