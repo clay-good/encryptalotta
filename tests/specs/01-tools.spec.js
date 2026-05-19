@@ -2704,6 +2704,49 @@ test('ubl: Delivery/ActualDeliveryDate xs:date check flags a US-style MM/DD/YYYY
   await expect(page.locator('#ubl-results')).toContainText(/Delivery\/ActualDeliveryDate "04\/15\/2024" does not match the xs:date YYYY-MM-DD form/i, { timeout: 5_000 });
 });
 
+test('sepa: EndToEndId Max35Text length check confirms when every value fits', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Canonical fixture carries <EndToEndId>E2E-001</EndToEndId> — 7 chars, well within Max35Text.
+  await page.fill('#sepa-input', SEPA_PAIN001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/EndToEndId values fit within ISO 20022 Max35Text/i, { timeout: 5_000 });
+});
+
+test('sepa: EndToEndId Max35Text length check flags a 40-char CRM reference', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Replace with a 40-char reference — exceeds Max35Text.
+  const longE2e = 'CRM-INV-2024-0123456789-abcdefghij-extra';
+  const withLong = SEPA_PAIN001.replace(
+    '<EndToEndId>E2E-001</EndToEndId>',
+    `<EndToEndId>${longE2e}</EndToEndId>`
+  );
+  await page.fill('#sepa-input', withLong);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(new RegExp(`EndToEndId "${longE2e}" exceeds ISO 20022 Max35Text`, 'i'), { timeout: 5_000 });
+});
+
+test('ubl: Delivery country code check confirms on a valid ISO 3166-1 alpha-2 code', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  const withDelivery = UBL_INVOICE.replace(
+    '<cbc:IssueDate>2024-04-01</cbc:IssueDate>',
+    '<cbc:IssueDate>2024-04-01</cbc:IssueDate>\n  <cac:Delivery><cac:DeliveryLocation><cac:Address><cac:Country><cbc:IdentificationCode>DE</cbc:IdentificationCode></cac:Country></cac:Address></cac:DeliveryLocation></cac:Delivery>'
+  );
+  await page.fill('#ubl-input', withDelivery);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Delivery country code .* DE is a valid ISO 3166-1 alpha-2 code \(EN 16931 BT-80/i, { timeout: 5_000 });
+});
+
+test('ubl: Delivery country code check flags UK (not an ISO code — Great Britain is GB)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  const withBadDelivery = UBL_INVOICE.replace(
+    '<cbc:IssueDate>2024-04-01</cbc:IssueDate>',
+    '<cbc:IssueDate>2024-04-01</cbc:IssueDate>\n  <cac:Delivery><cac:DeliveryLocation><cac:Address><cac:Country><cbc:IdentificationCode>UK</cbc:IdentificationCode></cac:Country></cac:Address></cac:DeliveryLocation></cac:Delivery>'
+  );
+  await page.fill('#ubl-input', withBadDelivery);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/"UK" is not a valid ISO 3166-1 alpha-2 code/i, { timeout: 5_000 });
+});
+
 test('ubl: rejects non-UBL XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   await page.fill('#ubl-input', '<?xml version="1.0"?><Document/>');

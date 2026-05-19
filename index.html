@@ -4486,6 +4486,8 @@
                 'sepa.warn.creDtTmReqdDt': '{field} ordering mismatch: PmtInf #{idx} declares {reqd} which precedes GrpHdr/CreDtTm {cre} — clearing systems reject back-dated settlement instructions (ISO 20022 / EPC SEPA Rulebook)',
                 'sepa.ok.msgIdLen': 'GrpHdr/MsgId {msgId} fits within ISO 20022 Max35Text ({len}/35 characters)',
                 'sepa.warn.msgIdLen': 'GrpHdr/MsgId "{msgId}" exceeds ISO 20022 Max35Text ({len}/35 characters) — clearing systems reject the file at the schema-validation gate (a common cause is a generator that uses a full UUID, which is 36 characters)',
+                'sepa.ok.e2eIdLen': 'EndToEndId values fit within ISO 20022 Max35Text across all {n} transaction(s) (each ≤35 characters)',
+                'sepa.warn.e2eIdLen': 'EndToEndId "{id}" exceeds ISO 20022 Max35Text ({len}/35 characters) — clearing systems reject the file at the schema-validation gate (a common cause is a CRM-supplied invoice / customer reference longer than the 35-character ISO 20022 cap)',
                 'sepa.warn.ccyInvalid': 'Currency code not active per ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unrecognized ISO 20022 root element — partial parse only.',
                 'err.sepaEmpty': 'XML input is empty.',
@@ -4617,6 +4619,8 @@
                 'ubl.warn.buyerOrOrderRef': 'Neither BuyerReference (BT-10) nor OrderReference/ID (BT-13) is declared — PEPPOL BIS Billing 3.0 PEPPOL-EN16931-R003 requires at least one so the buyer can match the invoice against an internal reference; PEPPOL access points reject at the schematron gate',
                 'ubl.ok.deliveryDate': 'Delivery/ActualDeliveryDate {v} matches the xs:date YYYY-MM-DD form (EN 16931 BT-72 / PEPPOL BIS Billing 3.0)',
                 'ubl.warn.deliveryDate': 'Delivery/ActualDeliveryDate "{v}" does not match the xs:date YYYY-MM-DD form — EN 16931 BT-72 / PEPPOL BIS Billing 3.0 require the canonical xs:date form (e.g. 2024-04-15); PEPPOL access points reject at the schematron gate',
+                'ubl.ok.deliveryCountry': 'Delivery country code (Delivery/DeliveryLocation/Address/Country/IdentificationCode) {code} is a valid ISO 3166-1 alpha-2 code (EN 16931 BT-80 / PEPPOL BIS Billing 3.0)',
+                'ubl.warn.deliveryCountry': 'Delivery country code (Delivery/DeliveryLocation/Address/Country/IdentificationCode) "{code}" is not a valid ISO 3166-1 alpha-2 code — EN 16931 BT-80 / PEPPOL BIS Billing 3.0 require the canonical alpha-2 code (a common cause is UK in place of the ISO code GB); PEPPOL access points reject at the schematron gate',
                 'ubl.ok.ccyValid': 'Currency codes active per ISO 4217: {list}',
                 'ubl.ok.ibanValid': 'Payee/Payer financial account IBANs valid (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'Payee/Payer IBAN failed ISO 13616 MOD-97 check: {iban}',
@@ -5708,6 +5712,8 @@
                 'sepa.warn.creDtTmReqdDt': 'Ordre {field} incohérent : le bloc PmtInf n°{idx} déclare {reqd}, antérieur à GrpHdr/CreDtTm {cre} — les systèmes de compensation rejettent les instructions de règlement antidatées (ISO 20022 / règles EPC SEPA)',
                 'sepa.ok.msgIdLen': 'GrpHdr/MsgId {msgId} respecte la limite ISO 20022 Max35Text ({len}/35 caractères)',
                 'sepa.warn.msgIdLen': 'GrpHdr/MsgId « {msgId} » dépasse la limite ISO 20022 Max35Text ({len}/35 caractères) — les systèmes de compensation rejettent le fichier au contrôle de schéma (cause fréquente : un générateur qui utilise un UUID complet, soit 36 caractères)',
+                'sepa.ok.e2eIdLen': 'Les valeurs EndToEndId respectent la limite ISO 20022 Max35Text sur l’ensemble des {n} transaction(s) (chacune ≤ 35 caractères)',
+                'sepa.warn.e2eIdLen': 'EndToEndId « {id} » dépasse la limite ISO 20022 Max35Text ({len}/35 caractères) — les systèmes de compensation rejettent le fichier au contrôle de schéma (cause fréquente : une référence facture / client issue d’un CRM dépassant la limite ISO 20022 de 35 caractères)',
                 'sepa.warn.ccyInvalid': 'Code monétaire non actif selon ISO 4217 : {code}',
                 'sepa.warn.unknownDoc': 'Élément racine ISO 20022 non reconnu — analyse partielle uniquement.',
                 'err.sepaEmpty': 'Le XML d’entrée est vide.',
@@ -5829,6 +5835,8 @@
                 'ubl.warn.buyerOrOrderRef': 'Ni BuyerReference (BT-10) ni OrderReference/ID (BT-13) ne sont déclarées — PEPPOL BIS Billing 3.0 PEPPOL-EN16931-R003 exige au moins l’une des deux afin que l’acheteur puisse rapprocher la facture d’une référence interne ; les points d’accès PEPPOL rejettent au contrôle schematron',
                 'ubl.ok.deliveryDate': 'Delivery/ActualDeliveryDate {v} respecte la forme xs:date AAAA-MM-JJ (EN 16931 BT-72 / PEPPOL BIS Billing 3.0)',
                 'ubl.warn.deliveryDate': 'Delivery/ActualDeliveryDate « {v} » ne respecte pas la forme xs:date AAAA-MM-JJ — EN 16931 BT-72 / PEPPOL BIS Billing 3.0 exigent la forme canonique xs:date (p. ex. 2024-04-15) ; les points d’accès PEPPOL rejettent au contrôle schematron',
+                'ubl.ok.deliveryCountry': 'Code pays de livraison (Delivery/DeliveryLocation/Address/Country/IdentificationCode) {code} est un code ISO 3166-1 alpha-2 valide (EN 16931 BT-80 / PEPPOL BIS Billing 3.0)',
+                'ubl.warn.deliveryCountry': 'Code pays de livraison (Delivery/DeliveryLocation/Address/Country/IdentificationCode) « {code} » n’est pas un code ISO 3166-1 alpha-2 valide — EN 16931 BT-80 / PEPPOL BIS Billing 3.0 exigent le code alpha-2 canonique (cause fréquente : UK au lieu du code ISO GB) ; les points d’accès PEPPOL rejettent au contrôle schematron',
                 'ubl.ok.ccyValid': 'Codes monétaires actifs selon ISO 4217 : {list}',
                 'ubl.ok.ibanValid': 'IBAN des comptes Payee/Payer valides (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'IBAN Payee/Payer échoue au contrôle ISO 13616 MOD-97 : {iban}',
@@ -6890,6 +6898,8 @@
                 'sepa.warn.creDtTmReqdDt': '{field} 时间顺序异常：PmtInf 第 {idx} 块声明 {reqd}，早于 GrpHdr/CreDtTm {cre}——清算系统会拒绝回溯日期的结算指令（ISO 20022 / EPC SEPA 规则书）',
                 'sepa.ok.msgIdLen': 'GrpHdr/MsgId {msgId} 在 ISO 20022 Max35Text 限制范围内（{len}/35 字符）',
                 'sepa.warn.msgIdLen': 'GrpHdr/MsgId "{msgId}" 超出 ISO 20022 Max35Text 限制（{len}/35 字符）——清算系统会在模式校验阶段拒绝该文件（常见原因是生成器使用了完整 UUID，长度为 36 字符）',
+                'sepa.ok.e2eIdLen': '所有 {n} 笔交易的 EndToEndId 均在 ISO 20022 Max35Text 限制范围内（每个 ≤35 字符）',
+                'sepa.warn.e2eIdLen': 'EndToEndId "{id}" 超出 ISO 20022 Max35Text 限制（{len}/35 字符）——清算系统会在模式校验阶段拒绝该文件（常见原因是 CRM 生成的发票 / 客户参考超过了 ISO 20022 的 35 字符上限）',
                 'sepa.warn.ccyInvalid': '币种代码不在 ISO 4217 现行清单中：{code}',
                 'sepa.warn.unknownDoc': '无法识别的 ISO 20022 根元素 — 仅部分解析。',
                 'err.sepaEmpty': 'XML 输入为空。',
@@ -7011,6 +7021,8 @@
                 'ubl.warn.buyerOrOrderRef': 'BuyerReference (BT-10) 与 OrderReference/ID (BT-13) 均未声明——PEPPOL BIS Billing 3.0 PEPPOL-EN16931-R003 要求至少声明其中之一，以便买方将发票与内部参考关联；PEPPOL 接入点会在 schematron 校验时拒绝',
                 'ubl.ok.deliveryDate': 'Delivery/ActualDeliveryDate {v} 符合 xs:date YYYY-MM-DD 形式（EN 16931 BT-72 / PEPPOL BIS Billing 3.0）',
                 'ubl.warn.deliveryDate': 'Delivery/ActualDeliveryDate "{v}" 不符合 xs:date YYYY-MM-DD 形式——EN 16931 BT-72 / PEPPOL BIS Billing 3.0 要求规范的 xs:date 形式（例如 2024-04-15）；PEPPOL 接入点会在 schematron 校验时拒绝',
+                'ubl.ok.deliveryCountry': '交付地国别代码 (Delivery/DeliveryLocation/Address/Country/IdentificationCode) {code} 为有效的 ISO 3166-1 alpha-2 代码（EN 16931 BT-80 / PEPPOL BIS Billing 3.0）',
+                'ubl.warn.deliveryCountry': '交付地国别代码 (Delivery/DeliveryLocation/Address/Country/IdentificationCode) "{code}" 不是有效的 ISO 3166-1 alpha-2 代码——EN 16931 BT-80 / PEPPOL BIS Billing 3.0 要求规范的 alpha-2 代码（常见原因：用 UK 替代 ISO 代码 GB）；PEPPOL 接入点会在 schematron 校验时拒绝',
                 'ubl.ok.ccyValid': '币种代码按 ISO 4217 有效：{list}',
                 'ubl.ok.ibanValid': '收款方/付款方账户 IBAN 通过 ISO 13616 MOD-97 校验（{n}）',
                 'ubl.warn.ibanInvalid': '收款方/付款方 IBAN 未通过 ISO 13616 MOD-97 校验：{iban}',
@@ -8087,6 +8099,8 @@
                 'sepa.warn.creDtTmReqdDt': '{field}-Reihenfolge widersprüchlich: PmtInf-Block Nr. {idx} deklariert {reqd} vor GrpHdr/CreDtTm {cre} — Clearing-Systeme verwerfen rückdatierte Settlement-Anweisungen (ISO 20022 / EPC-SEPA-Rulebook)',
                 'sepa.ok.msgIdLen': 'GrpHdr/MsgId {msgId} liegt innerhalb der ISO-20022-Max35Text-Grenze ({len}/35 Zeichen)',
                 'sepa.warn.msgIdLen': 'GrpHdr/MsgId „{msgId}“ überschreitet die ISO-20022-Max35Text-Grenze ({len}/35 Zeichen) — Clearing-Systeme weisen die Datei am Schema-Validierungs-Gate ab (häufige Ursache: ein Generator nutzt eine vollständige UUID mit 36 Zeichen)',
+                'sepa.ok.e2eIdLen': 'EndToEndId-Werte liegen über alle {n} Transaktion(en) innerhalb der ISO-20022-Max35Text-Grenze (jeweils ≤ 35 Zeichen)',
+                'sepa.warn.e2eIdLen': 'EndToEndId „{id}“ überschreitet die ISO-20022-Max35Text-Grenze ({len}/35 Zeichen) — Clearing-Systeme weisen die Datei am Schema-Validierungs-Gate ab (häufige Ursache: eine aus einem CRM stammende Rechnungs- oder Kundenreferenz, die die ISO-20022-Grenze von 35 Zeichen überschreitet)',
                 'sepa.warn.ccyInvalid': 'Währungscode nicht aktiv nach ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unbekanntes ISO-20022-Wurzelelement — nur Teilanalyse.',
                 'err.sepaEmpty': 'Die XML-Eingabe ist leer.',
@@ -8208,6 +8222,8 @@
                 'ubl.warn.buyerOrOrderRef': 'Weder BuyerReference (BT-10) noch OrderReference/ID (BT-13) ist deklariert — PEPPOL BIS Billing 3.0 PEPPOL-EN16931-R003 verlangt mindestens eines der beiden, damit der Käufer die Rechnung einer internen Referenz zuordnen kann; PEPPOL-Access-Points lehnen am Schematron-Gate ab',
                 'ubl.ok.deliveryDate': 'Delivery/ActualDeliveryDate {v} entspricht der xs:date-Form JJJJ-MM-TT (EN 16931 BT-72 / PEPPOL BIS Billing 3.0)',
                 'ubl.warn.deliveryDate': 'Delivery/ActualDeliveryDate „{v}“ entspricht nicht der xs:date-Form JJJJ-MM-TT — EN 16931 BT-72 / PEPPOL BIS Billing 3.0 verlangen die kanonische xs:date-Form (z. B. 2024-04-15); PEPPOL-Access-Points lehnen am Schematron-Gate ab',
+                'ubl.ok.deliveryCountry': 'Lieferland-Code (Delivery/DeliveryLocation/Address/Country/IdentificationCode) {code} ist ein gültiger ISO-3166-1-Alpha-2-Code (EN 16931 BT-80 / PEPPOL BIS Billing 3.0)',
+                'ubl.warn.deliveryCountry': 'Lieferland-Code (Delivery/DeliveryLocation/Address/Country/IdentificationCode) „{code}“ ist kein gültiger ISO-3166-1-Alpha-2-Code — EN 16931 BT-80 / PEPPOL BIS Billing 3.0 verlangen den kanonischen Alpha-2-Code (häufige Ursache: UK statt des ISO-Codes GB); PEPPOL-Access-Points lehnen am Schematron-Gate ab',
                 'ubl.ok.ccyValid': 'Währungscodes nach ISO 4217 aktiv: {list}',
                 'ubl.ok.ibanValid': 'IBANs der Payee-/Payer-Konten gültig (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'Payee-/Payer-IBAN scheitert an ISO-13616-MOD-97-Prüfung: {iban}',
@@ -9269,6 +9285,8 @@
                 'sepa.warn.creDtTmReqdDt': '{field} क्रम असंगत: PmtInf #{idx} {reqd} घोषित करता है, जो GrpHdr/CreDtTm {cre} से पहले है — क्लियरिंग सिस्टम पूर्व-तारीख वाले निपटान निर्देशों को अस्वीकार कर देते हैं (ISO 20022 / EPC SEPA रूलबुक)',
                 'sepa.ok.msgIdLen': 'GrpHdr/MsgId {msgId} ISO 20022 Max35Text सीमा के भीतर है ({len}/35 अक्षर)',
                 'sepa.warn.msgIdLen': 'GrpHdr/MsgId "{msgId}" ISO 20022 Max35Text सीमा से अधिक है ({len}/35 अक्षर) — क्लियरिंग सिस्टम फ़ाइल को स्कीमा-वैलिडेशन गेट पर अस्वीकार करते हैं (आम कारण: जनरेटर पूर्ण UUID (36 अक्षर) का उपयोग करता है)',
+                'sepa.ok.e2eIdLen': 'सभी {n} लेन-देन में EndToEndId मान ISO 20022 Max35Text सीमा के भीतर हैं (प्रत्येक ≤35 अक्षर)',
+                'sepa.warn.e2eIdLen': 'EndToEndId "{id}" ISO 20022 Max35Text सीमा से अधिक है ({len}/35 अक्षर) — क्लियरिंग सिस्टम फ़ाइल को स्कीमा-वैलिडेशन गेट पर अस्वीकार करते हैं (आम कारण: CRM द्वारा प्रदत्त चालान / ग्राहक संदर्भ जो ISO 20022 की 35 अक्षर सीमा से अधिक हो)',
                 'sepa.warn.ccyInvalid': 'मुद्रा कोड ISO 4217 में सक्रिय नहीं: {code}',
                 'sepa.warn.unknownDoc': 'अज्ञात ISO 20022 रूट तत्व — केवल आंशिक पार्सिंग।',
                 'err.sepaEmpty': 'XML इनपुट खाली है।',
@@ -9390,6 +9408,8 @@
                 'ubl.warn.buyerOrOrderRef': 'न तो BuyerReference (BT-10) और न ही OrderReference/ID (BT-13) घोषित है — PEPPOL BIS Billing 3.0 PEPPOL-EN16931-R003 के लिए कम-से-कम एक आवश्यक है ताकि क्रेता चालान को आंतरिक संदर्भ से मिला सके; PEPPOL एक्सेस पॉइंट schematron गेट पर अस्वीकार कर देते हैं',
                 'ubl.ok.deliveryDate': 'Delivery/ActualDeliveryDate {v} xs:date YYYY-MM-DD स्वरूप के अनुरूप है (EN 16931 BT-72 / PEPPOL BIS Billing 3.0)',
                 'ubl.warn.deliveryDate': 'Delivery/ActualDeliveryDate "{v}" xs:date YYYY-MM-DD स्वरूप के अनुरूप नहीं है — EN 16931 BT-72 / PEPPOL BIS Billing 3.0 के लिए कैनोनिकल xs:date स्वरूप (उदा. 2024-04-15) आवश्यक है; PEPPOL एक्सेस पॉइंट schematron गेट पर अस्वीकार कर देते हैं',
+                'ubl.ok.deliveryCountry': 'डिलीवरी देश कोड (Delivery/DeliveryLocation/Address/Country/IdentificationCode) {code} एक मान्य ISO 3166-1 alpha-2 कोड है (EN 16931 BT-80 / PEPPOL BIS Billing 3.0)',
+                'ubl.warn.deliveryCountry': 'डिलीवरी देश कोड (Delivery/DeliveryLocation/Address/Country/IdentificationCode) "{code}" मान्य ISO 3166-1 alpha-2 कोड नहीं है — EN 16931 BT-80 / PEPPOL BIS Billing 3.0 के लिए कैनोनिकल alpha-2 कोड आवश्यक है (आम कारण: ISO कोड GB के स्थान पर UK); PEPPOL एक्सेस पॉइंट schematron गेट पर अस्वीकार कर देते हैं',
                 'ubl.ok.ccyValid': 'मुद्रा कोड ISO 4217 के अनुसार सक्रिय: {list}',
                 'ubl.ok.ibanValid': 'भुगतानकर्ता/प्राप्तकर्ता खाते के IBAN वैध (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'भुगतानकर्ता/प्राप्तकर्ता IBAN ISO 13616 MOD-97 जाँच में विफल: {iban}',
@@ -17701,6 +17721,42 @@
             }
         }
 
+        // ISO 20022 declares per-transaction `PmtId/EndToEndId` as Max35Text
+        // (35-codepoint schema cap). Draft 51 covers the EPC SEPA character-set
+        // rule on the same field; this gate covers the orthogonal length rule.
+        // EndToEndId values are commonly populated from CRM / ERP-issued
+        // invoice or customer references that may exceed 35 chars (the
+        // canonical real-world failure is a "Customer-{UUID}" reference whose
+        // 36-char UUID alone busts the cap). Walks every transaction across
+        // pain.001 / pain.008 wrappers, emits one green confirmation row
+        // when every value fits or one warning row per offending value.
+        function sepaCheckE2eIdLength(out, doc, detected) {
+            if (detected.type !== 'pain.001' && detected.type !== 'pain.008') return;
+            const w = detected.wrapper;
+            if (!w) return;
+            const txs = [...sepaAllLocal(w, 'CdtTrfTxInf'), ...sepaAllLocal(w, 'DrctDbtTxInf')];
+            if (!txs.length) return;
+            let seen = 0;
+            const bad = [];
+            for (const tx of txs) {
+                const pmtId = sepaFirst(tx, 'PmtId');
+                if (!pmtId) continue;
+                const id = (sepaTextOf(pmtId, 'EndToEndId') || '').trim();
+                if (!id) continue;
+                seen++;
+                const len = [...id].length;
+                if (len > 35) bad.push({ id, len });
+            }
+            if (!seen) return;
+            if (bad.length === 0) {
+                tlsRenderRow(out, t('sepa.row.warning'), '✓ ' + tFormat('sepa.ok.e2eIdLen', { n: intlNumber(seen) }));
+            } else {
+                for (const b of bad) {
+                    tlsRenderRow(out, t('sepa.row.warning'), '✗ ' + tFormat('sepa.warn.e2eIdLen', { id: b.id, len: intlNumber(b.len) }));
+                }
+            }
+        }
+
         function sepaCheckBics(out, doc) {
             const bics = sepaCollectBics(doc);
             if (!bics.length) return;
@@ -17746,6 +17802,7 @@
                 sepaCheckSeqTp(out, doc, detected);
                 sepaCheckMsgIdCharset(out, doc, detected);
                 sepaCheckMsgIdLength(out, doc, detected);
+                sepaCheckE2eIdLength(out, doc, detected);
                 sepaCheckE2eIdCharset(out, doc, detected);
                 sepaCheckInstrIdCharset(out, doc, detected);
                 sepaCheckMndtIdCharset(out, doc, detected);
@@ -19024,6 +19081,37 @@
             }
         }
 
+        // EN 16931 BT-80 (Deliver-to country code): UBL declares the field as
+        // `cac:Delivery/cac:DeliveryLocation/cac:Address/cac:Country/cbc:IdentificationCode`
+        // (plain text, no enumeration). PEPPOL BIS Billing 3.0 narrows the
+        // value to a current ISO 3166-1 alpha-2 code. The canonical real-world
+        // failure mirrors the party-address (BT-40 / BT-55) gate from draft 68
+        // and the item-origin (BT-159) gate from draft 71 — `UK` (not an ISO
+        // code; Great Britain is `GB`) folded into a delivery address from a
+        // template repurposed across PEPPOL and non-PEPPOL flows. Distinct
+        // surface from the two earlier gates: the delivery country is a
+        // third party-position the EN 16931 model carries (separate from
+        // supplier, customer, and per-line origin), and customs / Intrastat
+        // routing keys off it independently. Reuses the shared
+        // `ISO_3166_1_ALPHA2` set so the data stays single-sourced.
+        function ublCheckDeliveryCountry(out, detected) {
+            const delivery = sepaFirst(detected.root, 'Delivery');
+            if (!delivery) return;
+            const loc = sepaFirst(delivery, 'DeliveryLocation');
+            if (!loc) return;
+            const addr = sepaFirst(loc, 'Address');
+            if (!addr) return;
+            const country = sepaFirst(addr, 'Country');
+            if (!country) return;
+            const code = (sepaTextOf(country, 'IdentificationCode') || '').trim();
+            if (!code) return;
+            if (ISO_3166_1_ALPHA2.has(code.toUpperCase())) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + tFormat('ubl.ok.deliveryCountry', { code }));
+            } else {
+                tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + tFormat('ubl.warn.deliveryCountry', { code }));
+            }
+        }
+
         // Walk every `cac:FinancialInstitutionBranch/cbc:ID` (and the legacy
         // UBL `cac:FinancialInstitution/cbc:ID`) under `cac:PaymentMeans` —
         // PEPPOL BIS Billing 3.0 / EN 16931 BT-86 names this element as the
@@ -19168,6 +19256,7 @@
                 ublCheckBics(out, doc);
                 ublCheckDateFormats(out, detected);
                 ublCheckDeliveryDate(out, detected);
+                ublCheckDeliveryCountry(out, detected);
                 ublCheckEndpointIds(out, detected);
                 ublCheckBuyerOrOrderRef(out, detected);
                 ublCheckLineAmount(out, detected);
