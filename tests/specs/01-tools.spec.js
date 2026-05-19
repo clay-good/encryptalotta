@@ -2620,6 +2620,46 @@ test('ubl: EndpointID presence check flags a missing supplier EndpointID', async
   await expect(page.locator('#ubl-results')).toContainText(/Party\/EndpointID is missing — PEPPOL BIS Billing 3\.0 BR-62/i, { timeout: 5_000 });
 });
 
+test('sepa: CreDtTm ≤ ReqdExctnDt ordering check confirms on canonical fixture', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // SEPA_PAIN001 carries CreDtTm=2024-01-15T10:30:00 and ReqdExctnDt=2024-01-20 — ordered correctly.
+  await page.fill('#sepa-input', SEPA_PAIN001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/ReqdExctnDt is on or after GrpHdr\/CreDtTm 2024-01-15/i, { timeout: 5_000 });
+});
+
+test('sepa: CreDtTm ≤ ReqdExctnDt ordering check flags a back-dated ReqdExctnDt', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Push ReqdExctnDt to 2024-01-10 (before CreDtTm 2024-01-15) — the back-dated case.
+  const withBackdated = SEPA_PAIN001.replace(
+    '<ReqdExctnDt>2024-01-20</ReqdExctnDt>',
+    '<ReqdExctnDt>2024-01-10</ReqdExctnDt>'
+  );
+  await page.fill('#sepa-input', withBackdated);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/ReqdExctnDt ordering mismatch: PmtInf #1 declares 2024-01-10 which precedes GrpHdr\/CreDtTm 2024-01-15/i, { timeout: 5_000 });
+});
+
+test('ubl: BuyerReference / OrderReference check confirms when BuyerReference is declared', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Inject a BuyerReference at the root after IssueDate.
+  const withBuyer = UBL_INVOICE.replace(
+    '<cbc:IssueDate>2024-04-01</cbc:IssueDate>',
+    '<cbc:IssueDate>2024-04-01</cbc:IssueDate>\n  <cbc:BuyerReference>PO-2024-042</cbc:BuyerReference>'
+  );
+  await page.fill('#ubl-input', withBuyer);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/BuyerReference "PO-2024-042" declared/i, { timeout: 5_000 });
+});
+
+test('ubl: BuyerReference / OrderReference check flags when both are missing', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Canonical fixture has neither BuyerReference nor OrderReference — should flag.
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Neither BuyerReference \(BT-10\) nor OrderReference\/ID \(BT-13\) is declared/i, { timeout: 5_000 });
+});
+
 test('ubl: rejects non-UBL XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   await page.fill('#ubl-input', '<?xml version="1.0"?><Document/>');

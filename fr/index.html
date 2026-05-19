@@ -4479,6 +4479,8 @@
                 'sepa.warn.creDtTm': 'GrpHdr/CreDtTm "{v}" is not a valid ISO 20022 ISODateTime — required form is YYYY-MM-DDTHH:MM:SS[.fff][Z|±HH:MM] (T separator + explicit timezone); clearing systems reject the file at the xs:dateTime schema gate',
                 'sepa.ok.reqdDt': '{field} matches the xs:date YYYY-MM-DD form across all {n} PmtInf block(s) (ISO 20022 / EPC SEPA Rulebook)',
                 'sepa.warn.reqdDt': '{field} mismatch: PmtInf #{idx} declares "{v}" but ISO 20022 / EPC SEPA Rulebook require the canonical xs:date form YYYY-MM-DD (e.g. 2024-04-15); clearing systems reject the file at the xs:date schema gate',
+                'sepa.ok.creDtTmReqdDt': '{field} is on or after GrpHdr/CreDtTm {cre} across all {n} PmtInf block(s) (ISO 20022 / EPC SEPA Rulebook temporal ordering)',
+                'sepa.warn.creDtTmReqdDt': '{field} ordering mismatch: PmtInf #{idx} declares {reqd} which precedes GrpHdr/CreDtTm {cre} — clearing systems reject back-dated settlement instructions (ISO 20022 / EPC SEPA Rulebook)',
                 'sepa.warn.ccyInvalid': 'Currency code not active per ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unrecognized ISO 20022 root element — partial parse only.',
                 'err.sepaEmpty': 'XML input is empty.',
@@ -4604,6 +4606,10 @@
                 'ubl.warn.dateFormat': '{field} "{v}" does not match the xs:date YYYY-MM-DD form — EN 16931 / PEPPOL BIS Billing 3.0 require the canonical ISO 8601 calendar date (e.g. 2024-04-01); PEPPOL access points reject the document at the schema gate',
                 'ubl.ok.endpointId': 'Both supplier and customer Party/EndpointID are declared (EN 16931 BT-34 / BT-49 / PEPPOL BIS Billing 3.0 BR-62 / BR-63)',
                 'ubl.warn.endpointId': '{party} Party/EndpointID is missing — PEPPOL BIS Billing 3.0 {rule} requires every party to declare an electronic address; without it the document has no SML/SMP routing destination and PEPPOL access points reject at the schematron gate',
+                'ubl.ok.buyerOrOrderRefBoth': 'BuyerReference "{buyer}" and OrderReference/ID "{order}" both declared (EN 16931 BT-10 / BT-13 / PEPPOL BIS Billing 3.0 PEPPOL-EN16931-R003)',
+                'ubl.ok.buyerOrOrderRefBuyer': 'BuyerReference "{v}" declared (EN 16931 BT-10 / PEPPOL BIS Billing 3.0 PEPPOL-EN16931-R003 — BuyerReference OR OrderReference required)',
+                'ubl.ok.buyerOrOrderRefOrder': 'OrderReference/ID "{v}" declared (EN 16931 BT-13 / PEPPOL BIS Billing 3.0 PEPPOL-EN16931-R003 — BuyerReference OR OrderReference required)',
+                'ubl.warn.buyerOrOrderRef': 'Neither BuyerReference (BT-10) nor OrderReference/ID (BT-13) is declared — PEPPOL BIS Billing 3.0 PEPPOL-EN16931-R003 requires at least one so the buyer can match the invoice against an internal reference; PEPPOL access points reject at the schematron gate',
                 'ubl.ok.ccyValid': 'Currency codes active per ISO 4217: {list}',
                 'ubl.ok.ibanValid': 'Payee/Payer financial account IBANs valid (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'Payee/Payer IBAN failed ISO 13616 MOD-97 check: {iban}',
@@ -5691,6 +5697,8 @@
                 'sepa.warn.creDtTm': 'GrpHdr/CreDtTm « {v} » n’est pas un ISO 20022 ISODateTime valide — la forme requise est YYYY-MM-DDTHH:MM:SS[.fff][Z|±HH:MM] (séparateur T + fuseau horaire explicite) ; les systèmes de compensation rejettent le fichier au contrôle de schéma xs:dateTime',
                 'sepa.ok.reqdDt': '{field} respecte le format xs:date YYYY-MM-DD sur l’ensemble des {n} bloc(s) PmtInf (ISO 20022 / règles EPC SEPA)',
                 'sepa.warn.reqdDt': 'Discordance {field} : le bloc PmtInf n°{idx} déclare « {v} », or ISO 20022 / règles EPC SEPA exigent la forme xs:date canonique YYYY-MM-DD (par exemple 2024-04-15) ; les systèmes de compensation rejettent le fichier au contrôle de schéma xs:date',
+                'sepa.ok.creDtTmReqdDt': '{field} est postérieur ou égal à GrpHdr/CreDtTm {cre} sur l’ensemble des {n} bloc(s) PmtInf (ordre temporel ISO 20022 / EPC SEPA)',
+                'sepa.warn.creDtTmReqdDt': 'Ordre {field} incohérent : le bloc PmtInf n°{idx} déclare {reqd}, antérieur à GrpHdr/CreDtTm {cre} — les systèmes de compensation rejettent les instructions de règlement antidatées (ISO 20022 / règles EPC SEPA)',
                 'sepa.warn.ccyInvalid': 'Code monétaire non actif selon ISO 4217 : {code}',
                 'sepa.warn.unknownDoc': 'Élément racine ISO 20022 non reconnu — analyse partielle uniquement.',
                 'err.sepaEmpty': 'Le XML d’entrée est vide.',
@@ -5806,6 +5814,10 @@
                 'ubl.warn.dateFormat': '{field} « {v} » ne respecte pas le format xs:date YYYY-MM-DD — EN 16931 / PEPPOL BIS Billing 3.0 exigent la date calendaire ISO 8601 canonique (par exemple 2024-04-01) ; les points d’accès PEPPOL rejettent le document au contrôle de schéma',
                 'ubl.ok.endpointId': 'Party/EndpointID est déclaré côté fournisseur et côté client (EN 16931 BT-34 / BT-49 / PEPPOL BIS Billing 3.0 BR-62 / BR-63)',
                 'ubl.warn.endpointId': 'Party/EndpointID manquant pour {party} — PEPPOL BIS Billing 3.0 {rule} exige que chaque partie déclare une adresse électronique ; sans elle, le document n’a pas de destination de routage SML/SMP et les points d’accès PEPPOL rejettent au contrôle schematron',
+                'ubl.ok.buyerOrOrderRefBoth': 'BuyerReference « {buyer} » et OrderReference/ID « {order} » tous deux déclarés (EN 16931 BT-10 / BT-13 / PEPPOL BIS Billing 3.0 PEPPOL-EN16931-R003)',
+                'ubl.ok.buyerOrOrderRefBuyer': 'BuyerReference « {v} » déclarée (EN 16931 BT-10 / PEPPOL BIS Billing 3.0 PEPPOL-EN16931-R003 — BuyerReference OU OrderReference requise)',
+                'ubl.ok.buyerOrOrderRefOrder': 'OrderReference/ID « {v} » déclarée (EN 16931 BT-13 / PEPPOL BIS Billing 3.0 PEPPOL-EN16931-R003 — BuyerReference OU OrderReference requise)',
+                'ubl.warn.buyerOrOrderRef': 'Ni BuyerReference (BT-10) ni OrderReference/ID (BT-13) ne sont déclarées — PEPPOL BIS Billing 3.0 PEPPOL-EN16931-R003 exige au moins l’une des deux afin que l’acheteur puisse rapprocher la facture d’une référence interne ; les points d’accès PEPPOL rejettent au contrôle schematron',
                 'ubl.ok.ccyValid': 'Codes monétaires actifs selon ISO 4217 : {list}',
                 'ubl.ok.ibanValid': 'IBAN des comptes Payee/Payer valides (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'IBAN Payee/Payer échoue au contrôle ISO 13616 MOD-97 : {iban}',
@@ -6863,6 +6875,8 @@
                 'sepa.warn.creDtTm': 'GrpHdr/CreDtTm “{v}” 不是有效的 ISO 20022 ISODateTime——要求格式为 YYYY-MM-DDTHH:MM:SS[.fff][Z|±HH:MM]（T 分隔符 + 显式时区）；清算系统会在 xs:dateTime 模式校验环节拒绝该文件',
                 'sepa.ok.reqdDt': '所有 {n} 个 PmtInf 块的 {field} 均符合 xs:date YYYY-MM-DD 格式（ISO 20022 / EPC SEPA 规则书）',
                 'sepa.warn.reqdDt': '{field} 不匹配：PmtInf 第 {idx} 块声明 “{v}”，但 ISO 20022 / EPC SEPA 规则书要求规范的 xs:date 格式 YYYY-MM-DD（例如 2024-04-15）；清算系统会在 xs:date 模式校验环节拒绝该文件',
+                'sepa.ok.creDtTmReqdDt': '所有 {n} 个 PmtInf 块的 {field} 均不早于 GrpHdr/CreDtTm {cre}（ISO 20022 / EPC SEPA 时间顺序）',
+                'sepa.warn.creDtTmReqdDt': '{field} 时间顺序异常：PmtInf 第 {idx} 块声明 {reqd}，早于 GrpHdr/CreDtTm {cre}——清算系统会拒绝回溯日期的结算指令（ISO 20022 / EPC SEPA 规则书）',
                 'sepa.warn.ccyInvalid': '币种代码不在 ISO 4217 现行清单中：{code}',
                 'sepa.warn.unknownDoc': '无法识别的 ISO 20022 根元素 — 仅部分解析。',
                 'err.sepaEmpty': 'XML 输入为空。',
@@ -6978,6 +6992,10 @@
                 'ubl.warn.dateFormat': '{field} “{v}” 不符合 xs:date YYYY-MM-DD 格式——EN 16931 / PEPPOL BIS Billing 3.0 要求使用规范的 ISO 8601 历法日期（例如 2024-04-01）；PEPPOL 接入点会在模式校验时拒绝该文件',
                 'ubl.ok.endpointId': '供应方和客户方均已声明 Party/EndpointID（EN 16931 BT-34 / BT-49 / PEPPOL BIS Billing 3.0 BR-62 / BR-63）',
                 'ubl.warn.endpointId': '{party} 的 Party/EndpointID 缺失——PEPPOL BIS Billing 3.0 {rule} 要求每一方都声明电子地址；否则该文件没有 SML/SMP 路由目的地，PEPPOL 接入点会在 schematron 校验时拒绝',
+                'ubl.ok.buyerOrOrderRefBoth': 'BuyerReference “{buyer}” 与 OrderReference/ID “{order}” 均已声明（EN 16931 BT-10 / BT-13 / PEPPOL BIS Billing 3.0 PEPPOL-EN16931-R003）',
+                'ubl.ok.buyerOrOrderRefBuyer': 'BuyerReference “{v}” 已声明（EN 16931 BT-10 / PEPPOL BIS Billing 3.0 PEPPOL-EN16931-R003——要求至少声明 BuyerReference 或 OrderReference 之一）',
+                'ubl.ok.buyerOrOrderRefOrder': 'OrderReference/ID “{v}” 已声明（EN 16931 BT-13 / PEPPOL BIS Billing 3.0 PEPPOL-EN16931-R003——要求至少声明 BuyerReference 或 OrderReference 之一）',
+                'ubl.warn.buyerOrOrderRef': 'BuyerReference (BT-10) 与 OrderReference/ID (BT-13) 均未声明——PEPPOL BIS Billing 3.0 PEPPOL-EN16931-R003 要求至少声明其中之一，以便买方将发票与内部参考关联；PEPPOL 接入点会在 schematron 校验时拒绝',
                 'ubl.ok.ccyValid': '币种代码按 ISO 4217 有效：{list}',
                 'ubl.ok.ibanValid': '收款方/付款方账户 IBAN 通过 ISO 13616 MOD-97 校验（{n}）',
                 'ubl.warn.ibanInvalid': '收款方/付款方 IBAN 未通过 ISO 13616 MOD-97 校验：{iban}',
@@ -8050,6 +8068,8 @@
                 'sepa.warn.creDtTm': 'GrpHdr/CreDtTm „{v}“ ist kein gültiges ISO-20022-ISODateTime — erforderliche Form ist YYYY-MM-DDTHH:MM:SS[.fff][Z|±HH:MM] (T-Trennzeichen + explizite Zeitzone); Clearing-Systeme verwerfen die Datei am xs:dateTime-Schema-Gate',
                 'sepa.ok.reqdDt': '{field} entspricht über alle {n} PmtInf-Block(s) der xs:date-Form YYYY-MM-DD (ISO 20022 / EPC-SEPA-Rulebook)',
                 'sepa.warn.reqdDt': '{field}-Abweichung: PmtInf-Block Nr. {idx} deklariert „{v}“, aber ISO 20022 / EPC-SEPA-Rulebook verlangen die kanonische xs:date-Form YYYY-MM-DD (z. B. 2024-04-15); Clearing-Systeme verwerfen die Datei am xs:date-Schema-Gate',
+                'sepa.ok.creDtTmReqdDt': '{field} liegt über alle {n} PmtInf-Block(s) am oder nach GrpHdr/CreDtTm {cre} (zeitliche Reihenfolge nach ISO 20022 / EPC-SEPA-Rulebook)',
+                'sepa.warn.creDtTmReqdDt': '{field}-Reihenfolge widersprüchlich: PmtInf-Block Nr. {idx} deklariert {reqd} vor GrpHdr/CreDtTm {cre} — Clearing-Systeme verwerfen rückdatierte Settlement-Anweisungen (ISO 20022 / EPC-SEPA-Rulebook)',
                 'sepa.warn.ccyInvalid': 'Währungscode nicht aktiv nach ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unbekanntes ISO-20022-Wurzelelement — nur Teilanalyse.',
                 'err.sepaEmpty': 'Die XML-Eingabe ist leer.',
@@ -8165,6 +8185,10 @@
                 'ubl.warn.dateFormat': '{field} „{v}“ entspricht nicht der xs:date-Form YYYY-MM-DD — EN 16931 / PEPPOL BIS Billing 3.0 verlangen das kanonische ISO-8601-Kalenderdatum (z. B. 2024-04-01); PEPPOL-Access-Points lehnen das Dokument am Schema-Gate ab',
                 'ubl.ok.endpointId': 'Party/EndpointID ist sowohl beim Lieferanten als auch beim Kunden deklariert (EN 16931 BT-34 / BT-49 / PEPPOL BIS Billing 3.0 BR-62 / BR-63)',
                 'ubl.warn.endpointId': 'Party/EndpointID fehlt für {party} — PEPPOL BIS Billing 3.0 {rule} verlangt, dass jede Partei eine elektronische Adresse deklariert; ohne sie hat das Dokument kein SML/SMP-Routing-Ziel und PEPPOL-Access-Points lehnen es am Schematron-Gate ab',
+                'ubl.ok.buyerOrOrderRefBoth': 'BuyerReference „{buyer}“ und OrderReference/ID „{order}“ sind beide deklariert (EN 16931 BT-10 / BT-13 / PEPPOL BIS Billing 3.0 PEPPOL-EN16931-R003)',
+                'ubl.ok.buyerOrOrderRefBuyer': 'BuyerReference „{v}“ deklariert (EN 16931 BT-10 / PEPPOL BIS Billing 3.0 PEPPOL-EN16931-R003 — BuyerReference ODER OrderReference erforderlich)',
+                'ubl.ok.buyerOrOrderRefOrder': 'OrderReference/ID „{v}“ deklariert (EN 16931 BT-13 / PEPPOL BIS Billing 3.0 PEPPOL-EN16931-R003 — BuyerReference ODER OrderReference erforderlich)',
+                'ubl.warn.buyerOrOrderRef': 'Weder BuyerReference (BT-10) noch OrderReference/ID (BT-13) ist deklariert — PEPPOL BIS Billing 3.0 PEPPOL-EN16931-R003 verlangt mindestens eines der beiden, damit der Käufer die Rechnung einer internen Referenz zuordnen kann; PEPPOL-Access-Points lehnen am Schematron-Gate ab',
                 'ubl.ok.ccyValid': 'Währungscodes nach ISO 4217 aktiv: {list}',
                 'ubl.ok.ibanValid': 'IBANs der Payee-/Payer-Konten gültig (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'Payee-/Payer-IBAN scheitert an ISO-13616-MOD-97-Prüfung: {iban}',
@@ -9222,6 +9246,8 @@
                 'sepa.warn.creDtTm': 'GrpHdr/CreDtTm "{v}" मान्य ISO 20022 ISODateTime नहीं है — अपेक्षित रूप YYYY-MM-DDTHH:MM:SS[.fff][Z|±HH:MM] है (T विभाजक + स्पष्ट टाइमज़ोन); क्लियरिंग सिस्टम xs:dateTime स्कीमा गेट पर फ़ाइल को अस्वीकार कर देते हैं',
                 'sepa.ok.reqdDt': 'सभी {n} PmtInf ब्लॉक(ों) में {field} xs:date YYYY-MM-DD रूप के अनुरूप है (ISO 20022 / EPC SEPA रूलबुक)',
                 'sepa.warn.reqdDt': '{field} मेल नहीं खाता: PmtInf #{idx} "{v}" घोषित करता है, परंतु ISO 20022 / EPC SEPA रूलबुक के लिए मानक xs:date रूप YYYY-MM-DD आवश्यक है (उदाहरण: 2024-04-15); क्लियरिंग सिस्टम xs:date स्कीमा गेट पर फ़ाइल को अस्वीकार कर देते हैं',
+                'sepa.ok.creDtTmReqdDt': 'सभी {n} PmtInf ब्लॉक(ों) में {field} GrpHdr/CreDtTm {cre} पर या उसके बाद है (ISO 20022 / EPC SEPA रूलबुक समय-क्रम)',
+                'sepa.warn.creDtTmReqdDt': '{field} क्रम असंगत: PmtInf #{idx} {reqd} घोषित करता है, जो GrpHdr/CreDtTm {cre} से पहले है — क्लियरिंग सिस्टम पूर्व-तारीख वाले निपटान निर्देशों को अस्वीकार कर देते हैं (ISO 20022 / EPC SEPA रूलबुक)',
                 'sepa.warn.ccyInvalid': 'मुद्रा कोड ISO 4217 में सक्रिय नहीं: {code}',
                 'sepa.warn.unknownDoc': 'अज्ञात ISO 20022 रूट तत्व — केवल आंशिक पार्सिंग।',
                 'err.sepaEmpty': 'XML इनपुट खाली है।',
@@ -9337,6 +9363,10 @@
                 'ubl.warn.dateFormat': '{field} "{v}" xs:date YYYY-MM-DD रूप के अनुरूप नहीं है — EN 16931 / PEPPOL BIS Billing 3.0 के लिए मानक ISO 8601 कैलेंडर दिनांक आवश्यक है (उदाहरण: 2024-04-01); PEPPOL एक्सेस पॉइंट स्कीमा गेट पर दस्तावेज़ को अस्वीकार कर देते हैं',
                 'ubl.ok.endpointId': 'आपूर्तिकर्ता और ग्राहक दोनों के Party/EndpointID घोषित हैं (EN 16931 BT-34 / BT-49 / PEPPOL BIS Billing 3.0 BR-62 / BR-63)',
                 'ubl.warn.endpointId': '{party} का Party/EndpointID अनुपस्थित है — PEPPOL BIS Billing 3.0 {rule} के लिए हर पक्ष को इलेक्ट्रॉनिक पता घोषित करना आवश्यक है; इसके बिना दस्तावेज़ का कोई SML/SMP रूटिंग गंतव्य नहीं होता और PEPPOL एक्सेस पॉइंट schematron गेट पर अस्वीकार कर देते हैं',
+                'ubl.ok.buyerOrOrderRefBoth': 'BuyerReference "{buyer}" और OrderReference/ID "{order}" दोनों घोषित हैं (EN 16931 BT-10 / BT-13 / PEPPOL BIS Billing 3.0 PEPPOL-EN16931-R003)',
+                'ubl.ok.buyerOrOrderRefBuyer': 'BuyerReference "{v}" घोषित है (EN 16931 BT-10 / PEPPOL BIS Billing 3.0 PEPPOL-EN16931-R003 — BuyerReference या OrderReference में से कम-से-कम एक आवश्यक)',
+                'ubl.ok.buyerOrOrderRefOrder': 'OrderReference/ID "{v}" घोषित है (EN 16931 BT-13 / PEPPOL BIS Billing 3.0 PEPPOL-EN16931-R003 — BuyerReference या OrderReference में से कम-से-कम एक आवश्यक)',
+                'ubl.warn.buyerOrOrderRef': 'न तो BuyerReference (BT-10) और न ही OrderReference/ID (BT-13) घोषित है — PEPPOL BIS Billing 3.0 PEPPOL-EN16931-R003 के लिए कम-से-कम एक आवश्यक है ताकि क्रेता चालान को आंतरिक संदर्भ से मिला सके; PEPPOL एक्सेस पॉइंट schematron गेट पर अस्वीकार कर देते हैं',
                 'ubl.ok.ccyValid': 'मुद्रा कोड ISO 4217 के अनुसार सक्रिय: {list}',
                 'ubl.ok.ibanValid': 'भुगतानकर्ता/प्राप्तकर्ता खाते के IBAN वैध (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'भुगतानकर्ता/प्राप्तकर्ता IBAN ISO 13616 MOD-97 जाँच में विफल: {iban}',
@@ -17405,6 +17435,60 @@
             }
         }
 
+        // ISO 20022 / EPC SEPA Rulebook temporal-ordering invariant: the file
+        // creation timestamp `GrpHdr/CreDtTm` MUST be on or before every
+        // per-PmtInf settlement date (`ReqdExctnDt` for pain.001, `ReqdColltnDt`
+        // for pain.008). You can't request execution before you've created the
+        // file — schemas allow the inversion, but clearing systems (EBA STEP2,
+        // STET, RT1) reject it because the settlement engine reads the gap as
+        // a back-dated instruction. The canonical real-world cause is a
+        // template repurposed from a prior cycle where CreDtTm was refreshed
+        // to today but ReqdExctnDt wasn't bumped forward, leaving last week's
+        // settlement date in place. Parallel to draft 39's UBL DueDate ≥
+        // IssueDate gate. Compares the date portion of CreDtTm (we already
+        // validated the xs:dateTime form in draft 74, and the YYYY-MM-DD prefix
+        // is stable across all valid CreDtTm shapes) against the per-PmtInf
+        // ReqdExctnDt / ReqdColltnDt (already validated in draft 76). Skips
+        // silently when either side is missing or unparseable — the
+        // format-level checks fire those gates upstream.
+        function sepaCheckCreDtTmReqdDtOrder(out, doc, detected) {
+            if (detected.type !== 'pain.001' && detected.type !== 'pain.008') return;
+            const w = detected.wrapper;
+            if (!w) return;
+            const grpHdr = sepaFirst(w, 'GrpHdr');
+            if (!grpHdr) return;
+            const creRaw = (sepaTextOf(grpHdr, 'CreDtTm') || '').trim();
+            const creDate = (creRaw.match(/^\d{4}-\d{2}-\d{2}/) || [''])[0];
+            if (!creDate) return;
+            const creTs = Date.parse(creDate);
+            if (!Number.isFinite(creTs)) return;
+            const fieldName = detected.type === 'pain.001' ? 'ReqdExctnDt' : 'ReqdColltnDt';
+            const pmtInfs = sepaAllLocal(w, 'PmtInf');
+            if (!pmtInfs.length) return;
+            const bad = [];
+            let seen = 0;
+            pmtInfs.forEach((pi, i) => {
+                const el = sepaFirst(pi, fieldName);
+                if (!el) return;
+                const raw = (sepaTextOf(el, 'Dt') || (el.textContent || '').trim());
+                if (!raw) return;
+                const m = SEPA_DATE_RE.exec(raw);
+                if (!m) return;
+                const ts = Date.parse(raw);
+                if (!Number.isFinite(ts)) return;
+                seen++;
+                if (ts < creTs) bad.push({ idx: i + 1, v: raw });
+            });
+            if (!seen) return;
+            if (bad.length === 0) {
+                tlsRenderRow(out, t('sepa.row.warning'), '✓ ' + tFormat('sepa.ok.creDtTmReqdDt', { field: fieldName, cre: creDate, n: intlNumber(seen) }));
+            } else {
+                for (const b of bad) {
+                    tlsRenderRow(out, t('sepa.row.warning'), '✗ ' + tFormat('sepa.warn.creDtTmReqdDt', { field: fieldName, idx: intlNumber(b.idx), reqd: b.v, cre: creDate }));
+                }
+            }
+        }
+
         // ISO 20022 / EPC SEPA Rulebook `GrpHdr/CreDtTm` xs:dateTime format
         // check. ISO 20022 declares CreDtTm as ISODateTime (xs:dateTime), which
         // requires the canonical `YYYY-MM-DDTHH:MM:SS[.fff][Z|±HH:MM]` form —
@@ -17581,6 +17665,7 @@
                 sepaCheckCtgyPurp(out, doc, detected);
                 sepaCheckCreDtTm(out, doc, detected);
                 sepaCheckReqdDt(out, doc, detected);
+                sepaCheckCreDtTmReqdDtOrder(out, doc, detected);
             } catch (e) {
                 tlsRenderRow(out, t('sepa.row.error'), e.message);
             }
@@ -18630,6 +18715,39 @@
             }
         }
 
+        // PEPPOL BIS Billing 3.0 PEPPOL-EN16931-R003: a PEPPOL invoice MUST
+        // declare either `cbc:BuyerReference` (EN 16931 BT-10, Buyer reference)
+        // or `cac:OrderReference/cbc:ID` (BT-13, Purchase order reference).
+        // The two fields are alternates — at least one MUST be present so the
+        // buyer's accounts-payable team can match the invoice against an
+        // internal reference. UBL 2.1 marks both as optional at the schema
+        // level so an invoice missing both is schema-valid plain XML but
+        // PEPPOL access points reject at the PEPPOL-EN16931-R003 schematron
+        // gate. France's Chorus Pro public-sector portal additionally pins
+        // BuyerReference for B2G flows (the "Service Code" the central
+        // government uses to route the invoice to the right department).
+        // The new `ublCheckBuyerOrOrderRef()` reads both fields and emits one
+        // green confirmation row when at least one is present (citing which),
+        // or one red row when both are missing. Invoice-only — credit notes
+        // are exempt from PEPPOL-EN16931-R003.
+        function ublCheckBuyerOrOrderRef(out, detected) {
+            if (detected.type !== 'Invoice') return;
+            const r = detected.root;
+            const buyerRef = (sepaTextOf(r, 'BuyerReference') || '').trim();
+            let orderRef = '';
+            const orderEl = sepaFirst(r, 'OrderReference');
+            if (orderEl) orderRef = (sepaTextOf(orderEl, 'ID') || '').trim();
+            if (buyerRef && orderRef) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + tFormat('ubl.ok.buyerOrOrderRefBoth', { buyer: buyerRef, order: orderRef }));
+            } else if (buyerRef) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + tFormat('ubl.ok.buyerOrOrderRefBuyer', { v: buyerRef }));
+            } else if (orderRef) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + tFormat('ubl.ok.buyerOrOrderRefOrder', { v: orderRef }));
+            } else {
+                tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + tFormat('ubl.warn.buyerOrOrderRef', {}));
+            }
+        }
+
         // EN 16931 BT-34 (Seller electronic address) / BT-49 (Buyer electronic
         // address) / PEPPOL BIS Billing 3.0 BR-62 / BR-63: every PEPPOL invoice
         // MUST declare an electronic address for both the supplier and the
@@ -18868,6 +18986,7 @@
                 ublCheckBics(out, doc);
                 ublCheckDateFormats(out, detected);
                 ublCheckEndpointIds(out, detected);
+                ublCheckBuyerOrOrderRef(out, detected);
             } catch (e) {
                 tlsRenderRow(out, t('ubl.row.error'), e.message);
             }
