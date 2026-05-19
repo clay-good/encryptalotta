@@ -2660,6 +2660,50 @@ test('ubl: BuyerReference / OrderReference check flags when both are missing', a
   await expect(page.locator('#ubl-results')).toContainText(/Neither BuyerReference \(BT-10\) nor OrderReference\/ID \(BT-13\) is declared/i, { timeout: 5_000 });
 });
 
+test('sepa: MsgId Max35Text length check confirms within the 35-codepoint ISO 20022 cap', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Canonical fixture carries <MsgId>MSG-2024-001</MsgId> — 12 codepoints, well within Max35Text.
+  await page.fill('#sepa-input', SEPA_PAIN001);
+  await page.click('#btn-ubl-parse').catch(() => {});
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/GrpHdr\/MsgId MSG-2024-001 fits within ISO 20022 Max35Text/i, { timeout: 5_000 });
+});
+
+test('sepa: MsgId Max35Text length check flags a 36-char UUID', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Replace with a full UUID (36 chars) — exceeds Max35Text.
+  const withUuid = SEPA_PAIN001.replace(
+    '<MsgId>MSG-2024-001</MsgId>',
+    '<MsgId>3f8a1c2d-4b56-7e89-9012-3456789abcde</MsgId>'
+  );
+  await page.fill('#sepa-input', withUuid);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/exceeds ISO 20022 Max35Text/i, { timeout: 5_000 });
+});
+
+test('ubl: Delivery/ActualDeliveryDate xs:date check confirms on a canonical YYYY-MM-DD', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Inject cac:Delivery/cbc:ActualDeliveryDate after IssueDate.
+  const withDelivery = UBL_INVOICE.replace(
+    '<cbc:IssueDate>2024-04-01</cbc:IssueDate>',
+    '<cbc:IssueDate>2024-04-01</cbc:IssueDate>\n  <cac:Delivery><cbc:ActualDeliveryDate>2024-04-15</cbc:ActualDeliveryDate></cac:Delivery>'
+  );
+  await page.fill('#ubl-input', withDelivery);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Delivery\/ActualDeliveryDate 2024-04-15 matches the xs:date YYYY-MM-DD form \(EN 16931 BT-72/i, { timeout: 5_000 });
+});
+
+test('ubl: Delivery/ActualDeliveryDate xs:date check flags a US-style MM/DD/YYYY', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  const withBadDelivery = UBL_INVOICE.replace(
+    '<cbc:IssueDate>2024-04-01</cbc:IssueDate>',
+    '<cbc:IssueDate>2024-04-01</cbc:IssueDate>\n  <cac:Delivery><cbc:ActualDeliveryDate>04/15/2024</cbc:ActualDeliveryDate></cac:Delivery>'
+  );
+  await page.fill('#ubl-input', withBadDelivery);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Delivery\/ActualDeliveryDate "04\/15\/2024" does not match the xs:date YYYY-MM-DD form/i, { timeout: 5_000 });
+});
+
 test('ubl: rejects non-UBL XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   await page.fill('#ubl-input', '<?xml version="1.0"?><Document/>');
