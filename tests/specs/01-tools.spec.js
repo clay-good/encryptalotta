@@ -2836,6 +2836,68 @@ test('ubl: BillingReference/InvoiceDocumentReference/IssueDate xs:date check fla
   await expect(page.locator('#ubl-results')).toContainText(/BillingReference\/InvoiceDocumentReference\/IssueDate "03\/15\/2024" does not match the xs:date YYYY-MM-DD form/i, { timeout: 5_000 });
 });
 
+function buildPain008(mndtId) {
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.008.001.02">
+  <CstmrDrctDbtInitn>
+    <GrpHdr><MsgId>DD-MSG-2024-088</MsgId><CreDtTm>2024-05-15T09:00:00</CreDtTm><NbOfTxs>1</NbOfTxs><CtrlSum>42.00</CtrlSum><InitgPty><Nm>Creditor Inc</Nm></InitgPty></GrpHdr>
+    <PmtInf>
+      <PmtInfId>DD-PAY-001</PmtInfId><PmtMtd>DD</PmtMtd><ReqdColltnDt>2024-06-01</ReqdColltnDt>
+      <Cdtr><Nm>Creditor Inc</Nm></Cdtr>
+      <CdtrAcct><Id><IBAN>DE91100000000123456789</IBAN></Id></CdtrAcct>
+      <CdtrAgt><FinInstnId><BIC>DEUTDEFFXXX</BIC></FinInstnId></CdtrAgt>
+      <DrctDbtTxInf>
+        <PmtId><EndToEndId>DD-E2E-088</EndToEndId></PmtId>
+        <InstdAmt Ccy="EUR">42.00</InstdAmt>
+        <DrctDbtTx><MndtRltdInf><MndtId>${mndtId}</MndtId></MndtRltdInf></DrctDbtTx>
+        <DbtrAgt><FinInstnId><BIC>COBADEFFXXX</BIC></FinInstnId></DbtrAgt>
+        <Dbtr><Nm>Subscriber</Nm></Dbtr>
+        <DbtrAcct><Id><IBAN>DE89370400440532013000</IBAN></Id></DbtrAcct>
+        <RmtInf><Ustrd>Subscription May 2024</Ustrd></RmtInf>
+      </DrctDbtTxInf>
+    </PmtInf>
+  </CstmrDrctDbtInitn>
+</Document>`;
+}
+
+test('sepa: MndtId Max35Text length check confirms when every value fits', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  await page.fill('#sepa-input', buildPain008('MANDATE-2024-001'));  // 16 chars
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/MndtId values fit within ISO 20022 Max35Text/i, { timeout: 5_000 });
+});
+
+test('sepa: MndtId Max35Text length check flags a long mandate reference', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  const longMndt = 'MNDT-Subscriber-Long-Company-Name-GmbH-Co-KG-2024';  // 49 chars
+  await page.fill('#sepa-input', buildPain008(longMndt));
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(new RegExp(`MndtId "${longMndt}" exceeds ISO 20022 Max35Text`, 'i'), { timeout: 5_000 });
+});
+
+test('ubl: PaymentMandate/ID length check confirms when every value fits', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  const withMandate = UBL_INVOICE.replace(
+    '</cac:LegalMonetaryTotal>',
+    '</cac:LegalMonetaryTotal>\n  <cac:PaymentMeans>\n    <cbc:PaymentMeansCode>59</cbc:PaymentMeansCode>\n    <cac:PaymentMandate>\n      <cbc:ID>MANDATE-2024-001</cbc:ID>\n    </cac:PaymentMandate>\n  </cac:PaymentMeans>'
+  );
+  await page.fill('#ubl-input', withMandate);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/PaymentMeans\/PaymentMandate\/ID values .* fit within the 35-character cap/i, { timeout: 5_000 });
+});
+
+test('ubl: PaymentMandate/ID length check flags a long mandate reference', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  const longMandate = 'MNDT-Subscriber-Long-Company-Name-GmbH-Co-KG-2024';  // 49 chars
+  const withLong = UBL_INVOICE.replace(
+    '</cac:LegalMonetaryTotal>',
+    `</cac:LegalMonetaryTotal>\n  <cac:PaymentMeans>\n    <cbc:PaymentMeansCode>59</cbc:PaymentMeansCode>\n    <cac:PaymentMandate>\n      <cbc:ID>${longMandate}</cbc:ID>\n    </cac:PaymentMandate>\n  </cac:PaymentMeans>`
+  );
+  await page.fill('#ubl-input', withLong);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(new RegExp(`PaymentMeans/PaymentMandate/ID "${longMandate}" exceeds the 35-character cap`, 'i'), { timeout: 5_000 });
+});
+
 test('ubl: rejects non-UBL XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   await page.fill('#ubl-input', '<?xml version="1.0"?><Document/>');
