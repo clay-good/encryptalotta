@@ -4521,6 +4521,8 @@
                 'sepa.warn.counterpartyNmLen': 'Transaction #{idx} {party}/Nm "{nm}" exceeds the 70-character cap ({len}/70 characters) — ISO 20022 declares the field as Max140Text but the EPC SCT / SDD Rulebooks narrow the allowed length to 70 characters because the value is propagated end-to-end into the receiving bank\'s account-statement renderer at a column width pinned to the legacy SWIFT MT103 / MT104 70-char narrative limit; an over-cap name is either silently truncated (the statement reads a half-truncated company name the customer can\'t reconcile) or hard-rejected by the originator bank\'s pre-clearing gate (common cause: a CRM column carrying legal name plus department / branch suffix)',
                 'sepa.ok.rmtInfUstrdCount': 'Every transaction\'s RmtInf carries at most one <Ustrd> element across all {n} populated RmtInf block(s) (EPC SCT / SDD Rulebook narrows ISO 20022\'s 0..n cardinality to a single occurrence)',
                 'sepa.warn.rmtInfUstrdCount': 'Transaction #{idx} RmtInf carries {count} <Ustrd> elements — ISO 20022 declares Ustrd as 0..n but the EPC SCT and SDD Rulebook Implementation Guidelines narrow the maximum cardinality to a single occurrence per RmtInf; clearing systems (EBA STEP2, STET, RT1) reject the file because the receiving bank\'s account-statement renderer surfaces only one narrative line — any additional Ustrd elements would be dropped before the customer sees them, so the rulebook forbids the shape upfront (common cause: a generator that splits a multi-line invoice description into one Ustrd element per line, intending the bank to render them as a block)',
+                'sepa.ok.adrLineCount': 'Every PostalAddress fits within the EPC SEPA Rulebook 2-AdrLine cap across all {n} populated PstlAdr block(s) (each ≤2 lines; EPC narrows ISO 20022 cardinality 0..7 to 0..2)',
+                'sepa.warn.adrLineCount': 'PostalAddress #{idx} declares {count} <AdrLine> elements — ISO 20022 allows up to 7 address lines but the EPC SCT / SDD Rulebook Implementation Guidelines narrow the cap to 2 lines per address (the layout matches the legacy SWIFT MT103 / MT104 address columns SEPA party-address rendering downstream is pinned to); a party block declaring three or more AdrLine elements is either silently truncated by the receiving bank (the customer sees a half-truncated address that doesn\'t match the contract on file) or hard-rejected by the originator bank\'s pre-clearing gate (common cause: a CRM exporting line-per-field shape — street, number, ZIP, city, country — without re-packing into the SEPA two-line format)',
                 'sepa.warn.ccyInvalid': 'Currency code not active per ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unrecognized ISO 20022 root element — partial parse only.',
                 'err.sepaEmpty': 'XML input is empty.',
@@ -4688,6 +4690,8 @@
                 'ubl.warn.lmtLineSign': 'LegalMonetaryTotal/LineExtensionAmount declares a negative value "{v}" — EN 16931 BR-CO-10 pins the file-wide Sum of Invoice line net amounts (BT-106) to Σ BT-131 and BT-131 is itself non-negative (draft 107), so BT-106 as the sum must be non-negative too; a negative BT-106 propagates into the BR-CO-10 totals chain and the buyer\'s AP system reads the invoice as a credit (common cause: a summary-only invoice template that derives BT-106 from an external accounting system instead of summing the lines, allowing a signed value to bypass the per-line gate)',
                 'ubl.ok.lmtTaxExclSign': 'LegalMonetaryTotal/TaxExclusiveAmount "{v}" is non-negative (EN 16931 BT-109 — Invoice total amount without VAT)',
                 'ubl.warn.lmtTaxExclSign': 'LegalMonetaryTotal/TaxExclusiveAmount declares a negative value "{v}" — EN 16931 BR-CO-13 composes the Invoice total amount without VAT (BT-109) from BT-106 (line totals) + BT-99 (charges) − BT-92 (allowances), and each input narrows to a non-negative decimal, so BT-109 inherits the non-negativity invariant; a negative BT-109 propagates into the BR-CO-15 chain (TaxInclusiveAmount = TaxExclusiveAmount + Σ TaxAmount) and the buyer\'s AP system reads the invoice as a credit (common cause: a summary-only invoice template that derives BT-109 from an external accounting system rather than composing it from BT-92 / BT-99 / BT-106)',
+                'ubl.ok.lmtTaxInclSign': 'LegalMonetaryTotal/TaxInclusiveAmount "{v}" is non-negative (EN 16931 BT-112 — Invoice total amount with VAT)',
+                'ubl.warn.lmtTaxInclSign': 'LegalMonetaryTotal/TaxInclusiveAmount declares a negative value "{v}" — EN 16931 BR-CO-15 composes the Invoice total amount with VAT (BT-112) = BT-109 (TaxExclusiveAmount, draft 117) + Σ BT-110 (TaxAmount, draft 113), and both inputs narrow to non-negative decimals, so BT-112 inherits the non-negativity invariant; a negative BT-112 propagates into the BR-CO-16 chain (PayableAmount = TaxInclusiveAmount − PrepaidAmount + PayableRounding) and the buyer\'s AP system reads the invoice as a credit (common cause: a summary-only invoice template that derives BT-112 from an external accounting system rather than composing it via BR-CO-15)',
                 'ubl.ok.ccyValid': 'Currency codes active per ISO 4217: {list}',
                 'ubl.ok.ibanValid': 'Payee/Payer financial account IBANs valid (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'Payee/Payer IBAN failed ISO 13616 MOD-97 check: {iban}',
@@ -5817,6 +5821,8 @@
                 'sepa.warn.counterpartyNmLen': 'Transaction #{idx} {party}/Nm « {nm} » dépasse la limite de 70 caractères ({len}/70) — ISO 20022 déclare le champ comme Max140Text mais les règles EPC SCT / SDD restreignent la longueur autorisée à 70 caractères car la valeur est propagée de bout en bout dans le moteur de relevé de compte de la banque destinataire, à une largeur de colonne alignée sur la limite historique du libellé SWIFT MT103 / MT104 ; un nom dépassant la limite est soit tronqué silencieusement (le relevé affiche un nom de société à moitié coupé que le client ne peut pas rapprocher) soit rejeté par le contrôle pré-compensation de la banque émettrice (cause fréquente : une colonne CRM portant le nom légal plus le suffixe service / agence)',
                 'sepa.ok.rmtInfUstrdCount': 'Chaque RmtInf de transaction porte au plus un élément <Ustrd> sur l’ensemble des {n} bloc(s) RmtInf renseigné(s) (les règles EPC SCT / SDD restreignent la cardinalité 0..n d’ISO 20022 à une seule occurrence)',
                 'sepa.warn.rmtInfUstrdCount': 'La transaction #{idx} RmtInf porte {count} éléments <Ustrd> — ISO 20022 déclare Ustrd en 0..n mais les implementation guidelines EPC SCT / SDD restreignent la cardinalité maximale à une seule occurrence par RmtInf ; les systèmes de compensation (EBA STEP2, STET, RT1) rejettent le fichier car le moteur de relevé de compte de la banque destinataire n’affiche qu’une ligne narrative — tout élément Ustrd supplémentaire serait abandonné avant que le client ne le voie, donc les règles interdisent cette forme en amont (cause fréquente : un générateur qui divise une description de facture multi-lignes en un élément Ustrd par ligne, dans l’intention que la banque les affiche comme un bloc)',
+                'sepa.ok.adrLineCount': 'Chaque PostalAddress respecte la limite EPC SEPA de 2 AdrLine sur l’ensemble des {n} bloc(s) PstlAdr renseigné(s) (chacun ≤ 2 lignes ; EPC restreint la cardinalité ISO 20022 0..7 à 0..2)',
+                'sepa.warn.adrLineCount': 'PostalAddress #{idx} déclare {count} éléments <AdrLine> — ISO 20022 autorise jusqu’à 7 lignes d’adresse, mais les implementation guidelines EPC SCT / SDD restreignent la limite à 2 lignes par adresse (la disposition correspond aux colonnes d’adresse SWIFT MT103 / MT104 héritées sur lesquelles le rendu d’adresse de partie SEPA est ancré en aval) ; un bloc partie déclarant trois lignes AdrLine ou plus est soit tronqué silencieusement par la banque destinataire (le client voit une adresse à moitié coupée qui ne correspond pas au contrat) soit rejeté par le contrôle pré-compensation de la banque émettrice (cause fréquente : un CRM exportant en forme ligne-par-champ — rue, numéro, code postal, ville, pays — sans reconditionnement au format SEPA deux lignes)',
                 'sepa.warn.ccyInvalid': 'Code monétaire non actif selon ISO 4217 : {code}',
                 'sepa.warn.unknownDoc': 'Élément racine ISO 20022 non reconnu — analyse partielle uniquement.',
                 'err.sepaEmpty': 'Le XML d’entrée est vide.',
@@ -5974,6 +5980,8 @@
                 'ubl.warn.lmtLineSign': 'LegalMonetaryTotal/LineExtensionAmount déclare une valeur négative « {v} » — EN 16931 BR-CO-10 fixe la somme des montants nets des lignes (BT-106) à Σ BT-131, et BT-131 est lui-même non négatif (draft 107), donc BT-106 comme somme doit également être non négatif ; un BT-106 négatif se propage dans la chaîne de totaux BR-CO-10 et le système AP de l’acheteur lit la facture comme un avoir (cause fréquente : un modèle de facture résumé qui dérive BT-106 d’un système comptable externe au lieu de sommer les lignes, ce qui permet à une valeur signée de contourner le contrôle ligne par ligne)',
                 'ubl.ok.lmtTaxExclSign': 'LegalMonetaryTotal/TaxExclusiveAmount « {v} » est non négatif (EN 16931 BT-109 — montant total de la facture hors TVA)',
                 'ubl.warn.lmtTaxExclSign': 'LegalMonetaryTotal/TaxExclusiveAmount déclare une valeur négative « {v} » — EN 16931 BR-CO-13 compose le montant total de la facture hors TVA (BT-109) à partir de BT-106 (totaux des lignes) + BT-99 (charges) − BT-92 (allocations), et chaque entrée se restreint à un décimal non négatif, donc BT-109 hérite de l’invariant de non-négativité ; un BT-109 négatif se propage dans la chaîne BR-CO-15 (TaxInclusiveAmount = TaxExclusiveAmount + Σ TaxAmount) et le système AP de l’acheteur lit la facture comme un avoir (cause fréquente : un modèle de facture résumé qui dérive BT-109 d’un système comptable externe au lieu de le composer à partir de BT-92 / BT-99 / BT-106)',
+                'ubl.ok.lmtTaxInclSign': 'LegalMonetaryTotal/TaxInclusiveAmount « {v} » est non négatif (EN 16931 BT-112 — montant total de la facture TTC)',
+                'ubl.warn.lmtTaxInclSign': 'LegalMonetaryTotal/TaxInclusiveAmount déclare une valeur négative « {v} » — EN 16931 BR-CO-15 compose le montant total de la facture TTC (BT-112) = BT-109 (TaxExclusiveAmount, draft 117) + Σ BT-110 (TaxAmount, draft 113), et les deux entrées se restreignent à des décimaux non négatifs, donc BT-112 hérite de l’invariant de non-négativité ; un BT-112 négatif se propage dans la chaîne BR-CO-16 (PayableAmount = TaxInclusiveAmount − PrepaidAmount + PayableRounding) et le système AP de l’acheteur lit la facture comme un avoir (cause fréquente : un modèle de facture résumé qui dérive BT-112 d’un système comptable externe au lieu de le composer via BR-CO-15)',
                 'ubl.ok.ccyValid': 'Codes monétaires actifs selon ISO 4217 : {list}',
                 'ubl.ok.ibanValid': 'IBAN des comptes Payee/Payer valides (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'IBAN Payee/Payer échoue au contrôle ISO 13616 MOD-97 : {iban}',
@@ -7073,6 +7081,8 @@
                 'sepa.warn.counterpartyNmLen': '第 {idx} 笔交易 {party}/Nm "{nm}" 超过 70 字符上限（{len}/70）——ISO 20022 将该字段声明为 Max140Text，但 EPC SCT / SDD 规则书将允许长度收窄为 70 字符，因为该值被端到端传播到收款行账户对账单渲染器中，列宽与历史 SWIFT MT103 / MT104 70 字符摘要限制保持一致；超长名称要么被静默截断（对账单显示半截公司名称，客户无法对账）要么被付款行预清算环节硬拒绝（常见原因：CRM 列同时包含法定名称和部门 / 分支机构后缀）',
                 'sepa.ok.rmtInfUstrdCount': '所有 {n} 个已填充 RmtInf 块中，每笔交易的 RmtInf 至多携带一个 <Ustrd> 元素（EPC SCT / SDD 规则书将 ISO 20022 的 0..n 基数收窄为仅一次出现）',
                 'sepa.warn.rmtInfUstrdCount': '第 {idx} 笔交易的 RmtInf 携带 {count} 个 <Ustrd> 元素——ISO 20022 将 Ustrd 声明为 0..n，但 EPC SCT / SDD 实施指南将每个 RmtInf 的最大基数收窄为单次出现；清算系统（EBA STEP2、STET、RT1）拒绝此文件，因为收款行账户对账单渲染器只输出一行摘要——任何额外的 Ustrd 元素都会在客户看到之前被丢弃，因此规则书在源头禁止这种形式（常见原因是生成器将多行发票描述拆分为每行一个 Ustrd 元素，期望银行将它们作为整体渲染）',
+                'sepa.ok.adrLineCount': '所有 {n} 个已填充 PstlAdr 块中，每个 PostalAddress 都符合 EPC SEPA 规则书 2-AdrLine 上限（每个 ≤2 行；EPC 将 ISO 20022 的 0..7 基数收窄为 0..2）',
+                'sepa.warn.adrLineCount': 'PostalAddress #{idx} 声明了 {count} 个 <AdrLine> 元素——ISO 20022 允许最多 7 行地址，但 EPC SCT / SDD 实施指南将上限收窄为每个地址 2 行（该布局与 SEPA 当事人地址下游渲染所对齐的历史 SWIFT MT103 / MT104 地址列保持一致）；声明三行或更多 AdrLine 的当事人块要么被收款行静默截断（客户看到与合同记录不符的半截地址），要么被付款行预清算环节硬拒绝（常见原因：CRM 以逐字段方式导出——街道、号码、邮编、城市、国家——而未重新打包为 SEPA 两行格式）',
                 'sepa.warn.ccyInvalid': '币种代码不在 ISO 4217 现行清单中：{code}',
                 'sepa.warn.unknownDoc': '无法识别的 ISO 20022 根元素 — 仅部分解析。',
                 'err.sepaEmpty': 'XML 输入为空。',
@@ -7230,6 +7240,8 @@
                 'ubl.warn.lmtLineSign': 'LegalMonetaryTotal/LineExtensionAmount 声明负值 "{v}"——EN 16931 BR-CO-10 将文件级发票行净额之和（BT-106）固定为 Σ BT-131，而 BT-131 本身非负（draft 107），因此作为求和的 BT-106 也必须非负；负的 BT-106 会传播进 BR-CO-10 的合计链，买方 AP 系统会将该发票读作贷项（常见原因：仅汇总型发票模板从外部会计系统得出 BT-106 而非求和行项，从而让带符号的值绕过逐行检查）',
                 'ubl.ok.lmtTaxExclSign': 'LegalMonetaryTotal/TaxExclusiveAmount "{v}" 非负（EN 16931 BT-109 — 发票不含 VAT 总额）',
                 'ubl.warn.lmtTaxExclSign': 'LegalMonetaryTotal/TaxExclusiveAmount 声明负值 "{v}"——EN 16931 BR-CO-13 将发票不含 VAT 总额（BT-109）组合为 BT-106（行总额） + BT-99（费用） − BT-92（折让），且每项输入都收窄为非负小数，因此 BT-109 继承非负不变式；负的 BT-109 会传播到 BR-CO-15 链（TaxInclusiveAmount = TaxExclusiveAmount + Σ TaxAmount），买方 AP 系统会将该发票读作贷项（常见原因：仅汇总型发票模板从外部会计系统得出 BT-109，而不是从 BT-92 / BT-99 / BT-106 组合）',
+                'ubl.ok.lmtTaxInclSign': 'LegalMonetaryTotal/TaxInclusiveAmount "{v}" 非负（EN 16931 BT-112 — 发票含 VAT 总额）',
+                'ubl.warn.lmtTaxInclSign': 'LegalMonetaryTotal/TaxInclusiveAmount 声明负值 "{v}"——EN 16931 BR-CO-15 将发票含 VAT 总额（BT-112）组合为 BT-109（TaxExclusiveAmount，draft 117） + Σ BT-110（TaxAmount，draft 113），两个输入都收窄为非负小数，因此 BT-112 继承非负不变式；负的 BT-112 会传播到 BR-CO-16 链（PayableAmount = TaxInclusiveAmount − PrepaidAmount + PayableRounding），买方 AP 系统会将该发票读作贷项（常见原因：仅汇总型发票模板从外部会计系统得出 BT-112，而不是通过 BR-CO-15 组合）',
                 'ubl.ok.ccyValid': '币种代码按 ISO 4217 有效：{list}',
                 'ubl.ok.ibanValid': '收款方/付款方账户 IBAN 通过 ISO 13616 MOD-97 校验（{n}）',
                 'ubl.warn.ibanInvalid': '收款方/付款方 IBAN 未通过 ISO 13616 MOD-97 校验：{iban}',
@@ -8344,6 +8356,8 @@
                 'sepa.warn.counterpartyNmLen': 'Transaktion #{idx} {party}/Nm „{nm}“ überschreitet die 70-Zeichen-Grenze ({len}/70) — ISO 20022 deklariert das Feld als Max140Text, aber die EPC-SCT-/SDD-Rulebooks schränken die zulässige Länge auf 70 Zeichen ein, da der Wert durch die SEPA-Rails Ende-zu-Ende in den Kontoauszugs-Renderer der empfangenden Bank gelangt, mit einer Spaltenbreite, die an die historische 70-Zeichen-Narrative-Grenze von SWIFT MT103 / MT104 angelehnt ist; ein zu langer Name wird entweder stillschweigend gekürzt (der Auszug zeigt einen halb abgeschnittenen Firmennamen, den der Kunde nicht zuordnen kann) oder vom Pre-Clearing-Gate der Auftraggeberbank hart abgelehnt (häufige Ursache: eine CRM-Spalte mit Firmenname plus Abteilungs-/Filialsuffix)',
                 'sepa.ok.rmtInfUstrdCount': 'Das RmtInf jeder Transaktion trägt höchstens ein <Ustrd>-Element über alle {n} befüllten RmtInf-Block(s) (das EPC-SCT-/SDD-Rulebook schränkt die 0..n-Kardinalität von ISO 20022 auf ein einziges Vorkommen ein)',
                 'sepa.warn.rmtInfUstrdCount': 'Transaktion #{idx} RmtInf trägt {count} <Ustrd>-Elemente — ISO 20022 deklariert Ustrd als 0..n, die EPC-SCT-/SDD-Implementation-Guidelines schränken die maximale Kardinalität jedoch auf ein einziges Vorkommen pro RmtInf ein; Clearingsysteme (EBA STEP2, STET, RT1) weisen die Datei ab, da der Kontoauszugs-Renderer der empfangenden Bank nur eine Narrative-Zeile ausgibt — alle weiteren Ustrd-Elemente würden verworfen, bevor der Kunde sie sieht, daher verbietet das Rulebook die Form vorab (häufige Ursache: ein Generator, der eine mehrzeilige Rechnungsbeschreibung in je ein Ustrd-Element pro Zeile aufteilt, in der Erwartung, dass die Bank sie als Block rendert)',
+                'sepa.ok.adrLineCount': 'Jede PostalAddress hält die EPC-SEPA-Rulebook-Grenze von 2 AdrLine über alle {n} befüllten PstlAdr-Block(s) ein (jeweils ≤ 2 Zeilen; das EPC schränkt die ISO-20022-Kardinalität 0..7 auf 0..2 ein)',
+                'sepa.warn.adrLineCount': 'PostalAddress #{idx} deklariert {count} <AdrLine>-Elemente — ISO 20022 erlaubt bis zu 7 Adresszeilen, die EPC-SCT-/SDD-Implementation-Guidelines schränken die Grenze jedoch auf 2 Zeilen pro Adresse ein (die Aufteilung entspricht den historischen SWIFT-MT103-/MT104-Adressspalten, an denen das SEPA-Parteienadress-Rendering nachgelagert verankert ist); ein Parteiblock mit drei oder mehr AdrLine-Elementen wird entweder stillschweigend von der empfangenden Bank gekürzt (der Kunde sieht eine halb abgeschnittene Adresse, die nicht zum hinterlegten Vertrag passt) oder vom Pre-Clearing-Gate der Auftraggeberbank hart abgelehnt (häufige Ursache: ein CRM, das im Zeile-pro-Feld-Format exportiert — Straße, Hausnummer, PLZ, Ort, Land — ohne Neupackung in das SEPA-Zweizeilen-Format)',
                 'sepa.warn.ccyInvalid': 'Währungscode nicht aktiv nach ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unbekanntes ISO-20022-Wurzelelement — nur Teilanalyse.',
                 'err.sepaEmpty': 'Die XML-Eingabe ist leer.',
@@ -8501,6 +8515,8 @@
                 'ubl.warn.lmtLineSign': 'LegalMonetaryTotal/LineExtensionAmount deklariert einen negativen Wert „{v}“ — EN 16931 BR-CO-10 legt die Summe der Rechnungszeilen-Nettobeträge (BT-106) auf Σ BT-131 fest, und BT-131 ist selbst nicht negativ (Draft 107), daher muss BT-106 als Summe ebenfalls nicht negativ sein; ein negativer BT-106 pflanzt sich in die BR-CO-10-Summenkette fort, und das AP-System des Käufers liest die Rechnung als Gutschrift (häufige Ursache: eine Summary-only-Rechnungsvorlage, die BT-106 aus einem externen Buchhaltungssystem ableitet, statt die Zeilen zu summieren, sodass ein vorzeichenbehafteter Wert das Per-Line-Gate umgeht)',
                 'ubl.ok.lmtTaxExclSign': 'LegalMonetaryTotal/TaxExclusiveAmount „{v}“ ist nicht negativ (EN 16931 BT-109 — Rechnungs-Gesamtbetrag ohne USt)',
                 'ubl.warn.lmtTaxExclSign': 'LegalMonetaryTotal/TaxExclusiveAmount deklariert einen negativen Wert „{v}“ — EN 16931 BR-CO-13 komponiert den Rechnungs-Gesamtbetrag ohne USt (BT-109) aus BT-106 (Zeilensummen) + BT-99 (Zuschläge) − BT-92 (Nachlässe), wobei sich jede Eingabe auf ein nicht-negatives Dezimal einschränkt; BT-109 erbt daher den Nicht-Negativitäts-Invariante; ein negativer BT-109 pflanzt sich in die BR-CO-15-Kette (TaxInclusiveAmount = TaxExclusiveAmount + Σ TaxAmount) fort und das AP-System des Käufers liest die Rechnung als Gutschrift (häufige Ursache: eine Summary-only-Rechnungsvorlage, die BT-109 aus einem externen Buchhaltungssystem ableitet, statt ihn aus BT-92 / BT-99 / BT-106 zu komponieren)',
+                'ubl.ok.lmtTaxInclSign': 'LegalMonetaryTotal/TaxInclusiveAmount „{v}“ ist nicht negativ (EN 16931 BT-112 — Rechnungs-Gesamtbetrag mit USt)',
+                'ubl.warn.lmtTaxInclSign': 'LegalMonetaryTotal/TaxInclusiveAmount deklariert einen negativen Wert „{v}“ — EN 16931 BR-CO-15 komponiert den Rechnungs-Gesamtbetrag mit USt (BT-112) = BT-109 (TaxExclusiveAmount, Draft 117) + Σ BT-110 (TaxAmount, Draft 113), und beide Eingaben schränken sich auf nicht-negative Dezimale ein, sodass BT-112 die Nicht-Negativitäts-Invariante erbt; ein negativer BT-112 pflanzt sich in die BR-CO-16-Kette (PayableAmount = TaxInclusiveAmount − PrepaidAmount + PayableRounding) fort und das AP-System des Käufers liest die Rechnung als Gutschrift (häufige Ursache: eine Summary-only-Rechnungsvorlage, die BT-112 aus einem externen Buchhaltungssystem ableitet, statt ihn über BR-CO-15 zu komponieren)',
                 'ubl.ok.ccyValid': 'Währungscodes nach ISO 4217 aktiv: {list}',
                 'ubl.ok.ibanValid': 'IBANs der Payee-/Payer-Konten gültig (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'Payee-/Payer-IBAN scheitert an ISO-13616-MOD-97-Prüfung: {iban}',
@@ -9600,6 +9616,8 @@
                 'sepa.warn.counterpartyNmLen': 'लेन-देन #{idx} {party}/Nm "{nm}" 70-वर्ण सीमा से अधिक है ({len}/70) — ISO 20022 इस फ़ील्ड को Max140Text घोषित करता है पर EPC SCT / SDD रूलबुक अनुमत लंबाई को 70 वर्णों तक सीमित करती हैं क्योंकि यह मान प्राप्तकर्ता बैंक के खाता-विवरण रेंडरर में अंत-से-अंत तक प्रसारित होता है, और स्तंभ चौड़ाई ऐतिहासिक SWIFT MT103 / MT104 70-वर्ण विवरण सीमा के अनुरूप होती है; सीमा से अधिक नाम या तो मूक रूप से छोटा कर दिया जाता है (विवरण आधा-कटा कंपनी नाम दिखाता है जिसे ग्राहक मिलान नहीं कर सकता) या प्रेषक बैंक के पूर्व-समाशोधन गेट पर अस्वीकृत होता है (आम कारण: कानूनी नाम के साथ विभाग / शाखा प्रत्यय वाला CRM स्तंभ)',
                 'sepa.ok.rmtInfUstrdCount': 'सभी {n} भरे हुए RmtInf ब्लॉक में प्रत्येक लेन-देन का RmtInf अधिकतम एक <Ustrd> तत्व रखता है (EPC SCT / SDD रूलबुक ISO 20022 की 0..n कार्डिनैलिटी को एक ही उपस्थिति तक सीमित करती हैं)',
                 'sepa.warn.rmtInfUstrdCount': 'लेन-देन #{idx} का RmtInf {count} <Ustrd> तत्व रखता है — ISO 20022 Ustrd को 0..n घोषित करता है पर EPC SCT / SDD कार्यान्वयन दिशानिर्देश प्रति RmtInf अधिकतम कार्डिनैलिटी को एक उपस्थिति तक सीमित करते हैं; क्लियरिंग सिस्टम (EBA STEP2, STET, RT1) फ़ाइल अस्वीकार करते हैं क्योंकि प्राप्तकर्ता बैंक का खाता-विवरण रेंडरर केवल एक विवरण पंक्ति दिखाता है — कोई भी अतिरिक्त Ustrd तत्व ग्राहक को दिखने से पहले हटा दिया जाता, इसलिए नियम स्रोत पर ही इस आकार को निषिद्ध करते हैं (आम कारण: एक जनरेटर जो बहु-पंक्ति चालान विवरण को प्रति पंक्ति एक Ustrd तत्व में विभाजित करता है, इस आशा से कि बैंक उन्हें ब्लॉक के रूप में प्रस्तुत करेगा)',
+                'sepa.ok.adrLineCount': 'सभी {n} भरे हुए PstlAdr ब्लॉक्स में प्रत्येक PostalAddress EPC SEPA रूलबुक की 2-AdrLine सीमा के भीतर है (प्रत्येक ≤2 पंक्तियाँ; EPC ISO 20022 की 0..7 कार्डिनैलिटी को 0..2 तक सीमित करता है)',
+                'sepa.warn.adrLineCount': 'PostalAddress #{idx} {count} <AdrLine> तत्व घोषित करता है — ISO 20022 7 पते की पंक्तियों तक अनुमति देता है, पर EPC SCT / SDD कार्यान्वयन दिशानिर्देश सीमा को प्रति पते 2 पंक्तियों तक सीमित करते हैं (यह लेआउट ऐतिहासिक SWIFT MT103 / MT104 पता स्तंभों के अनुरूप है, जिन पर SEPA पक्ष-पता डाउनस्ट्रीम रेंडरिंग आधारित है); तीन या अधिक AdrLine तत्व घोषित करने वाला पक्ष ब्लॉक या तो प्राप्तकर्ता बैंक द्वारा मूक रूप से छोटा कर दिया जाता है (ग्राहक को अनुबंध पर रिकॉर्ड से मेल नहीं खाने वाला आधा-कटा पता दिखाई देता है) या प्रेषक बैंक के पूर्व-समाशोधन गेट पर अस्वीकृत होता है (आम कारण: CRM जो लाइन-प्रति-फ़ील्ड स्वरूप में निर्यात करता है — सड़क, नंबर, ZIP, शहर, देश — SEPA दो-पंक्ति प्रारूप में पुनः-पैक किए बिना)',
                 'sepa.warn.ccyInvalid': 'मुद्रा कोड ISO 4217 में सक्रिय नहीं: {code}',
                 'sepa.warn.unknownDoc': 'अज्ञात ISO 20022 रूट तत्व — केवल आंशिक पार्सिंग।',
                 'err.sepaEmpty': 'XML इनपुट खाली है।',
@@ -9757,6 +9775,8 @@
                 'ubl.warn.lmtLineSign': 'LegalMonetaryTotal/LineExtensionAmount ऋणात्मक मान "{v}" घोषित करता है — EN 16931 BR-CO-10 फ़ाइल-व्यापी चालान पंक्ति शुद्ध राशियों के योग (BT-106) को Σ BT-131 के बराबर मानता है, और BT-131 स्वयं गैर-ऋणात्मक है (draft 107), इसलिए योग के रूप में BT-106 भी गैर-ऋणात्मक होना चाहिए; ऋणात्मक BT-106 BR-CO-10 के योग शृंखला में प्रसारित होता है और क्रेता का AP सिस्टम चालान को क्रेडिट के रूप में पढ़ता है (आम कारण: सारांश-केवल चालान टेम्पलेट जो पंक्तियों का योग करने के बजाय बाहरी लेखा प्रणाली से BT-106 प्राप्त करता है, जिससे चिह्नित मान प्रति-पंक्ति गेट को बायपास कर देता है)',
                 'ubl.ok.lmtTaxExclSign': 'LegalMonetaryTotal/TaxExclusiveAmount "{v}" गैर-ऋणात्मक है (EN 16931 BT-109 — चालान कुल राशि बिना VAT)',
                 'ubl.warn.lmtTaxExclSign': 'LegalMonetaryTotal/TaxExclusiveAmount ऋणात्मक मान "{v}" घोषित करता है — EN 16931 BR-CO-13 चालान कुल राशि बिना VAT (BT-109) को BT-106 (पंक्ति योग) + BT-99 (शुल्क) − BT-92 (छूट) से रचित मानता है, और प्रत्येक इनपुट गैर-ऋणात्मक दशमलव तक सीमित है, इसलिए BT-109 गैर-ऋणात्मक अपरिवर्तनीयता विरासत में लेता है; ऋणात्मक BT-109 BR-CO-15 शृंखला (TaxInclusiveAmount = TaxExclusiveAmount + Σ TaxAmount) में प्रसारित होता है और क्रेता का AP सिस्टम चालान को क्रेडिट के रूप में पढ़ता है (आम कारण: सारांश-केवल चालान टेम्पलेट जो BT-92 / BT-99 / BT-106 से रचने के बजाय बाहरी लेखा प्रणाली से BT-109 प्राप्त करता है)',
+                'ubl.ok.lmtTaxInclSign': 'LegalMonetaryTotal/TaxInclusiveAmount "{v}" गैर-ऋणात्मक है (EN 16931 BT-112 — चालान कुल राशि सहित VAT)',
+                'ubl.warn.lmtTaxInclSign': 'LegalMonetaryTotal/TaxInclusiveAmount ऋणात्मक मान "{v}" घोषित करता है — EN 16931 BR-CO-15 चालान कुल राशि सहित VAT (BT-112) को BT-109 (TaxExclusiveAmount, draft 117) + Σ BT-110 (TaxAmount, draft 113) से रचित मानता है, और दोनों इनपुट गैर-ऋणात्मक दशमलव तक सीमित हैं, इसलिए BT-112 गैर-ऋणात्मक अपरिवर्तनीयता विरासत में लेता है; ऋणात्मक BT-112 BR-CO-16 शृंखला (PayableAmount = TaxInclusiveAmount − PrepaidAmount + PayableRounding) में प्रसारित होता है और क्रेता का AP सिस्टम चालान को क्रेडिट के रूप में पढ़ता है (आम कारण: सारांश-केवल चालान टेम्पलेट जो BR-CO-15 के माध्यम से रचने के बजाय बाहरी लेखा प्रणाली से BT-112 प्राप्त करता है)',
                 'ubl.ok.ccyValid': 'मुद्रा कोड ISO 4217 के अनुसार सक्रिय: {list}',
                 'ubl.ok.ibanValid': 'भुगतानकर्ता/प्राप्तकर्ता खाते के IBAN वैध (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'भुगतानकर्ता/प्राप्तकर्ता IBAN ISO 13616 MOD-97 जाँच में विफल: {iban}',
@@ -18666,6 +18686,55 @@
             }
         }
 
+        // EPC SEPA Rulebook 2-AdrLine cap per PostalAddress (draft 118).
+        // ISO 20022 declares `<PstlAdr>/<AdrLine>` with cardinality
+        // `0..7` (up to seven free-text address lines per party
+        // address). The EPC SCT and SDD Rulebook Implementation
+        // Guidelines narrow the maximum cardinality to a single
+        // PstlAdr to two AdrLine elements because SEPA party-address
+        // rendering downstream (account statement, regulator
+        // reporting feeds, anti-money-laundering screening) is pinned
+        // to a two-line layout matching the legacy SWIFT MT103 / MT104
+        // address columns. A party block declaring three or more
+        // AdrLine elements is schema-valid plain XML but rail-broken:
+        // the receiving bank silently drops the third and subsequent
+        // lines (the customer sees a half-truncated address that
+        // doesn't match the contract on file), or the originator
+        // bank's pre-clearing gate hard-rejects the file. The
+        // canonical real-world failure is a CRM that exports the
+        // address in line-per-field shape (street, number, ZIP, city,
+        // country) without re-packing it into the SEPA two-line
+        // format. The new `sepaCheckAdrLineCount()` walks every
+        // `<PstlAdr>` reachable under the pain.001 / pain.008 wrapper,
+        // counts non-empty `<AdrLine>` children, and emits one green
+        // confirmation row when every populated address fits within
+        // 2 lines or one red row per offending PostalAddress keyed by
+        // a 1-based index across the document. Pair with draft 119 on
+        // the UBL side.
+        function sepaCheckAdrLineCount(out, doc, detected) {
+            if (detected.type !== 'pain.001' && detected.type !== 'pain.008') return;
+            const w = detected.wrapper;
+            if (!w) return;
+            const addrs = sepaAllLocal(w, 'PstlAdr');
+            if (!addrs.length) return;
+            let seen = 0;
+            const bad = [];
+            addrs.forEach((pa, i) => {
+                const lines = sepaAllLocal(pa, 'AdrLine').filter(el => (el.textContent || '').trim().length > 0);
+                if (!lines.length) return;
+                seen++;
+                if (lines.length > 2) bad.push({ idx: i + 1, count: lines.length });
+            });
+            if (!seen) return;
+            if (bad.length === 0) {
+                tlsRenderRow(out, t('sepa.row.warning'), '✓ ' + tFormat('sepa.ok.adrLineCount', { n: intlNumber(seen) }));
+            } else {
+                for (const b of bad) {
+                    tlsRenderRow(out, t('sepa.row.warning'), '✗ ' + tFormat('sepa.warn.adrLineCount', { idx: intlNumber(b.idx), count: intlNumber(b.count) }));
+                }
+            }
+        }
+
         // EPC SCT Rulebook single-Ustrd-per-RmtInf cardinality cap
         // (draft 116). ISO 20022 declares `<RmtInf>/<Ustrd>` as
         // `0..n` — multiple unstructured remittance lines per
@@ -18974,6 +19043,7 @@
                 sepaCheckIbanOnly(out, doc, detected);
                 sepaCheckCounterpartyNameLength(out, doc, detected);
                 sepaCheckRmtInfUstrdCount(out, doc, detected);
+                sepaCheckAdrLineCount(out, doc, detected);
                 sepaCheckE2eIdCharset(out, doc, detected);
                 sepaCheckInstrIdCharset(out, doc, detected);
                 sepaCheckMndtIdCharset(out, doc, detected);
@@ -20763,6 +20833,49 @@
             }
         }
 
+        // EN 16931 BR-CO-15 / BT-112 file-wide TaxInclusiveAmount
+        // non-negative check (draft 119). EN 16931 BT-112 (Invoice
+        // total amount with VAT) is carried by UBL as the
+        // `<cbc:TaxInclusiveAmount>` direct child of
+        // `<cac:LegalMonetaryTotal>` — the gross figure on every
+        // invoice and credit note. BR-CO-15 pins BT-112 = BT-109
+        // (TaxExclusiveAmount, draft 117) + Σ BT-110 (TaxAmount,
+        // draft 113), and both inputs narrow to non-negative
+        // decimals, so BT-112 inherits the non-negativity invariant.
+        // UBL declares `<cbc:TaxInclusiveAmount>` as `xsd:decimal`
+        // which permits negative values, so a generator that bypasses
+        // the BR-CO-15 composition and writes BT-112 directly (e.g.
+        // summary-only invoice templates that derive the figure from
+        // an external accounting system) can write a signed value
+        // that's schema-valid but rail-broken — the negative BT-112
+        // propagates into the BR-CO-16 chain (PayableAmount =
+        // TaxInclusiveAmount − PrepaidAmount + PayableRounding) and
+        // the buyer's AP system reads the invoice as a credit.
+        // Completes the file-wide signed-monetary-anchor family
+        // alongside drafts 113 (BT-110), 115 (BT-106), 117 (BT-109),
+        // and 45 (BR-CO-16 arithmetic). The new
+        // `ublCheckLegalMonTotalTaxInclSign()` reads
+        // `<cac:LegalMonetaryTotal>/<cbc:TaxInclusiveAmount>` via
+        // `sepaFirstChildLocal`, parses to `Number`, and emits one
+        // green confirmation row when the value is ≥ 0 or one red
+        // row otherwise. Pair with draft 118 on the SEPA side.
+        function ublCheckLegalMonTotalTaxInclSign(out, detected) {
+            const r = detected.root;
+            if (!r) return;
+            const lmt = sepaFirst(r, 'LegalMonetaryTotal');
+            if (!lmt) return;
+            const amtEl = sepaFirstChildLocal(lmt, 'TaxInclusiveAmount');
+            if (!amtEl) return;
+            const raw = (amtEl.textContent || '').trim();
+            const v = Number(raw);
+            if (!Number.isFinite(v)) return;
+            if (v >= 0) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + tFormat('ubl.ok.lmtTaxInclSign', { v: raw }));
+            } else {
+                tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + tFormat('ubl.warn.lmtTaxInclSign', { v: raw }));
+            }
+        }
+
         // EN 16931 BR-CO-12 / BT-109 file-wide TaxExclusiveAmount
         // non-negative check (draft 117). EN 16931 BT-109 (Invoice
         // total amount without VAT) is carried by UBL as the
@@ -21144,6 +21257,7 @@
                 ublCheckTaxTotalSign(out, detected);
                 ublCheckLegalMonTotalLineSign(out, detected);
                 ublCheckLegalMonTotalTaxExclSign(out, detected);
+                ublCheckLegalMonTotalTaxInclSign(out, detected);
                 ublCheckLineAmount(out, detected);
             } catch (e) {
                 tlsRenderRow(out, t('ubl.row.error'), e.message);

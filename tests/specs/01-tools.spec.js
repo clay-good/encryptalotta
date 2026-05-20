@@ -3477,6 +3477,46 @@ test('ubl: LegalMonetaryTotal/TaxExclusiveAmount BT-109 sign flags a negative fi
   await expect(page.locator('#ubl-results')).toContainText(/LegalMonetaryTotal\/TaxExclusiveAmount declares a negative value "-100\.00"/i, { timeout: 5_000 });
 });
 
+test('sepa: AdrLine 2-line cap confirms on a Cdtr address with two AdrLine elements', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  const twoLine = SEPA_PAIN001.replace(
+    '<Cdtr><Nm>Supplier GmbH</Nm></Cdtr>',
+    '<Cdtr><Nm>Supplier GmbH</Nm><PstlAdr><AdrLine>Hauptstrasse 1</AdrLine><AdrLine>10115 Berlin DE</AdrLine></PstlAdr></Cdtr>'
+  );
+  await page.fill('#sepa-input', twoLine);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Every PostalAddress fits within the EPC SEPA Rulebook 2-AdrLine cap/i, { timeout: 5_000 });
+});
+
+test('sepa: AdrLine 2-line cap flags a Cdtr address with three AdrLine elements', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  const threeLine = SEPA_PAIN001.replace(
+    '<Cdtr><Nm>Supplier GmbH</Nm></Cdtr>',
+    '<Cdtr><Nm>Supplier GmbH</Nm><PstlAdr><AdrLine>Hauptstrasse 1</AdrLine><AdrLine>10115 Berlin</AdrLine><AdrLine>DE</AdrLine></PstlAdr></Cdtr>'
+  );
+  await page.fill('#sepa-input', threeLine);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/PostalAddress #1 declares 3 <AdrLine> elements/i, { timeout: 5_000 });
+});
+
+test('ubl: LegalMonetaryTotal/TaxInclusiveAmount BT-112 sign confirms on canonical fixture', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/LegalMonetaryTotal\/TaxInclusiveAmount "119\.00" is non-negative \(EN 16931 BT-112/i, { timeout: 5_000 });
+});
+
+test('ubl: LegalMonetaryTotal/TaxInclusiveAmount BT-112 sign flags a negative file-wide value', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  const neg = UBL_INVOICE.replace(
+    '<cbc:TaxInclusiveAmount currencyID="EUR">119.00</cbc:TaxInclusiveAmount>',
+    '<cbc:TaxInclusiveAmount currencyID="EUR">-119.00</cbc:TaxInclusiveAmount>'
+  );
+  await page.fill('#ubl-input', neg);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/LegalMonetaryTotal\/TaxInclusiveAmount declares a negative value "-119\.00"/i, { timeout: 5_000 });
+});
+
 test('ubl: rejects non-UBL XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   await page.fill('#ubl-input', '<?xml version="1.0"?><Document/>');
