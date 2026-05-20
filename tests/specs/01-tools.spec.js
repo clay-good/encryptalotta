@@ -3402,6 +3402,44 @@ test('ubl: TaxTotal/TaxAmount BT-110 sign check flags a negative file-wide VAT',
   await expect(page.locator('#ubl-results')).toContainText(/TaxTotal #1 declares a negative TaxAmount "-19\.00"/i, { timeout: 5_000 });
 });
 
+test('sepa: counterparty Nm 70-char EPC cap confirms on canonical pain.001', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Canonical SEPA_PAIN001 carries Cdtr/Nm=Supplier GmbH (13 chars).
+  await page.fill('#sepa-input', SEPA_PAIN001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Every Cdtr\/Nm value fits within the EPC SEPA Rulebook 70-character cap/i, { timeout: 5_000 });
+});
+
+test('sepa: counterparty Nm 70-char EPC cap flags an over-length Cdtr/Nm', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // 85-char name (legal name + department + branch suffix style).
+  const longNm = 'Supplier GmbH Hamburg Branch Procurement Department Northern Region Sub-Unit';
+  const over = SEPA_PAIN001.replace('<Cdtr><Nm>Supplier GmbH</Nm></Cdtr>', '<Cdtr><Nm>' + longNm + '</Nm></Cdtr>');
+  await page.fill('#sepa-input', over);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Transaction #1 Cdtr\/Nm "Supplier GmbH Hamburg Branch Procurement Department Northern Region Sub-Unit" exceeds the 70-character cap/i, { timeout: 5_000 });
+});
+
+test('ubl: LegalMonetaryTotal/LineExtensionAmount BT-106 sign confirms on canonical fixture', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/LegalMonetaryTotal\/LineExtensionAmount "100\.00" is non-negative \(EN 16931 BT-106/i, { timeout: 5_000 });
+});
+
+test('ubl: LegalMonetaryTotal/LineExtensionAmount BT-106 sign flags a negative file-wide value', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Flip the LegalMonetaryTotal's direct-child LineExtensionAmount to -100.00; leave the
+  // per-line LineExtensionAmount=100.00 untouched so only the BT-106 sign trips.
+  const neg = UBL_INVOICE.replace(
+    '<cac:LegalMonetaryTotal>\n    <cbc:LineExtensionAmount currencyID="EUR">100.00</cbc:LineExtensionAmount>',
+    '<cac:LegalMonetaryTotal>\n    <cbc:LineExtensionAmount currencyID="EUR">-100.00</cbc:LineExtensionAmount>'
+  );
+  await page.fill('#ubl-input', neg);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/LegalMonetaryTotal\/LineExtensionAmount declares a negative value "-100\.00"/i, { timeout: 5_000 });
+});
+
 test('ubl: rejects non-UBL XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   await page.fill('#ubl-input', '<?xml version="1.0"?><Document/>');
