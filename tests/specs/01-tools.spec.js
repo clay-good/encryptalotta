@@ -3246,6 +3246,44 @@ test('ubl: StandardItemIdentification GTIN check flags a typo\'d GTIN', async ({
   await expect(page.locator('#ubl-results')).toContainText(/StandardItemIdentification "5901234123458" with schemeID="0160" failed the GS1 GTIN MOD-10 check/i, { timeout: 5_000 });
 });
 
+test('sepa: NbOfTxs Max15NumericText shape check confirms on canonical digit-only values', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Canonical SEPA_PAIN001 fixture declares GrpHdr/NbOfTxs=1 (digit-only).
+  await page.fill('#sepa-input', SEPA_PAIN001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/NbOfTxs values all match the ISO 20022 Max15NumericText shape/i, { timeout: 5_000 });
+});
+
+test('sepa: NbOfTxs Max15NumericText shape check flags a "1.0" decimal serialization', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // JSON-style "1.0" passes Number() (== 1, so draft-35 value parity still works)
+  // but ISO 20022 Max15NumericText rejects the decimal point.
+  const decimal = SEPA_PAIN001.replace('<NbOfTxs>1</NbOfTxs>', '<NbOfTxs>1.0</NbOfTxs>');
+  await page.fill('#sepa-input', decimal);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/GrpHdr\/NbOfTxs declares "1\.0"/i, { timeout: 5_000 });
+});
+
+test('ubl: LineExtensionAmount non-negative check confirms on positive line amounts', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Canonical UBL_INVOICE declares LineExtensionAmount=100.00 on the single line.
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Every line declares a non-negative LineExtensionAmount across all 1 line\(s\)/i, { timeout: 5_000 });
+});
+
+test('ubl: LineExtensionAmount non-negative check flags a negative line amount', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Flip the single line's LineExtensionAmount to -100.00.
+  const neg = UBL_INVOICE.replace(
+    '<cbc:LineExtensionAmount currencyID="EUR">100.00</cbc:LineExtensionAmount>\n    <cac:Item>',
+    '<cbc:LineExtensionAmount currencyID="EUR">-100.00</cbc:LineExtensionAmount>\n    <cac:Item>'
+  );
+  await page.fill('#ubl-input', neg);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Line #1 declares a negative LineExtensionAmount "-100\.00"/i, { timeout: 5_000 });
+});
+
 test('ubl: rejects non-UBL XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   await page.fill('#ubl-input', '<?xml version="1.0"?><Document/>');
