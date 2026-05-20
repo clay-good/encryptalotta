@@ -3361,6 +3361,47 @@ test('ubl: Seller RegistrationName BR-08 flags a missing PartyLegalEntity', asyn
   await expect(page.locator('#ubl-results')).toContainText(/AccountingSupplierParty is missing Party\/PartyLegalEntity\/RegistrationName/i, { timeout: 5_000 });
 });
 
+test('sepa: IBAN-only account identification confirms on canonical pain.001', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Canonical SEPA_PAIN001 carries DbtrAcct + CdtrAcct both identified by IBAN.
+  await page.fill('#sepa-input', SEPA_PAIN001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Every DbtrAcct \/ CdtrAcct identifies the account by <IBAN>/i, { timeout: 5_000 });
+});
+
+test('sepa: IBAN-only account identification flags an Othr-identified DbtrAcct', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Replace the DbtrAcct IBAN with an Othr block (BBAN / proprietary identifier).
+  const othr = SEPA_PAIN001.replace(
+    '<DbtrAcct><Id><IBAN>DE89370400440532013000</IBAN></Id></DbtrAcct>',
+    '<DbtrAcct><Id><Othr><Id>0532013000</Id></Othr></Id></DbtrAcct>'
+  );
+  await page.fill('#sepa-input', othr);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/DbtrAcct #1 identifies the account via <Othr>/i, { timeout: 5_000 });
+});
+
+test('ubl: TaxTotal/TaxAmount BT-110 sign check confirms on canonical fixture', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Canonical UBL_INVOICE declares TaxTotal/TaxAmount=19.00.
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Every TaxTotal declares a non-negative TaxAmount across all 1 TaxTotal block\(s\)/i, { timeout: 5_000 });
+});
+
+test('ubl: TaxTotal/TaxAmount BT-110 sign check flags a negative file-wide VAT', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Flip the file-wide TaxAmount (direct child of TaxTotal) to -19.00; leave the per-subtotal
+  // TaxAmount=19.00 untouched so only the BT-110 sign trips.
+  const neg = UBL_INVOICE.replace(
+    '<cac:TaxTotal>\n    <cbc:TaxAmount currencyID="EUR">19.00</cbc:TaxAmount>',
+    '<cac:TaxTotal>\n    <cbc:TaxAmount currencyID="EUR">-19.00</cbc:TaxAmount>'
+  );
+  await page.fill('#ubl-input', neg);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/TaxTotal #1 declares a negative TaxAmount "-19\.00"/i, { timeout: 5_000 });
+});
+
 test('ubl: rejects non-UBL XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   await page.fill('#ubl-input', '<?xml version="1.0"?><Document/>');

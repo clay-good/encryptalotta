@@ -4515,6 +4515,8 @@
                 'sepa.warn.rmtInfXor': 'Transaction #{idx} RmtInf populates both <Ustrd> and <Strd> — the EPC SCT / SDD Rulebooks narrow ISO 20022\'s free container to exactly one of the two forms per occurrence (unstructured human-readable text OR structured CdtrRefInf, never both); clearing systems reject at the rail-level rulebook gate because downstream reconciliation can\'t tell which carrier holds the canonical reference',
                 'sepa.ok.counterpartyNm': 'Every transaction declares a {party}/Nm across all {n} transaction(s) (EPC SEPA Rulebook {attr} — counterparty legal name)',
                 'sepa.warn.counterpartyNm': 'Transaction #{idx} is missing {party}/Nm — EPC SEPA Rulebook {attr} requires the counterparty legal name on every transaction; the value is what the receiving bank prints on the customer\'s statement and what AML / sanctions screening keys off, so an empty or missing name is rejected by SEPA clearing systems at the rulebook gate (a common cause is a generator that defaults the party block to an account-only structure when the source database\'s name column is null)',
+                'sepa.ok.ibanOnly': 'Every DbtrAcct / CdtrAcct identifies the account by <IBAN> across all {n} account block(s) (EPC SEPA Rulebook — IBAN-only account identification)',
+                'sepa.warn.ibanOnly': '{role} #{idx} identifies the account via <Othr> or with no <IBAN> child — the EPC SCT / SDD Rulebooks narrow ISO 20022\'s IBAN | Othr account-identification choice to IBAN-only; SEPA\'s interbank-settlement design is pinned to IBAN routing so an Othr-identified account is schema-valid plain XML but rail-broken (clearing systems EBA STEP2 / STET / RT1 cannot derive the holding-bank BIC from a non-IBAN identifier and reject the leg before any rail-level processing fires)',
                 'sepa.warn.ccyInvalid': 'Currency code not active per ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unrecognized ISO 20022 root element — partial parse only.',
                 'err.sepaEmpty': 'XML input is empty.',
@@ -4676,6 +4678,8 @@
                 'ubl.warn.invoiceIdLen': 'Invoice/CreditNote ID "{id}" exceeds the 35-character cap ({len}/35 characters) — EN 16931 BT-1 is routinely copied verbatim into SEPA EndToEndId (ISO 20022 Max35Text) by downstream pain.001 generators; a longer value forces the SEPA generator to truncate (silent data loss across the reconciliation key the creditor\'s bank-statement matching pairs against the open receivable) or to fail the file at the schema-validation gate',
                 'ubl.ok.sellerName': 'Seller PartyLegalEntity/RegistrationName "{name}" present (EN 16931 BR-08 / BT-27)',
                 'ubl.warn.sellerName': 'AccountingSupplierParty is missing Party/PartyLegalEntity/RegistrationName — EN 16931 BR-08 / BT-27 requires the seller\'s legal-entity registration name on every PEPPOL invoice and credit note; the value is the name printed on the buyer\'s purchase ledger and the name AP / VAT systems pair with the BT-31 Seller VAT identifier for tax reporting (UBL 2.1 marks PartyLegalEntity / RegistrationName optional at the schema level so a supplier party carrying only PartyName/Name (the trading name, BT-28) passes XML validation but is rejected by PEPPOL access points at the BR-08 schematron gate)',
+                'ubl.ok.taxTotalSign': 'Every TaxTotal declares a non-negative TaxAmount across all {n} TaxTotal block(s) (EN 16931 BR-CO-13 / BT-110 — Invoice total VAT amount)',
+                'ubl.warn.taxTotalSign': 'TaxTotal #{idx} declares a negative TaxAmount "{v}" — EN 16931 BR-CO-13 / BR-DEC-13 require the file-wide Invoice total VAT amount (BT-110) to be non-negative; an invoice\'s VAT total can be zero (zero-rated supply, exempt invoice, intra-EU reverse charge) but never negative (even a CreditNote carries a positive VAT total because the UNCL 1001 document-type code already conveys the credit direction); a negative file-wide VAT silently inverts the sign of the buyer\'s input-VAT entry and breaks the per-period VAT reporting chain (common cause: a generator reusing the same shape for charges and refunds and flipping the sign on every monetary slot instead of switching the document-type code)',
                 'ubl.ok.ccyValid': 'Currency codes active per ISO 4217: {list}',
                 'ubl.ok.ibanValid': 'Payee/Payer financial account IBANs valid (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'Payee/Payer IBAN failed ISO 13616 MOD-97 check: {iban}',
@@ -5799,6 +5803,8 @@
                 'sepa.warn.rmtInfXor': 'La transaction #{idx} renseigne à la fois <Ustrd> et <Strd> dans RmtInf — les règles EPC SCT / SDD restreignent le conteneur libre d’ISO 20022 à exactement une des deux formes par occurrence (texte libre non structuré OU CdtrRefInf structuré, jamais les deux) ; les systèmes de compensation rejettent au contrôle de règles au niveau du rail car le rapprochement aval ne peut pas déterminer quel porteur contient la référence canonique',
                 'sepa.ok.counterpartyNm': 'Chaque transaction déclare {party}/Nm sur l’ensemble des {n} transaction(s) (règles EPC SEPA {attr} — nom légal de la contrepartie)',
                 'sepa.warn.counterpartyNm': 'La transaction #{idx} ne déclare pas {party}/Nm — les règles EPC SEPA {attr} exigent le nom légal de la contrepartie sur chaque transaction ; la valeur est ce que la banque destinataire imprime sur le relevé du client et ce sur quoi se basent les contrôles LCB-FT / sanctions, un nom vide ou absent est donc rejeté par les systèmes de compensation SEPA au contrôle de règles (cause fréquente : un générateur qui réduit le bloc partie à une structure compte-seule lorsque la colonne nom de la base source est nulle)',
+                'sepa.ok.ibanOnly': 'Chaque DbtrAcct / CdtrAcct identifie le compte par <IBAN> sur l’ensemble des {n} bloc(s) de compte (règles EPC SEPA — identification de compte par IBAN uniquement)',
+                'sepa.warn.ibanOnly': '{role} #{idx} identifie le compte via <Othr> ou sans enfant <IBAN> — les règles EPC SCT / SDD restreignent le choix IBAN | Othr d’ISO 20022 à IBAN uniquement ; la conception du règlement interbancaire SEPA est ancrée sur le routage IBAN, donc un compte identifié par Othr est conforme au schéma mais inopérant au niveau du rail (les systèmes de compensation EBA STEP2 / STET / RT1 ne peuvent pas déduire le BIC de la banque dépositaire à partir d’un identifiant non IBAN et rejettent la jambe avant tout traitement au niveau du rail)',
                 'sepa.warn.ccyInvalid': 'Code monétaire non actif selon ISO 4217 : {code}',
                 'sepa.warn.unknownDoc': 'Élément racine ISO 20022 non reconnu — analyse partielle uniquement.',
                 'err.sepaEmpty': 'Le XML d’entrée est vide.',
@@ -5950,6 +5956,8 @@
                 'ubl.warn.invoiceIdLen': 'L’ID Invoice/CreditNote « {id} » dépasse la limite de 35 caractères ({len}/35) — EN 16931 BT-1 est régulièrement recopié tel quel dans SEPA EndToEndId (ISO 20022 Max35Text) par les générateurs pain.001 en aval ; une valeur plus longue force le générateur SEPA à tronquer (perte silencieuse de la clé de rapprochement que le rapprochement des relevés bancaires du créancier utilise pour apparier la créance ouverte) ou à rejeter le fichier au contrôle de schéma',
                 'ubl.ok.sellerName': 'PartyLegalEntity/RegistrationName du vendeur « {name} » présent (EN 16931 BR-08 / BT-27)',
                 'ubl.warn.sellerName': 'AccountingSupplierParty ne déclare pas Party/PartyLegalEntity/RegistrationName — EN 16931 BR-08 / BT-27 exige le nom légal d’entité du vendeur sur chaque facture et avoir PEPPOL ; la valeur est le nom imprimé sur le grand livre des achats de l’acheteur et le nom que les systèmes AP / TVA associent à l’identifiant TVA vendeur BT-31 pour la déclaration fiscale (UBL 2.1 rend PartyLegalEntity / RegistrationName facultatif au niveau du schéma, donc un bloc fournisseur ne portant que PartyName/Name (le nom commercial, BT-28) est conforme au schéma mais rejeté par les points d’accès PEPPOL au contrôle schématron BR-08)',
+                'ubl.ok.taxTotalSign': 'Chaque TaxTotal déclare un TaxAmount non négatif sur l’ensemble des {n} bloc(s) TaxTotal (EN 16931 BR-CO-13 / BT-110 — montant TVA total de la facture)',
+                'ubl.warn.taxTotalSign': 'TaxTotal #{idx} déclare un TaxAmount négatif « {v} » — EN 16931 BR-CO-13 / BR-DEC-13 exigent que le montant TVA total de la facture (BT-110) ne soit pas négatif ; la TVA totale d’une facture peut être nulle (livraison taxée à zéro, facture exonérée, autoliquidation intra-UE) mais jamais négative (même un avoir porte une TVA totale positive car le code de type document UNCL 1001 indique déjà le sens crédit) ; une TVA totale négative inverse silencieusement le signe de l’entrée TVA déductible de l’acheteur et rompt la chaîne de déclaration TVA par période (cause fréquente : un générateur qui réutilise le même format pour les charges et remboursements en inversant le signe sur chaque champ monétaire au lieu de changer le code de type document)',
                 'ubl.ok.ccyValid': 'Codes monétaires actifs selon ISO 4217 : {list}',
                 'ubl.ok.ibanValid': 'IBAN des comptes Payee/Payer valides (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'IBAN Payee/Payer échoue au contrôle ISO 13616 MOD-97 : {iban}',
@@ -7043,6 +7051,8 @@
                 'sepa.warn.rmtInfXor': '第 {idx} 笔交易的 RmtInf 同时填充了 <Ustrd> 和 <Strd>——EPC SCT / SDD 规则书将 ISO 20022 的自由容器收窄为每次出现仅可取两种形式之一（非结构化人类可读文本 或 结构化 CdtrRefInf，不能同时使用）；清算系统在轨道级规则书校验处拒绝，因为下游对账无法判断哪个载体保存了规范引用',
                 'sepa.ok.counterpartyNm': '所有 {n} 笔交易均声明了 {party}/Nm（EPC SEPA 规则书 {attr}——对手方法定名称）',
                 'sepa.warn.counterpartyNm': '第 {idx} 笔交易缺少 {party}/Nm——EPC SEPA 规则书 {attr} 要求每笔交易都包含对手方的法定名称；该值是收款行打印在客户对账单上的内容，也是反洗钱 / 制裁筛查所依据的字段，空白或缺失的名称会被 SEPA 清算系统在规则书校验处拒绝（常见原因是生成器在源数据库名称列为空时将当事人块默认为仅含账户的结构）',
+                'sepa.ok.ibanOnly': '所有 {n} 个 DbtrAcct / CdtrAcct 账户块均通过 <IBAN> 标识账户（EPC SEPA 规则书——仅限 IBAN 的账户标识）',
+                'sepa.warn.ibanOnly': '{role} #{idx} 通过 <Othr> 或缺少 <IBAN> 子元素来标识账户——EPC SCT / SDD 规则书将 ISO 20022 的 IBAN | Othr 账户标识选项收窄为仅限 IBAN；SEPA 的银行间结算设计依赖 IBAN 路由，因此 Othr 标识的账户在 XML 模式上有效但在轨道层面不可用（EBA STEP2 / STET / RT1 清算系统无法从非 IBAN 标识中推导出开户行 BIC，会在任何轨道级处理之前拒绝该腿）',
                 'sepa.warn.ccyInvalid': '币种代码不在 ISO 4217 现行清单中：{code}',
                 'sepa.warn.unknownDoc': '无法识别的 ISO 20022 根元素 — 仅部分解析。',
                 'err.sepaEmpty': 'XML 输入为空。',
@@ -7194,6 +7204,8 @@
                 'ubl.warn.invoiceIdLen': 'Invoice/CreditNote ID "{id}" 超过 35 字符上限（{len}/35）——EN 16931 BT-1 通常被下游 pain.001 生成器逐字复制到 SEPA EndToEndId（ISO 20022 Max35Text）；过长的值会迫使 SEPA 生成器截断（导致用于将付款匹配到未结应收账款的对账键发生静默数据丢失）或在模式校验处拒绝文件',
                 'ubl.ok.sellerName': '已声明卖方 PartyLegalEntity/RegistrationName "{name}"（EN 16931 BR-08 / BT-27）',
                 'ubl.warn.sellerName': 'AccountingSupplierParty 缺少 Party/PartyLegalEntity/RegistrationName——EN 16931 BR-08 / BT-27 要求每张 PEPPOL 发票和贷项通知单声明卖方的法定实体注册名称；该值是买方采购总账中打印的名称，也是 AP / 增值税系统与 BT-31 卖方 VAT 标识相关联用于税务申报的名称（UBL 2.1 将 PartyLegalEntity / RegistrationName 设为可选，所以仅包含 PartyName/Name（商号，BT-28）的供应商当事人在模式上有效，但会被 PEPPOL 接入点在 BR-08 schematron 校验处拒绝）',
+                'ubl.ok.taxTotalSign': '所有 {n} 个 TaxTotal 块均声明非负 TaxAmount（EN 16931 BR-CO-13 / BT-110——发票 VAT 总额）',
+                'ubl.warn.taxTotalSign': 'TaxTotal #{idx} 声明负的 TaxAmount "{v}"——EN 16931 BR-CO-13 / BR-DEC-13 要求文件级发票 VAT 总额（BT-110）非负；发票的 VAT 总额可以为零（零税率供应、免税发票、欧盟内部反向收费）但不能为负（即使贷项通知单也携带正的 VAT 总额，因为 UNCL 1001 文档类型代码已经表达了贷项方向）；负的文件级 VAT 会默默反转买方进项税条目的符号，破坏分期 VAT 申报链（常见原因是生成器在收费与退款之间复用同一形状，并在每个货币字段上翻转符号，而不是切换文档类型代码）',
                 'ubl.ok.ccyValid': '币种代码按 ISO 4217 有效：{list}',
                 'ubl.ok.ibanValid': '收款方/付款方账户 IBAN 通过 ISO 13616 MOD-97 校验（{n}）',
                 'ubl.warn.ibanInvalid': '收款方/付款方 IBAN 未通过 ISO 13616 MOD-97 校验：{iban}',
@@ -8302,6 +8314,8 @@
                 'sepa.warn.rmtInfXor': 'Transaktion #{idx} befüllt sowohl <Ustrd> als auch <Strd> im RmtInf — die EPC-SCT-/SDD-Rulebooks schränken den freien Container von ISO 20022 auf genau eine der beiden Formen pro Vorkommen ein (unstrukturierter, menschenlesbarer Text ODER strukturiertes CdtrRefInf, niemals beides); Clearingsysteme weisen am Rulebook-Gate auf Rail-Ebene ab, weil die nachgelagerte Abstimmung nicht erkennen kann, welcher Träger die kanonische Referenz enthält',
                 'sepa.ok.counterpartyNm': 'Jede Transaktion deklariert {party}/Nm über alle {n} Transaktion(en) (EPC-SEPA-Rulebook {attr} — rechtlicher Name der Gegenpartei)',
                 'sepa.warn.counterpartyNm': 'Transaktion #{idx} fehlt {party}/Nm — das EPC-SEPA-Rulebook {attr} verlangt den rechtlichen Namen der Gegenpartei in jeder Transaktion; der Wert ist das, was die empfangende Bank auf dem Kontoauszug des Kunden druckt, und das Feld, an dem die AML-/Sanktions-Prüfung ansetzt, daher wird ein leerer oder fehlender Name von SEPA-Clearingsystemen am Rulebook-Gate abgewiesen (häufige Ursache: ein Generator, der den Parteiblock auf eine Nur-Konto-Struktur reduziert, wenn die Namensspalte der Quelldatenbank null ist)',
+                'sepa.ok.ibanOnly': 'Jeder DbtrAcct / CdtrAcct identifiziert das Konto per <IBAN> über alle {n} Konto-Block(s) (EPC-SEPA-Rulebook — IBAN-only-Kontoidentifikation)',
+                'sepa.warn.ibanOnly': '{role} #{idx} identifiziert das Konto über <Othr> oder ohne <IBAN>-Kind — die EPC-SCT-/SDD-Rulebooks schränken die IBAN | Othr-Wahl von ISO 20022 auf IBAN-only ein; das SEPA-Interbank-Settlement-Design ist auf IBAN-Routing ausgelegt, daher ist ein per Othr identifiziertes Konto schemavalid, aber auf Rail-Ebene unbrauchbar (Clearingsysteme EBA STEP2 / STET / RT1 können den BIC der kontoführenden Bank nicht aus einer Nicht-IBAN-Identifikation ableiten und weisen den Leg vor jeder Rail-Verarbeitung ab)',
                 'sepa.warn.ccyInvalid': 'Währungscode nicht aktiv nach ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unbekanntes ISO-20022-Wurzelelement — nur Teilanalyse.',
                 'err.sepaEmpty': 'Die XML-Eingabe ist leer.',
@@ -8453,6 +8467,8 @@
                 'ubl.warn.invoiceIdLen': 'Die Invoice-/CreditNote-ID „{id}“ überschreitet die 35-Zeichen-Grenze ({len}/35) — EN 16931 BT-1 wird von nachgelagerten pain.001-Generatoren routinemäßig wörtlich in SEPA EndToEndId (ISO 20022 Max35Text) übernommen; ein längerer Wert zwingt den SEPA-Generator zur Kürzung (stiller Datenverlust beim Abstimmungsschlüssel, mit dem die Kontoauszugsabstimmung des Gläubigers die offene Forderung paart) oder die Datei wird am Schema-Validierungs-Gate abgelehnt',
                 'ubl.ok.sellerName': 'PartyLegalEntity/RegistrationName des Verkäufers „{name}“ vorhanden (EN 16931 BR-08 / BT-27)',
                 'ubl.warn.sellerName': 'AccountingSupplierParty deklariert kein Party/PartyLegalEntity/RegistrationName — EN 16931 BR-08 / BT-27 verlangt den rechtlichen Entitätsnamen des Verkäufers auf jeder PEPPOL-Rechnung und -Gutschrift; der Wert ist der Name, der im Wareneingangsbuch des Käufers gedruckt wird, und der Name, den AP-/USt-Systeme mit dem BT-31-Verkäufer-USt-IdNr für die steuerliche Meldung verknüpfen (UBL 2.1 markiert PartyLegalEntity / RegistrationName auf Schemaebene als optional, sodass ein Lieferantenblock, der nur PartyName/Name (den Handelsnamen, BT-28) trägt, schemavalid ist, aber von PEPPOL-Access-Points am BR-08-Schematron-Gate abgewiesen wird)',
+                'ubl.ok.taxTotalSign': 'Jedes TaxTotal deklariert einen nicht-negativen TaxAmount über alle {n} TaxTotal-Block(s) (EN 16931 BR-CO-13 / BT-110 — Rechnungs-Gesamt-USt-Betrag)',
+                'ubl.warn.taxTotalSign': 'TaxTotal #{idx} deklariert einen negativen TaxAmount „{v}“ — EN 16931 BR-CO-13 / BR-DEC-13 verlangen, dass der datei-weite Rechnungs-Gesamt-USt-Betrag (BT-110) nicht negativ ist; die USt-Summe einer Rechnung kann null sein (nullsatz-besteuerte Lieferung, steuerbefreite Rechnung, innergemeinschaftliches Reverse Charge), aber niemals negativ (selbst eine Gutschrift trägt eine positive USt-Summe, da der UNCL-1001-Dokumenttypcode die Gutschriftrichtung bereits ausdrückt); eine negative datei-weite USt kehrt stillschweigend das Vorzeichen des Vorsteuer-Postens des Käufers um und unterbricht die periodenbezogene USt-Meldekette (häufige Ursache: ein Generator, der dieselbe Form für Belastungen und Rückerstattungen wiederverwendet und das Vorzeichen in jedem monetären Feld umkehrt, statt den Dokumenttypcode zu wechseln)',
                 'ubl.ok.ccyValid': 'Währungscodes nach ISO 4217 aktiv: {list}',
                 'ubl.ok.ibanValid': 'IBANs der Payee-/Payer-Konten gültig (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'Payee-/Payer-IBAN scheitert an ISO-13616-MOD-97-Prüfung: {iban}',
@@ -9546,6 +9562,8 @@
                 'sepa.warn.rmtInfXor': 'लेन-देन #{idx} का RmtInf <Ustrd> और <Strd> दोनों भरता है — EPC SCT / SDD रूलबुक ISO 20022 के मुक्त कंटेनर को प्रति घटना ठीक एक रूप तक सीमित करते हैं (असंरचित मानव-पठनीय पाठ या संरचित CdtrRefInf, कभी दोनों नहीं); क्लियरिंग सिस्टम रेल-स्तरीय रूलबुक गेट पर अस्वीकार करते हैं क्योंकि डाउनस्ट्रीम सुलह यह नहीं बता सकती कि कौन सा वाहक कैनोनिकल संदर्भ रखता है',
                 'sepa.ok.counterpartyNm': 'सभी {n} लेन-देन में {party}/Nm घोषित है (EPC SEPA रूलबुक {attr} — प्रतिपक्ष का कानूनी नाम)',
                 'sepa.warn.counterpartyNm': 'लेन-देन #{idx} में {party}/Nm नहीं है — EPC SEPA रूलबुक {attr} प्रत्येक लेन-देन पर प्रतिपक्ष का कानूनी नाम अनिवार्य करती है; यह मान प्राप्तकर्ता बैंक द्वारा ग्राहक के विवरण पर मुद्रित किया जाता है और AML / प्रतिबंध स्क्रीनिंग का आधार है, इसलिए खाली या अनुपस्थित नाम SEPA क्लियरिंग सिस्टम द्वारा रूलबुक गेट पर अस्वीकृत होता है (आम कारण: स्रोत डेटाबेस का नाम स्तंभ रिक्त होने पर जनरेटर द्वारा पार्टी ब्लॉक को केवल-खाता संरचना में डिफ़ॉल्ट करना)',
+                'sepa.ok.ibanOnly': 'सभी {n} खाता ब्लॉक्स में प्रत्येक DbtrAcct / CdtrAcct खाते की पहचान <IBAN> से करता है (EPC SEPA रूलबुक — केवल-IBAN खाता पहचान)',
+                'sepa.warn.ibanOnly': '{role} #{idx} खाते की पहचान <Othr> से करता है या उसमें <IBAN> चाइल्ड नहीं है — EPC SCT / SDD रूलबुक ISO 20022 के IBAN | Othr खाता-पहचान विकल्प को केवल-IBAN तक सीमित करती हैं; SEPA की अंतर-बैंकीय निपटान संरचना IBAN आधारित रूटिंग पर निर्भर है, इसलिए Othr से पहचाने गए खाते XML स्कीमा के अनुसार वैध हैं पर रेल स्तर पर अनुपयोगी हैं (क्लियरिंग सिस्टम EBA STEP2 / STET / RT1 गैर-IBAN पहचानकर्ता से धारक बैंक का BIC प्राप्त नहीं कर सकते और किसी भी रेल-स्तरीय प्रसंस्करण से पहले इस लेग को अस्वीकार कर देते हैं)',
                 'sepa.warn.ccyInvalid': 'मुद्रा कोड ISO 4217 में सक्रिय नहीं: {code}',
                 'sepa.warn.unknownDoc': 'अज्ञात ISO 20022 रूट तत्व — केवल आंशिक पार्सिंग।',
                 'err.sepaEmpty': 'XML इनपुट खाली है।',
@@ -9697,6 +9715,8 @@
                 'ubl.warn.invoiceIdLen': 'Invoice/CreditNote ID "{id}" 35-वर्ण सीमा से अधिक ({len}/35) — EN 16931 BT-1 को डाउनस्ट्रीम pain.001 जनरेटर सामान्यतः SEPA EndToEndId (ISO 20022 Max35Text) में हू-ब-हू कॉपी करते हैं; लंबा मान SEPA जनरेटर को छँटाई पर मजबूर करता है (देनदार के बैंक-स्टेटमेंट मिलान को खुली प्राप्य के साथ जोड़ने वाली सुलह कुंजी में मूक डेटा हानि) या फ़ाइल को स्कीमा-सत्यापन गेट पर अस्वीकार कर देती है',
                 'ubl.ok.sellerName': 'विक्रेता PartyLegalEntity/RegistrationName "{name}" मौजूद है (EN 16931 BR-08 / BT-27)',
                 'ubl.warn.sellerName': 'AccountingSupplierParty में Party/PartyLegalEntity/RegistrationName घोषित नहीं है — EN 16931 BR-08 / BT-27 प्रत्येक PEPPOL चालान और क्रेडिट नोट पर विक्रेता का कानूनी-इकाई पंजीकरण नाम अनिवार्य करता है; यह मान क्रेता के क्रय बही पर मुद्रित नाम और AP / VAT सिस्टम द्वारा कर रिपोर्टिंग के लिए BT-31 विक्रेता VAT पहचानकर्ता से जोड़ा गया नाम होता है (UBL 2.1 PartyLegalEntity / RegistrationName को स्कीमा-स्तर पर वैकल्पिक रखता है, इसलिए केवल PartyName/Name (व्यापारिक नाम, BT-28) वाला आपूर्तिकर्ता पक्ष XML मान्यता पास करता है पर PEPPOL एक्सेस पॉइंट्स द्वारा BR-08 schematron गेट पर अस्वीकृत होता है)',
+                'ubl.ok.taxTotalSign': 'सभी {n} TaxTotal ब्लॉक्स में प्रत्येक TaxTotal गैर-ऋणात्मक TaxAmount घोषित करता है (EN 16931 BR-CO-13 / BT-110 — चालान कुल VAT राशि)',
+                'ubl.warn.taxTotalSign': 'TaxTotal #{idx} ऋणात्मक TaxAmount "{v}" घोषित करता है — EN 16931 BR-CO-13 / BR-DEC-13 के अनुसार फ़ाइल-व्यापी चालान कुल VAT राशि (BT-110) गैर-ऋणात्मक होनी चाहिए; चालान का VAT कुल शून्य हो सकता है (शून्य दर आपूर्ति, छूट प्राप्त चालान, EU भीतर रिवर्स चार्ज) पर कभी ऋणात्मक नहीं (क्रेडिट नोट भी सकारात्मक VAT कुल रखती है क्योंकि UNCL 1001 दस्तावेज़-प्रकार कोड पहले से ही क्रेडिट दिशा बता देता है); ऋणात्मक फ़ाइल-व्यापी VAT क्रेता की इनपुट-VAT प्रविष्टि के चिह्न को चुपचाप पलट देती है और प्रति-अवधि VAT रिपोर्टिंग शृंखला तोड़ देती है (आम कारण: जनरेटर शुल्क और वापसी के लिए समान आकार पुनः उपयोग करता है और दस्तावेज़-प्रकार कोड बदलने के बजाय प्रत्येक मौद्रिक स्लॉट का चिह्न पलटता है)',
                 'ubl.ok.ccyValid': 'मुद्रा कोड ISO 4217 के अनुसार सक्रिय: {list}',
                 'ubl.ok.ibanValid': 'भुगतानकर्ता/प्राप्तकर्ता खाते के IBAN वैध (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'भुगतानकर्ता/प्राप्तकर्ता IBAN ISO 13616 MOD-97 जाँच में विफल: {iban}',
@@ -18606,6 +18626,54 @@
             }
         }
 
+        // EPC SEPA Rulebook IBAN-only account identification check
+        // (draft 112). ISO 20022 declares CashAccount38 with a choice
+        // between `<IBAN>` and `<Othr>` (the BBAN / domestic account
+        // number / proprietary identifier alternative); both options
+        // pass the XML schema. The EPC SCT and SDD Rulebooks narrow the
+        // allowed set to a single value — IBAN-only — for every
+        // `<DbtrAcct>` and `<CdtrAcct>` carried in a SEPA pain.001 /
+        // pain.008 file. SEPA's whole interbank-settlement design is
+        // pinned to IBAN routing; an `<Othr>`-identified account is
+        // schema-valid plain XML but rail-broken — clearing systems
+        // (EBA STEP2, STET, RT1) cannot route the leg because the BIC
+        // of the holding bank can't be derived from a non-IBAN
+        // identifier. The canonical real-world failure is a template
+        // repurposed from a non-SEPA domestic-rail flow where account
+        // identification used a BBAN / proprietary number; the slot
+        // wasn't migrated to IBAN when the file moved onto SEPA rails.
+        // The new `sepaCheckIbanOnly()` walks every `<DbtrAcct>` and
+        // `<CdtrAcct>` reachable under the pain.001 / pain.008 wrapper,
+        // drills into `<Id>`, and checks for the presence of `<IBAN>`
+        // vs `<Othr>`; emits one green confirmation row when every
+        // account block identifies by IBAN, or one red row per
+        // offending block keyed by 1-based index. Skips silently when
+        // no account blocks are reachable (caught by upstream parser).
+        function sepaCheckIbanOnly(out, doc, detected) {
+            if (detected.type !== 'pain.001' && detected.type !== 'pain.008') return;
+            const w = detected.wrapper;
+            if (!w) return;
+            const accts = [
+                ...sepaAllLocal(w, 'DbtrAcct'),
+                ...sepaAllLocal(w, 'CdtrAcct')
+            ];
+            if (!accts.length) return;
+            const bad = [];
+            accts.forEach((acct, i) => {
+                const idEl = sepaFirst(acct, 'Id');
+                if (!idEl) { bad.push({ idx: i + 1, role: acct.localName }); return; }
+                const hasIban = !!sepaFirst(idEl, 'IBAN');
+                if (!hasIban) bad.push({ idx: i + 1, role: acct.localName });
+            });
+            if (bad.length === 0) {
+                tlsRenderRow(out, t('sepa.row.warning'), '✓ ' + tFormat('sepa.ok.ibanOnly', { n: intlNumber(accts.length) }));
+            } else {
+                for (const b of bad) {
+                    tlsRenderRow(out, t('sepa.row.warning'), '✗ ' + tFormat('sepa.warn.ibanOnly', { idx: intlNumber(b.idx), role: b.role }));
+                }
+            }
+        }
+
         // EPC SEPA Rulebook party-name presence check (draft 110).
         // The EPC SCT Rulebook attribute AT-03 (Name of the Beneficiary)
         // and SDD Rulebook AT-23 (Name of the Debtor) both pin the
@@ -18757,6 +18825,7 @@
                 sepaCheckNbOfTxsShape(out, doc, detected);
                 sepaCheckRmtInfXor(out, doc, detected);
                 sepaCheckCounterpartyName(out, doc, detected);
+                sepaCheckIbanOnly(out, doc, detected);
                 sepaCheckE2eIdCharset(out, doc, detected);
                 sepaCheckInstrIdCharset(out, doc, detected);
                 sepaCheckMndtIdCharset(out, doc, detected);
@@ -20546,6 +20615,64 @@
             }
         }
 
+        // EN 16931 BR-CO-13 / BT-110 file-wide TaxAmount non-negative
+        // check (draft 113). EN 16931 BT-110 (Invoice total VAT
+        // amount) is carried by UBL as the `<cbc:TaxAmount>` that
+        // appears as a direct child of `<cac:TaxTotal>` at the
+        // document root — distinct from the per-subtotal
+        // `<cac:TaxSubtotal>/<cbc:TaxAmount>` (BT-117) nested below.
+        // BR-CO-13 / BR-DEC-13 pin BT-110 to a non-negative decimal:
+        // an invoice's file-wide VAT total can be zero (zero-rated
+        // supply, exempt invoice, intra-EU reverse charge) but never
+        // negative; even a CreditNote carries a positive VAT total
+        // because the document-type code already conveys the credit
+        // direction (UNCL 1001 = 381 / 396 / 532 — draft 47). UBL
+        // declares `<cbc:TaxAmount>` as `xsd:decimal` which permits
+        // negative values; EN 16931 / PEPPOL BIS Billing 3.0 narrow
+        // the allowed set to non-negative decimals because a negative
+        // file-wide VAT silently inverts the sign of the buyer's input-
+        // VAT entry and breaks the per-period VAT reporting chain. The
+        // canonical real-world failure is a generator that reuses the
+        // same invoice shape for charges and refunds and flips the
+        // sign on every monetary slot rather than switching the
+        // document-type code. Distinct from drafts 103 (PriceAmount
+        // sign), 107 (LineExtensionAmount sign), and 28 (VAT totals
+        // arithmetic): those validate inputs / arithmetic; this gate
+        // validates the document-level BT-110 sign so the math means
+        // what the BR-CO rules say it means. The new
+        // `ublCheckTaxTotalSign()` walks every `<cac:TaxTotal>`
+        // reachable from the root, reads its direct-child
+        // `<cbc:TaxAmount>` (via `sepaFirstChildLocal` so the nested
+        // TaxSubtotal/TaxAmount values are not picked up), parses to
+        // Number, and emits one green confirmation row when every
+        // parsed value is ≥ 0 or one red row per offending TaxTotal.
+        // Pair with draft 112 on the SEPA side.
+        function ublCheckTaxTotalSign(out, detected) {
+            const r = detected.root;
+            if (!r) return;
+            const totals = sepaAllLocal(r, 'TaxTotal');
+            if (!totals.length) return;
+            let seen = 0;
+            const bad = [];
+            totals.forEach((tt, i) => {
+                const amtEl = sepaFirstChildLocal(tt, 'TaxAmount');
+                if (!amtEl) return;
+                const raw = (amtEl.textContent || '').trim();
+                const v = Number(raw);
+                if (!Number.isFinite(v)) return;
+                seen++;
+                if (v < 0) bad.push({ idx: i + 1, v: raw });
+            });
+            if (!seen) return;
+            if (bad.length === 0) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + tFormat('ubl.ok.taxTotalSign', { n: intlNumber(seen) }));
+            } else {
+                for (const b of bad) {
+                    tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + tFormat('ubl.warn.taxTotalSign', { idx: intlNumber(b.idx), v: b.v }));
+                }
+            }
+        }
+
         // EN 16931 BR-08 / BT-27 (Seller name) presence check
         // (draft 111). PEPPOL BIS Billing 3.0 / EN 16931 require every
         // Invoice and CreditNote to declare the seller's legal-entity
@@ -20775,6 +20902,7 @@
                 ublCheckLineAmountSign(out, detected);
                 ublCheckInvoiceIdLength(out, detected);
                 ublCheckSellerName(out, detected);
+                ublCheckTaxTotalSign(out, detected);
                 ublCheckLineAmount(out, detected);
             } catch (e) {
                 tlsRenderRow(out, t('ubl.row.error'), e.message);
