@@ -4527,6 +4527,8 @@
                 'sepa.warn.adrLineLen': 'PostalAddress #{idx} line {line} "{value}" exceeds the 70-character cap ({len}/70 characters) — ISO 20022 declares <PstlAdr>/<AdrLine> as Max70Text and the EPC SCT / SDD Rulebooks re-affirm the 70-character cap because the value is propagated end-to-end through SEPA rails into the receiving bank\'s account-statement address renderer (column width pinned to the legacy SWIFT MT103 / MT104 70-char address-line limit); an over-cap value that survives an upstream generator\'s relaxed validation is either silently truncated by the receiving bank (the customer sees a half-truncated address that doesn\'t match the contract on file) or hard-rejected by the originator bank\'s pre-clearing gate (common cause: a CRM column carrying street + number + apartment + building-name + neighborhood as a single free-text line)',
                 'sepa.ok.twnNmLen': 'Every populated TwnNm fits within the EPC SEPA Rulebook 35-character cap across all {n} non-empty town/city name(s) (each ≤35 codepoints; matches the ISO 20022 Max35Text schema cap re-affirmed by the EPC SCT / SDD Rulebooks)',
                 'sepa.warn.twnNmLen': 'PostalAddress #{idx} TwnNm "{value}" exceeds the 35-character cap ({len}/35 characters) — ISO 20022 declares <PstlAdr>/<TwnNm> as Max35Text and the EPC SCT / SDD Rulebooks re-affirm the 35-character cap because the value is propagated end-to-end through SEPA rails into the receiving bank\'s account-statement address renderer (column width pinned to the legacy SWIFT MT103 / MT104 35-char town/city limit); an over-cap value that survives an upstream generator\'s relaxed validation is either silently truncated by the receiving bank (the customer sees a half-truncated city that doesn\'t match the contract on file) or hard-rejected by the originator bank\'s pre-clearing gate (common cause: a CRM column carrying city + administrative-division — "Frankfurt am Main, Hessen, Germany" — packed into a single free-text field)',
+                'sepa.ok.pstCdLen': 'Every populated PstCd fits within the EPC SEPA Rulebook 16-character cap across all {n} non-empty postal code(s) (each ≤16 codepoints; matches the ISO 20022 Max16Text schema cap re-affirmed by the EPC SCT / SDD Rulebooks)',
+                'sepa.warn.pstCdLen': 'PostalAddress #{idx} PstCd "{value}" exceeds the 16-character cap ({len}/16 characters) — ISO 20022 declares <PstlAdr>/<PstCd> as Max16Text and the EPC SCT / SDD Rulebooks re-affirm the 16-character cap because the value is propagated end-to-end through SEPA rails into the receiving bank\'s account-statement address renderer (column width pinned to the legacy SWIFT MT103 / MT104 postal-code limit); an over-cap value that survives an upstream generator\'s relaxed validation is either silently truncated by the receiving bank (the customer sees a half-truncated ZIP that doesn\'t match the contract on file) or hard-rejected by the originator bank\'s pre-clearing gate (common cause: a CRM column carrying ZIP + city — "10115 Berlin Mitte" — or a long alphanumeric routing code packed into the postal-code slot)',
                 'sepa.warn.ccyInvalid': 'Currency code not active per ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unrecognized ISO 20022 root element — partial parse only.',
                 'err.sepaEmpty': 'XML input is empty.',
@@ -4692,6 +4694,8 @@
                 'ubl.warn.buyerName': 'AccountingCustomerParty is missing Party/PartyLegalEntity/RegistrationName — EN 16931 BR-07 / BT-44 requires the buyer\'s legal-entity registration name on every PEPPOL invoice and credit note; the value is the name printed on the supplier\'s sales ledger and the name AP / VAT systems pair with the BT-48 Buyer VAT identifier for tax reporting (UBL 2.1 marks PartyLegalEntity / RegistrationName optional at the schema level so a customer party carrying only PartyName/Name (the trading name, BT-45) passes XML validation but is rejected by PEPPOL access points at the BR-07 schematron gate)',
                 'ubl.ok.sellerCountry': 'Seller PostalAddress/Country/IdentificationCode "{code}" present (EN 16931 BR-09 / BT-40)',
                 'ubl.warn.sellerCountry': 'AccountingSupplierParty is missing Party/PostalAddress/Country/IdentificationCode — EN 16931 BR-09 / BT-40 requires the seller\'s country code (ISO 3166-1 alpha-2) on every PEPPOL invoice and credit note; the value establishes which member state\'s VAT regime governs the supply (intra-EU vs export vs domestic) and which national tax authority the BT-31 Seller VAT identifier is registered with (UBL 2.1 marks PostalAddress / Country / IdentificationCode optional at the schema level so a supplier party carrying only PartyName + PartyLegalEntity passes XML validation but is rejected by PEPPOL access points at the BR-09 schematron gate)',
+                'ubl.ok.buyerCountry': 'Buyer PostalAddress/Country/IdentificationCode "{code}" present (EN 16931 BR-11 / BT-55)',
+                'ubl.warn.buyerCountry': 'AccountingCustomerParty is missing Party/PostalAddress/Country/IdentificationCode — EN 16931 BR-11 / BT-55 requires the buyer\'s country code (ISO 3166-1 alpha-2) on every PEPPOL invoice and credit note; the value establishes which member state\'s VAT regime governs the buyer side of the supply (intra-EU reverse-charge vs domestic input-VAT vs B2C export) and which national tax authority the BT-48 Buyer VAT identifier is registered with (UBL 2.1 marks PostalAddress / Country / IdentificationCode optional at the schema level so a customer party carrying only PartyName + PartyLegalEntity passes XML validation but is rejected by PEPPOL access points at the BR-11 schematron gate)',
                 'ubl.ok.taxTotalSign': 'Every TaxTotal declares a non-negative TaxAmount across all {n} TaxTotal block(s) (EN 16931 BR-CO-13 / BT-110 — Invoice total VAT amount)',
                 'ubl.warn.taxTotalSign': 'TaxTotal #{idx} declares a negative TaxAmount "{v}" — EN 16931 BR-CO-13 / BR-DEC-13 require the file-wide Invoice total VAT amount (BT-110) to be non-negative; an invoice\'s VAT total can be zero (zero-rated supply, exempt invoice, intra-EU reverse charge) but never negative (even a CreditNote carries a positive VAT total because the UNCL 1001 document-type code already conveys the credit direction); a negative file-wide VAT silently inverts the sign of the buyer\'s input-VAT entry and breaks the per-period VAT reporting chain (common cause: a generator reusing the same shape for charges and refunds and flipping the sign on every monetary slot instead of switching the document-type code)',
                 'ubl.ok.lmtLineSign': 'LegalMonetaryTotal/LineExtensionAmount "{v}" is non-negative (EN 16931 BT-106 — Sum of Invoice line net amounts)',
@@ -5835,6 +5839,8 @@
                 'sepa.warn.adrLineLen': 'PostalAddress #{idx} ligne {line} « {value} » dépasse la limite de 70 caractères ({len}/70) — ISO 20022 déclare <PstlAdr>/<AdrLine> comme Max70Text et les règles EPC SCT / SDD réaffirment la limite de 70 caractères car la valeur est propagée de bout en bout dans le moteur de relevé de compte de la banque destinataire (largeur de colonne alignée sur la limite historique d’adresse SWIFT MT103 / MT104 de 70 caractères) ; une valeur dépassant la limite qui passe la validation relâchée d’un générateur amont est soit tronquée silencieusement par la banque destinataire (le client voit une adresse à moitié coupée qui ne correspond pas au contrat) soit rejetée par le contrôle pré-compensation de la banque émettrice (cause fréquente : une colonne CRM portant rue + numéro + appartement + nom de bâtiment + quartier comme une seule ligne de texte libre)',
                 'sepa.ok.twnNmLen': 'Chaque TwnNm renseigné respecte la limite EPC SEPA de 35 caractères sur l’ensemble des {n} nom(s) de ville non vide(s) (chacun ≤ 35 codepoints ; correspond à la limite ISO 20022 Max35Text réaffirmée par les règles EPC SCT / SDD)',
                 'sepa.warn.twnNmLen': 'PostalAddress #{idx} TwnNm « {value} » dépasse la limite de 35 caractères ({len}/35) — ISO 20022 déclare <PstlAdr>/<TwnNm> comme Max35Text et les règles EPC SCT / SDD réaffirment la limite de 35 caractères car la valeur est propagée de bout en bout dans le moteur de relevé de compte de la banque destinataire (largeur de colonne alignée sur la limite historique de ville SWIFT MT103 / MT104 de 35 caractères) ; une valeur dépassant la limite qui passe la validation relâchée d’un générateur amont est soit tronquée silencieusement par la banque destinataire (le client voit une ville à moitié coupée qui ne correspond pas au contrat) soit rejetée par le contrôle pré-compensation de la banque émettrice (cause fréquente : une colonne CRM portant ville + division administrative — « Frankfurt am Main, Hessen, Germany » — dans un seul champ de texte libre)',
+                'sepa.ok.pstCdLen': 'Chaque PstCd renseigné respecte la limite EPC SEPA de 16 caractères sur l’ensemble des {n} code(s) postal/postaux non vide(s) (chacun ≤ 16 codepoints ; correspond à la limite ISO 20022 Max16Text réaffirmée par les règles EPC SCT / SDD)',
+                'sepa.warn.pstCdLen': 'PostalAddress #{idx} PstCd « {value} » dépasse la limite de 16 caractères ({len}/16) — ISO 20022 déclare <PstlAdr>/<PstCd> comme Max16Text et les règles EPC SCT / SDD réaffirment la limite de 16 caractères car la valeur est propagée de bout en bout dans le moteur de relevé de compte de la banque destinataire (largeur de colonne alignée sur la limite historique de code postal SWIFT MT103 / MT104) ; une valeur dépassant la limite qui passe la validation relâchée d’un générateur amont est soit tronquée silencieusement par la banque destinataire (le client voit un code postal à moitié coupé qui ne correspond pas au contrat) soit rejetée par le contrôle pré-compensation de la banque émettrice (cause fréquente : une colonne CRM portant code postal + ville — « 10115 Berlin Mitte » — ou un long code de routage alphanumérique placé dans le champ code postal)',
                 'sepa.warn.ccyInvalid': 'Code monétaire non actif selon ISO 4217 : {code}',
                 'sepa.warn.unknownDoc': 'Élément racine ISO 20022 non reconnu — analyse partielle uniquement.',
                 'err.sepaEmpty': 'Le XML d’entrée est vide.',
@@ -5990,6 +5996,8 @@
                 'ubl.warn.buyerName': 'AccountingCustomerParty ne déclare pas Party/PartyLegalEntity/RegistrationName — EN 16931 BR-07 / BT-44 exige le nom légal d’entité de l’acheteur sur chaque facture et avoir PEPPOL ; la valeur est le nom imprimé sur le grand livre des ventes du fournisseur et le nom que les systèmes AP / TVA associent à l’identifiant TVA acheteur BT-48 pour la déclaration fiscale (UBL 2.1 rend PartyLegalEntity / RegistrationName facultatif au niveau du schéma, donc un bloc client ne portant que PartyName/Name (le nom commercial, BT-45) est conforme au schéma mais rejeté par les points d’accès PEPPOL au contrôle schématron BR-07)',
                 'ubl.ok.sellerCountry': 'PostalAddress/Country/IdentificationCode du vendeur « {code} » présent (EN 16931 BR-09 / BT-40)',
                 'ubl.warn.sellerCountry': 'AccountingSupplierParty ne déclare pas Party/PostalAddress/Country/IdentificationCode — EN 16931 BR-09 / BT-40 exige le code pays du vendeur (ISO 3166-1 alpha-2) sur chaque facture et avoir PEPPOL ; la valeur établit quel régime TVA d’État membre régit la livraison (intra-UE vs export vs domestique) et auprès de quelle autorité fiscale nationale l’identifiant TVA vendeur BT-31 est enregistré (UBL 2.1 rend PostalAddress / Country / IdentificationCode facultatif au niveau du schéma, donc un bloc fournisseur ne portant que PartyName + PartyLegalEntity est conforme au schéma mais rejeté par les points d’accès PEPPOL au contrôle schématron BR-09)',
+                'ubl.ok.buyerCountry': 'PostalAddress/Country/IdentificationCode de l’acheteur « {code} » présent (EN 16931 BR-11 / BT-55)',
+                'ubl.warn.buyerCountry': 'AccountingCustomerParty ne déclare pas Party/PostalAddress/Country/IdentificationCode — EN 16931 BR-11 / BT-55 exige le code pays de l’acheteur (ISO 3166-1 alpha-2) sur chaque facture et avoir PEPPOL ; la valeur établit quel régime TVA d’État membre régit le côté acheteur de la livraison (autoliquidation intra-UE vs TVA déductible domestique vs export B2C) et auprès de quelle autorité fiscale nationale l’identifiant TVA acheteur BT-48 est enregistré (UBL 2.1 rend PostalAddress / Country / IdentificationCode facultatif au niveau du schéma, donc un bloc client ne portant que PartyName + PartyLegalEntity est conforme au schéma mais rejeté par les points d’accès PEPPOL au contrôle schématron BR-11)',
                 'ubl.ok.taxTotalSign': 'Chaque TaxTotal déclare un TaxAmount non négatif sur l’ensemble des {n} bloc(s) TaxTotal (EN 16931 BR-CO-13 / BT-110 — montant TVA total de la facture)',
                 'ubl.warn.taxTotalSign': 'TaxTotal #{idx} déclare un TaxAmount négatif « {v} » — EN 16931 BR-CO-13 / BR-DEC-13 exigent que le montant TVA total de la facture (BT-110) ne soit pas négatif ; la TVA totale d’une facture peut être nulle (livraison taxée à zéro, facture exonérée, autoliquidation intra-UE) mais jamais négative (même un avoir porte une TVA totale positive car le code de type document UNCL 1001 indique déjà le sens crédit) ; une TVA totale négative inverse silencieusement le signe de l’entrée TVA déductible de l’acheteur et rompt la chaîne de déclaration TVA par période (cause fréquente : un générateur qui réutilise le même format pour les charges et remboursements en inversant le signe sur chaque champ monétaire au lieu de changer le code de type document)',
                 'ubl.ok.lmtLineSign': 'LegalMonetaryTotal/LineExtensionAmount « {v} » est non négatif (EN 16931 BT-106 — somme des montants nets des lignes de facture)',
@@ -7103,6 +7111,8 @@
                 'sepa.warn.adrLineLen': 'PostalAddress #{idx} 第 {line} 行 "{value}" 超过 70 字符上限（{len}/70 字符）——ISO 20022 将 <PstlAdr>/<AdrLine> 声明为 Max70Text，EPC SCT / SDD 规则书重申 70 字符上限，因为该值通过 SEPA 轨道端到端传播至收款行的账户对账单地址渲染器（列宽与历史 SWIFT MT103 / MT104 70 字符地址行限制一致）；上游生成器宽松校验放行的超长值要么被收款行静默截断（客户看到与合同记录不符的半截地址），要么被付款行预清算环节硬拒绝（常见原因：CRM 字段将街道 + 号码 + 公寓 + 楼名 + 街区合并为单行自由文本）',
                 'sepa.ok.twnNmLen': '所有 {n} 个非空 TwnNm 城市名均符合 EPC SEPA 规则书 35 字符上限（每个 ≤35 码点；与 EPC SCT / SDD 规则书重申的 ISO 20022 Max35Text 模式上限一致）',
                 'sepa.warn.twnNmLen': 'PostalAddress #{idx} TwnNm "{value}" 超过 35 字符上限（{len}/35 字符）——ISO 20022 将 <PstlAdr>/<TwnNm> 声明为 Max35Text，EPC SCT / SDD 规则书重申 35 字符上限，因为该值通过 SEPA 轨道端到端传播至收款行的账户对账单地址渲染器（列宽与历史 SWIFT MT103 / MT104 35 字符城市/镇限制一致）；上游生成器宽松校验放行的超长值要么被收款行静默截断（客户看到与合同记录不符的半截城市名），要么被付款行预清算环节硬拒绝（常见原因：CRM 字段将城市 + 行政区划——"Frankfurt am Main, Hessen, Germany"——合并为单一自由文本字段）',
+                'sepa.ok.pstCdLen': '所有 {n} 个非空 PstCd 邮政编码均符合 EPC SEPA 规则书 16 字符上限（每个 ≤16 码点；与 EPC SCT / SDD 规则书重申的 ISO 20022 Max16Text 模式上限一致）',
+                'sepa.warn.pstCdLen': 'PostalAddress #{idx} PstCd "{value}" 超过 16 字符上限（{len}/16 字符）——ISO 20022 将 <PstlAdr>/<PstCd> 声明为 Max16Text，EPC SCT / SDD 规则书重申 16 字符上限，因为该值通过 SEPA 轨道端到端传播至收款行的账户对账单地址渲染器（列宽与历史 SWIFT MT103 / MT104 邮政编码限制一致）；上游生成器宽松校验放行的超长值要么被收款行静默截断（客户看到与合同记录不符的半截邮编），要么被付款行预清算环节硬拒绝（常见原因：CRM 字段将邮编 + 城市——"10115 Berlin Mitte"——或长字母数字路由代码合并放入邮政编码字段）',
                 'sepa.warn.ccyInvalid': '币种代码不在 ISO 4217 现行清单中：{code}',
                 'sepa.warn.unknownDoc': '无法识别的 ISO 20022 根元素 — 仅部分解析。',
                 'err.sepaEmpty': 'XML 输入为空。',
@@ -7258,6 +7268,8 @@
                 'ubl.warn.buyerName': 'AccountingCustomerParty 缺少 Party/PartyLegalEntity/RegistrationName——EN 16931 BR-07 / BT-44 要求每张 PEPPOL 发票和贷项通知单声明买方的法定实体注册名称；该值是供应商销售总账中打印的名称，也是 AP / 增值税系统与 BT-48 买方 VAT 标识相关联用于税务申报的名称（UBL 2.1 将 PartyLegalEntity / RegistrationName 设为可选，所以仅包含 PartyName/Name（商号，BT-45）的客户当事人在模式上有效，但会被 PEPPOL 接入点在 BR-07 schematron 校验处拒绝）',
                 'ubl.ok.sellerCountry': '已声明卖方 PostalAddress/Country/IdentificationCode "{code}"（EN 16931 BR-09 / BT-40）',
                 'ubl.warn.sellerCountry': 'AccountingSupplierParty 缺少 Party/PostalAddress/Country/IdentificationCode——EN 16931 BR-09 / BT-40 要求每张 PEPPOL 发票和贷项通知单声明卖方国家代码（ISO 3166-1 alpha-2）；该值确定哪个成员国的增值税制度管辖该供应（欧盟内 vs 出口 vs 国内）以及 BT-31 卖方 VAT 标识在哪一国税务机关注册（UBL 2.1 将 PostalAddress / Country / IdentificationCode 设为可选，所以仅包含 PartyName + PartyLegalEntity 的供应商当事人在模式上有效，但会被 PEPPOL 接入点在 BR-09 schematron 校验处拒绝）',
+                'ubl.ok.buyerCountry': '已声明买方 PostalAddress/Country/IdentificationCode "{code}"（EN 16931 BR-11 / BT-55）',
+                'ubl.warn.buyerCountry': 'AccountingCustomerParty 缺少 Party/PostalAddress/Country/IdentificationCode——EN 16931 BR-11 / BT-55 要求每张 PEPPOL 发票和贷项通知单声明买方国家代码（ISO 3166-1 alpha-2）；该值确定哪个成员国的增值税制度管辖该供应的买方侧（欧盟内反向征收 vs 国内进项税 vs B2C 出口）以及 BT-48 买方 VAT 标识在哪一国税务机关注册（UBL 2.1 将 PostalAddress / Country / IdentificationCode 设为可选，所以仅包含 PartyName + PartyLegalEntity 的客户当事人在模式上有效，但会被 PEPPOL 接入点在 BR-11 schematron 校验处拒绝）',
                 'ubl.ok.taxTotalSign': '所有 {n} 个 TaxTotal 块均声明非负 TaxAmount（EN 16931 BR-CO-13 / BT-110——发票 VAT 总额）',
                 'ubl.warn.taxTotalSign': 'TaxTotal #{idx} 声明负的 TaxAmount "{v}"——EN 16931 BR-CO-13 / BR-DEC-13 要求文件级发票 VAT 总额（BT-110）非负；发票的 VAT 总额可以为零（零税率供应、免税发票、欧盟内部反向收费）但不能为负（即使贷项通知单也携带正的 VAT 总额，因为 UNCL 1001 文档类型代码已经表达了贷项方向）；负的文件级 VAT 会默默反转买方进项税条目的符号，破坏分期 VAT 申报链（常见原因是生成器在收费与退款之间复用同一形状，并在每个货币字段上翻转符号，而不是切换文档类型代码）',
                 'ubl.ok.lmtLineSign': 'LegalMonetaryTotal/LineExtensionAmount "{v}" 非负（EN 16931 BT-106——发票行净额之和）',
@@ -8386,6 +8398,8 @@
                 'sepa.warn.adrLineLen': 'PostalAddress #{idx} Zeile {line} „{value}“ überschreitet die 70-Zeichen-Grenze ({len}/70 Zeichen) — ISO 20022 deklariert <PstlAdr>/<AdrLine> als Max70Text und die EPC-SCT-/SDD-Rulebooks bekräftigen die 70-Zeichen-Grenze, weil der Wert end-to-end über die SEPA-Schienen in den Kontoauszugs-Adressrenderer der empfangenden Bank propagiert wird (Spaltenbreite an die historische SWIFT-MT103-/MT104-70-Zeichen-Adresszeilengrenze gepinnt); ein über der Grenze liegender Wert, der eine lockere Vorvalidierung eines vorgelagerten Generators passiert, wird entweder stillschweigend von der empfangenden Bank gekürzt (der Kunde sieht eine halb abgeschnittene Adresse, die nicht zum hinterlegten Vertrag passt) oder vom Pre-Clearing-Gate der Auftraggeberbank hart abgelehnt (häufige Ursache: eine CRM-Spalte, die Straße + Hausnummer + Wohnung + Gebäudename + Stadtviertel als eine einzige Freitextzeile trägt)',
                 'sepa.ok.twnNmLen': 'Jeder befüllte TwnNm hält die EPC-SEPA-Rulebook-Grenze von 35 Zeichen über alle {n} nicht leeren Orts-/Stadtnamen ein (jeweils ≤ 35 Codepoints; entspricht der ISO-20022-Max35Text-Schemagrenze, die von den EPC-SCT-/SDD-Rulebooks bekräftigt wird)',
                 'sepa.warn.twnNmLen': 'PostalAddress #{idx} TwnNm „{value}“ überschreitet die 35-Zeichen-Grenze ({len}/35 Zeichen) — ISO 20022 deklariert <PstlAdr>/<TwnNm> als Max35Text und die EPC-SCT-/SDD-Rulebooks bekräftigen die 35-Zeichen-Grenze, weil der Wert end-to-end über die SEPA-Schienen in den Kontoauszugs-Adressrenderer der empfangenden Bank propagiert wird (Spaltenbreite an die historische SWIFT-MT103-/MT104-35-Zeichen-Stadt-/Ortsgrenze gepinnt); ein über der Grenze liegender Wert, der eine lockere Vorvalidierung eines vorgelagerten Generators passiert, wird entweder stillschweigend von der empfangenden Bank gekürzt (der Kunde sieht eine halb abgeschnittene Stadt, die nicht zum hinterlegten Vertrag passt) oder vom Pre-Clearing-Gate der Auftraggeberbank hart abgelehnt (häufige Ursache: eine CRM-Spalte, die Stadt + Verwaltungseinheit — „Frankfurt am Main, Hessen, Germany“ — in einem einzigen Freitextfeld trägt)',
+                'sepa.ok.pstCdLen': 'Jeder befüllte PstCd hält die EPC-SEPA-Rulebook-Grenze von 16 Zeichen über alle {n} nicht leeren Postleitzahl(en) ein (jeweils ≤ 16 Codepoints; entspricht der ISO-20022-Max16Text-Schemagrenze, die von den EPC-SCT-/SDD-Rulebooks bekräftigt wird)',
+                'sepa.warn.pstCdLen': 'PostalAddress #{idx} PstCd „{value}“ überschreitet die 16-Zeichen-Grenze ({len}/16 Zeichen) — ISO 20022 deklariert <PstlAdr>/<PstCd> als Max16Text und die EPC-SCT-/SDD-Rulebooks bekräftigen die 16-Zeichen-Grenze, weil der Wert end-to-end über die SEPA-Schienen in den Kontoauszugs-Adressrenderer der empfangenden Bank propagiert wird (Spaltenbreite an die historische SWIFT-MT103-/MT104-Postleitzahlgrenze gepinnt); ein über der Grenze liegender Wert, der eine lockere Vorvalidierung eines vorgelagerten Generators passiert, wird entweder stillschweigend von der empfangenden Bank gekürzt (der Kunde sieht eine halb abgeschnittene PLZ, die nicht zum hinterlegten Vertrag passt) oder vom Pre-Clearing-Gate der Auftraggeberbank hart abgelehnt (häufige Ursache: eine CRM-Spalte, die PLZ + Ort — „10115 Berlin Mitte“ — oder einen langen alphanumerischen Routingcode in das Postleitzahlfeld packt)',
                 'sepa.warn.ccyInvalid': 'Währungscode nicht aktiv nach ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unbekanntes ISO-20022-Wurzelelement — nur Teilanalyse.',
                 'err.sepaEmpty': 'Die XML-Eingabe ist leer.',
@@ -8541,6 +8555,8 @@
                 'ubl.warn.buyerName': 'AccountingCustomerParty deklariert kein Party/PartyLegalEntity/RegistrationName — EN 16931 BR-07 / BT-44 verlangt den rechtlichen Entitätsnamen des Käufers auf jeder PEPPOL-Rechnung und -Gutschrift; der Wert ist der Name, der im Verkaufsbuch des Lieferanten gedruckt wird, und der Name, den AP-/USt-Systeme mit dem BT-48-Käufer-USt-IdNr für die steuerliche Meldung verknüpfen (UBL 2.1 markiert PartyLegalEntity / RegistrationName auf Schemaebene als optional, sodass ein Kundenblock, der nur PartyName/Name (den Handelsnamen, BT-45) trägt, schemavalid ist, aber von PEPPOL-Access-Points am BR-07-Schematron-Gate abgewiesen wird)',
                 'ubl.ok.sellerCountry': 'PostalAddress/Country/IdentificationCode des Verkäufers „{code}“ vorhanden (EN 16931 BR-09 / BT-40)',
                 'ubl.warn.sellerCountry': 'AccountingSupplierParty deklariert kein Party/PostalAddress/Country/IdentificationCode — EN 16931 BR-09 / BT-40 verlangt den Ländercode des Verkäufers (ISO 3166-1 alpha-2) auf jeder PEPPOL-Rechnung und -Gutschrift; der Wert legt fest, welches Mitgliedstaaten-USt-Regime die Lieferung regelt (innergemeinschaftlich vs. Ausfuhr vs. Inland) und bei welcher nationalen Steuerbehörde die BT-31-Verkäufer-USt-IdNr registriert ist (UBL 2.1 markiert PostalAddress / Country / IdentificationCode auf Schemaebene als optional, sodass ein Lieferantenblock, der nur PartyName + PartyLegalEntity trägt, schemavalid ist, aber von PEPPOL-Access-Points am BR-09-Schematron-Gate abgewiesen wird)',
+                'ubl.ok.buyerCountry': 'PostalAddress/Country/IdentificationCode des Käufers „{code}“ vorhanden (EN 16931 BR-11 / BT-55)',
+                'ubl.warn.buyerCountry': 'AccountingCustomerParty deklariert kein Party/PostalAddress/Country/IdentificationCode — EN 16931 BR-11 / BT-55 verlangt den Ländercode des Käufers (ISO 3166-1 alpha-2) auf jeder PEPPOL-Rechnung und -Gutschrift; der Wert legt fest, welches Mitgliedstaaten-USt-Regime die Käuferseite der Lieferung regelt (innergemeinschaftliches Reverse-Charge vs. inländische Vorsteuer vs. B2C-Ausfuhr) und bei welcher nationalen Steuerbehörde die BT-48-Käufer-USt-IdNr registriert ist (UBL 2.1 markiert PostalAddress / Country / IdentificationCode auf Schemaebene als optional, sodass ein Kundenblock, der nur PartyName + PartyLegalEntity trägt, schemavalid ist, aber von PEPPOL-Access-Points am BR-11-Schematron-Gate abgewiesen wird)',
                 'ubl.ok.taxTotalSign': 'Jedes TaxTotal deklariert einen nicht-negativen TaxAmount über alle {n} TaxTotal-Block(s) (EN 16931 BR-CO-13 / BT-110 — Rechnungs-Gesamt-USt-Betrag)',
                 'ubl.warn.taxTotalSign': 'TaxTotal #{idx} deklariert einen negativen TaxAmount „{v}“ — EN 16931 BR-CO-13 / BR-DEC-13 verlangen, dass der datei-weite Rechnungs-Gesamt-USt-Betrag (BT-110) nicht negativ ist; die USt-Summe einer Rechnung kann null sein (nullsatz-besteuerte Lieferung, steuerbefreite Rechnung, innergemeinschaftliches Reverse Charge), aber niemals negativ (selbst eine Gutschrift trägt eine positive USt-Summe, da der UNCL-1001-Dokumenttypcode die Gutschriftrichtung bereits ausdrückt); eine negative datei-weite USt kehrt stillschweigend das Vorzeichen des Vorsteuer-Postens des Käufers um und unterbricht die periodenbezogene USt-Meldekette (häufige Ursache: ein Generator, der dieselbe Form für Belastungen und Rückerstattungen wiederverwendet und das Vorzeichen in jedem monetären Feld umkehrt, statt den Dokumenttypcode zu wechseln)',
                 'ubl.ok.lmtLineSign': 'LegalMonetaryTotal/LineExtensionAmount „{v}“ ist nicht negativ (EN 16931 BT-106 — Summe der Rechnungszeilen-Nettobeträge)',
@@ -9654,6 +9670,8 @@
                 'sepa.warn.adrLineLen': 'PostalAddress #{idx} पंक्ति {line} "{value}" 70-वर्ण सीमा से अधिक है ({len}/70 वर्ण) — ISO 20022 <PstlAdr>/<AdrLine> को Max70Text के रूप में घोषित करता है और EPC SCT / SDD रूलबुक्स 70-वर्ण सीमा की पुनः-पुष्टि करते हैं क्योंकि यह मान SEPA रेल के माध्यम से प्राप्तकर्ता बैंक के खाता विवरण पता रेंडरर तक एंड-टू-एंड प्रसारित होता है (स्तंभ चौड़ाई ऐतिहासिक SWIFT MT103 / MT104 70-वर्ण पता पंक्ति सीमा से जुड़ी); ऊपरी जनरेटर की ढीली मान्यता पास करने वाला अति-सीमित मान या तो प्राप्तकर्ता बैंक द्वारा मूक रूप से छोटा कर दिया जाता है (ग्राहक को अनुबंध रिकॉर्ड से मेल नहीं खाने वाला आधा-कटा पता दिखता है) या प्रेषक बैंक के पूर्व-समाशोधन गेट पर अस्वीकृत होता है (आम कारण: CRM कॉलम जो सड़क + नंबर + अपार्टमेंट + भवन-नाम + पड़ोस को एकल मुक्त-पाठ पंक्ति के रूप में रखता है)',
                 'sepa.ok.twnNmLen': 'सभी {n} गैर-रिक्त नगर/शहर नामों में प्रत्येक भरा हुआ TwnNm EPC SEPA रूलबुक की 35-वर्ण सीमा के भीतर है (प्रत्येक ≤35 कोडपॉइंट; EPC SCT / SDD रूलबुक्स द्वारा पुनः-पुष्ट ISO 20022 Max35Text स्कीमा सीमा के अनुरूप)',
                 'sepa.warn.twnNmLen': 'PostalAddress #{idx} TwnNm "{value}" 35-वर्ण सीमा से अधिक है ({len}/35 वर्ण) — ISO 20022 <PstlAdr>/<TwnNm> को Max35Text के रूप में घोषित करता है और EPC SCT / SDD रूलबुक्स 35-वर्ण सीमा की पुनः-पुष्टि करते हैं क्योंकि यह मान SEPA रेल के माध्यम से प्राप्तकर्ता बैंक के खाता विवरण पता रेंडरर तक एंड-टू-एंड प्रसारित होता है (स्तंभ चौड़ाई ऐतिहासिक SWIFT MT103 / MT104 35-वर्ण नगर/शहर सीमा से जुड़ी); ऊपरी जनरेटर की ढीली मान्यता पास करने वाला अति-सीमित मान या तो प्राप्तकर्ता बैंक द्वारा मूक रूप से छोटा कर दिया जाता है (ग्राहक को अनुबंध रिकॉर्ड से मेल नहीं खाने वाला आधा-कटा शहर दिखता है) या प्रेषक बैंक के पूर्व-समाशोधन गेट पर अस्वीकृत होता है (आम कारण: CRM कॉलम जो शहर + प्रशासनिक प्रभाग — "Frankfurt am Main, Hessen, Germany" — को एकल मुक्त-पाठ क्षेत्र में रखता है)',
+                'sepa.ok.pstCdLen': 'सभी {n} गैर-रिक्त पिन कोड में प्रत्येक भरा हुआ PstCd EPC SEPA रूलबुक की 16-वर्ण सीमा के भीतर है (प्रत्येक ≤16 कोडपॉइंट; EPC SCT / SDD रूलबुक्स द्वारा पुनः-पुष्ट ISO 20022 Max16Text स्कीमा सीमा के अनुरूप)',
+                'sepa.warn.pstCdLen': 'PostalAddress #{idx} PstCd "{value}" 16-वर्ण सीमा से अधिक है ({len}/16 वर्ण) — ISO 20022 <PstlAdr>/<PstCd> को Max16Text के रूप में घोषित करता है और EPC SCT / SDD रूलबुक्स 16-वर्ण सीमा की पुनः-पुष्टि करते हैं क्योंकि यह मान SEPA रेल के माध्यम से प्राप्तकर्ता बैंक के खाता विवरण पता रेंडरर तक एंड-टू-एंड प्रसारित होता है (स्तंभ चौड़ाई ऐतिहासिक SWIFT MT103 / MT104 पिन कोड सीमा से जुड़ी); ऊपरी जनरेटर की ढीली मान्यता पास करने वाला अति-सीमित मान या तो प्राप्तकर्ता बैंक द्वारा मूक रूप से छोटा कर दिया जाता है (ग्राहक को अनुबंध रिकॉर्ड से मेल नहीं खाने वाला आधा-कटा पिन कोड दिखता है) या प्रेषक बैंक के पूर्व-समाशोधन गेट पर अस्वीकृत होता है (आम कारण: CRM कॉलम जो पिन कोड + शहर — "10115 Berlin Mitte" — या लंबा अल्फ़ान्यूमेरिक रूटिंग कोड पिन कोड क्षेत्र में रखता है)',
                 'sepa.warn.ccyInvalid': 'मुद्रा कोड ISO 4217 में सक्रिय नहीं: {code}',
                 'sepa.warn.unknownDoc': 'अज्ञात ISO 20022 रूट तत्व — केवल आंशिक पार्सिंग।',
                 'err.sepaEmpty': 'XML इनपुट खाली है।',
@@ -9809,6 +9827,8 @@
                 'ubl.warn.buyerName': 'AccountingCustomerParty में Party/PartyLegalEntity/RegistrationName घोषित नहीं है — EN 16931 BR-07 / BT-44 प्रत्येक PEPPOL चालान और क्रेडिट नोट पर क्रेता का कानूनी-इकाई पंजीकरण नाम अनिवार्य करता है; यह मान आपूर्तिकर्ता के विक्रय बही पर मुद्रित नाम और AP / VAT सिस्टम द्वारा कर रिपोर्टिंग के लिए BT-48 क्रेता VAT पहचानकर्ता से जोड़ा गया नाम होता है (UBL 2.1 PartyLegalEntity / RegistrationName को स्कीमा-स्तर पर वैकल्पिक रखता है, इसलिए केवल PartyName/Name (व्यापारिक नाम, BT-45) वाला ग्राहक पक्ष XML मान्यता पास करता है पर PEPPOL एक्सेस पॉइंट्स द्वारा BR-07 schematron गेट पर अस्वीकृत होता है)',
                 'ubl.ok.sellerCountry': 'विक्रेता PostalAddress/Country/IdentificationCode "{code}" मौजूद है (EN 16931 BR-09 / BT-40)',
                 'ubl.warn.sellerCountry': 'AccountingSupplierParty में Party/PostalAddress/Country/IdentificationCode घोषित नहीं है — EN 16931 BR-09 / BT-40 प्रत्येक PEPPOL चालान और क्रेडिट नोट पर विक्रेता का देश कोड (ISO 3166-1 alpha-2) अनिवार्य करता है; यह मान निर्धारित करता है कि कौन सा सदस्य राज्य का VAT शासन इस आपूर्ति को नियंत्रित करता है (इंट्रा-EU बनाम निर्यात बनाम घरेलू) और BT-31 विक्रेता VAT पहचानकर्ता किस राष्ट्रीय कर प्राधिकरण के साथ पंजीकृत है (UBL 2.1 PostalAddress / Country / IdentificationCode को स्कीमा-स्तर पर वैकल्पिक रखता है, इसलिए केवल PartyName + PartyLegalEntity वाला आपूर्तिकर्ता पक्ष XML मान्यता पास करता है पर PEPPOL एक्सेस पॉइंट्स द्वारा BR-09 schematron गेट पर अस्वीकृत होता है)',
+                'ubl.ok.buyerCountry': 'क्रेता PostalAddress/Country/IdentificationCode "{code}" मौजूद है (EN 16931 BR-11 / BT-55)',
+                'ubl.warn.buyerCountry': 'AccountingCustomerParty में Party/PostalAddress/Country/IdentificationCode घोषित नहीं है — EN 16931 BR-11 / BT-55 प्रत्येक PEPPOL चालान और क्रेडिट नोट पर क्रेता का देश कोड (ISO 3166-1 alpha-2) अनिवार्य करता है; यह मान निर्धारित करता है कि कौन सा सदस्य राज्य का VAT शासन आपूर्ति के क्रेता पक्ष को नियंत्रित करता है (इंट्रा-EU रिवर्स-चार्ज बनाम घरेलू इनपुट-VAT बनाम B2C निर्यात) और BT-48 क्रेता VAT पहचानकर्ता किस राष्ट्रीय कर प्राधिकरण के साथ पंजीकृत है (UBL 2.1 PostalAddress / Country / IdentificationCode को स्कीमा-स्तर पर वैकल्पिक रखता है, इसलिए केवल PartyName + PartyLegalEntity वाला ग्राहक पक्ष XML मान्यता पास करता है पर PEPPOL एक्सेस पॉइंट्स द्वारा BR-11 schematron गेट पर अस्वीकृत होता है)',
                 'ubl.ok.taxTotalSign': 'सभी {n} TaxTotal ब्लॉक्स में प्रत्येक TaxTotal गैर-ऋणात्मक TaxAmount घोषित करता है (EN 16931 BR-CO-13 / BT-110 — चालान कुल VAT राशि)',
                 'ubl.warn.taxTotalSign': 'TaxTotal #{idx} ऋणात्मक TaxAmount "{v}" घोषित करता है — EN 16931 BR-CO-13 / BR-DEC-13 के अनुसार फ़ाइल-व्यापी चालान कुल VAT राशि (BT-110) गैर-ऋणात्मक होनी चाहिए; चालान का VAT कुल शून्य हो सकता है (शून्य दर आपूर्ति, छूट प्राप्त चालान, EU भीतर रिवर्स चार्ज) पर कभी ऋणात्मक नहीं (क्रेडिट नोट भी सकारात्मक VAT कुल रखती है क्योंकि UNCL 1001 दस्तावेज़-प्रकार कोड पहले से ही क्रेडिट दिशा बता देता है); ऋणात्मक फ़ाइल-व्यापी VAT क्रेता की इनपुट-VAT प्रविष्टि के चिह्न को चुपचाप पलट देती है और प्रति-अवधि VAT रिपोर्टिंग शृंखला तोड़ देती है (आम कारण: जनरेटर शुल्क और वापसी के लिए समान आकार पुनः उपयोग करता है और दस्तावेज़-प्रकार कोड बदलने के बजाय प्रत्येक मौद्रिक स्लॉट का चिह्न पलटता है)',
                 'ubl.ok.lmtLineSign': 'LegalMonetaryTotal/LineExtensionAmount "{v}" गैर-ऋणात्मक है (EN 16931 BT-106 — चालान पंक्ति शुद्ध राशियों का योग)',
@@ -18875,6 +18895,54 @@
             }
         }
 
+        // EPC SCT / SDD Rulebook 16-character cap per <PstlAdr>/<PstCd>
+        // (draft 124). ISO 20022 declares `<PstCd>` as `Max16Text` at
+        // the schema level, which already pins the cap; however many
+        // real-world generators source the value from CRM postal-code
+        // columns that allow up to 35 codepoints (or merge city + ZIP
+        // into one field) and rely on downstream validation, so the
+        // inspector should surface a value that exceeds 16 chars before
+        // the file leaves the originator. The EPC SCT and SDD Rulebooks
+        // re-affirm the 16-character cap because the value is propagated
+        // end-to-end through SEPA rails into the receiving bank's
+        // account-statement address renderer at a column width pinned to
+        // the legacy SWIFT MT103 / MT104 postal-code limit. An over-cap
+        // PstCd is either silently truncated by the receiving bank (the
+        // statement reads a half-truncated ZIP that doesn't match the
+        // contract on file) or hard-rejected by the originator bank's
+        // own pre-clearing gate. The canonical real-world failure is a
+        // CRM column carrying ZIP + city ("10115 Berlin Mitte") or a
+        // long alphanumeric routing code packed into the postal-code
+        // slot. Parallel in shape to drafts 120 (AdrLine length) and
+        // 122 (TwnNm length); together the three gates cover every
+        // length-capped postal-address subfield the EPC narrows.
+        // Pair with draft 125 on the UBL side.
+        function sepaCheckPstCdLength(out, doc, detected) {
+            if (detected.type !== 'pain.001' && detected.type !== 'pain.008') return;
+            const w = detected.wrapper;
+            if (!w) return;
+            const addrs = sepaAllLocal(w, 'PstlAdr');
+            if (!addrs.length) return;
+            let seen = 0;
+            const bad = [];
+            addrs.forEach((pa, i) => {
+                const pc = sepaTextOf(pa, 'PstCd');
+                const v = (pc || '').trim();
+                if (!v) return;
+                seen++;
+                const len = [...v].length;
+                if (len > 16) bad.push({ idx: i + 1, value: v, len });
+            });
+            if (!seen) return;
+            if (bad.length === 0) {
+                tlsRenderRow(out, t('sepa.row.warning'), '✓ ' + tFormat('sepa.ok.pstCdLen', { n: intlNumber(seen) }));
+            } else {
+                for (const b of bad) {
+                    tlsRenderRow(out, t('sepa.row.warning'), '✗ ' + tFormat('sepa.warn.pstCdLen', { idx: intlNumber(b.idx), value: b.value, len: intlNumber(b.len) }));
+                }
+            }
+        }
+
         // EPC SCT Rulebook single-Ustrd-per-RmtInf cardinality cap
         // (draft 116). ISO 20022 declares `<RmtInf>/<Ustrd>` as
         // `0..n` — multiple unstructured remittance lines per
@@ -19186,6 +19254,7 @@
                 sepaCheckAdrLineCount(out, doc, detected);
                 sepaCheckAdrLineLength(out, doc, detected);
                 sepaCheckTwnNmLength(out, doc, detected);
+                sepaCheckPstCdLength(out, doc, detected);
                 sepaCheckE2eIdCharset(out, doc, detected);
                 sepaCheckInstrIdCharset(out, doc, detected);
                 sepaCheckMndtIdCharset(out, doc, detected);
@@ -21281,6 +21350,50 @@
             }
         }
 
+        // EN 16931 BR-11 / BT-55 Buyer country code presence check
+        // (draft 125). PEPPOL BIS Billing 3.0 / EN 16931 require every
+        // Invoice and CreditNote to declare the buyer's country code at
+        // `<cac:AccountingCustomerParty>/<cac:Party>/<cac:PostalAddress>/
+        // <cac:Country>/<cbc:IdentificationCode>` — the value is the
+        // ISO 3166-1 alpha-2 code that establishes which member state's
+        // VAT regime governs the buyer side of the supply (intra-EU
+        // reverse-charge vs domestic input-VAT vs B2C export) and which
+        // national tax authority the BT-48 Buyer VAT identifier
+        // (draft 58) is registered with. UBL 2.1 marks both
+        // `<cac:PostalAddress>` and `<cac:Country>/<cbc:IdentificationCode>`
+        // optional at the schema level, so a customer party carrying
+        // only `<cac:PartyName>` and `<cac:PartyLegalEntity>` (the
+        // canonical happy-path the §2.7 inspector first shipped with)
+        // passes XML validation but is rejected by PEPPOL access points
+        // at the BR-11 schematron gate. Buyer-side mirror of draft 123
+        // (Seller country, BR-09 / BT-40); together with drafts 111 /
+        // 121 (name presence) and 123 / 125 (country presence) the
+        // inspector now exercises every EN 16931 schematron mandatory
+        // field on both supplier and customer party blocks. The
+        // canonical real-world failure is a generator that fills the
+        // legal-entity slot from the customer-master integration but
+        // leaves the buyer's postal-address block empty because the
+        // address source is wired to a separate CRM that's optional in
+        // the data model — far more common than the seller-side gap
+        // (the supplier's own address is usually mandatory in upstream
+        // invoice templates). Pair with draft 124 on the SEPA side.
+        function ublCheckBuyerCountry(out, detected) {
+            const r = detected.root;
+            if (!r) return;
+            const acp = sepaFirst(r, 'AccountingCustomerParty');
+            if (!acp) return;
+            const party = sepaFirst(acp, 'Party');
+            if (!party) return;
+            const addr = sepaFirst(party, 'PostalAddress');
+            const country = addr ? sepaFirst(addr, 'Country') : null;
+            const code = country ? (sepaTextOf(country, 'IdentificationCode') || '').trim() : '';
+            if (code) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + tFormat('ubl.ok.buyerCountry', { code }));
+            } else {
+                tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + t('ubl.warn.buyerCountry'));
+            }
+        }
+
         // EN 16931 BT-1 (Invoice number) length check (draft 109).
         // UBL declares `<cbc:ID>` at the Invoice / CreditNote root as
         // plain Identifier text with no schema-level length cap, and
@@ -21475,6 +21588,7 @@
                 ublCheckSellerName(out, detected);
                 ublCheckBuyerName(out, detected);
                 ublCheckSellerCountry(out, detected);
+                ublCheckBuyerCountry(out, detected);
                 ublCheckTaxTotalSign(out, detected);
                 ublCheckLegalMonTotalLineSign(out, detected);
                 ublCheckLegalMonTotalTaxExclSign(out, detected);

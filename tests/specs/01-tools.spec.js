@@ -1640,6 +1640,7 @@ const UBL_INVOICE = `<?xml version="1.0" encoding="UTF-8"?>
   <cac:AccountingCustomerParty>
     <cac:Party>
       <cac:PartyName><cbc:Name>Beispiel SARL</cbc:Name></cac:PartyName>
+      <cac:PostalAddress><cac:Country><cbc:IdentificationCode>FR</cbc:IdentificationCode></cac:Country></cac:PostalAddress>
       <cac:PartyLegalEntity><cbc:RegistrationName>Beispiel SARL</cbc:RegistrationName></cac:PartyLegalEntity>
     </cac:Party>
   </cac:AccountingCustomerParty>
@@ -3564,6 +3565,50 @@ test('ubl: Seller PostalAddress Country BR-09 flags a missing PostalAddress', as
   await page.fill('#ubl-input', noAddr);
   await page.click('#btn-ubl-parse');
   await expect(page.locator('#ubl-results')).toContainText(/AccountingSupplierParty is missing Party\/PostalAddress\/Country\/IdentificationCode/i, { timeout: 5_000 });
+});
+
+test('sepa: PstCd 16-char EPC length cap confirms on a clean Cdtr postal code', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  const cleanCode = SEPA_PAIN001.replace(
+    '<Cdtr><Nm>Supplier GmbH</Nm></Cdtr>',
+    '<Cdtr><Nm>Supplier GmbH</Nm><PstlAdr><PstCd>10115</PstCd></PstlAdr></Cdtr>'
+  );
+  await page.fill('#sepa-input', cleanCode);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Every populated PstCd fits within the EPC SEPA Rulebook 16-character cap/i, { timeout: 5_000 });
+});
+
+test('sepa: PstCd 16-char EPC length cap flags an over-length postal code', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // 19-char ZIP + city packed into the postal-code slot.
+  const longCode = '10115 Berlin Mitte';
+  const over = SEPA_PAIN001.replace(
+    '<Cdtr><Nm>Supplier GmbH</Nm></Cdtr>',
+    '<Cdtr><Nm>Supplier GmbH</Nm><PstlAdr><PstCd>' + longCode + '</PstCd></PstlAdr></Cdtr>'
+  );
+  await page.fill('#sepa-input', over);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/PostalAddress #1 PstCd .* exceeds the 16-character cap/i, { timeout: 5_000 });
+});
+
+test('ubl: Buyer PostalAddress Country BR-11 confirms on canonical fixture', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Canonical UBL_INVOICE buyer carries PostalAddress/Country/IdentificationCode=FR.
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Buyer PostalAddress\/Country\/IdentificationCode "FR" present \(EN 16931 BR-11 \/ BT-55\)/i, { timeout: 5_000 });
+});
+
+test('ubl: Buyer PostalAddress Country BR-11 flags a missing PostalAddress', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Strip the buyer's PostalAddress block (FR) — leave only PartyName + PartyLegalEntity.
+  const noAddr = UBL_INVOICE.replace(
+    '<cac:PostalAddress><cac:Country><cbc:IdentificationCode>FR</cbc:IdentificationCode></cac:Country></cac:PostalAddress>',
+    ''
+  );
+  await page.fill('#ubl-input', noAddr);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/AccountingCustomerParty is missing Party\/PostalAddress\/Country\/IdentificationCode/i, { timeout: 5_000 });
 });
 
 test('ubl: Buyer RegistrationName BR-07 confirms on canonical fixture', async ({ page }) => {
