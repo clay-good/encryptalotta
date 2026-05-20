@@ -3284,6 +3284,46 @@ test('ubl: LineExtensionAmount non-negative check flags a negative line amount',
   await expect(page.locator('#ubl-results')).toContainText(/Line #1 declares a negative LineExtensionAmount "-100\.00"/i, { timeout: 5_000 });
 });
 
+test('sepa: RmtInf Strd/Ustrd XOR check confirms on Ustrd-only canonical fixture', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Canonical SEPA_PAIN001 carries only <Ustrd> within RmtInf — the EPC-compliant case.
+  await page.fill('#sepa-input', SEPA_PAIN001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Every transaction's RmtInf carries at most one of <Strd> or <Ustrd>/i, { timeout: 5_000 });
+});
+
+test('sepa: RmtInf Strd/Ustrd XOR check flags both forms populated in the same RmtInf', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Inject a <Strd>/<CdtrRefInf>/<Ref> alongside the existing <Ustrd>.
+  const both = SEPA_PAIN001.replace(
+    '<RmtInf><Ustrd>Invoice 2024-001</Ustrd></RmtInf>',
+    '<RmtInf><Ustrd>Invoice 2024-001</Ustrd><Strd><CdtrRefInf><Ref>INV-2024-001</Ref></CdtrRefInf></Strd></RmtInf>'
+  );
+  await page.fill('#sepa-input', both);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Transaction #1 RmtInf populates both <Ustrd> and <Strd>/i, { timeout: 5_000 });
+});
+
+test('ubl: Invoice ID BT-1 35-char cap confirms on canonical fixture', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Canonical UBL_INVOICE declares <cbc:ID>INV-2024-042</cbc:ID> (12 chars).
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Invoice\/CreditNote ID \(EN 16931 BT-1\) fits within the 35-character SEPA EndToEndId cap/i, { timeout: 5_000 });
+});
+
+test('ubl: Invoice ID BT-1 35-char cap flags an over-length invoice number', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // 42-char invoice number — would be silently truncated by a downstream pain.001 generator.
+  const long = UBL_INVOICE.replace(
+    '<cbc:ID>INV-2024-042</cbc:ID>',
+    '<cbc:ID>INV-2024-Subscription-Long-Customer-Ref-042</cbc:ID>'
+  );
+  await page.fill('#ubl-input', long);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Invoice\/CreditNote ID "INV-2024-Subscription-Long-Customer-Ref-042" exceeds the 35-character cap/i, { timeout: 5_000 });
+});
+
 test('ubl: rejects non-UBL XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   await page.fill('#ubl-input', '<?xml version="1.0"?><Document/>');
