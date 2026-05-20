@@ -4519,6 +4519,8 @@
                 'sepa.warn.ibanOnly': '{role} #{idx} identifies the account via <Othr> or with no <IBAN> child — the EPC SCT / SDD Rulebooks narrow ISO 20022\'s IBAN | Othr account-identification choice to IBAN-only; SEPA\'s interbank-settlement design is pinned to IBAN routing so an Othr-identified account is schema-valid plain XML but rail-broken (clearing systems EBA STEP2 / STET / RT1 cannot derive the holding-bank BIC from a non-IBAN identifier and reject the leg before any rail-level processing fires)',
                 'sepa.ok.counterpartyNmLen': 'Every {party}/Nm value fits within the EPC SEPA Rulebook 70-character cap across all {n} transaction(s) (each ≤70 characters)',
                 'sepa.warn.counterpartyNmLen': 'Transaction #{idx} {party}/Nm "{nm}" exceeds the 70-character cap ({len}/70 characters) — ISO 20022 declares the field as Max140Text but the EPC SCT / SDD Rulebooks narrow the allowed length to 70 characters because the value is propagated end-to-end into the receiving bank\'s account-statement renderer at a column width pinned to the legacy SWIFT MT103 / MT104 70-char narrative limit; an over-cap name is either silently truncated (the statement reads a half-truncated company name the customer can\'t reconcile) or hard-rejected by the originator bank\'s pre-clearing gate (common cause: a CRM column carrying legal name plus department / branch suffix)',
+                'sepa.ok.rmtInfUstrdCount': 'Every transaction\'s RmtInf carries at most one <Ustrd> element across all {n} populated RmtInf block(s) (EPC SCT / SDD Rulebook narrows ISO 20022\'s 0..n cardinality to a single occurrence)',
+                'sepa.warn.rmtInfUstrdCount': 'Transaction #{idx} RmtInf carries {count} <Ustrd> elements — ISO 20022 declares Ustrd as 0..n but the EPC SCT and SDD Rulebook Implementation Guidelines narrow the maximum cardinality to a single occurrence per RmtInf; clearing systems (EBA STEP2, STET, RT1) reject the file because the receiving bank\'s account-statement renderer surfaces only one narrative line — any additional Ustrd elements would be dropped before the customer sees them, so the rulebook forbids the shape upfront (common cause: a generator that splits a multi-line invoice description into one Ustrd element per line, intending the bank to render them as a block)',
                 'sepa.warn.ccyInvalid': 'Currency code not active per ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unrecognized ISO 20022 root element — partial parse only.',
                 'err.sepaEmpty': 'XML input is empty.',
@@ -4684,6 +4686,8 @@
                 'ubl.warn.taxTotalSign': 'TaxTotal #{idx} declares a negative TaxAmount "{v}" — EN 16931 BR-CO-13 / BR-DEC-13 require the file-wide Invoice total VAT amount (BT-110) to be non-negative; an invoice\'s VAT total can be zero (zero-rated supply, exempt invoice, intra-EU reverse charge) but never negative (even a CreditNote carries a positive VAT total because the UNCL 1001 document-type code already conveys the credit direction); a negative file-wide VAT silently inverts the sign of the buyer\'s input-VAT entry and breaks the per-period VAT reporting chain (common cause: a generator reusing the same shape for charges and refunds and flipping the sign on every monetary slot instead of switching the document-type code)',
                 'ubl.ok.lmtLineSign': 'LegalMonetaryTotal/LineExtensionAmount "{v}" is non-negative (EN 16931 BT-106 — Sum of Invoice line net amounts)',
                 'ubl.warn.lmtLineSign': 'LegalMonetaryTotal/LineExtensionAmount declares a negative value "{v}" — EN 16931 BR-CO-10 pins the file-wide Sum of Invoice line net amounts (BT-106) to Σ BT-131 and BT-131 is itself non-negative (draft 107), so BT-106 as the sum must be non-negative too; a negative BT-106 propagates into the BR-CO-10 totals chain and the buyer\'s AP system reads the invoice as a credit (common cause: a summary-only invoice template that derives BT-106 from an external accounting system instead of summing the lines, allowing a signed value to bypass the per-line gate)',
+                'ubl.ok.lmtTaxExclSign': 'LegalMonetaryTotal/TaxExclusiveAmount "{v}" is non-negative (EN 16931 BT-109 — Invoice total amount without VAT)',
+                'ubl.warn.lmtTaxExclSign': 'LegalMonetaryTotal/TaxExclusiveAmount declares a negative value "{v}" — EN 16931 BR-CO-13 composes the Invoice total amount without VAT (BT-109) from BT-106 (line totals) + BT-99 (charges) − BT-92 (allowances), and each input narrows to a non-negative decimal, so BT-109 inherits the non-negativity invariant; a negative BT-109 propagates into the BR-CO-15 chain (TaxInclusiveAmount = TaxExclusiveAmount + Σ TaxAmount) and the buyer\'s AP system reads the invoice as a credit (common cause: a summary-only invoice template that derives BT-109 from an external accounting system rather than composing it from BT-92 / BT-99 / BT-106)',
                 'ubl.ok.ccyValid': 'Currency codes active per ISO 4217: {list}',
                 'ubl.ok.ibanValid': 'Payee/Payer financial account IBANs valid (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'Payee/Payer IBAN failed ISO 13616 MOD-97 check: {iban}',
@@ -5811,6 +5815,8 @@
                 'sepa.warn.ibanOnly': '{role} #{idx} identifie le compte via <Othr> ou sans enfant <IBAN> — les règles EPC SCT / SDD restreignent le choix IBAN | Othr d’ISO 20022 à IBAN uniquement ; la conception du règlement interbancaire SEPA est ancrée sur le routage IBAN, donc un compte identifié par Othr est conforme au schéma mais inopérant au niveau du rail (les systèmes de compensation EBA STEP2 / STET / RT1 ne peuvent pas déduire le BIC de la banque dépositaire à partir d’un identifiant non IBAN et rejettent la jambe avant tout traitement au niveau du rail)',
                 'sepa.ok.counterpartyNmLen': 'Chaque valeur {party}/Nm respecte la limite EPC SEPA de 70 caractères sur l’ensemble des {n} transaction(s) (chacune ≤ 70 caractères)',
                 'sepa.warn.counterpartyNmLen': 'Transaction #{idx} {party}/Nm « {nm} » dépasse la limite de 70 caractères ({len}/70) — ISO 20022 déclare le champ comme Max140Text mais les règles EPC SCT / SDD restreignent la longueur autorisée à 70 caractères car la valeur est propagée de bout en bout dans le moteur de relevé de compte de la banque destinataire, à une largeur de colonne alignée sur la limite historique du libellé SWIFT MT103 / MT104 ; un nom dépassant la limite est soit tronqué silencieusement (le relevé affiche un nom de société à moitié coupé que le client ne peut pas rapprocher) soit rejeté par le contrôle pré-compensation de la banque émettrice (cause fréquente : une colonne CRM portant le nom légal plus le suffixe service / agence)',
+                'sepa.ok.rmtInfUstrdCount': 'Chaque RmtInf de transaction porte au plus un élément <Ustrd> sur l’ensemble des {n} bloc(s) RmtInf renseigné(s) (les règles EPC SCT / SDD restreignent la cardinalité 0..n d’ISO 20022 à une seule occurrence)',
+                'sepa.warn.rmtInfUstrdCount': 'La transaction #{idx} RmtInf porte {count} éléments <Ustrd> — ISO 20022 déclare Ustrd en 0..n mais les implementation guidelines EPC SCT / SDD restreignent la cardinalité maximale à une seule occurrence par RmtInf ; les systèmes de compensation (EBA STEP2, STET, RT1) rejettent le fichier car le moteur de relevé de compte de la banque destinataire n’affiche qu’une ligne narrative — tout élément Ustrd supplémentaire serait abandonné avant que le client ne le voie, donc les règles interdisent cette forme en amont (cause fréquente : un générateur qui divise une description de facture multi-lignes en un élément Ustrd par ligne, dans l’intention que la banque les affiche comme un bloc)',
                 'sepa.warn.ccyInvalid': 'Code monétaire non actif selon ISO 4217 : {code}',
                 'sepa.warn.unknownDoc': 'Élément racine ISO 20022 non reconnu — analyse partielle uniquement.',
                 'err.sepaEmpty': 'Le XML d’entrée est vide.',
@@ -5966,6 +5972,8 @@
                 'ubl.warn.taxTotalSign': 'TaxTotal #{idx} déclare un TaxAmount négatif « {v} » — EN 16931 BR-CO-13 / BR-DEC-13 exigent que le montant TVA total de la facture (BT-110) ne soit pas négatif ; la TVA totale d’une facture peut être nulle (livraison taxée à zéro, facture exonérée, autoliquidation intra-UE) mais jamais négative (même un avoir porte une TVA totale positive car le code de type document UNCL 1001 indique déjà le sens crédit) ; une TVA totale négative inverse silencieusement le signe de l’entrée TVA déductible de l’acheteur et rompt la chaîne de déclaration TVA par période (cause fréquente : un générateur qui réutilise le même format pour les charges et remboursements en inversant le signe sur chaque champ monétaire au lieu de changer le code de type document)',
                 'ubl.ok.lmtLineSign': 'LegalMonetaryTotal/LineExtensionAmount « {v} » est non négatif (EN 16931 BT-106 — somme des montants nets des lignes de facture)',
                 'ubl.warn.lmtLineSign': 'LegalMonetaryTotal/LineExtensionAmount déclare une valeur négative « {v} » — EN 16931 BR-CO-10 fixe la somme des montants nets des lignes (BT-106) à Σ BT-131, et BT-131 est lui-même non négatif (draft 107), donc BT-106 comme somme doit également être non négatif ; un BT-106 négatif se propage dans la chaîne de totaux BR-CO-10 et le système AP de l’acheteur lit la facture comme un avoir (cause fréquente : un modèle de facture résumé qui dérive BT-106 d’un système comptable externe au lieu de sommer les lignes, ce qui permet à une valeur signée de contourner le contrôle ligne par ligne)',
+                'ubl.ok.lmtTaxExclSign': 'LegalMonetaryTotal/TaxExclusiveAmount « {v} » est non négatif (EN 16931 BT-109 — montant total de la facture hors TVA)',
+                'ubl.warn.lmtTaxExclSign': 'LegalMonetaryTotal/TaxExclusiveAmount déclare une valeur négative « {v} » — EN 16931 BR-CO-13 compose le montant total de la facture hors TVA (BT-109) à partir de BT-106 (totaux des lignes) + BT-99 (charges) − BT-92 (allocations), et chaque entrée se restreint à un décimal non négatif, donc BT-109 hérite de l’invariant de non-négativité ; un BT-109 négatif se propage dans la chaîne BR-CO-15 (TaxInclusiveAmount = TaxExclusiveAmount + Σ TaxAmount) et le système AP de l’acheteur lit la facture comme un avoir (cause fréquente : un modèle de facture résumé qui dérive BT-109 d’un système comptable externe au lieu de le composer à partir de BT-92 / BT-99 / BT-106)',
                 'ubl.ok.ccyValid': 'Codes monétaires actifs selon ISO 4217 : {list}',
                 'ubl.ok.ibanValid': 'IBAN des comptes Payee/Payer valides (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'IBAN Payee/Payer échoue au contrôle ISO 13616 MOD-97 : {iban}',
@@ -7063,6 +7071,8 @@
                 'sepa.warn.ibanOnly': '{role} #{idx} 通过 <Othr> 或缺少 <IBAN> 子元素来标识账户——EPC SCT / SDD 规则书将 ISO 20022 的 IBAN | Othr 账户标识选项收窄为仅限 IBAN；SEPA 的银行间结算设计依赖 IBAN 路由，因此 Othr 标识的账户在 XML 模式上有效但在轨道层面不可用（EBA STEP2 / STET / RT1 清算系统无法从非 IBAN 标识中推导出开户行 BIC，会在任何轨道级处理之前拒绝该腿）',
                 'sepa.ok.counterpartyNmLen': '所有 {n} 笔交易的 {party}/Nm 值均符合 EPC SEPA 规则书的 70 字符上限（每个 ≤70 字符）',
                 'sepa.warn.counterpartyNmLen': '第 {idx} 笔交易 {party}/Nm "{nm}" 超过 70 字符上限（{len}/70）——ISO 20022 将该字段声明为 Max140Text，但 EPC SCT / SDD 规则书将允许长度收窄为 70 字符，因为该值被端到端传播到收款行账户对账单渲染器中，列宽与历史 SWIFT MT103 / MT104 70 字符摘要限制保持一致；超长名称要么被静默截断（对账单显示半截公司名称，客户无法对账）要么被付款行预清算环节硬拒绝（常见原因：CRM 列同时包含法定名称和部门 / 分支机构后缀）',
+                'sepa.ok.rmtInfUstrdCount': '所有 {n} 个已填充 RmtInf 块中，每笔交易的 RmtInf 至多携带一个 <Ustrd> 元素（EPC SCT / SDD 规则书将 ISO 20022 的 0..n 基数收窄为仅一次出现）',
+                'sepa.warn.rmtInfUstrdCount': '第 {idx} 笔交易的 RmtInf 携带 {count} 个 <Ustrd> 元素——ISO 20022 将 Ustrd 声明为 0..n，但 EPC SCT / SDD 实施指南将每个 RmtInf 的最大基数收窄为单次出现；清算系统（EBA STEP2、STET、RT1）拒绝此文件，因为收款行账户对账单渲染器只输出一行摘要——任何额外的 Ustrd 元素都会在客户看到之前被丢弃，因此规则书在源头禁止这种形式（常见原因是生成器将多行发票描述拆分为每行一个 Ustrd 元素，期望银行将它们作为整体渲染）',
                 'sepa.warn.ccyInvalid': '币种代码不在 ISO 4217 现行清单中：{code}',
                 'sepa.warn.unknownDoc': '无法识别的 ISO 20022 根元素 — 仅部分解析。',
                 'err.sepaEmpty': 'XML 输入为空。',
@@ -7218,6 +7228,8 @@
                 'ubl.warn.taxTotalSign': 'TaxTotal #{idx} 声明负的 TaxAmount "{v}"——EN 16931 BR-CO-13 / BR-DEC-13 要求文件级发票 VAT 总额（BT-110）非负；发票的 VAT 总额可以为零（零税率供应、免税发票、欧盟内部反向收费）但不能为负（即使贷项通知单也携带正的 VAT 总额，因为 UNCL 1001 文档类型代码已经表达了贷项方向）；负的文件级 VAT 会默默反转买方进项税条目的符号，破坏分期 VAT 申报链（常见原因是生成器在收费与退款之间复用同一形状，并在每个货币字段上翻转符号，而不是切换文档类型代码）',
                 'ubl.ok.lmtLineSign': 'LegalMonetaryTotal/LineExtensionAmount "{v}" 非负（EN 16931 BT-106——发票行净额之和）',
                 'ubl.warn.lmtLineSign': 'LegalMonetaryTotal/LineExtensionAmount 声明负值 "{v}"——EN 16931 BR-CO-10 将文件级发票行净额之和（BT-106）固定为 Σ BT-131，而 BT-131 本身非负（draft 107），因此作为求和的 BT-106 也必须非负；负的 BT-106 会传播进 BR-CO-10 的合计链，买方 AP 系统会将该发票读作贷项（常见原因：仅汇总型发票模板从外部会计系统得出 BT-106 而非求和行项，从而让带符号的值绕过逐行检查）',
+                'ubl.ok.lmtTaxExclSign': 'LegalMonetaryTotal/TaxExclusiveAmount "{v}" 非负（EN 16931 BT-109 — 发票不含 VAT 总额）',
+                'ubl.warn.lmtTaxExclSign': 'LegalMonetaryTotal/TaxExclusiveAmount 声明负值 "{v}"——EN 16931 BR-CO-13 将发票不含 VAT 总额（BT-109）组合为 BT-106（行总额） + BT-99（费用） − BT-92（折让），且每项输入都收窄为非负小数，因此 BT-109 继承非负不变式；负的 BT-109 会传播到 BR-CO-15 链（TaxInclusiveAmount = TaxExclusiveAmount + Σ TaxAmount），买方 AP 系统会将该发票读作贷项（常见原因：仅汇总型发票模板从外部会计系统得出 BT-109，而不是从 BT-92 / BT-99 / BT-106 组合）',
                 'ubl.ok.ccyValid': '币种代码按 ISO 4217 有效：{list}',
                 'ubl.ok.ibanValid': '收款方/付款方账户 IBAN 通过 ISO 13616 MOD-97 校验（{n}）',
                 'ubl.warn.ibanInvalid': '收款方/付款方 IBAN 未通过 ISO 13616 MOD-97 校验：{iban}',
@@ -8330,6 +8342,8 @@
                 'sepa.warn.ibanOnly': '{role} #{idx} identifiziert das Konto über <Othr> oder ohne <IBAN>-Kind — die EPC-SCT-/SDD-Rulebooks schränken die IBAN | Othr-Wahl von ISO 20022 auf IBAN-only ein; das SEPA-Interbank-Settlement-Design ist auf IBAN-Routing ausgelegt, daher ist ein per Othr identifiziertes Konto schemavalid, aber auf Rail-Ebene unbrauchbar (Clearingsysteme EBA STEP2 / STET / RT1 können den BIC der kontoführenden Bank nicht aus einer Nicht-IBAN-Identifikation ableiten und weisen den Leg vor jeder Rail-Verarbeitung ab)',
                 'sepa.ok.counterpartyNmLen': 'Jeder {party}/Nm-Wert hält die EPC-SEPA-Rulebook-Grenze von 70 Zeichen über alle {n} Transaktion(en) ein (jeweils ≤ 70 Zeichen)',
                 'sepa.warn.counterpartyNmLen': 'Transaktion #{idx} {party}/Nm „{nm}“ überschreitet die 70-Zeichen-Grenze ({len}/70) — ISO 20022 deklariert das Feld als Max140Text, aber die EPC-SCT-/SDD-Rulebooks schränken die zulässige Länge auf 70 Zeichen ein, da der Wert durch die SEPA-Rails Ende-zu-Ende in den Kontoauszugs-Renderer der empfangenden Bank gelangt, mit einer Spaltenbreite, die an die historische 70-Zeichen-Narrative-Grenze von SWIFT MT103 / MT104 angelehnt ist; ein zu langer Name wird entweder stillschweigend gekürzt (der Auszug zeigt einen halb abgeschnittenen Firmennamen, den der Kunde nicht zuordnen kann) oder vom Pre-Clearing-Gate der Auftraggeberbank hart abgelehnt (häufige Ursache: eine CRM-Spalte mit Firmenname plus Abteilungs-/Filialsuffix)',
+                'sepa.ok.rmtInfUstrdCount': 'Das RmtInf jeder Transaktion trägt höchstens ein <Ustrd>-Element über alle {n} befüllten RmtInf-Block(s) (das EPC-SCT-/SDD-Rulebook schränkt die 0..n-Kardinalität von ISO 20022 auf ein einziges Vorkommen ein)',
+                'sepa.warn.rmtInfUstrdCount': 'Transaktion #{idx} RmtInf trägt {count} <Ustrd>-Elemente — ISO 20022 deklariert Ustrd als 0..n, die EPC-SCT-/SDD-Implementation-Guidelines schränken die maximale Kardinalität jedoch auf ein einziges Vorkommen pro RmtInf ein; Clearingsysteme (EBA STEP2, STET, RT1) weisen die Datei ab, da der Kontoauszugs-Renderer der empfangenden Bank nur eine Narrative-Zeile ausgibt — alle weiteren Ustrd-Elemente würden verworfen, bevor der Kunde sie sieht, daher verbietet das Rulebook die Form vorab (häufige Ursache: ein Generator, der eine mehrzeilige Rechnungsbeschreibung in je ein Ustrd-Element pro Zeile aufteilt, in der Erwartung, dass die Bank sie als Block rendert)',
                 'sepa.warn.ccyInvalid': 'Währungscode nicht aktiv nach ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unbekanntes ISO-20022-Wurzelelement — nur Teilanalyse.',
                 'err.sepaEmpty': 'Die XML-Eingabe ist leer.',
@@ -8485,6 +8499,8 @@
                 'ubl.warn.taxTotalSign': 'TaxTotal #{idx} deklariert einen negativen TaxAmount „{v}“ — EN 16931 BR-CO-13 / BR-DEC-13 verlangen, dass der datei-weite Rechnungs-Gesamt-USt-Betrag (BT-110) nicht negativ ist; die USt-Summe einer Rechnung kann null sein (nullsatz-besteuerte Lieferung, steuerbefreite Rechnung, innergemeinschaftliches Reverse Charge), aber niemals negativ (selbst eine Gutschrift trägt eine positive USt-Summe, da der UNCL-1001-Dokumenttypcode die Gutschriftrichtung bereits ausdrückt); eine negative datei-weite USt kehrt stillschweigend das Vorzeichen des Vorsteuer-Postens des Käufers um und unterbricht die periodenbezogene USt-Meldekette (häufige Ursache: ein Generator, der dieselbe Form für Belastungen und Rückerstattungen wiederverwendet und das Vorzeichen in jedem monetären Feld umkehrt, statt den Dokumenttypcode zu wechseln)',
                 'ubl.ok.lmtLineSign': 'LegalMonetaryTotal/LineExtensionAmount „{v}“ ist nicht negativ (EN 16931 BT-106 — Summe der Rechnungszeilen-Nettobeträge)',
                 'ubl.warn.lmtLineSign': 'LegalMonetaryTotal/LineExtensionAmount deklariert einen negativen Wert „{v}“ — EN 16931 BR-CO-10 legt die Summe der Rechnungszeilen-Nettobeträge (BT-106) auf Σ BT-131 fest, und BT-131 ist selbst nicht negativ (Draft 107), daher muss BT-106 als Summe ebenfalls nicht negativ sein; ein negativer BT-106 pflanzt sich in die BR-CO-10-Summenkette fort, und das AP-System des Käufers liest die Rechnung als Gutschrift (häufige Ursache: eine Summary-only-Rechnungsvorlage, die BT-106 aus einem externen Buchhaltungssystem ableitet, statt die Zeilen zu summieren, sodass ein vorzeichenbehafteter Wert das Per-Line-Gate umgeht)',
+                'ubl.ok.lmtTaxExclSign': 'LegalMonetaryTotal/TaxExclusiveAmount „{v}“ ist nicht negativ (EN 16931 BT-109 — Rechnungs-Gesamtbetrag ohne USt)',
+                'ubl.warn.lmtTaxExclSign': 'LegalMonetaryTotal/TaxExclusiveAmount deklariert einen negativen Wert „{v}“ — EN 16931 BR-CO-13 komponiert den Rechnungs-Gesamtbetrag ohne USt (BT-109) aus BT-106 (Zeilensummen) + BT-99 (Zuschläge) − BT-92 (Nachlässe), wobei sich jede Eingabe auf ein nicht-negatives Dezimal einschränkt; BT-109 erbt daher den Nicht-Negativitäts-Invariante; ein negativer BT-109 pflanzt sich in die BR-CO-15-Kette (TaxInclusiveAmount = TaxExclusiveAmount + Σ TaxAmount) fort und das AP-System des Käufers liest die Rechnung als Gutschrift (häufige Ursache: eine Summary-only-Rechnungsvorlage, die BT-109 aus einem externen Buchhaltungssystem ableitet, statt ihn aus BT-92 / BT-99 / BT-106 zu komponieren)',
                 'ubl.ok.ccyValid': 'Währungscodes nach ISO 4217 aktiv: {list}',
                 'ubl.ok.ibanValid': 'IBANs der Payee-/Payer-Konten gültig (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'Payee-/Payer-IBAN scheitert an ISO-13616-MOD-97-Prüfung: {iban}',
@@ -9582,6 +9598,8 @@
                 'sepa.warn.ibanOnly': '{role} #{idx} खाते की पहचान <Othr> से करता है या उसमें <IBAN> चाइल्ड नहीं है — EPC SCT / SDD रूलबुक ISO 20022 के IBAN | Othr खाता-पहचान विकल्प को केवल-IBAN तक सीमित करती हैं; SEPA की अंतर-बैंकीय निपटान संरचना IBAN आधारित रूटिंग पर निर्भर है, इसलिए Othr से पहचाने गए खाते XML स्कीमा के अनुसार वैध हैं पर रेल स्तर पर अनुपयोगी हैं (क्लियरिंग सिस्टम EBA STEP2 / STET / RT1 गैर-IBAN पहचानकर्ता से धारक बैंक का BIC प्राप्त नहीं कर सकते और किसी भी रेल-स्तरीय प्रसंस्करण से पहले इस लेग को अस्वीकार कर देते हैं)',
                 'sepa.ok.counterpartyNmLen': 'सभी {n} लेन-देन में प्रत्येक {party}/Nm मान EPC SEPA रूलबुक की 70-वर्ण सीमा के भीतर है (प्रत्येक ≤70 वर्ण)',
                 'sepa.warn.counterpartyNmLen': 'लेन-देन #{idx} {party}/Nm "{nm}" 70-वर्ण सीमा से अधिक है ({len}/70) — ISO 20022 इस फ़ील्ड को Max140Text घोषित करता है पर EPC SCT / SDD रूलबुक अनुमत लंबाई को 70 वर्णों तक सीमित करती हैं क्योंकि यह मान प्राप्तकर्ता बैंक के खाता-विवरण रेंडरर में अंत-से-अंत तक प्रसारित होता है, और स्तंभ चौड़ाई ऐतिहासिक SWIFT MT103 / MT104 70-वर्ण विवरण सीमा के अनुरूप होती है; सीमा से अधिक नाम या तो मूक रूप से छोटा कर दिया जाता है (विवरण आधा-कटा कंपनी नाम दिखाता है जिसे ग्राहक मिलान नहीं कर सकता) या प्रेषक बैंक के पूर्व-समाशोधन गेट पर अस्वीकृत होता है (आम कारण: कानूनी नाम के साथ विभाग / शाखा प्रत्यय वाला CRM स्तंभ)',
+                'sepa.ok.rmtInfUstrdCount': 'सभी {n} भरे हुए RmtInf ब्लॉक में प्रत्येक लेन-देन का RmtInf अधिकतम एक <Ustrd> तत्व रखता है (EPC SCT / SDD रूलबुक ISO 20022 की 0..n कार्डिनैलिटी को एक ही उपस्थिति तक सीमित करती हैं)',
+                'sepa.warn.rmtInfUstrdCount': 'लेन-देन #{idx} का RmtInf {count} <Ustrd> तत्व रखता है — ISO 20022 Ustrd को 0..n घोषित करता है पर EPC SCT / SDD कार्यान्वयन दिशानिर्देश प्रति RmtInf अधिकतम कार्डिनैलिटी को एक उपस्थिति तक सीमित करते हैं; क्लियरिंग सिस्टम (EBA STEP2, STET, RT1) फ़ाइल अस्वीकार करते हैं क्योंकि प्राप्तकर्ता बैंक का खाता-विवरण रेंडरर केवल एक विवरण पंक्ति दिखाता है — कोई भी अतिरिक्त Ustrd तत्व ग्राहक को दिखने से पहले हटा दिया जाता, इसलिए नियम स्रोत पर ही इस आकार को निषिद्ध करते हैं (आम कारण: एक जनरेटर जो बहु-पंक्ति चालान विवरण को प्रति पंक्ति एक Ustrd तत्व में विभाजित करता है, इस आशा से कि बैंक उन्हें ब्लॉक के रूप में प्रस्तुत करेगा)',
                 'sepa.warn.ccyInvalid': 'मुद्रा कोड ISO 4217 में सक्रिय नहीं: {code}',
                 'sepa.warn.unknownDoc': 'अज्ञात ISO 20022 रूट तत्व — केवल आंशिक पार्सिंग।',
                 'err.sepaEmpty': 'XML इनपुट खाली है।',
@@ -9737,6 +9755,8 @@
                 'ubl.warn.taxTotalSign': 'TaxTotal #{idx} ऋणात्मक TaxAmount "{v}" घोषित करता है — EN 16931 BR-CO-13 / BR-DEC-13 के अनुसार फ़ाइल-व्यापी चालान कुल VAT राशि (BT-110) गैर-ऋणात्मक होनी चाहिए; चालान का VAT कुल शून्य हो सकता है (शून्य दर आपूर्ति, छूट प्राप्त चालान, EU भीतर रिवर्स चार्ज) पर कभी ऋणात्मक नहीं (क्रेडिट नोट भी सकारात्मक VAT कुल रखती है क्योंकि UNCL 1001 दस्तावेज़-प्रकार कोड पहले से ही क्रेडिट दिशा बता देता है); ऋणात्मक फ़ाइल-व्यापी VAT क्रेता की इनपुट-VAT प्रविष्टि के चिह्न को चुपचाप पलट देती है और प्रति-अवधि VAT रिपोर्टिंग शृंखला तोड़ देती है (आम कारण: जनरेटर शुल्क और वापसी के लिए समान आकार पुनः उपयोग करता है और दस्तावेज़-प्रकार कोड बदलने के बजाय प्रत्येक मौद्रिक स्लॉट का चिह्न पलटता है)',
                 'ubl.ok.lmtLineSign': 'LegalMonetaryTotal/LineExtensionAmount "{v}" गैर-ऋणात्मक है (EN 16931 BT-106 — चालान पंक्ति शुद्ध राशियों का योग)',
                 'ubl.warn.lmtLineSign': 'LegalMonetaryTotal/LineExtensionAmount ऋणात्मक मान "{v}" घोषित करता है — EN 16931 BR-CO-10 फ़ाइल-व्यापी चालान पंक्ति शुद्ध राशियों के योग (BT-106) को Σ BT-131 के बराबर मानता है, और BT-131 स्वयं गैर-ऋणात्मक है (draft 107), इसलिए योग के रूप में BT-106 भी गैर-ऋणात्मक होना चाहिए; ऋणात्मक BT-106 BR-CO-10 के योग शृंखला में प्रसारित होता है और क्रेता का AP सिस्टम चालान को क्रेडिट के रूप में पढ़ता है (आम कारण: सारांश-केवल चालान टेम्पलेट जो पंक्तियों का योग करने के बजाय बाहरी लेखा प्रणाली से BT-106 प्राप्त करता है, जिससे चिह्नित मान प्रति-पंक्ति गेट को बायपास कर देता है)',
+                'ubl.ok.lmtTaxExclSign': 'LegalMonetaryTotal/TaxExclusiveAmount "{v}" गैर-ऋणात्मक है (EN 16931 BT-109 — चालान कुल राशि बिना VAT)',
+                'ubl.warn.lmtTaxExclSign': 'LegalMonetaryTotal/TaxExclusiveAmount ऋणात्मक मान "{v}" घोषित करता है — EN 16931 BR-CO-13 चालान कुल राशि बिना VAT (BT-109) को BT-106 (पंक्ति योग) + BT-99 (शुल्क) − BT-92 (छूट) से रचित मानता है, और प्रत्येक इनपुट गैर-ऋणात्मक दशमलव तक सीमित है, इसलिए BT-109 गैर-ऋणात्मक अपरिवर्तनीयता विरासत में लेता है; ऋणात्मक BT-109 BR-CO-15 शृंखला (TaxInclusiveAmount = TaxExclusiveAmount + Σ TaxAmount) में प्रसारित होता है और क्रेता का AP सिस्टम चालान को क्रेडिट के रूप में पढ़ता है (आम कारण: सारांश-केवल चालान टेम्पलेट जो BT-92 / BT-99 / BT-106 से रचने के बजाय बाहरी लेखा प्रणाली से BT-109 प्राप्त करता है)',
                 'ubl.ok.ccyValid': 'मुद्रा कोड ISO 4217 के अनुसार सक्रिय: {list}',
                 'ubl.ok.ibanValid': 'भुगतानकर्ता/प्राप्तकर्ता खाते के IBAN वैध (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'भुगतानकर्ता/प्राप्तकर्ता IBAN ISO 13616 MOD-97 जाँच में विफल: {iban}',
@@ -18646,6 +18666,58 @@
             }
         }
 
+        // EPC SCT Rulebook single-Ustrd-per-RmtInf cardinality cap
+        // (draft 116). ISO 20022 declares `<RmtInf>/<Ustrd>` as
+        // `0..n` — multiple unstructured remittance lines per
+        // transaction are schema-valid. The EPC SCT (pain.001) and
+        // SDD (pain.008) Rulebook Implementation Guidelines narrow
+        // the maximum cardinality to a single occurrence per
+        // `<RmtInf>`: only one `<Ustrd>` line is allowed (the
+        // 140-character cap already gated by draft 87's Ustrd-length
+        // check pins the *single* line's length, not how many lines
+        // may appear). Clearing systems (EBA STEP2, STET, RT1) reject
+        // files whose RmtInf carries two or more Ustrd elements
+        // because the receiving bank's downstream rendering can only
+        // surface one line in the account-statement narrative — any
+        // additional lines are dropped before the customer sees them,
+        // so the rulebook forbids the shape upfront. The canonical
+        // real-world failure is a generator that concatenates a
+        // multi-line invoice description by writing each line as its
+        // own `<Ustrd>` element, intending the bank to render them as
+        // a block — schema-valid but rail-broken. Distinct from
+        // draft 108's Strd / Ustrd XOR gate: that validates which
+        // carrier is used; this gate validates the cardinality
+        // within the Ustrd carrier. Pair with draft 117 on the UBL
+        // side.
+        function sepaCheckRmtInfUstrdCount(out, doc, detected) {
+            if (detected.type !== 'pain.001' && detected.type !== 'pain.008') return;
+            const w = detected.wrapper;
+            if (!w) return;
+            const txs = [
+                ...sepaAllLocal(w, 'CdtTrfTxInf'),
+                ...sepaAllLocal(w, 'DrctDbtTxInf')
+            ];
+            if (!txs.length) return;
+            let seen = 0;
+            const bad = [];
+            txs.forEach((tx, i) => {
+                const rmtInf = sepaFirst(tx, 'RmtInf');
+                if (!rmtInf) return;
+                const ustrds = sepaAllLocal(rmtInf, 'Ustrd').filter(el => (el.textContent || '').trim().length > 0);
+                if (!ustrds.length) return;
+                seen++;
+                if (ustrds.length > 1) bad.push({ idx: i + 1, count: ustrds.length });
+            });
+            if (!seen) return;
+            if (bad.length === 0) {
+                tlsRenderRow(out, t('sepa.row.warning'), '✓ ' + tFormat('sepa.ok.rmtInfUstrdCount', { n: intlNumber(seen) }));
+            } else {
+                for (const b of bad) {
+                    tlsRenderRow(out, t('sepa.row.warning'), '✗ ' + tFormat('sepa.warn.rmtInfUstrdCount', { idx: intlNumber(b.idx), count: intlNumber(b.count) }));
+                }
+            }
+        }
+
         // EPC SEPA Rulebook counterparty-name 70-character length cap
         // (draft 114). ISO 20022 declares `<Cdtr>/<Nm>` (pain.001) and
         // `<Dbtr>/<Nm>` (pain.008) as `Max140Text` — Unicode strings
@@ -18901,6 +18973,7 @@
                 sepaCheckCounterpartyName(out, doc, detected);
                 sepaCheckIbanOnly(out, doc, detected);
                 sepaCheckCounterpartyNameLength(out, doc, detected);
+                sepaCheckRmtInfUstrdCount(out, doc, detected);
                 sepaCheckE2eIdCharset(out, doc, detected);
                 sepaCheckInstrIdCharset(out, doc, detected);
                 sepaCheckMndtIdCharset(out, doc, detected);
@@ -20690,6 +20763,52 @@
             }
         }
 
+        // EN 16931 BR-CO-12 / BT-109 file-wide TaxExclusiveAmount
+        // non-negative check (draft 117). EN 16931 BT-109 (Invoice
+        // total amount without VAT) is carried by UBL as the
+        // `<cbc:TaxExclusiveAmount>` direct child of
+        // `<cac:LegalMonetaryTotal>` — the headline net figure on
+        // every invoice and credit note. BR-CO-13 pins BT-109 to the
+        // sum of (BT-106 line totals) plus (BT-99 charges) minus
+        // (BT-92 allowances), and the inputs (BT-106 covered by
+        // draft 115; BT-92 / BT-99 allowance / charge amounts gated by
+        // their own non-negativity rules) all narrow to non-negative
+        // decimals, so BT-109 as the composed total inherits the
+        // non-negativity invariant. UBL declares `<cbc:TaxExclusive
+        // Amount>` as `xsd:decimal` which permits negative values,
+        // so a generator that bypasses the per-line totals and writes
+        // BT-109 directly (e.g. summary-only invoice templates that
+        // derive the figure from an external accounting system rather
+        // than composing it from BT-92 / BT-99 / BT-106) can write a
+        // signed value that's schema-valid but rail-broken — the
+        // negative BT-109 propagates into the BR-CO-15 chain
+        // (TaxInclusive = TaxExclusive + Σ TaxAmount) and the buyer's
+        // AP system reads the invoice as a credit. Parallel in shape
+        // to drafts 113 (file-wide BT-110 sign) and 115 (file-wide
+        // BT-106 sign): all three validate the document-level signed
+        // monetary anchors that BR-CO-15 / BR-CO-16 totals chains
+        // depend on. The new `ublCheckLegalMonTotalTaxExclSign()`
+        // reads `<cac:LegalMonetaryTotal>/<cbc:TaxExclusiveAmount>`
+        // via `sepaFirstChildLocal`, parses to `Number`, and emits
+        // one green confirmation row when the value is ≥ 0 or one
+        // red row otherwise. Pair with draft 116 on the SEPA side.
+        function ublCheckLegalMonTotalTaxExclSign(out, detected) {
+            const r = detected.root;
+            if (!r) return;
+            const lmt = sepaFirst(r, 'LegalMonetaryTotal');
+            if (!lmt) return;
+            const amtEl = sepaFirstChildLocal(lmt, 'TaxExclusiveAmount');
+            if (!amtEl) return;
+            const raw = (amtEl.textContent || '').trim();
+            const v = Number(raw);
+            if (!Number.isFinite(v)) return;
+            if (v >= 0) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + tFormat('ubl.ok.lmtTaxExclSign', { v: raw }));
+            } else {
+                tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + tFormat('ubl.warn.lmtTaxExclSign', { v: raw }));
+            }
+        }
+
         // EN 16931 BT-106 file-wide LineExtensionAmount non-negative
         // check (draft 115). EN 16931 BT-106 (Sum of Invoice line net
         // amounts) is carried by UBL as the `<cbc:LineExtensionAmount>`
@@ -21024,6 +21143,7 @@
                 ublCheckSellerName(out, detected);
                 ublCheckTaxTotalSign(out, detected);
                 ublCheckLegalMonTotalLineSign(out, detected);
+                ublCheckLegalMonTotalTaxExclSign(out, detected);
                 ublCheckLineAmount(out, detected);
             } catch (e) {
                 tlsRenderRow(out, t('ubl.row.error'), e.message);

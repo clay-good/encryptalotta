@@ -3440,6 +3440,43 @@ test('ubl: LegalMonetaryTotal/LineExtensionAmount BT-106 sign flags a negative f
   await expect(page.locator('#ubl-results')).toContainText(/LegalMonetaryTotal\/LineExtensionAmount declares a negative value "-100\.00"/i, { timeout: 5_000 });
 });
 
+test('sepa: single-Ustrd per RmtInf confirms on canonical pain.001', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  await page.fill('#sepa-input', SEPA_PAIN001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Every transaction's RmtInf carries at most one <Ustrd> element/i, { timeout: 5_000 });
+});
+
+test('sepa: single-Ustrd per RmtInf flags two <Ustrd> elements in the same RmtInf', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Add a second <Ustrd> alongside the canonical one (multi-line description split into elements).
+  const two = SEPA_PAIN001.replace(
+    '<RmtInf><Ustrd>Invoice 2024-001</Ustrd></RmtInf>',
+    '<RmtInf><Ustrd>Invoice 2024-001</Ustrd><Ustrd>Line 2 description</Ustrd></RmtInf>'
+  );
+  await page.fill('#sepa-input', two);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Transaction #1 RmtInf carries 2 <Ustrd> elements/i, { timeout: 5_000 });
+});
+
+test('ubl: LegalMonetaryTotal/TaxExclusiveAmount BT-109 sign confirms on canonical fixture', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/LegalMonetaryTotal\/TaxExclusiveAmount "100\.00" is non-negative \(EN 16931 BT-109/i, { timeout: 5_000 });
+});
+
+test('ubl: LegalMonetaryTotal/TaxExclusiveAmount BT-109 sign flags a negative file-wide value', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  const neg = UBL_INVOICE.replace(
+    '<cbc:TaxExclusiveAmount currencyID="EUR">100.00</cbc:TaxExclusiveAmount>',
+    '<cbc:TaxExclusiveAmount currencyID="EUR">-100.00</cbc:TaxExclusiveAmount>'
+  );
+  await page.fill('#ubl-input', neg);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/LegalMonetaryTotal\/TaxExclusiveAmount declares a negative value "-100\.00"/i, { timeout: 5_000 });
+});
+
 test('ubl: rejects non-UBL XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   await page.fill('#ubl-input', '<?xml version="1.0"?><Document/>');
