@@ -1639,6 +1639,7 @@ const UBL_INVOICE = `<?xml version="1.0" encoding="UTF-8"?>
   <cac:AccountingCustomerParty>
     <cac:Party>
       <cac:PartyName><cbc:Name>Beispiel SARL</cbc:Name></cac:PartyName>
+      <cac:PartyLegalEntity><cbc:RegistrationName>Beispiel SARL</cbc:RegistrationName></cac:PartyLegalEntity>
     </cac:Party>
   </cac:AccountingCustomerParty>
   <cac:TaxTotal>
@@ -2175,8 +2176,8 @@ test('ubl: Buyer VAT identifier confirms a valid FR VAT ID', async ({ page }) =>
   // Party/PartyTaxScheme/CompanyID with TaxScheme/ID=VAT. FR40303265045 is
   // the canonical FR example with a passing (12 + 3*(SIREN%97))%97 checksum.
   const withVat = UBL_INVOICE.replace(
-    '<cac:PartyName><cbc:Name>Beispiel SARL</cbc:Name></cac:PartyName>\n    </cac:Party>\n  </cac:AccountingCustomerParty>',
-    '<cac:PartyName><cbc:Name>Beispiel SARL</cbc:Name></cac:PartyName>\n      <cac:PartyTaxScheme><cbc:CompanyID>FR40303265045</cbc:CompanyID><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:PartyTaxScheme>\n    </cac:Party>\n  </cac:AccountingCustomerParty>'
+    '<cac:PartyLegalEntity><cbc:RegistrationName>Beispiel SARL</cbc:RegistrationName></cac:PartyLegalEntity>\n    </cac:Party>\n  </cac:AccountingCustomerParty>',
+    '<cac:PartyLegalEntity><cbc:RegistrationName>Beispiel SARL</cbc:RegistrationName></cac:PartyLegalEntity>\n      <cac:PartyTaxScheme><cbc:CompanyID>FR40303265045</cbc:CompanyID><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:PartyTaxScheme>\n    </cac:Party>\n  </cac:AccountingCustomerParty>'
   );
   await page.fill('#ubl-input', withVat);
   await page.click('#btn-ubl-parse');
@@ -2186,8 +2187,8 @@ test('ubl: Buyer VAT identifier confirms a valid FR VAT ID', async ({ page }) =>
 test('ubl: Buyer VAT identifier flags a malformed value', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   const withVat = UBL_INVOICE.replace(
-    '<cac:PartyName><cbc:Name>Beispiel SARL</cbc:Name></cac:PartyName>\n    </cac:Party>\n  </cac:AccountingCustomerParty>',
-    '<cac:PartyName><cbc:Name>Beispiel SARL</cbc:Name></cac:PartyName>\n      <cac:PartyTaxScheme><cbc:CompanyID>987654321</cbc:CompanyID><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:PartyTaxScheme>\n    </cac:Party>\n  </cac:AccountingCustomerParty>'
+    '<cac:PartyLegalEntity><cbc:RegistrationName>Beispiel SARL</cbc:RegistrationName></cac:PartyLegalEntity>\n    </cac:Party>\n  </cac:AccountingCustomerParty>',
+    '<cac:PartyLegalEntity><cbc:RegistrationName>Beispiel SARL</cbc:RegistrationName></cac:PartyLegalEntity>\n      <cac:PartyTaxScheme><cbc:CompanyID>987654321</cbc:CompanyID><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:PartyTaxScheme>\n    </cac:Party>\n  </cac:AccountingCustomerParty>'
   );
   await page.fill('#ubl-input', withVat);
   await page.click('#btn-ubl-parse');
@@ -3497,6 +3498,52 @@ test('sepa: AdrLine 2-line cap flags a Cdtr address with three AdrLine elements'
   await page.fill('#sepa-input', threeLine);
   await page.click('#btn-sepa-parse');
   await expect(page.locator('#sepa-results')).toContainText(/PostalAddress #1 declares 3 <AdrLine> elements/i, { timeout: 5_000 });
+});
+
+test('sepa: AdrLine 70-char EPC length cap confirms on a clean two-line Cdtr address', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  const twoLine = SEPA_PAIN001.replace(
+    '<Cdtr><Nm>Supplier GmbH</Nm></Cdtr>',
+    '<Cdtr><Nm>Supplier GmbH</Nm><PstlAdr><AdrLine>Hauptstrasse 1</AdrLine><AdrLine>10115 Berlin DE</AdrLine></PstlAdr></Cdtr>'
+  );
+  await page.fill('#sepa-input', twoLine);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Every populated AdrLine fits within the EPC SEPA Rulebook 70-character cap/i, { timeout: 5_000 });
+});
+
+test('sepa: AdrLine 70-char EPC length cap flags an over-length AdrLine', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // 76-char address line (street + number + apartment + building name + neighborhood
+  // packed into one free-text line — over the EPC SEPA Rulebook 70-char cap).
+  const longLine = 'Hauptstrasse 12 Apartment 7 Building North Wing Charlottenburg Neighborhood';
+  const over = SEPA_PAIN001.replace(
+    '<Cdtr><Nm>Supplier GmbH</Nm></Cdtr>',
+    '<Cdtr><Nm>Supplier GmbH</Nm><PstlAdr><AdrLine>' + longLine + '</AdrLine></PstlAdr></Cdtr>'
+  );
+  await page.fill('#sepa-input', over);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/PostalAddress #1 line 1 .* exceeds the 70-character cap/i, { timeout: 5_000 });
+});
+
+test('ubl: Buyer RegistrationName BR-07 confirms on canonical fixture', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Canonical UBL_INVOICE now declares PartyLegalEntity/RegistrationName=Beispiel SARL
+  // on the customer party.
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Buyer PartyLegalEntity\/RegistrationName "Beispiel SARL" present/i, { timeout: 5_000 });
+});
+
+test('ubl: Buyer RegistrationName BR-07 flags a missing PartyLegalEntity', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Strip the customer's PartyLegalEntity block — leave only PartyName.
+  const noLegal = UBL_INVOICE.replace(
+    '<cac:PartyLegalEntity><cbc:RegistrationName>Beispiel SARL</cbc:RegistrationName></cac:PartyLegalEntity>',
+    ''
+  );
+  await page.fill('#ubl-input', noLegal);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/AccountingCustomerParty is missing Party\/PartyLegalEntity\/RegistrationName/i, { timeout: 5_000 });
 });
 
 test('ubl: LegalMonetaryTotal/TaxInclusiveAmount BT-112 sign confirms on canonical fixture', async ({ page }) => {
