@@ -3163,6 +3163,48 @@ test('ubl: Item Name presence check flags a line that omits Item/Name', async ({
   await expect(page.locator('#ubl-results')).toContainText(/Line #1 is missing an Item\/Name/i, { timeout: 5_000 });
 });
 
+test('sepa: CdtrSchmeId SchmeNm/Prtry check confirms when the literal "SEPA" is declared', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  const fixture = buildPain008('MANDATE-2024-001').replace(
+    '<Cdtr><Nm>Creditor Inc</Nm></Cdtr>',
+    '<Cdtr><Nm>Creditor Inc</Nm></Cdtr>\n      <CdtrSchmeId><Id><PrvtId><Othr><Id>DE98ZZZ09999999999</Id><SchmeNm><Prtry>SEPA</Prtry></SchmeNm></Othr></PrvtId></Id></CdtrSchmeId>'
+  );
+  await page.fill('#sepa-input', fixture);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/CdtrSchmeId\/Id\/PrvtId\/Othr\/SchmeNm\/Prtry declares the literal "SEPA"/i, { timeout: 5_000 });
+});
+
+test('sepa: CdtrSchmeId SchmeNm/Prtry check flags a non-SEPA scheme label', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Domestic scheme label "SDD" instead of the EPC-required "SEPA".
+  const fixture = buildPain008('MANDATE-2024-001').replace(
+    '<Cdtr><Nm>Creditor Inc</Nm></Cdtr>',
+    '<Cdtr><Nm>Creditor Inc</Nm></Cdtr>\n      <CdtrSchmeId><Id><PrvtId><Othr><Id>DE98ZZZ09999999999</Id><SchmeNm><Prtry>SDD</Prtry></SchmeNm></Othr></PrvtId></Id></CdtrSchmeId>'
+  );
+  await page.fill('#sepa-input', fixture);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/CdtrSchmeId\/Id\/PrvtId\/Othr\/SchmeNm\/Prtry declares "SDD"/i, { timeout: 5_000 });
+});
+
+test('ubl: PriceAmount non-negative check confirms when every line declares a non-negative price', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Canonical UBL_INVOICE declares PriceAmount=50.00 on its single line.
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Every line declares a non-negative Price\/PriceAmount across all 1 line\(s\)/i, { timeout: 5_000 });
+});
+
+test('ubl: PriceAmount non-negative check flags a negative unit price', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  const withNeg = UBL_INVOICE.replace(
+    '<cbc:PriceAmount currencyID="EUR">50.00</cbc:PriceAmount>',
+    '<cbc:PriceAmount currencyID="EUR">-50.00</cbc:PriceAmount>'
+  );
+  await page.fill('#ubl-input', withNeg);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Line #1 declares a negative Price\/PriceAmount "-50\.00"/i, { timeout: 5_000 });
+});
+
 test('ubl: rejects non-UBL XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   await page.fill('#ubl-input', '<?xml version="1.0"?><Document/>');
