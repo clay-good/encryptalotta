@@ -1633,6 +1633,7 @@ const UBL_INVOICE = `<?xml version="1.0" encoding="UTF-8"?>
   <cac:AccountingSupplierParty>
     <cac:Party>
       <cac:PartyName><cbc:Name>ACME Widgets GmbH</cbc:Name></cac:PartyName>
+      <cac:PostalAddress><cac:Country><cbc:IdentificationCode>DE</cbc:IdentificationCode></cac:Country></cac:PostalAddress>
       <cac:PartyLegalEntity><cbc:RegistrationName>ACME Widgets GmbH</cbc:RegistrationName></cac:PartyLegalEntity>
     </cac:Party>
   </cac:AccountingSupplierParty>
@@ -2419,12 +2420,8 @@ test('sepa: PstlAdr/Ctry check flags UK (not an ISO code — Great Britain is GB
 
 test('ubl: Country/IdentificationCode check confirms on a valid ISO 3166-1 alpha-2 code', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
-  // Inject a supplier PostalAddress with a clean ISO 3166-1 alpha-2 country code (DE).
-  const withCountry = UBL_INVOICE.replace(
-    '<cac:PartyLegalEntity><cbc:RegistrationName>ACME Widgets GmbH</cbc:RegistrationName></cac:PartyLegalEntity>',
-    '<cac:PostalAddress><cac:Country><cbc:IdentificationCode>DE</cbc:IdentificationCode></cac:Country></cac:PostalAddress>\n      <cac:PartyLegalEntity><cbc:RegistrationName>ACME Widgets GmbH</cbc:RegistrationName></cac:PartyLegalEntity>'
-  );
-  await page.fill('#ubl-input', withCountry);
+  // Canonical UBL_INVOICE supplier carries PostalAddress/Country/IdentificationCode=DE.
+  await page.fill('#ubl-input', UBL_INVOICE);
   await page.click('#btn-ubl-parse');
   await expect(page.locator('#ubl-results')).toContainText(/Party country codes \(PostalAddress\/Country\/IdentificationCode\) are all valid ISO 3166-1 alpha-2/i, { timeout: 5_000 });
 });
@@ -2433,8 +2430,8 @@ test('ubl: Country/IdentificationCode check flags UK (not an ISO code — Great 
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   // `UK` passes UBL 2.1's plain-text declaration but PEPPOL access points reject it at the schematron gate.
   const withCountry = UBL_INVOICE.replace(
-    '<cac:PartyLegalEntity><cbc:RegistrationName>ACME Widgets GmbH</cbc:RegistrationName></cac:PartyLegalEntity>',
-    '<cac:PostalAddress><cac:Country><cbc:IdentificationCode>UK</cbc:IdentificationCode></cac:Country></cac:PostalAddress>\n      <cac:PartyLegalEntity><cbc:RegistrationName>ACME Widgets GmbH</cbc:RegistrationName></cac:PartyLegalEntity>'
+    '<cbc:IdentificationCode>DE</cbc:IdentificationCode>',
+    '<cbc:IdentificationCode>UK</cbc:IdentificationCode>'
   );
   await page.fill('#ubl-input', withCountry);
   await page.click('#btn-ubl-parse');
@@ -3523,6 +3520,50 @@ test('sepa: AdrLine 70-char EPC length cap flags an over-length AdrLine', async 
   await page.fill('#sepa-input', over);
   await page.click('#btn-sepa-parse');
   await expect(page.locator('#sepa-results')).toContainText(/PostalAddress #1 line 1 .* exceeds the 70-character cap/i, { timeout: 5_000 });
+});
+
+test('sepa: TwnNm 35-char EPC length cap confirms on a clean Cdtr town name', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  const cleanTown = SEPA_PAIN001.replace(
+    '<Cdtr><Nm>Supplier GmbH</Nm></Cdtr>',
+    '<Cdtr><Nm>Supplier GmbH</Nm><PstlAdr><TwnNm>Berlin</TwnNm></PstlAdr></Cdtr>'
+  );
+  await page.fill('#sepa-input', cleanTown);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Every populated TwnNm fits within the EPC SEPA Rulebook 35-character cap/i, { timeout: 5_000 });
+});
+
+test('sepa: TwnNm 35-char EPC length cap flags an over-length town/city name', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // 49-char city + administrative-division packed into one free-text field.
+  const longTown = 'Frankfurt am Main Hessen Greater Rhine-Main Area';
+  const over = SEPA_PAIN001.replace(
+    '<Cdtr><Nm>Supplier GmbH</Nm></Cdtr>',
+    '<Cdtr><Nm>Supplier GmbH</Nm><PstlAdr><TwnNm>' + longTown + '</TwnNm></PstlAdr></Cdtr>'
+  );
+  await page.fill('#sepa-input', over);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/PostalAddress #1 TwnNm .* exceeds the 35-character cap/i, { timeout: 5_000 });
+});
+
+test('ubl: Seller PostalAddress Country BR-09 confirms on canonical fixture', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Canonical UBL_INVOICE supplier carries PostalAddress/Country/IdentificationCode=DE.
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Seller PostalAddress\/Country\/IdentificationCode "DE" present \(EN 16931 BR-09 \/ BT-40\)/i, { timeout: 5_000 });
+});
+
+test('ubl: Seller PostalAddress Country BR-09 flags a missing PostalAddress', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Strip the supplier's PostalAddress block — leave only PartyName + PartyLegalEntity.
+  const noAddr = UBL_INVOICE.replace(
+    '<cac:PostalAddress><cac:Country><cbc:IdentificationCode>DE</cbc:IdentificationCode></cac:Country></cac:PostalAddress>',
+    ''
+  );
+  await page.fill('#ubl-input', noAddr);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/AccountingSupplierParty is missing Party\/PostalAddress\/Country\/IdentificationCode/i, { timeout: 5_000 });
 });
 
 test('ubl: Buyer RegistrationName BR-07 confirms on canonical fixture', async ({ page }) => {
