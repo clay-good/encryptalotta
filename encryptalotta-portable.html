@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <!--
   encryptalotta — single-file portable build
-  Source mtime: 2026-05-20T12:22:57.202Z
-  Source: index.html (SHA-256: e1b938b236cb3bc03a7fb6a9c6f15300694ef3ab54dc81fb04a07183d7040fdf)
+  Source mtime: 2026-05-20T12:42:27.871Z
+  Source: index.html (SHA-256: 9d88efa265a1e141f40503b0acc7824e01d4fc9156939cb93464094eabe4303e)
   All vendored JavaScript inlined; favicons inlined as data: URIs.
   Identical functionality to the live site at https://encryptalotta.com.
   Runs from file://, USB stick, chat attachment, anywhere. No network calls.
@@ -6824,6 +6824,8 @@ var qrcode = function() {
                 'sepa.warn.nbOfTxsShape': '{scope} declares "{v}" — ISO 20022 Max15NumericText requires 1-15 ASCII digits with no decimal point, sign, exponent, separators, or whitespace; the value-parity gates (drafts 35 / 92) route through Number() which silently accepts shapes the schema rejects (a common cause is a generator that serialises the count as a JSON number landing as "1.0" or that interpolates a locale-formatted "1,000" from a templating engine)',
                 'sepa.ok.rmtInfXor': 'Every transaction\'s RmtInf carries at most one of <Strd> or <Ustrd> across all {n} populated RmtInf block(s) — EPC SEPA Rulebook treats structured and unstructured remittance information as mutually exclusive alternatives',
                 'sepa.warn.rmtInfXor': 'Transaction #{idx} RmtInf populates both <Ustrd> and <Strd> — the EPC SCT / SDD Rulebooks narrow ISO 20022\'s free container to exactly one of the two forms per occurrence (unstructured human-readable text OR structured CdtrRefInf, never both); clearing systems reject at the rail-level rulebook gate because downstream reconciliation can\'t tell which carrier holds the canonical reference',
+                'sepa.ok.counterpartyNm': 'Every transaction declares a {party}/Nm across all {n} transaction(s) (EPC SEPA Rulebook {attr} — counterparty legal name)',
+                'sepa.warn.counterpartyNm': 'Transaction #{idx} is missing {party}/Nm — EPC SEPA Rulebook {attr} requires the counterparty legal name on every transaction; the value is what the receiving bank prints on the customer\'s statement and what AML / sanctions screening keys off, so an empty or missing name is rejected by SEPA clearing systems at the rulebook gate (a common cause is a generator that defaults the party block to an account-only structure when the source database\'s name column is null)',
                 'sepa.warn.ccyInvalid': 'Currency code not active per ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unrecognized ISO 20022 root element — partial parse only.',
                 'err.sepaEmpty': 'XML input is empty.',
@@ -6983,6 +6985,8 @@ var qrcode = function() {
                 'ubl.warn.lineAmountSign': 'Line #{idx} declares a negative LineExtensionAmount "{v}" — EN 16931 BR-26 / BR-CN-26 require the per-line net amount (BT-131) to be non-negative; a negative line amount silently inverts the file-wide LegalMonetaryTotal sum (drafts 28 / 45), produces a payable amount the buyer reads as a credit when the supplier meant a charge, and short-circuits the AllowanceCharge / CreditNote flow EN 16931 prescribes for genuine reductions',
                 'ubl.ok.invoiceIdLen': 'Invoice/CreditNote ID (EN 16931 BT-1) fits within the 35-character SEPA EndToEndId cap across {n} reference(s) (≤35 characters)',
                 'ubl.warn.invoiceIdLen': 'Invoice/CreditNote ID "{id}" exceeds the 35-character cap ({len}/35 characters) — EN 16931 BT-1 is routinely copied verbatim into SEPA EndToEndId (ISO 20022 Max35Text) by downstream pain.001 generators; a longer value forces the SEPA generator to truncate (silent data loss across the reconciliation key the creditor\'s bank-statement matching pairs against the open receivable) or to fail the file at the schema-validation gate',
+                'ubl.ok.sellerName': 'Seller PartyLegalEntity/RegistrationName "{name}" present (EN 16931 BR-08 / BT-27)',
+                'ubl.warn.sellerName': 'AccountingSupplierParty is missing Party/PartyLegalEntity/RegistrationName — EN 16931 BR-08 / BT-27 requires the seller\'s legal-entity registration name on every PEPPOL invoice and credit note; the value is the name printed on the buyer\'s purchase ledger and the name AP / VAT systems pair with the BT-31 Seller VAT identifier for tax reporting (UBL 2.1 marks PartyLegalEntity / RegistrationName optional at the schema level so a supplier party carrying only PartyName/Name (the trading name, BT-28) passes XML validation but is rejected by PEPPOL access points at the BR-08 schematron gate)',
                 'ubl.ok.ccyValid': 'Currency codes active per ISO 4217: {list}',
                 'ubl.ok.ibanValid': 'Payee/Payer financial account IBANs valid (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'Payee/Payer IBAN failed ISO 13616 MOD-97 check: {iban}',
@@ -8104,6 +8108,8 @@ var qrcode = function() {
                 'sepa.warn.nbOfTxsShape': '{scope} déclare « {v} » — ISO 20022 Max15NumericText exige 1 à 15 chiffres ASCII sans point décimal, signe, exposant, séparateurs ni espace ; les contrôles de parité de valeur (drafts 35 / 92) passent par Number() qui accepte silencieusement des formes rejetées par le schéma (cause fréquente : un générateur qui sérialise le compteur comme un nombre JSON résultant en « 1.0 », ou qui intercale une valeur formatée localement « 1 000 » depuis un moteur de modèle)',
                 'sepa.ok.rmtInfXor': 'Le RmtInf de chaque transaction ne porte qu’une seule forme parmi <Strd> ou <Ustrd> sur l’ensemble des {n} bloc(s) RmtInf renseigné(s) — les règles EPC SEPA traitent les informations de remise structurées et non structurées comme des alternatives mutuellement exclusives',
                 'sepa.warn.rmtInfXor': 'La transaction #{idx} renseigne à la fois <Ustrd> et <Strd> dans RmtInf — les règles EPC SCT / SDD restreignent le conteneur libre d’ISO 20022 à exactement une des deux formes par occurrence (texte libre non structuré OU CdtrRefInf structuré, jamais les deux) ; les systèmes de compensation rejettent au contrôle de règles au niveau du rail car le rapprochement aval ne peut pas déterminer quel porteur contient la référence canonique',
+                'sepa.ok.counterpartyNm': 'Chaque transaction déclare {party}/Nm sur l’ensemble des {n} transaction(s) (règles EPC SEPA {attr} — nom légal de la contrepartie)',
+                'sepa.warn.counterpartyNm': 'La transaction #{idx} ne déclare pas {party}/Nm — les règles EPC SEPA {attr} exigent le nom légal de la contrepartie sur chaque transaction ; la valeur est ce que la banque destinataire imprime sur le relevé du client et ce sur quoi se basent les contrôles LCB-FT / sanctions, un nom vide ou absent est donc rejeté par les systèmes de compensation SEPA au contrôle de règles (cause fréquente : un générateur qui réduit le bloc partie à une structure compte-seule lorsque la colonne nom de la base source est nulle)',
                 'sepa.warn.ccyInvalid': 'Code monétaire non actif selon ISO 4217 : {code}',
                 'sepa.warn.unknownDoc': 'Élément racine ISO 20022 non reconnu — analyse partielle uniquement.',
                 'err.sepaEmpty': 'Le XML d’entrée est vide.',
@@ -8253,6 +8259,8 @@ var qrcode = function() {
                 'ubl.warn.lineAmountSign': 'Ligne #{idx} déclare un LineExtensionAmount négatif « {v} » — EN 16931 BR-26 / BR-CN-26 exigent un montant net de ligne (BT-131) non négatif ; un montant de ligne négatif inverse silencieusement la somme LegalMonetaryTotal du fichier (drafts 28 / 45), produit un montant dû lu par l’acheteur comme un avoir alors que le fournisseur visait une charge, et court-circuite le flux AllowanceCharge / CreditNote qu’EN 16931 prescrit pour les réductions véritables',
                 'ubl.ok.invoiceIdLen': 'L’ID Invoice/CreditNote (EN 16931 BT-1) respecte la limite de 35 caractères de SEPA EndToEndId sur {n} référence(s) (≤ 35 caractères)',
                 'ubl.warn.invoiceIdLen': 'L’ID Invoice/CreditNote « {id} » dépasse la limite de 35 caractères ({len}/35) — EN 16931 BT-1 est régulièrement recopié tel quel dans SEPA EndToEndId (ISO 20022 Max35Text) par les générateurs pain.001 en aval ; une valeur plus longue force le générateur SEPA à tronquer (perte silencieuse de la clé de rapprochement que le rapprochement des relevés bancaires du créancier utilise pour apparier la créance ouverte) ou à rejeter le fichier au contrôle de schéma',
+                'ubl.ok.sellerName': 'PartyLegalEntity/RegistrationName du vendeur « {name} » présent (EN 16931 BR-08 / BT-27)',
+                'ubl.warn.sellerName': 'AccountingSupplierParty ne déclare pas Party/PartyLegalEntity/RegistrationName — EN 16931 BR-08 / BT-27 exige le nom légal d’entité du vendeur sur chaque facture et avoir PEPPOL ; la valeur est le nom imprimé sur le grand livre des achats de l’acheteur et le nom que les systèmes AP / TVA associent à l’identifiant TVA vendeur BT-31 pour la déclaration fiscale (UBL 2.1 rend PartyLegalEntity / RegistrationName facultatif au niveau du schéma, donc un bloc fournisseur ne portant que PartyName/Name (le nom commercial, BT-28) est conforme au schéma mais rejeté par les points d’accès PEPPOL au contrôle schématron BR-08)',
                 'ubl.ok.ccyValid': 'Codes monétaires actifs selon ISO 4217 : {list}',
                 'ubl.ok.ibanValid': 'IBAN des comptes Payee/Payer valides (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'IBAN Payee/Payer échoue au contrôle ISO 13616 MOD-97 : {iban}',
@@ -9344,6 +9352,8 @@ var qrcode = function() {
                 'sepa.warn.nbOfTxsShape': '{scope} 声明 "{v}"——ISO 20022 Max15NumericText 要求 1-15 位 ASCII 数字，不允许小数点、正负号、指数、分隔符或空白；数值一致性校验（drafts 35 / 92）通过 Number() 解析，会默默接受模式所拒绝的形式（常见原因是生成器将计数序列化为 JSON 数字而落地为 "1.0"，或从模板引擎中插入了本地化格式 "1,000"）',
                 'sepa.ok.rmtInfXor': '每笔交易的 RmtInf 在所有 {n} 个已填充 RmtInf 块中至多包含 <Strd> 或 <Ustrd> 中的一种——EPC SEPA 规则书将结构化与非结构化汇款信息视为互斥替代项',
                 'sepa.warn.rmtInfXor': '第 {idx} 笔交易的 RmtInf 同时填充了 <Ustrd> 和 <Strd>——EPC SCT / SDD 规则书将 ISO 20022 的自由容器收窄为每次出现仅可取两种形式之一（非结构化人类可读文本 或 结构化 CdtrRefInf，不能同时使用）；清算系统在轨道级规则书校验处拒绝，因为下游对账无法判断哪个载体保存了规范引用',
+                'sepa.ok.counterpartyNm': '所有 {n} 笔交易均声明了 {party}/Nm（EPC SEPA 规则书 {attr}——对手方法定名称）',
+                'sepa.warn.counterpartyNm': '第 {idx} 笔交易缺少 {party}/Nm——EPC SEPA 规则书 {attr} 要求每笔交易都包含对手方的法定名称；该值是收款行打印在客户对账单上的内容，也是反洗钱 / 制裁筛查所依据的字段，空白或缺失的名称会被 SEPA 清算系统在规则书校验处拒绝（常见原因是生成器在源数据库名称列为空时将当事人块默认为仅含账户的结构）',
                 'sepa.warn.ccyInvalid': '币种代码不在 ISO 4217 现行清单中：{code}',
                 'sepa.warn.unknownDoc': '无法识别的 ISO 20022 根元素 — 仅部分解析。',
                 'err.sepaEmpty': 'XML 输入为空。',
@@ -9493,6 +9503,8 @@ var qrcode = function() {
                 'ubl.warn.lineAmountSign': '第 {idx} 行声明负的 LineExtensionAmount "{v}"——EN 16931 BR-26 / BR-CN-26 要求行级净额（BT-131）非负；负的行金额会默默反转文件级 LegalMonetaryTotal 合计（drafts 28 / 45），生成的应付金额会被买方读作贷项（卖方本意为收费），并绕过 EN 16931 为真正的减少所规定的 AllowanceCharge / CreditNote 流程',
                 'ubl.ok.invoiceIdLen': 'Invoice/CreditNote ID（EN 16931 BT-1）在 {n} 个引用中均符合 SEPA EndToEndId 的 35 字符上限（≤35 字符）',
                 'ubl.warn.invoiceIdLen': 'Invoice/CreditNote ID "{id}" 超过 35 字符上限（{len}/35）——EN 16931 BT-1 通常被下游 pain.001 生成器逐字复制到 SEPA EndToEndId（ISO 20022 Max35Text）；过长的值会迫使 SEPA 生成器截断（导致用于将付款匹配到未结应收账款的对账键发生静默数据丢失）或在模式校验处拒绝文件',
+                'ubl.ok.sellerName': '已声明卖方 PartyLegalEntity/RegistrationName "{name}"（EN 16931 BR-08 / BT-27）',
+                'ubl.warn.sellerName': 'AccountingSupplierParty 缺少 Party/PartyLegalEntity/RegistrationName——EN 16931 BR-08 / BT-27 要求每张 PEPPOL 发票和贷项通知单声明卖方的法定实体注册名称；该值是买方采购总账中打印的名称，也是 AP / 增值税系统与 BT-31 卖方 VAT 标识相关联用于税务申报的名称（UBL 2.1 将 PartyLegalEntity / RegistrationName 设为可选，所以仅包含 PartyName/Name（商号，BT-28）的供应商当事人在模式上有效，但会被 PEPPOL 接入点在 BR-08 schematron 校验处拒绝）',
                 'ubl.ok.ccyValid': '币种代码按 ISO 4217 有效：{list}',
                 'ubl.ok.ibanValid': '收款方/付款方账户 IBAN 通过 ISO 13616 MOD-97 校验（{n}）',
                 'ubl.warn.ibanInvalid': '收款方/付款方 IBAN 未通过 ISO 13616 MOD-97 校验：{iban}',
@@ -10599,6 +10611,8 @@ var qrcode = function() {
                 'sepa.warn.nbOfTxsShape': '{scope} deklariert „{v}“ — ISO 20022 Max15NumericText verlangt 1-15 ASCII-Ziffern ohne Dezimalpunkt, Vorzeichen, Exponent, Trennzeichen oder Leerraum; die Wert-Paritäts-Gates (Drafts 35 / 92) laufen über Number(), das stillschweigend Formen akzeptiert, die das Schema ablehnt (häufige Ursache: ein Generator, der den Zähler als JSON-Zahl serialisiert und „1.0“ erzeugt, oder eine aus einer Template-Engine eingefügte gebietsformatierte Zahl „1.000“)',
                 'sepa.ok.rmtInfXor': 'Das RmtInf jeder Transaktion enthält höchstens eines von <Strd> oder <Ustrd> über alle {n} befüllten RmtInf-Block(s) — das EPC-SEPA-Rulebook behandelt strukturierte und unstrukturierte Verwendungszweck-Informationen als sich gegenseitig ausschließende Alternativen',
                 'sepa.warn.rmtInfXor': 'Transaktion #{idx} befüllt sowohl <Ustrd> als auch <Strd> im RmtInf — die EPC-SCT-/SDD-Rulebooks schränken den freien Container von ISO 20022 auf genau eine der beiden Formen pro Vorkommen ein (unstrukturierter, menschenlesbarer Text ODER strukturiertes CdtrRefInf, niemals beides); Clearingsysteme weisen am Rulebook-Gate auf Rail-Ebene ab, weil die nachgelagerte Abstimmung nicht erkennen kann, welcher Träger die kanonische Referenz enthält',
+                'sepa.ok.counterpartyNm': 'Jede Transaktion deklariert {party}/Nm über alle {n} Transaktion(en) (EPC-SEPA-Rulebook {attr} — rechtlicher Name der Gegenpartei)',
+                'sepa.warn.counterpartyNm': 'Transaktion #{idx} fehlt {party}/Nm — das EPC-SEPA-Rulebook {attr} verlangt den rechtlichen Namen der Gegenpartei in jeder Transaktion; der Wert ist das, was die empfangende Bank auf dem Kontoauszug des Kunden druckt, und das Feld, an dem die AML-/Sanktions-Prüfung ansetzt, daher wird ein leerer oder fehlender Name von SEPA-Clearingsystemen am Rulebook-Gate abgewiesen (häufige Ursache: ein Generator, der den Parteiblock auf eine Nur-Konto-Struktur reduziert, wenn die Namensspalte der Quelldatenbank null ist)',
                 'sepa.warn.ccyInvalid': 'Währungscode nicht aktiv nach ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unbekanntes ISO-20022-Wurzelelement — nur Teilanalyse.',
                 'err.sepaEmpty': 'Die XML-Eingabe ist leer.',
@@ -10748,6 +10762,8 @@ var qrcode = function() {
                 'ubl.warn.lineAmountSign': 'Zeile #{idx} deklariert einen negativen LineExtensionAmount „{v}“ — EN 16931 BR-26 / BR-CN-26 verlangen, dass der zeilenspezifische Nettobetrag (BT-131) nicht negativ ist; ein negativer Zeilenbetrag kehrt die datei-weite LegalMonetaryTotal-Summe stillschweigend um (Drafts 28 / 45), erzeugt einen zu zahlenden Betrag, den der Käufer als Gutschrift liest, obwohl der Lieferant eine Belastung meinte, und umgeht den AllowanceCharge-/CreditNote-Flow, den EN 16931 für echte Reduzierungen vorschreibt',
                 'ubl.ok.invoiceIdLen': 'Die Invoice-/CreditNote-ID (EN 16931 BT-1) hält die 35-Zeichen-Grenze von SEPA EndToEndId über {n} Referenz(en) ein (≤ 35 Zeichen)',
                 'ubl.warn.invoiceIdLen': 'Die Invoice-/CreditNote-ID „{id}“ überschreitet die 35-Zeichen-Grenze ({len}/35) — EN 16931 BT-1 wird von nachgelagerten pain.001-Generatoren routinemäßig wörtlich in SEPA EndToEndId (ISO 20022 Max35Text) übernommen; ein längerer Wert zwingt den SEPA-Generator zur Kürzung (stiller Datenverlust beim Abstimmungsschlüssel, mit dem die Kontoauszugsabstimmung des Gläubigers die offene Forderung paart) oder die Datei wird am Schema-Validierungs-Gate abgelehnt',
+                'ubl.ok.sellerName': 'PartyLegalEntity/RegistrationName des Verkäufers „{name}“ vorhanden (EN 16931 BR-08 / BT-27)',
+                'ubl.warn.sellerName': 'AccountingSupplierParty deklariert kein Party/PartyLegalEntity/RegistrationName — EN 16931 BR-08 / BT-27 verlangt den rechtlichen Entitätsnamen des Verkäufers auf jeder PEPPOL-Rechnung und -Gutschrift; der Wert ist der Name, der im Wareneingangsbuch des Käufers gedruckt wird, und der Name, den AP-/USt-Systeme mit dem BT-31-Verkäufer-USt-IdNr für die steuerliche Meldung verknüpfen (UBL 2.1 markiert PartyLegalEntity / RegistrationName auf Schemaebene als optional, sodass ein Lieferantenblock, der nur PartyName/Name (den Handelsnamen, BT-28) trägt, schemavalid ist, aber von PEPPOL-Access-Points am BR-08-Schematron-Gate abgewiesen wird)',
                 'ubl.ok.ccyValid': 'Währungscodes nach ISO 4217 aktiv: {list}',
                 'ubl.ok.ibanValid': 'IBANs der Payee-/Payer-Konten gültig (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'Payee-/Payer-IBAN scheitert an ISO-13616-MOD-97-Prüfung: {iban}',
@@ -11839,6 +11855,8 @@ var qrcode = function() {
                 'sepa.warn.nbOfTxsShape': '{scope} "{v}" घोषित करता है — ISO 20022 Max15NumericText 1-15 ASCII अंक माँगता है, दशमलव बिंदु, चिह्न, घातांक, विभाजक या रिक्ति की अनुमति नहीं; मान-समता जाँचें (drafts 35 / 92) Number() से गुज़रती हैं जो स्कीमा-अस्वीकृत रूपों को मूक रूप से स्वीकार कर लेती हैं (आम कारण: जनरेटर गणना को JSON संख्या के रूप में सीरियलाइज़ करता है और "1.0" बनता है, या टेम्पलेट इंजन से स्थानीयकृत "1,000" प्रविष्ट होता है)',
                 'sepa.ok.rmtInfXor': 'सभी {n} भरे हुए RmtInf ब्लॉक में प्रत्येक लेन-देन का RmtInf <Strd> या <Ustrd> में से अधिकतम एक रखता है — EPC SEPA रूलबुक संरचित और असंरचित प्रेषण सूचना को परस्पर अनन्य विकल्पों के रूप में मानता है',
                 'sepa.warn.rmtInfXor': 'लेन-देन #{idx} का RmtInf <Ustrd> और <Strd> दोनों भरता है — EPC SCT / SDD रूलबुक ISO 20022 के मुक्त कंटेनर को प्रति घटना ठीक एक रूप तक सीमित करते हैं (असंरचित मानव-पठनीय पाठ या संरचित CdtrRefInf, कभी दोनों नहीं); क्लियरिंग सिस्टम रेल-स्तरीय रूलबुक गेट पर अस्वीकार करते हैं क्योंकि डाउनस्ट्रीम सुलह यह नहीं बता सकती कि कौन सा वाहक कैनोनिकल संदर्भ रखता है',
+                'sepa.ok.counterpartyNm': 'सभी {n} लेन-देन में {party}/Nm घोषित है (EPC SEPA रूलबुक {attr} — प्रतिपक्ष का कानूनी नाम)',
+                'sepa.warn.counterpartyNm': 'लेन-देन #{idx} में {party}/Nm नहीं है — EPC SEPA रूलबुक {attr} प्रत्येक लेन-देन पर प्रतिपक्ष का कानूनी नाम अनिवार्य करती है; यह मान प्राप्तकर्ता बैंक द्वारा ग्राहक के विवरण पर मुद्रित किया जाता है और AML / प्रतिबंध स्क्रीनिंग का आधार है, इसलिए खाली या अनुपस्थित नाम SEPA क्लियरिंग सिस्टम द्वारा रूलबुक गेट पर अस्वीकृत होता है (आम कारण: स्रोत डेटाबेस का नाम स्तंभ रिक्त होने पर जनरेटर द्वारा पार्टी ब्लॉक को केवल-खाता संरचना में डिफ़ॉल्ट करना)',
                 'sepa.warn.ccyInvalid': 'मुद्रा कोड ISO 4217 में सक्रिय नहीं: {code}',
                 'sepa.warn.unknownDoc': 'अज्ञात ISO 20022 रूट तत्व — केवल आंशिक पार्सिंग।',
                 'err.sepaEmpty': 'XML इनपुट खाली है।',
@@ -11988,6 +12006,8 @@ var qrcode = function() {
                 'ubl.warn.lineAmountSign': 'पंक्ति #{idx} ऋणात्मक LineExtensionAmount "{v}" घोषित करती है — EN 16931 BR-26 / BR-CN-26 के लिए प्रति-पंक्ति शुद्ध राशि (BT-131) गैर-ऋणात्मक आवश्यक है; ऋणात्मक पंक्ति राशि फ़ाइल-व्यापी LegalMonetaryTotal योग को चुपचाप उलट देती है (drafts 28 / 45), और देय राशि क्रेता को क्रेडिट दिखती है जबकि आपूर्तिकर्ता का इरादा शुल्क था, और EN 16931 द्वारा वास्तविक कमी के लिए निर्धारित AllowanceCharge / CreditNote प्रवाह को छोड़ देती है',
                 'ubl.ok.invoiceIdLen': 'Invoice/CreditNote ID (EN 16931 BT-1) {n} संदर्भ(s) पर SEPA EndToEndId की 35-वर्ण सीमा के भीतर है (≤35 वर्ण)',
                 'ubl.warn.invoiceIdLen': 'Invoice/CreditNote ID "{id}" 35-वर्ण सीमा से अधिक ({len}/35) — EN 16931 BT-1 को डाउनस्ट्रीम pain.001 जनरेटर सामान्यतः SEPA EndToEndId (ISO 20022 Max35Text) में हू-ब-हू कॉपी करते हैं; लंबा मान SEPA जनरेटर को छँटाई पर मजबूर करता है (देनदार के बैंक-स्टेटमेंट मिलान को खुली प्राप्य के साथ जोड़ने वाली सुलह कुंजी में मूक डेटा हानि) या फ़ाइल को स्कीमा-सत्यापन गेट पर अस्वीकार कर देती है',
+                'ubl.ok.sellerName': 'विक्रेता PartyLegalEntity/RegistrationName "{name}" मौजूद है (EN 16931 BR-08 / BT-27)',
+                'ubl.warn.sellerName': 'AccountingSupplierParty में Party/PartyLegalEntity/RegistrationName घोषित नहीं है — EN 16931 BR-08 / BT-27 प्रत्येक PEPPOL चालान और क्रेडिट नोट पर विक्रेता का कानूनी-इकाई पंजीकरण नाम अनिवार्य करता है; यह मान क्रेता के क्रय बही पर मुद्रित नाम और AP / VAT सिस्टम द्वारा कर रिपोर्टिंग के लिए BT-31 विक्रेता VAT पहचानकर्ता से जोड़ा गया नाम होता है (UBL 2.1 PartyLegalEntity / RegistrationName को स्कीमा-स्तर पर वैकल्पिक रखता है, इसलिए केवल PartyName/Name (व्यापारिक नाम, BT-28) वाला आपूर्तिकर्ता पक्ष XML मान्यता पास करता है पर PEPPOL एक्सेस पॉइंट्स द्वारा BR-08 schematron गेट पर अस्वीकृत होता है)',
                 'ubl.ok.ccyValid': 'मुद्रा कोड ISO 4217 के अनुसार सक्रिय: {list}',
                 'ubl.ok.ibanValid': 'भुगतानकर्ता/प्राप्तकर्ता खाते के IBAN वैध (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'भुगतानकर्ता/प्राप्तकर्ता IBAN ISO 13616 MOD-97 जाँच में विफल: {iban}',
@@ -20897,6 +20917,50 @@ var qrcode = function() {
             }
         }
 
+        // EPC SEPA Rulebook party-name presence check (draft 110).
+        // The EPC SCT Rulebook attribute AT-03 (Name of the Beneficiary)
+        // and SDD Rulebook AT-23 (Name of the Debtor) both pin the
+        // counterparty legal name as mandatory: the value is what the
+        // receiving bank prints on the customer's statement and what
+        // anti-money-laundering screening keys off. ISO 20022 declares
+        // `<Cdtr>/<Nm>` (pain.001 credit transfers) and `<Dbtr>/<Nm>`
+        // (pain.008 direct debits) as `Max140Text` and — in older pain.*
+        // versions — optional at the schema level, so an empty or
+        // missing name passes XML validation but is rejected by SEPA
+        // clearing systems at the rulebook gate. The canonical real-
+        // world failure is a generator that defaults the party block
+        // to an account-only structure (`<Cdtr/>` with only nested
+        // `CdtrAcct`) when the source database's name column is null.
+        // The new `sepaCheckCounterpartyName()` walks every
+        // `<CdtTrfTxInf>` (pain.001) or `<DrctDbtTxInf>` (pain.008),
+        // reads the counterparty's `<Nm>`, and emits one green
+        // confirmation row when every transaction declares a non-empty
+        // name or one red row per offending transaction keyed by the
+        // 1-based index. Pair with draft 111 on the UBL side.
+        function sepaCheckCounterpartyName(out, doc, detected) {
+            if (detected.type !== 'pain.001' && detected.type !== 'pain.008') return;
+            const w = detected.wrapper;
+            if (!w) return;
+            const isSct = detected.type === 'pain.001';
+            const txLocal = isSct ? 'CdtTrfTxInf' : 'DrctDbtTxInf';
+            const partyLocal = isSct ? 'Cdtr' : 'Dbtr';
+            const txs = sepaAllLocal(w, txLocal);
+            if (!txs.length) return;
+            const bad = [];
+            txs.forEach((tx, i) => {
+                const party = sepaFirst(tx, partyLocal);
+                const nm = party ? (sepaTextOf(party, 'Nm') || '').trim() : '';
+                if (!nm) bad.push(i + 1);
+            });
+            if (bad.length === 0) {
+                tlsRenderRow(out, t('sepa.row.warning'), '✓ ' + tFormat('sepa.ok.counterpartyNm', { n: intlNumber(txs.length), party: partyLocal, attr: isSct ? 'AT-03' : 'AT-23' }));
+            } else {
+                for (const idx of bad) {
+                    tlsRenderRow(out, t('sepa.row.warning'), '✗ ' + tFormat('sepa.warn.counterpartyNm', { idx: intlNumber(idx), party: partyLocal, attr: isSct ? 'AT-03' : 'AT-23' }));
+                }
+            }
+        }
+
         // EPC SEPA Rulebook RmtInf Strd / Ustrd mutual exclusivity
         // (draft 108). ISO 20022 declares `<RmtInf>` as a free
         // container that may carry zero or more `<Ustrd>` and / or one
@@ -21003,6 +21067,7 @@ var qrcode = function() {
                 sepaCheckPositiveAmounts(out, doc, detected);
                 sepaCheckNbOfTxsShape(out, doc, detected);
                 sepaCheckRmtInfXor(out, doc, detected);
+                sepaCheckCounterpartyName(out, doc, detected);
                 sepaCheckE2eIdCharset(out, doc, detected);
                 sepaCheckInstrIdCharset(out, doc, detected);
                 sepaCheckMndtIdCharset(out, doc, detected);
@@ -22792,6 +22857,43 @@ var qrcode = function() {
             }
         }
 
+        // EN 16931 BR-08 / BT-27 (Seller name) presence check
+        // (draft 111). PEPPOL BIS Billing 3.0 / EN 16931 require every
+        // Invoice and CreditNote to declare the seller's legal-entity
+        // registration name via
+        // `<cac:AccountingSupplierParty>/<cac:Party>/<cac:PartyLegalEntity>/<cbc:RegistrationName>`
+        // — the value is the name printed on the buyer's purchase
+        // ledger and the name AP / VAT systems pair with the BT-31
+        // Seller VAT identifier for tax reporting. UBL 2.1 marks both
+        // `<cac:PartyLegalEntity>` and `<cbc:RegistrationName>`
+        // optional at the schema level, so a supplier party carrying
+        // only `<cac:PartyName>/<cbc:Name>` (the trading name, BT-28)
+        // passes XML validation but is rejected by PEPPOL access
+        // points at the BR-08 schematron gate. The canonical real-
+        // world failure is a generator that fills the trading-name
+        // slot from a CRM column but leaves the legal-entity block
+        // empty because the company-registry integration is wired to
+        // a separate, sometimes-stale data source. Distinct from
+        // draft 57's Seller VAT identifier check (BT-31): that
+        // validates the identifier value; this validates the name the
+        // identifier is registered against. Pair with draft 110 on
+        // the SEPA side.
+        function ublCheckSellerName(out, detected) {
+            const r = detected.root;
+            if (!r) return;
+            const asp = sepaFirst(r, 'AccountingSupplierParty');
+            if (!asp) return;
+            const party = sepaFirst(asp, 'Party');
+            if (!party) return;
+            const ple = sepaFirst(party, 'PartyLegalEntity');
+            const name = ple ? (sepaTextOf(ple, 'RegistrationName') || '').trim() : '';
+            if (name) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + tFormat('ubl.ok.sellerName', { name }));
+            } else {
+                tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + t('ubl.warn.sellerName'));
+            }
+        }
+
         // EN 16931 BT-1 (Invoice number) length check (draft 109).
         // UBL declares `<cbc:ID>` at the Invoice / CreditNote root as
         // plain Identifier text with no schema-level length cap, and
@@ -22983,6 +23085,7 @@ var qrcode = function() {
                 ublCheckGtin(out, detected);
                 ublCheckLineAmountSign(out, detected);
                 ublCheckInvoiceIdLength(out, detected);
+                ublCheckSellerName(out, detected);
                 ublCheckLineAmount(out, detected);
             } catch (e) {
                 tlsRenderRow(out, t('ubl.row.error'), e.message);

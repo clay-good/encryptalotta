@@ -3324,6 +3324,43 @@ test('ubl: Invoice ID BT-1 35-char cap flags an over-length invoice number', asy
   await expect(page.locator('#ubl-results')).toContainText(/Invoice\/CreditNote ID "INV-2024-Subscription-Long-Customer-Ref-042" exceeds the 35-character cap/i, { timeout: 5_000 });
 });
 
+test('sepa: counterparty Nm presence confirms on canonical pain.001 (Cdtr/Nm declared)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Canonical SEPA_PAIN001 carries <Cdtr><Nm>Supplier GmbH</Nm></Cdtr> on the single transaction.
+  await page.fill('#sepa-input', SEPA_PAIN001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Every transaction declares a Cdtr\/Nm across all 1 transaction\(s\)/i, { timeout: 5_000 });
+});
+
+test('sepa: counterparty Nm presence flags a missing Cdtr/Nm on pain.001', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Strip the <Nm>Supplier GmbH</Nm> from the Cdtr block — leave an account-only structure.
+  const noNm = SEPA_PAIN001.replace('<Cdtr><Nm>Supplier GmbH</Nm></Cdtr>', '<Cdtr></Cdtr>');
+  await page.fill('#sepa-input', noNm);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Transaction #1 is missing Cdtr\/Nm/i, { timeout: 5_000 });
+});
+
+test('ubl: Seller RegistrationName BR-08 confirms on canonical fixture', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Canonical UBL_INVOICE declares PartyLegalEntity/RegistrationName=ACME Widgets GmbH on the supplier.
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Seller PartyLegalEntity\/RegistrationName "ACME Widgets GmbH" present/i, { timeout: 5_000 });
+});
+
+test('ubl: Seller RegistrationName BR-08 flags a missing PartyLegalEntity', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Strip the supplier's PartyLegalEntity block — leave only PartyName.
+  const noLegal = UBL_INVOICE.replace(
+    '<cac:PartyLegalEntity><cbc:RegistrationName>ACME Widgets GmbH</cbc:RegistrationName></cac:PartyLegalEntity>',
+    ''
+  );
+  await page.fill('#ubl-input', noLegal);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/AccountingSupplierParty is missing Party\/PartyLegalEntity\/RegistrationName/i, { timeout: 5_000 });
+});
+
 test('ubl: rejects non-UBL XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   await page.fill('#ubl-input', '<?xml version="1.0"?><Document/>');
