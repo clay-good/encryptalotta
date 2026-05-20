@@ -3120,6 +3120,49 @@ test('ubl: line quantity presence check flags a line that omits InvoicedQuantity
   await expect(page.locator('#ubl-results')).toContainText(/Line #1 is missing a InvoicedQuantity/i, { timeout: 5_000 });
 });
 
+test('sepa: SEPA Creditor Identifier MOD-97-10 check confirms on a canonical CID (DE98ZZZ09999999999)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Inject the EPC SDD canonical CID example into a pain.008 InitgPty/Id.
+  const fixture = buildPain008('MANDATE-2024-001').replace(
+    '<Cdtr><Nm>Creditor Inc</Nm></Cdtr>',
+    '<Cdtr><Nm>Creditor Inc</Nm></Cdtr>\n      <CdtrSchmeId><Id><PrvtId><Othr><Id>DE98ZZZ09999999999</Id><SchmeNm><Prtry>SEPA</Prtry></SchmeNm></Othr></PrvtId></Id></CdtrSchmeId>'
+  );
+  await page.fill('#sepa-input', fixture);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/SEPA Creditor Identifier\(s\) valid \(MOD-97-10\)/i, { timeout: 5_000 });
+});
+
+test('sepa: SEPA Creditor Identifier MOD-97-10 check flags a typo\'d CID', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Last digit flipped 9 → 8: DE98ZZZ09999999998 — MOD-97 now fails.
+  const fixture = buildPain008('MANDATE-2024-001').replace(
+    '<Cdtr><Nm>Creditor Inc</Nm></Cdtr>',
+    '<Cdtr><Nm>Creditor Inc</Nm></Cdtr>\n      <CdtrSchmeId><Id><PrvtId><Othr><Id>DE98ZZZ09999999998</Id><SchmeNm><Prtry>SEPA</Prtry></SchmeNm></Othr></PrvtId></Id></CdtrSchmeId>'
+  );
+  await page.fill('#sepa-input', fixture);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/SEPA Creditor Identifier "DE98ZZZ09999999998" failed MOD-97-10 check/i, { timeout: 5_000 });
+});
+
+test('ubl: Item Name presence check confirms when every line declares an Item/Name', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Every line declares an Item\/Name across all 1 line\(s\)/i, { timeout: 5_000 });
+});
+
+test('ubl: Item Name presence check flags a line that omits Item/Name', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Strip the <cbc:Name>Widget Pro</cbc:Name> from the single line in the fixture.
+  const noName = UBL_INVOICE.replace(
+    '<cac:Item><cbc:Name>Widget Pro</cbc:Name></cac:Item>',
+    '<cac:Item></cac:Item>'
+  );
+  await page.fill('#ubl-input', noName);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Line #1 is missing an Item\/Name/i, { timeout: 5_000 });
+});
+
 test('ubl: rejects non-UBL XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   await page.fill('#ubl-input', '<?xml version="1.0"?><Document/>');
