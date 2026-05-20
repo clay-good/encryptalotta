@@ -3205,6 +3205,47 @@ test('ubl: PriceAmount non-negative check flags a negative unit price', async ({
   await expect(page.locator('#ubl-results')).toContainText(/Line #1 declares a negative Price\/PriceAmount "-50\.00"/i, { timeout: 5_000 });
 });
 
+test('sepa: positive-amount check confirms when every transaction declares a strictly positive InstdAmt', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Canonical SEPA_PAIN001 declares InstdAmt=100.00 — strictly positive.
+  await page.fill('#sepa-input', SEPA_PAIN001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Every transaction declares a positive InstdAmt \/ Amt across all 1 transaction\(s\)/i, { timeout: 5_000 });
+});
+
+test('sepa: positive-amount check flags a zero-amount transaction', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Flip the canonical 100.00 → 0.00 (an EPC SEPA Rulebook violation).
+  const zero = SEPA_PAIN001.replace('<InstdAmt Ccy="EUR">100.00</InstdAmt>', '<InstdAmt Ccy="EUR">0.00</InstdAmt>');
+  await page.fill('#sepa-input', zero);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Transaction #1 declares InstdAmt \/ Amt "0\.00"/i, { timeout: 5_000 });
+});
+
+test('ubl: StandardItemIdentification GTIN check confirms on a valid GS1 GTIN', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Inject a canonical EAN-13 GTIN with schemeID="0160" into the single InvoiceLine's Item.
+  const withGtin = UBL_INVOICE.replace(
+    '<cac:Item><cbc:Name>Widget Pro</cbc:Name></cac:Item>',
+    '<cac:Item><cbc:Name>Widget Pro</cbc:Name><cac:StandardItemIdentification><cbc:ID schemeID="0160">5901234123457</cbc:ID></cac:StandardItemIdentification></cac:Item>'
+  );
+  await page.fill('#ubl-input', withGtin);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/StandardItemIdentification GTIN\(s\) valid \(GS1 MOD-10\)/i, { timeout: 5_000 });
+});
+
+test('ubl: StandardItemIdentification GTIN check flags a typo\'d GTIN', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Last digit flipped 7 → 8 — MOD-10 now fails.
+  const badGtin = UBL_INVOICE.replace(
+    '<cac:Item><cbc:Name>Widget Pro</cbc:Name></cac:Item>',
+    '<cac:Item><cbc:Name>Widget Pro</cbc:Name><cac:StandardItemIdentification><cbc:ID schemeID="0160">5901234123458</cbc:ID></cac:StandardItemIdentification></cac:Item>'
+  );
+  await page.fill('#ubl-input', badGtin);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/StandardItemIdentification "5901234123458" with schemeID="0160" failed the GS1 GTIN MOD-10 check/i, { timeout: 5_000 });
+});
+
 test('ubl: rejects non-UBL XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   await page.fill('#ubl-input', '<?xml version="1.0"?><Document/>');

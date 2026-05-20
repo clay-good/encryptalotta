@@ -4507,6 +4507,8 @@
                 'sepa.warn.cid': 'SEPA Creditor Identifier "{cid}" failed MOD-97-10 check — schema-valid plain text but rejected at the EPC SDD rulebook gate; the debtor\'s bank can\'t anchor the mandate authorisation against the creditor identity, and the collection fails before any rail-level processing fires (a common cause is a generator that interpolates the creditor\'s legal name into the national-identifier slot without recomputing the check digits)',
                 'sepa.ok.cdtrSchmePrtry': 'CdtrSchmeId/Id/PrvtId/Othr/SchmeNm/Prtry declares the literal "SEPA" across all {n} CdtrSchmeId entry(ies) (EPC SDD Rulebook narrowing of ISO 20022 Max35Text)',
                 'sepa.warn.cdtrSchmePrtry': 'CdtrSchmeId/Id/PrvtId/Othr/SchmeNm/Prtry declares "{actual}" — the EPC SDD Rulebook narrows ISO 20022\'s free-text Prtry to the literal string "SEPA" so the debtor\'s bank can route the mandate authorisation against the SEPA scheme (a common cause is a template that keeps a domestic / non-SEPA scheme label after the underlying flow was migrated to SEPA SDD)',
+                'sepa.ok.positiveAmt': 'Every transaction declares a positive InstdAmt / Amt across all {n} transaction(s) (EPC SEPA Rulebook — zero and negative amounts are rejected at the rail-level amount gate)',
+                'sepa.warn.positiveAmt': 'Transaction #{idx} declares InstdAmt / Amt "{v}" — the EPC SEPA Credit Transfer and SEPA Direct Debit Rulebooks both require a strictly positive decimal; zero-amount entries (commonly produced by a batch generator that forgets to exclude prelaunch / setup records) and negative-amount entries (commonly produced by a refund script misusing the credit-transfer flow) are schema-valid but rejected at the rail-level amount gate (refunds belong in a separate pain message, not a sign-flipped entry)',
                 'sepa.warn.ccyInvalid': 'Currency code not active per ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unrecognized ISO 20022 root element — partial parse only.',
                 'err.sepaEmpty': 'XML input is empty.',
@@ -4660,6 +4662,8 @@
                 'ubl.warn.itemName': 'Line #{idx} is missing an Item/Name — EN 16931 BR-25 / BT-153 require every line to declare a human-readable item description so the buyer can identify what was billed; PEPPOL access points reject at the schematron gate, and downstream AP / ERP systems either reject the line or render an empty description (the buyer sees a phantom charge they can\'t associate with a deliverable, which is the canonical dispute-trigger pattern)',
                 'ubl.ok.priceAmount': 'Every line declares a non-negative Price/PriceAmount across all {n} line(s) (EN 16931 BR-27 / BT-146)',
                 'ubl.warn.priceAmount': 'Line #{idx} declares a negative Price/PriceAmount "{v}" — EN 16931 BR-27 / BT-146 forbid negative unit prices because a negative price silently inverts BR-CO-04 (LineExtensionAmount = Quantity × Price), turning a positive-quantity line into a negative line amount the buyer reads as a credit (a common cause is a template that reuses the line shape for charges and discounts and forgets to switch the discount to cac:AllowanceCharge — the EN 16931 mechanism for line-level discounts)',
+                'ubl.ok.gtin': 'StandardItemIdentification GTIN(s) valid (GS1 MOD-10) across all {n} line(s) declaring schemeID="0160" (EN 16931 BT-157 / PEPPOL BIS Billing 3.0)',
+                'ubl.warn.gtin': 'StandardItemIdentification "{v}" with schemeID="0160" failed the GS1 GTIN MOD-10 check — schema-valid digit text but rejected at the PEPPOL BT-157 schematron gate, and downstream catalog / inventory systems silently fail to match the line to a master-data record (a common cause is a CRM exporting an EAN with a typo\'d digit or an SKU column mis-typed as a GTIN)',
                 'ubl.ok.ccyValid': 'Currency codes active per ISO 4217: {list}',
                 'ubl.ok.ibanValid': 'Payee/Payer financial account IBANs valid (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'Payee/Payer IBAN failed ISO 13616 MOD-97 check: {iban}',
@@ -5775,6 +5779,8 @@
                 'sepa.warn.cid': 'L’Identifiant Créancier SEPA « {cid} » a échoué au contrôle MOD-97-10 — texte conforme au schéma mais rejeté au contrôle EPC SDD ; la banque du débiteur ne peut pas ancrer l’autorisation du mandat à l’identité du créancier, et le prélèvement échoue avant tout traitement au niveau du rail (cause fréquente : un générateur qui intercale le nom légal du créancier dans le slot de l’identifiant national sans recalculer les clés de contrôle)',
                 'sepa.ok.cdtrSchmePrtry': 'CdtrSchmeId/Id/PrvtId/Othr/SchmeNm/Prtry déclare la valeur littérale « SEPA » sur {n} entrée(s) CdtrSchmeId (restriction EPC SDD Rulebook sur ISO 20022 Max35Text)',
                 'sepa.warn.cdtrSchmePrtry': 'CdtrSchmeId/Id/PrvtId/Othr/SchmeNm/Prtry déclare « {actual} » — l’EPC SDD Rulebook restreint le Prtry libre d’ISO 20022 à la chaîne littérale « SEPA » afin que la banque du débiteur puisse router l’autorisation du mandat vers le schéma SEPA (cause fréquente : un modèle conservant une étiquette de schéma domestique / non-SEPA alors que le flux sous-jacent a été migré vers SEPA SDD)',
+                'sepa.ok.positiveAmt': 'Chaque transaction déclare un InstdAmt / Amt positif sur l’ensemble des {n} transaction(s) (EPC SEPA Rulebook — les montants nuls et négatifs sont rejetés au contrôle de montant au niveau du rail)',
+                'sepa.warn.positiveAmt': 'Transaction #{idx} déclare InstdAmt / Amt « {v} » — les EPC SEPA Credit Transfer et SEPA Direct Debit Rulebooks exigent un décimal strictement positif ; les entrées à montant nul (souvent produites par un générateur de lots qui oublie d’exclure les enregistrements de prélancement / configuration) et négatif (souvent produites par un script de remboursement détournant le flux de virement) sont conformes au schéma mais rejetées au contrôle de montant au niveau du rail (les remboursements relèvent d’un message pain distinct, pas d’une entrée à signe inversé)',
                 'sepa.warn.ccyInvalid': 'Code monétaire non actif selon ISO 4217 : {code}',
                 'sepa.warn.unknownDoc': 'Élément racine ISO 20022 non reconnu — analyse partielle uniquement.',
                 'err.sepaEmpty': 'Le XML d’entrée est vide.',
@@ -5918,6 +5924,8 @@
                 'ubl.warn.itemName': 'Ligne #{idx} : Item/Name manquant — EN 16931 BR-25 / BT-153 exigent que chaque ligne déclare une description d’article lisible afin que l’acheteur puisse identifier ce qui a été facturé ; les points d’accès PEPPOL rejettent au contrôle schematron, et les systèmes AP / ERP en aval rejettent la ligne ou affichent une description vide (l’acheteur voit un frais fantôme qu’il ne peut associer à aucun livrable, schéma canonique de déclenchement de litige)',
                 'ubl.ok.priceAmount': 'Chaque ligne déclare un Price/PriceAmount non négatif sur l’ensemble des {n} ligne(s) (EN 16931 BR-27 / BT-146)',
                 'ubl.warn.priceAmount': 'Ligne #{idx} déclare un Price/PriceAmount négatif « {v} » — EN 16931 BR-27 / BT-146 interdisent les prix unitaires négatifs car un prix négatif inverse silencieusement BR-CO-04 (LineExtensionAmount = Quantité × Prix), transformant une ligne à quantité positive en montant de ligne négatif que l’acheteur lit comme un avoir (cause fréquente : un modèle qui réutilise la forme de ligne pour les frais et les remises et oublie de basculer la remise vers cac:AllowanceCharge — le mécanisme EN 16931 pour les remises au niveau ligne)',
+                'ubl.ok.gtin': 'GTIN StandardItemIdentification valide(s) (GS1 MOD-10) sur {n} ligne(s) déclarant schemeID="0160" (EN 16931 BT-157 / PEPPOL BIS Billing 3.0)',
+                'ubl.warn.gtin': 'StandardItemIdentification « {v} » avec schemeID="0160" a échoué au contrôle GS1 MOD-10 — texte chiffré conforme au schéma mais rejeté au contrôle schematron PEPPOL BT-157, et les systèmes catalogue / inventaire en aval échouent silencieusement à associer la ligne à un enregistrement de référence (cause fréquente : un CRM exportant un EAN avec un chiffre erroné ou une colonne SKU mal typée comme GTIN)',
                 'ubl.ok.ccyValid': 'Codes monétaires actifs selon ISO 4217 : {list}',
                 'ubl.ok.ibanValid': 'IBAN des comptes Payee/Payer valides (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'IBAN Payee/Payer échoue au contrôle ISO 13616 MOD-97 : {iban}',
@@ -7003,6 +7011,8 @@
                 'sepa.warn.cid': 'SEPA 收款人标识符 "{cid}" 未通过 MOD-97-10 校验——符合纯文本模式但被 EPC SDD 规则手册拒绝；债务人银行无法以收款人身份锚定授权，扣款会在轨道层处理之前失败（常见原因是生成器将收款人法定名称插入到国内标识符槽位但未重新计算校验位）',
                 'sepa.ok.cdtrSchmePrtry': '所有 {n} 条 CdtrSchmeId 条目的 CdtrSchmeId/Id/PrvtId/Othr/SchmeNm/Prtry 均声明字面值 "SEPA"（EPC SDD Rulebook 对 ISO 20022 Max35Text 的收窄）',
                 'sepa.warn.cdtrSchmePrtry': 'CdtrSchmeId/Id/PrvtId/Othr/SchmeNm/Prtry 声明 "{actual}"——EPC SDD Rulebook 将 ISO 20022 自由文本 Prtry 收窄为字面字符串 "SEPA"，以便债务人银行将授权路由到 SEPA 方案（常见原因是底层流程已迁移至 SEPA SDD 但模板仍保留域内/非 SEPA 方案标签）',
+                'sepa.ok.positiveAmt': '所有 {n} 笔交易的 InstdAmt / Amt 均为正值（EPC SEPA Rulebook——零额和负额会在轨道层金额校验时被拒绝）',
+                'sepa.warn.positiveAmt': '第 {idx} 笔交易声明 InstdAmt / Amt "{v}"——EPC SEPA Credit Transfer 与 SEPA Direct Debit Rulebooks 要求严格为正的十进制；零额条目（常因批量生成器未排除预启动 / 设置记录而产生）和负额条目（常因退款脚本误用信用转账流程而产生）虽符合模式但会在轨道层金额校验时被拒绝（退款属于单独的 pain 消息，而非反向符号条目）',
                 'sepa.warn.ccyInvalid': '币种代码不在 ISO 4217 现行清单中：{code}',
                 'sepa.warn.unknownDoc': '无法识别的 ISO 20022 根元素 — 仅部分解析。',
                 'err.sepaEmpty': 'XML 输入为空。',
@@ -7146,6 +7156,8 @@
                 'ubl.warn.itemName': '第 {idx} 行缺少 Item/Name——EN 16931 BR-25 / BT-153 要求每行声明可读的商品描述，便于买方识别所收取的费用；PEPPOL 接入点会在 schematron 校验时拒绝，下游 AP / ERP 系统会拒绝该行或显示为空描述（买方看到无法与可交付物对应的幻影收费——典型的争议触发模式）',
                 'ubl.ok.priceAmount': '所有 {n} 个行均声明非负 Price/PriceAmount（EN 16931 BR-27 / BT-146）',
                 'ubl.warn.priceAmount': '第 {idx} 行声明负的 Price/PriceAmount "{v}"——EN 16931 BR-27 / BT-146 禁止单价为负，因为负价格会默默反转 BR-CO-04（LineExtensionAmount = 数量 × 单价），将正数量行变为负数行金额而被买方读作贷项（常见原因是模板将费用与折扣复用同一行格式，忘记将折扣切换到 cac:AllowanceCharge——EN 16931 规定的行级折扣机制）',
+                'ubl.ok.gtin': '声明 schemeID="0160" 的所有 {n} 个行的 StandardItemIdentification GTIN 均通过 GS1 MOD-10 校验（EN 16931 BT-157 / PEPPOL BIS Billing 3.0）',
+                'ubl.warn.gtin': 'schemeID="0160" 的 StandardItemIdentification "{v}" 未通过 GS1 GTIN MOD-10 校验——符合数字文本规范但在 PEPPOL BT-157 schematron 检查时被拒绝，下游目录 / 库存系统会默默无法将该行与主数据记录匹配（常见原因是 CRM 导出的 EAN 含错位数字，或 SKU 列被误标为 GTIN）',
                 'ubl.ok.ccyValid': '币种代码按 ISO 4217 有效：{list}',
                 'ubl.ok.ibanValid': '收款方/付款方账户 IBAN 通过 ISO 13616 MOD-97 校验（{n}）',
                 'ubl.warn.ibanInvalid': '收款方/付款方 IBAN 未通过 ISO 13616 MOD-97 校验：{iban}',
@@ -8246,6 +8258,8 @@
                 'sepa.warn.cid': 'SEPA-Gläubiger-Identifikation „{cid}“ hat die MOD-97-10-Prüfung nicht bestanden — als Klartext schemakonform, aber am EPC-SDD-Regelwerks-Gate abgelehnt; die Bank des Schuldners kann die Mandatsautorisierung nicht an die Gläubigeridentität anker, und die Lastschrift schlägt vor jeder schienenebenen Verarbeitung fehl (häufige Ursache: ein Generator, der den juristischen Namen des Gläubigers in den Slot der nationalen Kennung einfügt, ohne die Prüfziffern neu zu berechnen)',
                 'sepa.ok.cdtrSchmePrtry': 'CdtrSchmeId/Id/PrvtId/Othr/SchmeNm/Prtry deklariert die literale Zeichenkette „SEPA“ über alle {n} CdtrSchmeId-Eintrag/Einträge (EPC-SDD-Rulebook-Einschränkung von ISO 20022 Max35Text)',
                 'sepa.warn.cdtrSchmePrtry': 'CdtrSchmeId/Id/PrvtId/Othr/SchmeNm/Prtry deklariert „{actual}“ — das EPC SDD Rulebook beschränkt das frei deklarierbare Prtry von ISO 20022 auf die literale Zeichenkette „SEPA“, damit die Bank des Schuldners die Mandatsautorisierung gegen das SEPA-Schema routen kann (häufige Ursache: eine Vorlage, die ein domestisches / nicht-SEPA-Schema-Label beibehält, nachdem der zugrunde liegende Flow auf SEPA SDD migriert wurde)',
+                'sepa.ok.positiveAmt': 'Jede Transaktion deklariert einen positiven InstdAmt / Amt über alle {n} Transaktion(en) (EPC SEPA Rulebook — null und negative Beträge werden am Schienen-Level-Betrags-Gate abgelehnt)',
+                'sepa.warn.positiveAmt': 'Transaktion #{idx} deklariert InstdAmt / Amt „{v}“ — die EPC SEPA Credit Transfer und SEPA Direct Debit Rulebooks verlangen einen streng positiven Dezimalwert; Null-Beträge (oft von einem Batch-Generator erzeugt, der Prelaunch- / Setup-Datensätze nicht ausschließt) und negative Beträge (oft von einem Refund-Skript erzeugt, das den Credit-Transfer-Flow zweckentfremdet) sind schemakonform, werden aber am Schienen-Level-Betrags-Gate abgelehnt (Erstattungen gehören in eine eigene pain-Nachricht, nicht in einen vorzeichenumgekehrten Eintrag)',
                 'sepa.warn.ccyInvalid': 'Währungscode nicht aktiv nach ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unbekanntes ISO-20022-Wurzelelement — nur Teilanalyse.',
                 'err.sepaEmpty': 'Die XML-Eingabe ist leer.',
@@ -8389,6 +8403,8 @@
                 'ubl.warn.itemName': 'Zeile #{idx} hat keinen Item/Name — EN 16931 BR-25 / BT-153 verlangen, dass jede Zeile eine menschenlesbare Artikelbeschreibung deklariert, damit der Käufer identifizieren kann, was berechnet wurde; PEPPOL-Access-Points lehnen am Schematron-Gate ab, und nachgelagerte AP-/ERP-Systeme lehnen die Zeile entweder ab oder zeigen eine leere Beschreibung an (der Käufer sieht eine Phantom-Belastung, die er keinem Liefergegenstand zuordnen kann — kanonisches Streit-Auslöser-Muster)',
                 'ubl.ok.priceAmount': 'Jede Zeile deklariert einen nicht-negativen Price/PriceAmount über alle {n} Zeile(n) (EN 16931 BR-27 / BT-146)',
                 'ubl.warn.priceAmount': 'Zeile #{idx} deklariert einen negativen Price/PriceAmount „{v}“ — EN 16931 BR-27 / BT-146 verbieten negative Stückpreise, weil ein negativer Preis BR-CO-04 (LineExtensionAmount = Menge × Preis) stillschweigend umkehrt und eine Zeile mit positiver Menge in einen negativen Zeilenbetrag verwandelt, den der Käufer als Gutschrift liest (häufige Ursache: eine Vorlage, die die Zeilenform für Belastungen und Rabatte wiederverwendet und vergisst, den Rabatt auf cac:AllowanceCharge umzustellen — den EN-16931-Mechanismus für Rabatte auf Zeilenebene)',
+                'ubl.ok.gtin': 'StandardItemIdentification-GTINs gültig (GS1 MOD-10) über alle {n} Zeile(n) mit schemeID="0160" (EN 16931 BT-157 / PEPPOL BIS Billing 3.0)',
+                'ubl.warn.gtin': 'StandardItemIdentification „{v}“ mit schemeID="0160" hat die GS1-GTIN-MOD-10-Prüfung nicht bestanden — als Ziffernfolge schemakonform, aber am PEPPOL-BT-157-Schematron-Gate abgelehnt, und nachgelagerte Katalog-/Bestandssysteme ordnen die Zeile stillschweigend keinem Stammdatensatz zu (häufige Ursache: ein CRM, das eine EAN mit einer fehlerhaften Ziffer exportiert, oder eine SKU-Spalte, die fälschlich als GTIN typisiert wurde)',
                 'ubl.ok.ccyValid': 'Währungscodes nach ISO 4217 aktiv: {list}',
                 'ubl.ok.ibanValid': 'IBANs der Payee-/Payer-Konten gültig (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'Payee-/Payer-IBAN scheitert an ISO-13616-MOD-97-Prüfung: {iban}',
@@ -9474,6 +9490,8 @@
                 'sepa.warn.cid': 'SEPA लेनदार पहचानकर्ता "{cid}" MOD-97-10 जाँच में विफल — सादे पाठ के अनुरूप पर EPC SDD नियम पुस्तक गेट पर अस्वीकृत; देनदार का बैंक मैंडेट प्राधिकरण को लेनदार पहचान से जोड़ नहीं सकता, और संग्रह रेल-स्तरीय प्रसंस्करण से पहले विफल हो जाता है (आम कारण: जनरेटर लेनदार के कानूनी नाम को राष्ट्रीय पहचानकर्ता स्लॉट में डालता है पर चेक अंक पुनः गणना नहीं करता)',
                 'sepa.ok.cdtrSchmePrtry': 'सभी {n} CdtrSchmeId प्रविष्टियों में CdtrSchmeId/Id/PrvtId/Othr/SchmeNm/Prtry अक्षरशः "SEPA" घोषित करते हैं (ISO 20022 Max35Text पर EPC SDD Rulebook प्रतिबंध)',
                 'sepa.warn.cdtrSchmePrtry': 'CdtrSchmeId/Id/PrvtId/Othr/SchmeNm/Prtry "{actual}" घोषित करता है — EPC SDD Rulebook ISO 20022 के मुक्त-पाठ Prtry को अक्षरशः "SEPA" तक सीमित करता है ताकि देनदार का बैंक मैंडेट प्राधिकरण को SEPA योजना पर रूट कर सके (आम कारण: टेम्पलेट जो अंतर्निहित प्रवाह को SEPA SDD पर माइग्रेट करने के बाद भी घरेलू / गैर-SEPA योजना लेबल रखता है)',
+                'sepa.ok.positiveAmt': 'सभी {n} लेन-देन में InstdAmt / Amt धनात्मक घोषित है (EPC SEPA Rulebook — शून्य और ऋणात्मक राशियाँ रेल-स्तरीय राशि गेट पर अस्वीकृत होती हैं)',
+                'sepa.warn.positiveAmt': 'लेन-देन #{idx} InstdAmt / Amt "{v}" घोषित करता है — EPC SEPA Credit Transfer और SEPA Direct Debit Rulebooks दशमलव को कड़ाई से धनात्मक मांगते हैं; शून्य-राशि प्रविष्टियाँ (अक्सर बैच जनरेटर द्वारा प्रीलॉन्च / सेटअप रिकॉर्ड्स बाहर न करने पर बनती हैं) और ऋणात्मक-राशि प्रविष्टियाँ (अक्सर रिफ़ंड स्क्रिप्ट द्वारा क्रेडिट-ट्रांसफ़र प्रवाह के दुरुपयोग से बनती हैं) स्कीमा-संगत हैं पर रेल-स्तरीय राशि गेट पर अस्वीकृत हो जाती हैं (रिफ़ंड अलग pain संदेश में जाते हैं, चिह्न-उलट प्रविष्टि में नहीं)',
                 'sepa.warn.ccyInvalid': 'मुद्रा कोड ISO 4217 में सक्रिय नहीं: {code}',
                 'sepa.warn.unknownDoc': 'अज्ञात ISO 20022 रूट तत्व — केवल आंशिक पार्सिंग।',
                 'err.sepaEmpty': 'XML इनपुट खाली है।',
@@ -9617,6 +9635,8 @@
                 'ubl.warn.itemName': 'पंक्ति #{idx} में Item/Name अनुपस्थित है — EN 16931 BR-25 / BT-153 के लिए प्रत्येक पंक्ति को मानव-पठनीय आइटम विवरण घोषित करना आवश्यक है ताकि क्रेता पहचान सके कि क्या बिल किया गया; PEPPOL एक्सेस पॉइंट schematron गेट पर अस्वीकार करते हैं, और डाउनस्ट्रीम AP / ERP सिस्टम पंक्ति को अस्वीकार करते हैं या रिक्त विवरण प्रस्तुत करते हैं (क्रेता को एक प्रेत शुल्क दिखता है जिसे वह किसी डिलिवरेबल से नहीं जोड़ सकता — विवाद-ट्रिगर का विहित पैटर्न)',
                 'ubl.ok.priceAmount': 'सभी {n} पंक्तियों में Price/PriceAmount गैर-ऋणात्मक घोषित है (EN 16931 BR-27 / BT-146)',
                 'ubl.warn.priceAmount': 'पंक्ति #{idx} ऋणात्मक Price/PriceAmount "{v}" घोषित करती है — EN 16931 BR-27 / BT-146 ऋणात्मक इकाई मूल्यों को निषिद्ध करते हैं क्योंकि ऋणात्मक मूल्य चुपचाप BR-CO-04 (LineExtensionAmount = मात्रा × मूल्य) को उलट देता है, जिससे धनात्मक-मात्रा वाली पंक्ति ऋणात्मक पंक्ति राशि में बदल जाती है जिसे क्रेता क्रेडिट के रूप में पढ़ता है (आम कारण: टेम्पलेट जो शुल्क और छूट के लिए एक ही पंक्ति आकार का पुनः उपयोग करता है और छूट को cac:AllowanceCharge में बदलना भूल जाता है — पंक्ति-स्तरीय छूट के लिए EN 16931 तंत्र)',
+                'ubl.ok.gtin': 'schemeID="0160" घोषित करने वाली सभी {n} पंक्तियों में StandardItemIdentification GTIN GS1 MOD-10 जाँच पास करते हैं (EN 16931 BT-157 / PEPPOL BIS Billing 3.0)',
+                'ubl.warn.gtin': 'schemeID="0160" के साथ StandardItemIdentification "{v}" GS1 GTIN MOD-10 जाँच में विफल — अंकीय पाठ के अनुरूप पर PEPPOL BT-157 schematron गेट पर अस्वीकृत, और डाउनस्ट्रीम कैटलॉग / इन्वेंटरी सिस्टम पंक्ति को मास्टर-डेटा रिकॉर्ड से जोड़ने में मूक रूप से विफल रहते हैं (आम कारण: CRM द्वारा गलत अंक वाले EAN निर्यात, या SKU कॉलम को गलती से GTIN के रूप में टाइप करना)',
                 'ubl.ok.ccyValid': 'मुद्रा कोड ISO 4217 के अनुसार सक्रिय: {list}',
                 'ubl.ok.ibanValid': 'भुगतानकर्ता/प्राप्तकर्ता खाते के IBAN वैध (ISO 13616 MOD-97) ({n})',
                 'ubl.warn.ibanInvalid': 'भुगतानकर्ता/प्राप्तकर्ता IBAN ISO 13616 MOD-97 जाँच में विफल: {iban}',
@@ -18228,6 +18248,60 @@
             }
         }
 
+        // EPC SEPA Rulebook positive-amount enforcement (draft 104). Both
+        // the SCT and SDD Rulebooks pin per-transaction amounts to a
+        // strictly positive decimal: zero-amount and negative-amount
+        // transactions are rejected at the rail-level amount gate
+        // (negative would mean a refund / reverse — the EPC mechanism
+        // for those is a separate pain message, not a sign-flipped
+        // entry). ISO 20022 declares `<InstdAmt>` and `<Amt>` as
+        // `xs:decimal` with no positivity constraint, so a 0.00 entry
+        // (commonly produced by a batch generator that forgets to
+        // exclude prelaunch / setup records) or a negative entry
+        // (commonly produced by a refund script that misuses the credit-
+        // transfer flow) is schema-valid plain text but rail-broken. The
+        // new `sepaCheckPositiveAmounts()` walks every `<CdtTrfTxInf>`
+        // and `<DrctDbtTxInf>`, reads each transaction's `<InstdAmt>`
+        // (pain.001 prefers it) or `<Amt>` (pain.008 prefers it), parses
+        // to Number, and emits one green confirmation row when every
+        // value is > 0 or one red row per offending transaction keyed by
+        // 1-based index. Skips transactions that lack a parseable
+        // amount — those are caught by upstream schema validation, and
+        // the CtrlSum invariants (drafts 35, 92) already exercise the
+        // arithmetic relation. camt.053 (statement) is intentionally
+        // out of scope — statement entries can legitimately be debits
+        // (negative from the holder's perspective) or zero (reservation
+        // entries).
+        function sepaCheckPositiveAmounts(out, doc, detected) {
+            if (detected.type !== 'pain.001' && detected.type !== 'pain.008') return;
+            const w = detected.wrapper;
+            if (!w) return;
+            const txs = [
+                ...sepaAllLocal(w, 'CdtTrfTxInf'),
+                ...sepaAllLocal(w, 'DrctDbtTxInf')
+            ];
+            if (!txs.length) return;
+            let seen = 0;
+            const bad = [];
+            txs.forEach((tx, i) => {
+                const amtEl = sepaFirst(tx, 'InstdAmt') || sepaFirst(tx, 'Amt');
+                if (!amtEl) return;
+                const raw = (amtEl.textContent || '').trim();
+                const v = Number(raw);
+                if (!Number.isFinite(v)) return;
+                seen++;
+                if (v <= 0) bad.push({ idx: i + 1, v: raw });
+            });
+            if (!seen) return;
+            if (bad.length === 0) {
+                tlsRenderRow(out, t('sepa.row.warning'), '✓ ' + tFormat('sepa.ok.positiveAmt', { n: intlNumber(seen) }));
+            } else {
+                for (const b of bad) {
+                    tlsRenderRow(out, t('sepa.row.warning'), '✗ ' + tFormat('sepa.warn.positiveAmt', { idx: intlNumber(b.idx), v: b.v }));
+                }
+            }
+        }
+
         // EPC SDD Rulebook CdtrSchmeId scheme-name narrowing (draft 102).
         // The proprietary scheme name on every `<CdtrSchmeId>/<Id>/<PrvtId>/<Othr>/<SchmeNm>/<Prtry>`
         // MUST be the literal string "SEPA" — the EPC SDD Rulebook
@@ -18480,6 +18554,7 @@
                 sepaCheckDtOfSgntr(out, doc, detected);
                 sepaCheckCid(out, doc, detected);
                 sepaCheckCdtrSchmePrtry(out, doc, detected);
+                sepaCheckPositiveAmounts(out, doc, detected);
                 sepaCheckE2eIdCharset(out, doc, detected);
                 sepaCheckInstrIdCharset(out, doc, detected);
                 sepaCheckMndtIdCharset(out, doc, detected);
@@ -19968,6 +20043,62 @@
             }
         }
 
+        // EN 16931 BT-157 / PEPPOL BIS Billing 3.0 GS1 GTIN check on
+        // `<cac:Item>/<cac:StandardItemIdentification>/<cbc:ID>` when
+        // `@schemeID="0160"` (draft 105). PEPPOL BIS Billing 3.0 narrows
+        // the EN 16931 BT-157 standard item identifier to a small set of
+        // scheme IDs from the PEPPOL Code List `ICD`; the most common is
+        // `"0160"` (GS1 Global Trade Item Number — GTIN-8 / GTIN-12 /
+        // GTIN-13 / GTIN-14). When schemeID=0160 is declared the value
+        // MUST satisfy the GS1 MOD-10 check digit on top of being a
+        // valid GTIN length; a bad-checksum GTIN is plain digit text
+        // that passes the XML schema but is rejected by PEPPOL access
+        // points at the BT-157 schematron gate, and downstream catalog
+        // / inventory systems silently fail to match the line to a
+        // master-data record. Reuses the existing `gs1Validate()` from
+        // the GS1 / EAN / GTIN tool (§2.13) — single-sourced. Lines
+        // whose StandardItemIdentification declares any other schemeID
+        // (e.g. EAN/UCC `"0088"` GLN, ASN `"0093"`, or a non-PEPPOL
+        // internal scheme) are silently skipped — those have their own
+        // validation rules out of scope for this gate. Lines that omit
+        // StandardItemIdentification are also skipped (BT-157 is
+        // optional per EN 16931).
+        function ublCheckGtin(out, detected) {
+            const r = detected.root;
+            const lineLocal = detected.type === 'Invoice' ? 'InvoiceLine' : 'CreditNoteLine';
+            const lines = sepaAllLocal(r, lineLocal);
+            if (!lines.length) return;
+            let seen = 0;
+            const bad = [];
+            for (const line of lines) {
+                const item = sepaFirst(line, 'Item');
+                if (!item) continue;
+                const sii = sepaFirst(item, 'StandardItemIdentification');
+                if (!sii) continue;
+                const idEl = sepaFirst(sii, 'ID');
+                if (!idEl) continue;
+                const schemeId = (idEl.getAttribute && idEl.getAttribute('schemeID') || '').trim();
+                if (schemeId !== '0160') continue;
+                const gtin = (idEl.textContent || '').trim();
+                if (!gtin) continue;
+                seen++;
+                try {
+                    const r = gs1Validate(gtin);
+                    if (!r || !r.ok) bad.push(gtin);
+                } catch (e) {
+                    bad.push(gtin);
+                }
+            }
+            if (!seen) return;
+            if (bad.length === 0) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + tFormat('ubl.ok.gtin', { n: intlNumber(seen) }));
+            } else {
+                for (const v of bad) {
+                    tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + tFormat('ubl.warn.gtin', { v }));
+                }
+            }
+        }
+
         // EN 16931 BR-27 PriceAmount non-negative check (draft 103).
         // BR-27 reads: "An Invoice line net price (BT-146) shall not be
         // negative." UBL declares `<cbc:PriceAmount>` as `xsd:decimal`,
@@ -20327,6 +20458,7 @@
                 ublCheckLineQuantity(out, detected);
                 ublCheckItemName(out, detected);
                 ublCheckPriceAmount(out, detected);
+                ublCheckGtin(out, detected);
                 ublCheckLineAmount(out, detected);
             } catch (e) {
                 tlsRenderRow(out, t('ubl.row.error'), e.message);
