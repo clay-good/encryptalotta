@@ -3820,6 +3820,92 @@ test('ubl: TaxCategory Percent non-negativity flags a negative VAT rate', async 
   await expect(page.locator('#ubl-results')).toContainText(/TaxCategory #1 declares a negative Percent "-19"/i, { timeout: 5_000 });
 });
 
+test('sepa: LclInstrm enforcement confirms CORE on a SEPA-compliant pain.008', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // EPC SDD Rulebook allows LclInstrm/Cd ∈ {CORE, B2B, COR1}. Inject CORE and assert confirmation.
+  const pain008 = `<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.008.001.02">
+  <CstmrDrctDbtInitn>
+    <GrpHdr><MsgId>DD-LCL-1</MsgId><CreDtTm>2024-05-15T09:00:00</CreDtTm><NbOfTxs>1</NbOfTxs><InitgPty><Nm>X</Nm></InitgPty></GrpHdr>
+    <PmtInf>
+      <PmtInfId>DD-1</PmtInfId>
+      <PmtMtd>DD</PmtMtd>
+      <PmtTpInf><SvcLvl><Cd>SEPA</Cd></SvcLvl><LclInstrm><Cd>CORE</Cd></LclInstrm><SeqTp>FRST</SeqTp></PmtTpInf>
+      <ReqdColltnDt>2024-06-01</ReqdColltnDt>
+      <Cdtr><Nm>C</Nm></Cdtr>
+      <CdtrAcct><Id><IBAN>DE91100000000123456789</IBAN></Id></CdtrAcct>
+      <CdtrAgt><FinInstnId><BIC>DEUTDEFFXXX</BIC></FinInstnId></CdtrAgt>
+      <DrctDbtTxInf>
+        <PmtId><EndToEndId>E2E-1</EndToEndId></PmtId>
+        <InstdAmt Ccy="EUR">10.00</InstdAmt>
+        <DrctDbtTx><MndtRltdInf><MndtId>M-1</MndtId></MndtRltdInf></DrctDbtTx>
+        <DbtrAgt><FinInstnId><BIC>COBADEFFXXX</BIC></FinInstnId></DbtrAgt>
+        <Dbtr><Nm>D</Nm></Dbtr>
+        <DbtrAcct><Id><IBAN>DE89370400440532013000</IBAN></Id></DbtrAcct>
+      </DrctDbtTxInf>
+    </PmtInf>
+  </CstmrDrctDbtInitn>
+</Document>`;
+  await page.fill('#sepa-input', pain008);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/LclInstrm\/Cd valid per EPC SDD Rulebook.*CORE \/ B2B \/ COR1/i, { timeout: 5_000 });
+});
+
+test('sepa: LclInstrm enforcement flags an unknown local-instrument code on pain.008', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // INST is a fictitious code outside CORE / B2B / COR1 — schema-valid Max4Text, rulebook-broken.
+  const pain008 = `<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.008.001.02">
+  <CstmrDrctDbtInitn>
+    <GrpHdr><MsgId>DD-LCL-2</MsgId><CreDtTm>2024-05-15T09:00:00</CreDtTm><NbOfTxs>1</NbOfTxs><InitgPty><Nm>X</Nm></InitgPty></GrpHdr>
+    <PmtInf>
+      <PmtInfId>DD-1</PmtInfId>
+      <PmtMtd>DD</PmtMtd>
+      <PmtTpInf><SvcLvl><Cd>SEPA</Cd></SvcLvl><LclInstrm><Cd>INST</Cd></LclInstrm><SeqTp>FRST</SeqTp></PmtTpInf>
+      <ReqdColltnDt>2024-06-01</ReqdColltnDt>
+      <Cdtr><Nm>C</Nm></Cdtr>
+      <CdtrAcct><Id><IBAN>DE91100000000123456789</IBAN></Id></CdtrAcct>
+      <CdtrAgt><FinInstnId><BIC>DEUTDEFFXXX</BIC></FinInstnId></CdtrAgt>
+      <DrctDbtTxInf>
+        <PmtId><EndToEndId>E2E-1</EndToEndId></PmtId>
+        <InstdAmt Ccy="EUR">10.00</InstdAmt>
+        <DrctDbtTx><MndtRltdInf><MndtId>M-1</MndtId></MndtRltdInf></DrctDbtTx>
+        <DbtrAgt><FinInstnId><BIC>COBADEFFXXX</BIC></FinInstnId></DbtrAgt>
+        <Dbtr><Nm>D</Nm></Dbtr>
+        <DbtrAcct><Id><IBAN>DE89370400440532013000</IBAN></Id></DbtrAcct>
+      </DrctDbtTxInf>
+    </PmtInf>
+  </CstmrDrctDbtInitn>
+</Document>`;
+  await page.fill('#sepa-input', pain008);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/LclInstrm\/Cd invalid: PmtInf #1 declares "INST".*CORE.*B2B.*COR1/i, { timeout: 5_000 });
+});
+
+test('ubl: UBLVersionID confirms when 2.1 is declared', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Inject <cbc:UBLVersionID>2.1</cbc:UBLVersionID> just before <cbc:CustomizationID>.
+  const withVer = UBL_INVOICE.replace(
+    '<cbc:CustomizationID>',
+    '<cbc:UBLVersionID>2.1</cbc:UBLVersionID>\n  <cbc:CustomizationID>'
+  );
+  await page.fill('#ubl-input', withVer);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/UBLVersionID declares OASIS UBL "2\.1"/i, { timeout: 5_000 });
+});
+
+test('ubl: UBLVersionID flags a non-2.1 declaration', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Declare 2.2 — schema-valid free text, PEPPOL access-point string-equality reject.
+  const withBad = UBL_INVOICE.replace(
+    '<cbc:CustomizationID>',
+    '<cbc:UBLVersionID>2.2</cbc:UBLVersionID>\n  <cbc:CustomizationID>'
+  );
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/UBLVersionID "2\.2" is not "2\.1"/i, { timeout: 5_000 });
+});
+
 test('ubl: Buyer RegistrationName BR-07 confirms on canonical fixture', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   // Canonical UBL_INVOICE now declares PartyLegalEntity/RegistrationName=Beispiel SARL
