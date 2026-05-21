@@ -3651,6 +3651,51 @@ test('ubl: BR-16 line presence flags a line-less Invoice', async ({ page }) => {
   await expect(page.locator('#ubl-results')).toContainText(/Document declares zero InvoiceLine elements/i, { timeout: 5_000 });
 });
 
+test('sepa: account-level <Ccy>=EUR confirms when DbtrAcct/CdtrAcct declare EUR', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Inject <Ccy>EUR</Ccy> into both DbtrAcct and CdtrAcct.
+  const withEur = SEPA_PAIN001
+    .replace('<DbtrAcct><Id><IBAN>DE89370400440532013000</IBAN></Id></DbtrAcct>',
+             '<DbtrAcct><Id><IBAN>DE89370400440532013000</IBAN></Id><Ccy>EUR</Ccy></DbtrAcct>')
+    .replace('<CdtrAcct><Id><IBAN>DE91100000000123456789</IBAN></Id></CdtrAcct>',
+             '<CdtrAcct><Id><IBAN>DE91100000000123456789</IBAN></Id><Ccy>EUR</Ccy></CdtrAcct>');
+  await page.fill('#sepa-input', withEur);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Every declared account-level <Ccy> is EUR across all 2 cash account/i, { timeout: 5_000 });
+});
+
+test('sepa: account-level <Ccy>=EUR flags a non-EUR account currency', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Inject a USD account-level Ccy on the creditor account — schema-valid but rail-broken.
+  const usd = SEPA_PAIN001.replace(
+    '<CdtrAcct><Id><IBAN>DE91100000000123456789</IBAN></Id></CdtrAcct>',
+    '<CdtrAcct><Id><IBAN>DE91100000000123456789</IBAN></Id><Ccy>USD</Ccy></CdtrAcct>'
+  );
+  await page.fill('#sepa-input', usd);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Cash account <Ccy> "USD" is not EUR/i, { timeout: 5_000 });
+});
+
+test('ubl: BR-DEC LegalMonetaryTotal 2-decimal cap confirms on canonical fixture', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Canonical UBL_INVOICE declares four LegalMonetaryTotal amounts at 2 decimals.
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Every populated LegalMonetaryTotal amount carries at most 2 fractional digits across all 4 amount/i, { timeout: 5_000 });
+});
+
+test('ubl: BR-DEC LegalMonetaryTotal 2-decimal cap flags an over-precision PayableAmount', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Flip PayableAmount to 4 decimals — schema-valid but BR-DEC-17 rejects.
+  const overDp = UBL_INVOICE.replace(
+    '<cbc:PayableAmount currencyID="EUR">119.00</cbc:PayableAmount>',
+    '<cbc:PayableAmount currencyID="EUR">119.0050</cbc:PayableAmount>'
+  );
+  await page.fill('#ubl-input', overDp);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/LegalMonetaryTotal\/PayableAmount value "119\.0050" declares 4 fractional digit/i, { timeout: 5_000 });
+});
+
 test('ubl: Buyer RegistrationName BR-07 confirms on canonical fixture', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   // Canonical UBL_INVOICE now declares PartyLegalEntity/RegistrationName=Beispiel SARL

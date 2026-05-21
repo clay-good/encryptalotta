@@ -4534,6 +4534,8 @@
                 'sepa.warn.pstCdLen': 'PostalAddress #{idx} PstCd "{value}" exceeds the 16-character cap ({len}/16 characters) — ISO 20022 declares <PstlAdr>/<PstCd> as Max16Text and the EPC SCT / SDD Rulebooks re-affirm the 16-character cap because the value is propagated end-to-end through SEPA rails into the receiving bank\'s account-statement address renderer (column width pinned to the legacy SWIFT MT103 / MT104 postal-code limit); an over-cap value that survives an upstream generator\'s relaxed validation is either silently truncated by the receiving bank (the customer sees a half-truncated ZIP that doesn\'t match the contract on file) or hard-rejected by the originator bank\'s pre-clearing gate (common cause: a CRM column carrying ZIP + city — "10115 Berlin Mitte" — or a long alphanumeric routing code packed into the postal-code slot)',
                 'sepa.ok.initgPtyNm': 'GrpHdr/InitgPty/Nm "{name}" present (EPC SEPA Rulebook originator-identification requirement)',
                 'sepa.warn.initgPtyNm': 'GrpHdr/InitgPty is missing <Nm> — ISO 20022 declares InitgPty as the mandatory party block carried in the group header (the initiating party identification — the originator on whose behalf the file is submitted), and although the schema marks the nested <Nm> as optional (Max70Text 0..1), the EPC SEPA Credit Transfer and SEPA Direct Debit Rulebooks both require the originator name to be present so the receiving bank can render it on the beneficiary\'s account statement and so the originator-identification audit trail back through clearing (EBA STEP2 / STET / RT1) carries a human-readable label; a file with InitgPty/Id but no InitgPty/Nm is schema-valid but rail-broken (common cause: a payments hub passing only the OrgId/OthrId numeric identifier through to GrpHdr without filling in the legal-entity name)',
+                'sepa.ok.acctCcy': 'Every declared account-level <Ccy> is EUR across all {n} cash account(s) (EPC SEPA Credit Transfer / Direct Debit Rulebook — SEPA is a single-currency scheme)',
+                'sepa.warn.acctCcy': 'Cash account <Ccy> "{code}" is not EUR — ISO 20022 declares <DbtrAcct>/<Ccy> and <CdtrAcct>/<Ccy> as ActiveOrHistoricCurrencyCode (any ISO 4217 code is schema-valid), but the EPC SEPA Credit Transfer and SEPA Direct Debit Rulebooks restrict SEPA to EUR; an account-level Ccy other than EUR routes the payment to the cross-border FX gateway (where it is rejected as non-SEPA) instead of EBA STEP2 / STET / RT1 (the SEPA clearing rails). Distinct from the amount-level Ccy="…" attribute check on <InstdAmt> / <Amt> (draft 98): that one validates the per-transaction settlement currency, this one validates the account-of-record currency at <DbtrAcct> / <CdtrAcct>',
                 'sepa.warn.ccyInvalid': 'Currency code not active per ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unrecognized ISO 20022 root element — partial parse only.',
                 'err.sepaEmpty': 'XML input is empty.',
@@ -4703,6 +4705,8 @@
                 'ubl.warn.buyerCountry': 'AccountingCustomerParty is missing Party/PostalAddress/Country/IdentificationCode — EN 16931 BR-11 / BT-55 requires the buyer\'s country code (ISO 3166-1 alpha-2) on every PEPPOL invoice and credit note; the value establishes which member state\'s VAT regime governs the buyer side of the supply (intra-EU reverse-charge vs domestic input-VAT vs B2C export) and which national tax authority the BT-48 Buyer VAT identifier is registered with (UBL 2.1 marks PostalAddress / Country / IdentificationCode optional at the schema level so a customer party carrying only PartyName + PartyLegalEntity passes XML validation but is rejected by PEPPOL access points at the BR-11 schematron gate)',
                 'ubl.ok.linePresence': 'Document carries {n} {field}(s) (EN 16931 BR-16 — an Invoice / Credit Note shall have at least one line)',
                 'ubl.warn.linePresence': 'Document declares zero {field} elements — EN 16931 BR-16 requires every Invoice and Credit Note to carry at least one line item (an Invoice without lines has no goods or services to bill for, and the line-total invariants BR-CO-10 / BR-CO-13 lose their inputs); UBL 2.1 marks the line element repeatable at 0..n at the schema level so a line-less document passes XML validation but is rejected by PEPPOL access points at the BR-16 schematron gate (common cause: a generator that emits the document shell from a template before the line-loop has produced any rows, or that suppresses zero-amount lines so a fully-discounted invoice ends up empty)',
+                'ubl.ok.lmtDec': 'Every populated LegalMonetaryTotal amount carries at most 2 fractional digits across all {n} amount(s) (EN 16931 BR-DEC-09 / -12 / -14 / -15 / -16 / -17 — the allowed maximum number of decimals for header-level monetary amounts is 2)',
+                'ubl.warn.lmtDec': 'LegalMonetaryTotal/{name} value "{v}" declares {dp} fractional digit(s) — EN 16931 BR-DEC pins every header-level monetary amount to a maximum of 2 decimal places (BR-DEC-09 BT-106 LineExtension, BR-DEC-12 BT-109 TaxExclusive, BR-DEC-14 BT-112 TaxInclusive, BR-DEC-15 BT-113 Prepaid, BR-DEC-16 BT-114 PayableRounding, BR-DEC-17 BT-115 Payable); UBL 2.1 declares the type as xsd:decimal with unbounded fractional digits so an over-precision amount passes XML validation but is rejected by PEPPOL access points at the BR-DEC schematron gate (common cause: a generator that defaults the print-format to 4 or more decimal places — common in upstream ERP systems carrying high-precision unit prices — without rounding header totals back to the per-currency minor-unit cap)',
                 'ubl.ok.taxTotalSign': 'Every TaxTotal declares a non-negative TaxAmount across all {n} TaxTotal block(s) (EN 16931 BR-CO-13 / BT-110 — Invoice total VAT amount)',
                 'ubl.warn.taxTotalSign': 'TaxTotal #{idx} declares a negative TaxAmount "{v}" — EN 16931 BR-CO-13 / BR-DEC-13 require the file-wide Invoice total VAT amount (BT-110) to be non-negative; an invoice\'s VAT total can be zero (zero-rated supply, exempt invoice, intra-EU reverse charge) but never negative (even a CreditNote carries a positive VAT total because the UNCL 1001 document-type code already conveys the credit direction); a negative file-wide VAT silently inverts the sign of the buyer\'s input-VAT entry and breaks the per-period VAT reporting chain (common cause: a generator reusing the same shape for charges and refunds and flipping the sign on every monetary slot instead of switching the document-type code)',
                 'ubl.ok.lmtLineSign': 'LegalMonetaryTotal/LineExtensionAmount "{v}" is non-negative (EN 16931 BT-106 — Sum of Invoice line net amounts)',
@@ -5850,6 +5854,8 @@
                 'sepa.warn.pstCdLen': 'PostalAddress #{idx} PstCd « {value} » dépasse la limite de 16 caractères ({len}/16) — ISO 20022 déclare <PstlAdr>/<PstCd> comme Max16Text et les règles EPC SCT / SDD réaffirment la limite de 16 caractères car la valeur est propagée de bout en bout dans le moteur de relevé de compte de la banque destinataire (largeur de colonne alignée sur la limite historique de code postal SWIFT MT103 / MT104) ; une valeur dépassant la limite qui passe la validation relâchée d’un générateur amont est soit tronquée silencieusement par la banque destinataire (le client voit un code postal à moitié coupé qui ne correspond pas au contrat) soit rejetée par le contrôle pré-compensation de la banque émettrice (cause fréquente : une colonne CRM portant code postal + ville — « 10115 Berlin Mitte » — ou un long code de routage alphanumérique placé dans le champ code postal)',
                 'sepa.ok.initgPtyNm': 'GrpHdr/InitgPty/Nm « {name} » présent (exigence d’identification du donneur d’ordre des règles EPC SEPA)',
                 'sepa.warn.initgPtyNm': 'GrpHdr/InitgPty ne contient pas <Nm> — ISO 20022 déclare InitgPty comme bloc de partie obligatoire dans l’en-tête de groupe (identification du donneur d’ordre — le donneur d’ordre pour le compte duquel le fichier est soumis), et bien que le schéma marque <Nm> imbriqué comme facultatif (Max70Text 0..1), les règles EPC SEPA de virement et de prélèvement exigent toutes deux que le nom du donneur d’ordre soit présent afin que la banque destinataire puisse l’afficher sur le relevé de compte du bénéficiaire et que la piste d’audit d’identification du donneur d’ordre à travers la compensation (EBA STEP2 / STET / RT1) porte une étiquette lisible ; un fichier avec InitgPty/Id mais sans InitgPty/Nm est conforme au schéma mais rejeté par les rails (cause fréquente : un hub de paiements ne transmettant que l’identifiant numérique OrgId/OthrId à GrpHdr sans renseigner le nom de l’entité juridique)',
+                'sepa.ok.acctCcy': 'Chaque <Ccy> de compte déclaré est EUR sur l’ensemble des {n} compte(s) (règles EPC SEPA de virement / prélèvement — SEPA est un schéma à devise unique)',
+                'sepa.warn.acctCcy': '<Ccy> de compte « {code} » n’est pas EUR — ISO 20022 déclare <DbtrAcct>/<Ccy> et <CdtrAcct>/<Ccy> comme ActiveOrHistoricCurrencyCode (tout code ISO 4217 est conforme au schéma), mais les règles EPC SEPA de virement et de prélèvement restreignent SEPA à EUR ; un Ccy de compte différent de EUR achemine le paiement vers la passerelle de change transfrontalier (où il est rejeté comme non-SEPA) au lieu de EBA STEP2 / STET / RT1 (les rails de compensation SEPA). À distinguer de l’attribut Ccy="…" au niveau du montant (draft 98) : celui-ci valide la devise de règlement par transaction, ce contrôle valide la devise du compte de référence à <DbtrAcct> / <CdtrAcct>',
                 'sepa.warn.ccyInvalid': 'Code monétaire non actif selon ISO 4217 : {code}',
                 'sepa.warn.unknownDoc': 'Élément racine ISO 20022 non reconnu — analyse partielle uniquement.',
                 'err.sepaEmpty': 'Le XML d’entrée est vide.',
@@ -6009,6 +6015,8 @@
                 'ubl.warn.buyerCountry': 'AccountingCustomerParty ne déclare pas Party/PostalAddress/Country/IdentificationCode — EN 16931 BR-11 / BT-55 exige le code pays de l’acheteur (ISO 3166-1 alpha-2) sur chaque facture et avoir PEPPOL ; la valeur établit quel régime TVA d’État membre régit le côté acheteur de la livraison (autoliquidation intra-UE vs TVA déductible domestique vs export B2C) et auprès de quelle autorité fiscale nationale l’identifiant TVA acheteur BT-48 est enregistré (UBL 2.1 rend PostalAddress / Country / IdentificationCode facultatif au niveau du schéma, donc un bloc client ne portant que PartyName + PartyLegalEntity est conforme au schéma mais rejeté par les points d’accès PEPPOL au contrôle schématron BR-11)',
                 'ubl.ok.linePresence': 'Le document porte {n} {field}(s) (EN 16931 BR-16 — une facture / un avoir doit comporter au moins une ligne)',
                 'ubl.warn.linePresence': 'Le document déclare zéro élément {field} — EN 16931 BR-16 exige que chaque facture et avoir porte au moins une ligne (une facture sans lignes n’a aucun bien ou service à facturer, et les invariants de totaux de lignes BR-CO-10 / BR-CO-13 perdent leurs entrées) ; UBL 2.1 marque l’élément ligne répétable de 0..n au niveau du schéma, donc un document sans lignes est conforme au schéma mais rejeté par les points d’accès PEPPOL au contrôle schématron BR-16 (cause fréquente : un générateur qui émet la coquille du document depuis un modèle avant que la boucle de lignes n’ait produit de lignes, ou qui supprime les lignes à montant zéro, de sorte qu’une facture entièrement remisée se retrouve vide)',
+                'ubl.ok.lmtDec': 'Chaque montant LegalMonetaryTotal renseigné comporte au plus 2 décimales sur l’ensemble des {n} montant(s) (EN 16931 BR-DEC-09 / -12 / -14 / -15 / -16 / -17 — le nombre maximal de décimales autorisé pour les montants monétaires d’en-tête est 2)',
+                'ubl.warn.lmtDec': 'LegalMonetaryTotal/{name} valeur « {v} » déclare {dp} décimale(s) — EN 16931 BR-DEC limite chaque montant monétaire d’en-tête à un maximum de 2 décimales (BR-DEC-09 BT-106 LineExtension, BR-DEC-12 BT-109 TaxExclusive, BR-DEC-14 BT-112 TaxInclusive, BR-DEC-15 BT-113 Prepaid, BR-DEC-16 BT-114 PayableRounding, BR-DEC-17 BT-115 Payable) ; UBL 2.1 déclare le type comme xsd:decimal avec un nombre illimité de chiffres fractionnaires, donc un montant de précision excessive est conforme au schéma mais rejeté par les points d’accès PEPPOL au contrôle schématron BR-DEC (cause fréquente : un générateur dont le format d’impression par défaut comporte 4 décimales ou plus — courant dans les systèmes ERP amont portant des prix unitaires de haute précision — sans arrondir les totaux d’en-tête à la limite minor-unit de la devise)',
                 'ubl.ok.taxTotalSign': 'Chaque TaxTotal déclare un TaxAmount non négatif sur l’ensemble des {n} bloc(s) TaxTotal (EN 16931 BR-CO-13 / BT-110 — montant TVA total de la facture)',
                 'ubl.warn.taxTotalSign': 'TaxTotal #{idx} déclare un TaxAmount négatif « {v} » — EN 16931 BR-CO-13 / BR-DEC-13 exigent que le montant TVA total de la facture (BT-110) ne soit pas négatif ; la TVA totale d’une facture peut être nulle (livraison taxée à zéro, facture exonérée, autoliquidation intra-UE) mais jamais négative (même un avoir porte une TVA totale positive car le code de type document UNCL 1001 indique déjà le sens crédit) ; une TVA totale négative inverse silencieusement le signe de l’entrée TVA déductible de l’acheteur et rompt la chaîne de déclaration TVA par période (cause fréquente : un générateur qui réutilise le même format pour les charges et remboursements en inversant le signe sur chaque champ monétaire au lieu de changer le code de type document)',
                 'ubl.ok.lmtLineSign': 'LegalMonetaryTotal/LineExtensionAmount « {v} » est non négatif (EN 16931 BT-106 — somme des montants nets des lignes de facture)',
@@ -7126,6 +7134,8 @@
                 'sepa.warn.pstCdLen': 'PostalAddress #{idx} PstCd "{value}" 超过 16 字符上限（{len}/16 字符）——ISO 20022 将 <PstlAdr>/<PstCd> 声明为 Max16Text，EPC SCT / SDD 规则书重申 16 字符上限，因为该值通过 SEPA 轨道端到端传播至收款行的账户对账单地址渲染器（列宽与历史 SWIFT MT103 / MT104 邮政编码限制一致）；上游生成器宽松校验放行的超长值要么被收款行静默截断（客户看到与合同记录不符的半截邮编），要么被付款行预清算环节硬拒绝（常见原因：CRM 字段将邮编 + 城市——"10115 Berlin Mitte"——或长字母数字路由代码合并放入邮政编码字段）',
                 'sepa.ok.initgPtyNm': '已声明 GrpHdr/InitgPty/Nm "{name}"（EPC SEPA 规则书发起方识别要求）',
                 'sepa.warn.initgPtyNm': 'GrpHdr/InitgPty 缺少 <Nm>——ISO 20022 将 InitgPty 声明为分组头中强制存在的当事方块（发起方识别——代表其提交文件的发起方），尽管模式将嵌套的 <Nm> 标记为可选（Max70Text 0..1），EPC SEPA 信用转账和直接借记规则书都要求发起方名称必须存在，以便收款行能在受益人的账户对账单上呈现该名称，并使通过清算系统（EBA STEP2 / STET / RT1）回溯的发起方识别审计链携带可读标签；只包含 InitgPty/Id 而无 InitgPty/Nm 的文件在模式上有效但在轨道上被拒绝（常见原因：支付中枢仅将 OrgId/OthrId 数字标识传递到 GrpHdr 而未填写法人名称）',
+                'sepa.ok.acctCcy': '所有 {n} 个现金账户中已声明的账户级 <Ccy> 均为 EUR（EPC SEPA 信用转账/直接借记规则书——SEPA 为单一货币计划）',
+                'sepa.warn.acctCcy': '现金账户 <Ccy> "{code}" 非 EUR——ISO 20022 将 <DbtrAcct>/<Ccy> 与 <CdtrAcct>/<Ccy> 声明为 ActiveOrHistoricCurrencyCode（任意 ISO 4217 代码均符合模式），但 EPC SEPA 信用转账与直接借记规则书将 SEPA 限制为 EUR；账户级 Ccy 非 EUR 会将付款路由到跨境换汇网关（在那里被作为非 SEPA 拒绝），而非 EBA STEP2 / STET / RT1（SEPA 清算轨道）。区别于金额级 Ccy="…" 属性检查（draft 98）：该项验证每笔交易的结算币种，本检查验证 <DbtrAcct> / <CdtrAcct> 的账面币种',
                 'sepa.warn.ccyInvalid': '币种代码不在 ISO 4217 现行清单中：{code}',
                 'sepa.warn.unknownDoc': '无法识别的 ISO 20022 根元素 — 仅部分解析。',
                 'err.sepaEmpty': 'XML 输入为空。',
@@ -7285,6 +7295,8 @@
                 'ubl.warn.buyerCountry': 'AccountingCustomerParty 缺少 Party/PostalAddress/Country/IdentificationCode——EN 16931 BR-11 / BT-55 要求每张 PEPPOL 发票和贷项通知单声明买方国家代码（ISO 3166-1 alpha-2）；该值确定哪个成员国的增值税制度管辖该供应的买方侧（欧盟内反向征收 vs 国内进项税 vs B2C 出口）以及 BT-48 买方 VAT 标识在哪一国税务机关注册（UBL 2.1 将 PostalAddress / Country / IdentificationCode 设为可选，所以仅包含 PartyName + PartyLegalEntity 的客户当事人在模式上有效，但会被 PEPPOL 接入点在 BR-11 schematron 校验处拒绝）',
                 'ubl.ok.linePresence': '文档承载 {n} 个 {field}（EN 16931 BR-16——发票/贷项通知单至少应包含一行）',
                 'ubl.warn.linePresence': '文档声明零个 {field} 元素——EN 16931 BR-16 要求每张发票和贷项通知单至少携带一行项目（无行的发票没有可计费的商品或服务，行汇总不变式 BR-CO-10 / BR-CO-13 会失去其输入项）；UBL 2.1 将行元素在模式级别标记为 0..n 可重复，因此无行的文档可通过 XML 验证，但会在 PEPPOL 接入点的 BR-16 schematron 关卡被拒绝（常见原因：在行循环尚未产出任何行之前，生成器就已从模板输出文档外壳；或生成器抑制零金额行，致使全折扣发票最终为空）',
+                'ubl.ok.lmtDec': '所有 {n} 个 LegalMonetaryTotal 金额的小数位均不超过 2 位（EN 16931 BR-DEC-09 / -12 / -14 / -15 / -16 / -17——头部级货币金额允许的最大小数位数为 2）',
+                'ubl.warn.lmtDec': 'LegalMonetaryTotal/{name} 值 "{v}" 声明了 {dp} 位小数——EN 16931 BR-DEC 将每个头部级货币金额限制为最多 2 位小数（BR-DEC-09 BT-106 LineExtension、BR-DEC-12 BT-109 TaxExclusive、BR-DEC-14 BT-112 TaxInclusive、BR-DEC-15 BT-113 Prepaid、BR-DEC-16 BT-114 PayableRounding、BR-DEC-17 BT-115 Payable）；UBL 2.1 将类型声明为 xsd:decimal 且小数位无限，因此过精度金额可通过 XML 验证，但会在 PEPPOL 接入点的 BR-DEC schematron 关卡被拒绝（常见原因：生成器的默认打印格式为 4 位或更多小数——上游 ERP 系统承载高精度单价时常见——未将头部总额四舍五入至该币种最小单位上限）',
                 'ubl.ok.taxTotalSign': '所有 {n} 个 TaxTotal 块均声明非负 TaxAmount（EN 16931 BR-CO-13 / BT-110——发票 VAT 总额）',
                 'ubl.warn.taxTotalSign': 'TaxTotal #{idx} 声明负的 TaxAmount "{v}"——EN 16931 BR-CO-13 / BR-DEC-13 要求文件级发票 VAT 总额（BT-110）非负；发票的 VAT 总额可以为零（零税率供应、免税发票、欧盟内部反向收费）但不能为负（即使贷项通知单也携带正的 VAT 总额，因为 UNCL 1001 文档类型代码已经表达了贷项方向）；负的文件级 VAT 会默默反转买方进项税条目的符号，破坏分期 VAT 申报链（常见原因是生成器在收费与退款之间复用同一形状，并在每个货币字段上翻转符号，而不是切换文档类型代码）',
                 'ubl.ok.lmtLineSign': 'LegalMonetaryTotal/LineExtensionAmount "{v}" 非负（EN 16931 BT-106——发票行净额之和）',
@@ -8417,6 +8429,8 @@
                 'sepa.warn.pstCdLen': 'PostalAddress #{idx} PstCd „{value}“ überschreitet die 16-Zeichen-Grenze ({len}/16 Zeichen) — ISO 20022 deklariert <PstlAdr>/<PstCd> als Max16Text und die EPC-SCT-/SDD-Rulebooks bekräftigen die 16-Zeichen-Grenze, weil der Wert end-to-end über die SEPA-Schienen in den Kontoauszugs-Adressrenderer der empfangenden Bank propagiert wird (Spaltenbreite an die historische SWIFT-MT103-/MT104-Postleitzahlgrenze gepinnt); ein über der Grenze liegender Wert, der eine lockere Vorvalidierung eines vorgelagerten Generators passiert, wird entweder stillschweigend von der empfangenden Bank gekürzt (der Kunde sieht eine halb abgeschnittene PLZ, die nicht zum hinterlegten Vertrag passt) oder vom Pre-Clearing-Gate der Auftraggeberbank hart abgelehnt (häufige Ursache: eine CRM-Spalte, die PLZ + Ort — „10115 Berlin Mitte“ — oder einen langen alphanumerischen Routingcode in das Postleitzahlfeld packt)',
                 'sepa.ok.initgPtyNm': 'GrpHdr/InitgPty/Nm „{name}“ vorhanden (Auftraggeber-Identifikationsanforderung des EPC-SEPA-Rulebook)',
                 'sepa.warn.initgPtyNm': 'GrpHdr/InitgPty enthält kein <Nm> — ISO 20022 deklariert InitgPty als obligatorischen Parteienblock im Gruppen-Header (Auftraggeber-Identifikation — der Auftraggeber, in dessen Auftrag die Datei eingereicht wird), und obwohl das Schema das verschachtelte <Nm> als optional markiert (Max70Text 0..1), verlangen die EPC-SEPA-Credit-Transfer- und SEPA-Direct-Debit-Rulebooks beide, dass der Auftraggebername vorhanden ist, damit die empfangende Bank ihn auf dem Kontoauszug des Begünstigten darstellen kann und damit der Auftraggeber-Identifikations-Audit-Trail durch die Clearing-Systeme (EBA STEP2 / STET / RT1) ein menschenlesbares Label trägt; eine Datei mit InitgPty/Id, aber ohne InitgPty/Nm ist schemavalid, aber auf den Schienen abgelehnt (häufige Ursache: ein Payments-Hub leitet nur den OrgId/OthrId-Zahlenidentifikator an GrpHdr weiter, ohne den Namen der juristischen Person zu füllen)',
+                'sepa.ok.acctCcy': 'Jeder deklarierte konto-seitige <Ccy> ist EUR über alle {n} Geldkonten (EPC-SEPA-Credit-Transfer-/Direct-Debit-Rulebook — SEPA ist ein Einwährungs-Schema)',
+                'sepa.warn.acctCcy': 'Konto-<Ccy> „{code}“ ist nicht EUR — ISO 20022 deklariert <DbtrAcct>/<Ccy> und <CdtrAcct>/<Ccy> als ActiveOrHistoricCurrencyCode (jeder ISO-4217-Code ist schemavalid), aber die EPC-SEPA-Credit-Transfer- und SEPA-Direct-Debit-Rulebooks beschränken SEPA auf EUR; ein Konto-Ccy ≠ EUR routet die Zahlung an das grenzüberschreitende FX-Gateway (wo sie als Nicht-SEPA abgelehnt wird) statt an EBA STEP2 / STET / RT1 (die SEPA-Clearing-Schienen). Im Unterschied zur Attributprüfung auf Betrags-Ebene Ccy="…" (Draft 98): jene validiert die pro-Transaktion-Abwicklungswährung, dieser Check validiert die Kontoführungswährung an <DbtrAcct> / <CdtrAcct>',
                 'sepa.warn.ccyInvalid': 'Währungscode nicht aktiv nach ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unbekanntes ISO-20022-Wurzelelement — nur Teilanalyse.',
                 'err.sepaEmpty': 'Die XML-Eingabe ist leer.',
@@ -8576,6 +8590,8 @@
                 'ubl.warn.buyerCountry': 'AccountingCustomerParty deklariert kein Party/PostalAddress/Country/IdentificationCode — EN 16931 BR-11 / BT-55 verlangt den Ländercode des Käufers (ISO 3166-1 alpha-2) auf jeder PEPPOL-Rechnung und -Gutschrift; der Wert legt fest, welches Mitgliedstaaten-USt-Regime die Käuferseite der Lieferung regelt (innergemeinschaftliches Reverse-Charge vs. inländische Vorsteuer vs. B2C-Ausfuhr) und bei welcher nationalen Steuerbehörde die BT-48-Käufer-USt-IdNr registriert ist (UBL 2.1 markiert PostalAddress / Country / IdentificationCode auf Schemaebene als optional, sodass ein Kundenblock, der nur PartyName + PartyLegalEntity trägt, schemavalid ist, aber von PEPPOL-Access-Points am BR-11-Schematron-Gate abgewiesen wird)',
                 'ubl.ok.linePresence': 'Dokument trägt {n} {field}(s) (EN 16931 BR-16 — eine Rechnung / Gutschrift muss mindestens eine Zeile enthalten)',
                 'ubl.warn.linePresence': 'Dokument deklariert null {field}-Elemente — EN 16931 BR-16 verlangt, dass jede Rechnung und Gutschrift mindestens eine Zeile trägt (eine Rechnung ohne Zeilen hat keine Waren oder Dienstleistungen, die berechnet werden könnten, und die Zeilen-Summen-Invarianten BR-CO-10 / BR-CO-13 verlieren ihre Eingaben); UBL 2.1 markiert das Zeilen-Element auf Schemaebene als wiederholbar mit 0..n, sodass ein zeilenloses Dokument schemavalid ist, aber von PEPPOL-Access-Points am BR-16-Schematron-Gate abgewiesen wird (häufige Ursache: ein Generator gibt die Dokumenthülle aus einer Vorlage aus, bevor die Zeilen-Schleife Zeilen produziert hat, oder unterdrückt Null-Betragszeilen, sodass eine vollständig rabattierte Rechnung leer endet)',
+                'ubl.ok.lmtDec': 'Jeder befüllte LegalMonetaryTotal-Betrag trägt höchstens 2 Nachkommastellen über alle {n} Beträge (EN 16931 BR-DEC-09 / -12 / -14 / -15 / -16 / -17 — die maximal erlaubte Anzahl Nachkommastellen für Header-Geldbeträge ist 2)',
+                'ubl.warn.lmtDec': 'LegalMonetaryTotal/{name} Wert „{v}“ deklariert {dp} Nachkommastelle(n) — EN 16931 BR-DEC bindet jeden Header-Geldbetrag an maximal 2 Nachkommastellen (BR-DEC-09 BT-106 LineExtension, BR-DEC-12 BT-109 TaxExclusive, BR-DEC-14 BT-112 TaxInclusive, BR-DEC-15 BT-113 Prepaid, BR-DEC-16 BT-114 PayableRounding, BR-DEC-17 BT-115 Payable); UBL 2.1 deklariert den Typ als xsd:decimal mit unbegrenzten Nachkommastellen, sodass ein überpräziser Betrag schemavalid ist, aber von PEPPOL-Access-Points am BR-DEC-Schematron-Gate abgewiesen wird (häufige Ursache: ein Generator, dessen Druckformat standardmäßig 4 oder mehr Nachkommastellen verwendet — üblich in vorgelagerten ERP-Systemen mit hochpräzisen Einzelpreisen — ohne die Header-Summen auf das Minor-Unit-Limit der Währung zu runden)',
                 'ubl.ok.taxTotalSign': 'Jedes TaxTotal deklariert einen nicht-negativen TaxAmount über alle {n} TaxTotal-Block(s) (EN 16931 BR-CO-13 / BT-110 — Rechnungs-Gesamt-USt-Betrag)',
                 'ubl.warn.taxTotalSign': 'TaxTotal #{idx} deklariert einen negativen TaxAmount „{v}“ — EN 16931 BR-CO-13 / BR-DEC-13 verlangen, dass der datei-weite Rechnungs-Gesamt-USt-Betrag (BT-110) nicht negativ ist; die USt-Summe einer Rechnung kann null sein (nullsatz-besteuerte Lieferung, steuerbefreite Rechnung, innergemeinschaftliches Reverse Charge), aber niemals negativ (selbst eine Gutschrift trägt eine positive USt-Summe, da der UNCL-1001-Dokumenttypcode die Gutschriftrichtung bereits ausdrückt); eine negative datei-weite USt kehrt stillschweigend das Vorzeichen des Vorsteuer-Postens des Käufers um und unterbricht die periodenbezogene USt-Meldekette (häufige Ursache: ein Generator, der dieselbe Form für Belastungen und Rückerstattungen wiederverwendet und das Vorzeichen in jedem monetären Feld umkehrt, statt den Dokumenttypcode zu wechseln)',
                 'ubl.ok.lmtLineSign': 'LegalMonetaryTotal/LineExtensionAmount „{v}“ ist nicht negativ (EN 16931 BT-106 — Summe der Rechnungszeilen-Nettobeträge)',
@@ -9693,6 +9709,8 @@
                 'sepa.warn.pstCdLen': 'PostalAddress #{idx} PstCd "{value}" 16-वर्ण सीमा से अधिक है ({len}/16 वर्ण) — ISO 20022 <PstlAdr>/<PstCd> को Max16Text के रूप में घोषित करता है और EPC SCT / SDD रूलबुक्स 16-वर्ण सीमा की पुनः-पुष्टि करते हैं क्योंकि यह मान SEPA रेल के माध्यम से प्राप्तकर्ता बैंक के खाता विवरण पता रेंडरर तक एंड-टू-एंड प्रसारित होता है (स्तंभ चौड़ाई ऐतिहासिक SWIFT MT103 / MT104 पिन कोड सीमा से जुड़ी); ऊपरी जनरेटर की ढीली मान्यता पास करने वाला अति-सीमित मान या तो प्राप्तकर्ता बैंक द्वारा मूक रूप से छोटा कर दिया जाता है (ग्राहक को अनुबंध रिकॉर्ड से मेल नहीं खाने वाला आधा-कटा पिन कोड दिखता है) या प्रेषक बैंक के पूर्व-समाशोधन गेट पर अस्वीकृत होता है (आम कारण: CRM कॉलम जो पिन कोड + शहर — "10115 Berlin Mitte" — या लंबा अल्फ़ान्यूमेरिक रूटिंग कोड पिन कोड क्षेत्र में रखता है)',
                 'sepa.ok.initgPtyNm': 'GrpHdr/InitgPty/Nm "{name}" मौजूद है (EPC SEPA रूलबुक आरंभकर्ता-पहचान आवश्यकता)',
                 'sepa.warn.initgPtyNm': 'GrpHdr/InitgPty में <Nm> नहीं है — ISO 20022 InitgPty को समूह हेडर में अनिवार्य पक्ष ब्लॉक के रूप में घोषित करता है (आरंभकर्ता पहचान — वह आरंभकर्ता जिसकी ओर से फ़ाइल जमा की गई है), और यद्यपि स्कीमा नेस्टेड <Nm> को वैकल्पिक के रूप में चिह्नित करता है (Max70Text 0..1), EPC SEPA क्रेडिट ट्रांसफर और SEPA डायरेक्ट डेबिट रूलबुक्स दोनों आरंभकर्ता का नाम मौजूद होना अनिवार्य करते हैं ताकि प्राप्तकर्ता बैंक उसे लाभार्थी के खाता विवरण पर प्रदर्शित कर सके और क्लियरिंग (EBA STEP2 / STET / RT1) के माध्यम से आरंभकर्ता-पहचान ऑडिट ट्रेल पर एक मानव-पठनीय लेबल हो; InitgPty/Id वाली परंतु InitgPty/Nm रहित फ़ाइल स्कीमा-मान्य है पर रेल पर अस्वीकृत होती है (आम कारण: एक भुगतान हब जो GrpHdr तक केवल OrgId/OthrId संख्यात्मक पहचानकर्ता पास करता है पर कानूनी-इकाई नाम नहीं भरता)',
+                'sepa.ok.acctCcy': 'सभी {n} नकद खातों पर घोषित प्रत्येक खाता-स्तरीय <Ccy> EUR है (EPC SEPA क्रेडिट ट्रांसफर / डायरेक्ट डेबिट रूलबुक — SEPA एकल-मुद्रा योजना है)',
+                'sepa.warn.acctCcy': 'नकद खाता <Ccy> "{code}" EUR नहीं है — ISO 20022 <DbtrAcct>/<Ccy> और <CdtrAcct>/<Ccy> को ActiveOrHistoricCurrencyCode के रूप में घोषित करता है (कोई भी ISO 4217 कोड स्कीमा-मान्य है), परंतु EPC SEPA क्रेडिट ट्रांसफर और डायरेक्ट डेबिट रूलबुक्स SEPA को EUR तक सीमित करते हैं; गैर-EUR खाता-स्तरीय Ccy भुगतान को सीमा-पार FX गेटवे की ओर रूट करता है (जहाँ इसे गैर-SEPA के रूप में अस्वीकृत किया जाता है) न कि EBA STEP2 / STET / RT1 (SEPA क्लियरिंग रेल) की ओर। राशि-स्तरीय Ccy="…" विशेषता जाँच (draft 98) से अलग: वह प्रति-लेन-देन निपटान मुद्रा को मान्य करती है, यह जाँच <DbtrAcct> / <CdtrAcct> की खाता-धारित मुद्रा को मान्य करती है',
                 'sepa.warn.ccyInvalid': 'मुद्रा कोड ISO 4217 में सक्रिय नहीं: {code}',
                 'sepa.warn.unknownDoc': 'अज्ञात ISO 20022 रूट तत्व — केवल आंशिक पार्सिंग।',
                 'err.sepaEmpty': 'XML इनपुट खाली है।',
@@ -9852,6 +9870,8 @@
                 'ubl.warn.buyerCountry': 'AccountingCustomerParty में Party/PostalAddress/Country/IdentificationCode घोषित नहीं है — EN 16931 BR-11 / BT-55 प्रत्येक PEPPOL चालान और क्रेडिट नोट पर क्रेता का देश कोड (ISO 3166-1 alpha-2) अनिवार्य करता है; यह मान निर्धारित करता है कि कौन सा सदस्य राज्य का VAT शासन आपूर्ति के क्रेता पक्ष को नियंत्रित करता है (इंट्रा-EU रिवर्स-चार्ज बनाम घरेलू इनपुट-VAT बनाम B2C निर्यात) और BT-48 क्रेता VAT पहचानकर्ता किस राष्ट्रीय कर प्राधिकरण के साथ पंजीकृत है (UBL 2.1 PostalAddress / Country / IdentificationCode को स्कीमा-स्तर पर वैकल्पिक रखता है, इसलिए केवल PartyName + PartyLegalEntity वाला ग्राहक पक्ष XML मान्यता पास करता है पर PEPPOL एक्सेस पॉइंट्स द्वारा BR-11 schematron गेट पर अस्वीकृत होता है)',
                 'ubl.ok.linePresence': 'दस्तावेज़ {n} {field} ले जाता है (EN 16931 BR-16 — चालान / क्रेडिट नोट में कम से कम एक पंक्ति होनी चाहिए)',
                 'ubl.warn.linePresence': 'दस्तावेज़ शून्य {field} तत्व घोषित करता है — EN 16931 BR-16 प्रत्येक चालान और क्रेडिट नोट पर कम से कम एक पंक्ति आइटम अनिवार्य करता है (बिना पंक्तियों वाली चालान में बिल करने योग्य कोई वस्तु या सेवा नहीं है, और पंक्ति-योग अनिवार्यताएँ BR-CO-10 / BR-CO-13 अपने इनपुट खो देती हैं); UBL 2.1 पंक्ति तत्व को स्कीमा-स्तर पर 0..n दोहराने योग्य चिह्नित करता है, इसलिए बिना पंक्तियों वाला दस्तावेज़ XML मान्यता पास करता है पर PEPPOL एक्सेस पॉइंट्स द्वारा BR-16 schematron गेट पर अस्वीकृत होता है (आम कारण: एक जनरेटर जो पंक्ति-लूप द्वारा कोई पंक्ति उत्पन्न करने से पहले ही टेम्प्लेट से दस्तावेज़ का बाहरी ढाँचा उत्सर्जित कर देता है, या जो शून्य-राशि पंक्तियों को दबा देता है, जिससे पूरी छूट वाली चालान अंततः खाली रह जाती है)',
+                'ubl.ok.lmtDec': 'सभी {n} राशियों में प्रत्येक भरा हुआ LegalMonetaryTotal राशि अधिकतम 2 दशमलव अंक धारण करता है (EN 16931 BR-DEC-09 / -12 / -14 / -15 / -16 / -17 — हेडर-स्तरीय मौद्रिक राशियों के लिए अनुमत अधिकतम दशमलव अंक 2 हैं)',
+                'ubl.warn.lmtDec': 'LegalMonetaryTotal/{name} मान "{v}" {dp} दशमलव अंक घोषित करता है — EN 16931 BR-DEC प्रत्येक हेडर-स्तरीय मौद्रिक राशि को अधिकतम 2 दशमलव अंकों तक सीमित करता है (BR-DEC-09 BT-106 LineExtension, BR-DEC-12 BT-109 TaxExclusive, BR-DEC-14 BT-112 TaxInclusive, BR-DEC-15 BT-113 Prepaid, BR-DEC-16 BT-114 PayableRounding, BR-DEC-17 BT-115 Payable); UBL 2.1 प्रकार को xsd:decimal के रूप में असीमित भिन्नात्मक अंकों के साथ घोषित करता है, इसलिए अति-परिशुद्धता राशि XML मान्यता पास करती है परंतु PEPPOL एक्सेस पॉइंट्स द्वारा BR-DEC schematron गेट पर अस्वीकृत होती है (आम कारण: एक जनरेटर जिसका डिफ़ॉल्ट प्रिंट प्रारूप 4 या अधिक दशमलव अंकों का होता है — उच्च-परिशुद्धता इकाई मूल्य धारण करने वाले अपस्ट्रीम ERP सिस्टम में आम — हेडर योगों को मुद्रा की लघु-इकाई सीमा तक राउंड किए बिना)',
                 'ubl.ok.taxTotalSign': 'सभी {n} TaxTotal ब्लॉक्स में प्रत्येक TaxTotal गैर-ऋणात्मक TaxAmount घोषित करता है (EN 16931 BR-CO-13 / BT-110 — चालान कुल VAT राशि)',
                 'ubl.warn.taxTotalSign': 'TaxTotal #{idx} ऋणात्मक TaxAmount "{v}" घोषित करता है — EN 16931 BR-CO-13 / BR-DEC-13 के अनुसार फ़ाइल-व्यापी चालान कुल VAT राशि (BT-110) गैर-ऋणात्मक होनी चाहिए; चालान का VAT कुल शून्य हो सकता है (शून्य दर आपूर्ति, छूट प्राप्त चालान, EU भीतर रिवर्स चार्ज) पर कभी ऋणात्मक नहीं (क्रेडिट नोट भी सकारात्मक VAT कुल रखती है क्योंकि UNCL 1001 दस्तावेज़-प्रकार कोड पहले से ही क्रेडिट दिशा बता देता है); ऋणात्मक फ़ाइल-व्यापी VAT क्रेता की इनपुट-VAT प्रविष्टि के चिह्न को चुपचाप पलट देती है और प्रति-अवधि VAT रिपोर्टिंग शृंखला तोड़ देती है (आम कारण: जनरेटर शुल्क और वापसी के लिए समान आकार पुनः उपयोग करता है और दस्तावेज़-प्रकार कोड बदलने के बजाय प्रत्येक मौद्रिक स्लॉट का चिह्न पलटता है)',
                 'ubl.ok.lmtLineSign': 'LegalMonetaryTotal/LineExtensionAmount "{v}" गैर-ऋणात्मक है (EN 16931 BT-106 — चालान पंक्ति शुद्ध राशियों का योग)',
@@ -18999,6 +19019,50 @@
             }
         }
 
+        // EPC SEPA Rulebook account-level <Ccy> = EUR check (draft 128).
+        // ISO 20022 declares <DbtrAcct>/<Ccy> and <CdtrAcct>/<Ccy> (the
+        // currency of the account of record, distinct from the Ccy="…"
+        // attribute on <InstdAmt> / <Amt> which is the per-transaction
+        // settlement currency) as ActiveOrHistoricCurrencyCode — any
+        // ISO 4217 alpha-3 code is schema-valid. The EPC SEPA Credit
+        // Transfer and SEPA Direct Debit Rulebooks both restrict SEPA to
+        // EUR; an account-level Ccy other than EUR routes the payment to
+        // the cross-border FX gateway (where it is rejected as non-SEPA)
+        // instead of the SEPA clearing rails (EBA STEP2 / STET / RT1).
+        // The typical real-world failure is a template repurposed across
+        // SEPA and SWIFT MT103 flows where the per-account Ccy element
+        // was not switched back to EUR even though the amount-level Ccy
+        // attribute was. Distinct from sepaCheckEurOnly (draft 98, checks
+        // every Ccy="…" attribute) — this gate validates the account-of-
+        // record currency at the <DbtrAcct> / <CdtrAcct> element. Skips
+        // silently when no account carries a <Ccy> child (the element is
+        // optional per the ISO 20022 schema and the receiving bank
+        // defaults to EUR for SEPA accounts when absent). Pair with
+        // draft 129 on the UBL side.
+        function sepaCheckAcctCcy(out, doc, detected) {
+            if (detected.type !== 'pain.001' && detected.type !== 'pain.008') return;
+            const w = detected.wrapper;
+            if (!w) return;
+            const accts = [...sepaAllLocal(w, 'DbtrAcct'), ...sepaAllLocal(w, 'CdtrAcct')];
+            if (!accts.length) return;
+            let seen = 0;
+            const bad = [];
+            for (const acct of accts) {
+                const ccy = (sepaTextOf(acct, 'Ccy') || '').trim().toUpperCase();
+                if (!ccy) continue;
+                seen++;
+                if (ccy !== 'EUR') bad.push(ccy);
+            }
+            if (!seen) return;
+            if (bad.length === 0) {
+                tlsRenderRow(out, t('sepa.row.warning'), '✓ ' + tFormat('sepa.ok.acctCcy', { n: intlNumber(seen) }));
+            } else {
+                for (const code of bad) {
+                    tlsRenderRow(out, t('sepa.row.warning'), '✗ ' + tFormat('sepa.warn.acctCcy', { code }));
+                }
+            }
+        }
+
         // EPC SCT Rulebook single-Ustrd-per-RmtInf cardinality cap
         // (draft 116). ISO 20022 declares `<RmtInf>/<Ustrd>` as
         // `0..n` — multiple unstructured remittance lines per
@@ -19312,6 +19376,7 @@
                 sepaCheckTwnNmLength(out, doc, detected);
                 sepaCheckPstCdLength(out, doc, detected);
                 sepaCheckInitgPtyNm(out, doc, detected);
+                sepaCheckAcctCcy(out, doc, detected);
                 sepaCheckE2eIdCharset(out, doc, detected);
                 sepaCheckInstrIdCharset(out, doc, detected);
                 sepaCheckMndtIdCharset(out, doc, detected);
@@ -21484,6 +21549,59 @@
             }
         }
 
+        // EN 16931 BR-DEC header-monetary 2-decimal cap (draft 129).
+        // EN 16931 declares a family of business rules (BR-DEC-09 BT-106
+        // LineExtensionAmount, BR-DEC-12 BT-109 TaxExclusiveAmount,
+        // BR-DEC-14 BT-112 TaxInclusiveAmount, BR-DEC-15 BT-113
+        // PrepaidAmount, BR-DEC-16 BT-114 PayableRoundingAmount,
+        // BR-DEC-17 BT-115 PayableAmount) all of which pin the
+        // corresponding LegalMonetaryTotal monetary amount to a maximum
+        // of 2 fractional digits. UBL 2.1 declares each *Amount element
+        // as xsd:decimal with unbounded fractional precision so a value
+        // like "119.000" or "119.0050" is schema-valid; PEPPOL access
+        // points reject the document at the BR-DEC schematron gate. The
+        // typical real-world failure is an upstream ERP carrying high-
+        // precision unit prices (4-6 decimals) whose print-format
+        // default propagates into header totals without rounding back
+        // to the per-currency minor-unit cap (2 decimals for EUR / USD
+        // / GBP). Counts characters after the decimal point on the
+        // raw text (trailing zeros included, matching EN 16931's
+        // strict-precision reading of BR-DEC). Walks every direct
+        // child of LegalMonetaryTotal whose localName ends in "Amount"
+        // so the check naturally covers future EN-16931 BR-DEC
+        // additions without code changes. Pair with draft 128 on the
+        // SEPA side. Distinct from the per-amount sign gates (drafts
+        // 113-119) which validate sign and arithmetic on the parsed
+        // numeric value — this gate validates raw lexical precision
+        // before parsing.
+        function ublCheckLmtDecimals(out, detected) {
+            const r = detected.root;
+            if (!r) return;
+            const lmt = sepaFirst(r, 'LegalMonetaryTotal');
+            if (!lmt) return;
+            const seen = [];
+            const bad = [];
+            for (const el of Array.from(lmt.children || [])) {
+                const local = el.localName || '';
+                if (!/Amount$/.test(local)) continue;
+                const raw = (el.textContent || '').trim();
+                if (!raw) continue;
+                if (!/^-?\d+(\.\d+)?$/.test(raw)) continue;
+                seen.push({ name: local, v: raw });
+                const dot = raw.indexOf('.');
+                const dp = dot < 0 ? 0 : (raw.length - dot - 1);
+                if (dp > 2) bad.push({ name: local, v: raw, dp });
+            }
+            if (!seen.length) return;
+            if (bad.length === 0) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + tFormat('ubl.ok.lmtDec', { n: intlNumber(seen.length) }));
+            } else {
+                for (const b of bad) {
+                    tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + tFormat('ubl.warn.lmtDec', { name: b.name, v: b.v, dp: intlNumber(b.dp) }));
+                }
+            }
+        }
+
         // EN 16931 BT-1 (Invoice number) length check (draft 109).
         // UBL declares `<cbc:ID>` at the Invoice / CreditNote root as
         // plain Identifier text with no schema-level length cap, and
@@ -21680,6 +21798,7 @@
                 ublCheckSellerCountry(out, detected);
                 ublCheckBuyerCountry(out, detected);
                 ublCheckLinePresence(out, detected);
+                ublCheckLmtDecimals(out, detected);
                 ublCheckTaxTotalSign(out, detected);
                 ublCheckLegalMonTotalLineSign(out, detected);
                 ublCheckLegalMonTotalTaxExclSign(out, detected);
