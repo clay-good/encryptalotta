@@ -3778,6 +3778,48 @@ test('ubl: BR-DEC tax-monetary 2-decimal cap flags an over-precision TaxSubtotal
   await expect(page.locator('#ubl-results')).toContainText(/TaxSubtotal #1\/TaxAmount value "19\.0050" declares 4 fractional digit/i, { timeout: 5_000 });
 });
 
+test('sepa: BtchBookg xs:boolean lexical check confirms when the flag is "true"', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Inject a lowercase "true" BtchBookg into the canonical PmtInf.
+  const withFlag = SEPA_PAIN001.replace(
+    '<PmtMtd>TRF</PmtMtd>',
+    '<PmtMtd>TRF</PmtMtd><BtchBookg>true</BtchBookg>'
+  );
+  await page.fill('#sepa-input', withFlag);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Every populated BtchBookg matches the xs:boolean lexical space across all 1 PmtInf block/i, { timeout: 5_000 });
+});
+
+test('sepa: BtchBookg xs:boolean lexical check flags an Excel-capitalised "True"', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  const withBad = SEPA_PAIN001.replace(
+    '<PmtMtd>TRF</PmtMtd>',
+    '<PmtMtd>TRF</PmtMtd><BtchBookg>True</BtchBookg>'
+  );
+  await page.fill('#sepa-input', withBad);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/PmtInf #1 BtchBookg "True" is not in the xs:boolean lexical space/i, { timeout: 5_000 });
+});
+
+test('ubl: TaxCategory Percent non-negativity confirms on canonical fixture', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Canonical UBL_INVOICE declares one TaxCategory with Percent=19.
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Every TaxCategory declares a non-negative Percent across all 1 TaxCategory block/i, { timeout: 5_000 });
+});
+
+test('ubl: TaxCategory Percent non-negativity flags a negative VAT rate', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  const neg = UBL_INVOICE.replace(
+    '<cbc:Percent>19</cbc:Percent>',
+    '<cbc:Percent>-19</cbc:Percent>'
+  );
+  await page.fill('#ubl-input', neg);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/TaxCategory #1 declares a negative Percent "-19"/i, { timeout: 5_000 });
+});
+
 test('ubl: Buyer RegistrationName BR-07 confirms on canonical fixture', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   // Canonical UBL_INVOICE now declares PartyLegalEntity/RegistrationName=Beispiel SARL
