@@ -3696,6 +3696,47 @@ test('ubl: BR-DEC LegalMonetaryTotal 2-decimal cap flags an over-precision Payab
   await expect(page.locator('#ubl-results')).toContainText(/LegalMonetaryTotal\/PayableAmount value "119\.0050" declares 4 fractional digit/i, { timeout: 5_000 });
 });
 
+test('sepa: per-transaction 2-decimal cap confirms when InstdAmt declares 2 decimals', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Canonical SEPA_PAIN001 declares InstdAmt=100.00 — 2 decimals, within the EPC cap.
+  await page.fill('#sepa-input', SEPA_PAIN001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Every transaction amount fits within the EPC SEPA Rulebook 2-decimal cap across all 1 transaction/i, { timeout: 5_000 });
+});
+
+test('sepa: per-transaction 2-decimal cap flags an over-precision InstdAmt', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Flip the canonical InstdAmt to 4 decimals — schema-valid but EPC SEPA Rulebook rejects.
+  const overDp = SEPA_PAIN001.replace(
+    '<InstdAmt Ccy="EUR">100.00</InstdAmt>',
+    '<InstdAmt Ccy="EUR">100.0050</InstdAmt>'
+  );
+  await page.fill('#sepa-input', overDp);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Transaction #1 declares InstdAmt \/ Amt "100\.0050" with 4 fractional digit/i, { timeout: 5_000 });
+});
+
+test('ubl: BR-DEC line-level LineExtensionAmount 2-decimal cap confirms on canonical fixture', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Canonical UBL_INVOICE declares one InvoiceLine with LineExtensionAmount=100.00.
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Every populated InvoiceLine \/ CreditNoteLine LineExtensionAmount carries at most 2 fractional digits across all 1 line/i, { timeout: 5_000 });
+});
+
+test('ubl: BR-DEC line-level LineExtensionAmount 2-decimal cap flags an over-precision line value', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Flip the per-line LineExtensionAmount to 4 decimals — schema-valid but BR-DEC BT-131 rejects.
+  // Two LineExtensionAmount occurrences exist in the fixture (header BT-106 and line BT-131); replace only the line one inside <cac:InvoiceLine>.
+  const overDp = UBL_INVOICE.replace(
+    '<cbc:LineExtensionAmount currencyID="EUR">100.00</cbc:LineExtensionAmount>\n    <cac:Item>',
+    '<cbc:LineExtensionAmount currencyID="EUR">100.0050</cbc:LineExtensionAmount>\n    <cac:Item>'
+  );
+  await page.fill('#ubl-input', overDp);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Line #1 LineExtensionAmount "100\.0050" declares 4 fractional digit/i, { timeout: 5_000 });
+});
+
 test('ubl: Buyer RegistrationName BR-07 confirms on canonical fixture', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   // Canonical UBL_INVOICE now declares PartyLegalEntity/RegistrationName=Beispiel SARL
