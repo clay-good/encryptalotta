@@ -3737,6 +3737,47 @@ test('ubl: BR-DEC line-level LineExtensionAmount 2-decimal cap flags an over-pre
   await expect(page.locator('#ubl-results')).toContainText(/Line #1 LineExtensionAmount "100\.0050" declares 4 fractional digit/i, { timeout: 5_000 });
 });
 
+test('sepa: CtrlSum 2-decimal cap confirms when GrpHdr/CtrlSum declares 2 decimals', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Canonical SEPA_PAIN001 declares GrpHdr/CtrlSum=100.00.
+  await page.fill('#sepa-input', SEPA_PAIN001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Every declared CtrlSum fits within the EPC SEPA Rulebook 2-decimal cap across all 1 control-sum slot/i, { timeout: 5_000 });
+});
+
+test('sepa: CtrlSum 2-decimal cap flags an over-precision GrpHdr/CtrlSum', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Flip GrpHdr/CtrlSum to 4 decimals — schema-valid but EPC SEPA Rulebook rejects.
+  // Also flip the matching InstdAmt so the arithmetic-invariant gate doesn't fire.
+  const overDp = SEPA_PAIN001
+    .replace('<CtrlSum>100.00</CtrlSum>', '<CtrlSum>100.0050</CtrlSum>')
+    .replace('<InstdAmt Ccy="EUR">100.00</InstdAmt>', '<InstdAmt Ccy="EUR">100.0050</InstdAmt>');
+  await page.fill('#sepa-input', overDp);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/GrpHdr\/CtrlSum value "100\.0050" declares 4 fractional digit/i, { timeout: 5_000 });
+});
+
+test('ubl: BR-DEC tax-monetary 2-decimal cap confirms on canonical fixture', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Canonical UBL_INVOICE declares TaxTotal/TaxAmount=19.00, TaxSubtotal/TaxableAmount=100.00, TaxSubtotal/TaxAmount=19.00 — three tax-side amounts all at 2 decimals.
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Every populated TaxTotal \/ TaxSubtotal monetary amount carries at most 2 fractional digits across all 3 amount/i, { timeout: 5_000 });
+});
+
+test('ubl: BR-DEC tax-monetary 2-decimal cap flags an over-precision TaxSubtotal/TaxAmount', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Flip the per-subtotal TaxAmount to 4 decimals — schema-valid but BR-DEC-20 rejects.
+  // Targets the inner TaxSubtotal/TaxAmount (the outer TaxTotal/TaxAmount above it still reads 19.00).
+  const overDp = UBL_INVOICE.replace(
+    '<cbc:TaxAmount currencyID="EUR">19.00</cbc:TaxAmount>\n      <cac:TaxCategory>',
+    '<cbc:TaxAmount currencyID="EUR">19.0050</cbc:TaxAmount>\n      <cac:TaxCategory>'
+  );
+  await page.fill('#ubl-input', overDp);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/TaxSubtotal #1\/TaxAmount value "19\.0050" declares 4 fractional digit/i, { timeout: 5_000 });
+});
+
 test('ubl: Buyer RegistrationName BR-07 confirms on canonical fixture', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   // Canonical UBL_INVOICE now declares PartyLegalEntity/RegistrationName=Beispiel SARL
