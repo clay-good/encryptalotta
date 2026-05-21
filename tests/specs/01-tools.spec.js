@@ -3611,6 +3611,46 @@ test('ubl: Buyer PostalAddress Country BR-11 flags a missing PostalAddress', asy
   await expect(page.locator('#ubl-results')).toContainText(/AccountingCustomerParty is missing Party\/PostalAddress\/Country\/IdentificationCode/i, { timeout: 5_000 });
 });
 
+test('sepa: InitgPty/Nm presence confirms on canonical fixture', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Canonical SEPA_PAIN001 declares GrpHdr/InitgPty/Nm = "ACME Corp".
+  await page.fill('#sepa-input', SEPA_PAIN001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/GrpHdr\/InitgPty\/Nm "ACME Corp" present/i, { timeout: 5_000 });
+});
+
+test('sepa: InitgPty/Nm presence flags a missing originator name', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Replace InitgPty/Nm with InitgPty/Id only — schema-valid but rail-broken per EPC SEPA Rulebook.
+  const noNm = SEPA_PAIN001.replace(
+    '<InitgPty><Nm>ACME Corp</Nm></InitgPty>',
+    '<InitgPty><Id><OrgId><Othr><Id>ACMECORP01</Id></Othr></OrgId></Id></InitgPty>'
+  );
+  await page.fill('#sepa-input', noNm);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/GrpHdr\/InitgPty is missing <Nm>/i, { timeout: 5_000 });
+});
+
+test('ubl: BR-16 line presence confirms on canonical Invoice fixture', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Canonical UBL_INVOICE carries one InvoiceLine.
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Document carries 1 InvoiceLine\(s\) \(EN 16931 BR-16/i, { timeout: 5_000 });
+});
+
+test('ubl: BR-16 line presence flags a line-less Invoice', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Strip the InvoiceLine block — leave the document shell only.
+  const noLines = UBL_INVOICE.replace(
+    /<cac:InvoiceLine>[\s\S]*?<\/cac:InvoiceLine>/g,
+    ''
+  );
+  await page.fill('#ubl-input', noLines);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Document declares zero InvoiceLine elements/i, { timeout: 5_000 });
+});
+
 test('ubl: Buyer RegistrationName BR-07 confirms on canonical fixture', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   // Canonical UBL_INVOICE now declares PartyLegalEntity/RegistrationName=Beispiel SARL
