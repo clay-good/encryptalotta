@@ -4544,6 +4544,8 @@
                 'sepa.warn.btchBookg': 'PmtInf #{idx} BtchBookg "{v}" is not in the xs:boolean lexical space — ISO 20022 declares <PmtInf>/<BtchBookg> as xs:boolean, whose lexical space is exactly {true, false, 1, 0} (case-sensitive); a value like "True" / "TRUE" / "yes" / "Y" is schema-invalid and clearing systems (EBA STEP2 / STET / RT1) reject the file at the ISO 20022 xs:boolean schema gate before it reaches the EPC SEPA Rulebook layer (common cause: a payments-hub export that round-trips boolean flags through Excel — which capitalises "TRUE" / "FALSE" on cell-save — without re-lowercasing before serialising to pain.001 / pain.008)',
                 'sepa.ok.lclInstrm': 'LclInstrm/Cd valid per EPC SDD Rulebook: {n} PmtInf block(s) declare one of CORE / B2B / COR1',
                 'sepa.warn.lclInstrm': 'LclInstrm/Cd invalid: PmtInf #{idx} declares "{v}" but EPC SDD Rulebook allows only CORE (standard SEPA Core direct-debit scheme), B2B (Business-to-Business scheme — no consumer refund right beyond the unauthorised-collection window), or COR1 (legacy 1-day Core variant retired November 2016, still seen on back-dated collections); ISO 20022 declares <PmtInf>/<PmtTpInf>/<LclInstrm>/<Cd> as Max4Text so any 4-character value passes the schema, but clearing systems (EBA STEP2 / STET / RT1) reject the file at the rail-level local-instrument gate (common cause: a non-SEPA local-instrument code re-used in an SDD template, or an SCT LclInstrm code accidentally pasted into a pain.008 generator)',
+                'sepa.ok.intrmyAgt': 'No IntrmyAgt1 / IntrmyAgt2 / IntrmyAgt3 declared across all {n} transaction(s) (EPC SCT / SDD Rulebook — SEPA is end-to-end with no intermediaries)',
+                'sepa.warn.intrmyAgt': 'Transaction #{idx} declares {slots} — the EPC SCT and SDD Rulebooks forbid intermediary agents in SEPA because settlement runs over EBA STEP2 / STET / RT1 as a single hop between the originator and beneficiary agents with no routing role for an intermediary bank; ISO 20022 declares the IntrmyAgt1 / IntrmyAgt2 / IntrmyAgt3 chain as optional inside every CdtTrfTxInf / DrctDbtTxInf (a SWIFT MT103 cover-payment carryover), so the schema accepts the construct but clearing systems hard-reject the file at the rail-level SEPA-compliance gate (common cause: a generator templated against a SWIFT MT103 export where the intermediary-bank slot was carried into the ISO 20022 migration without being stripped — typical on legacy ERPs sharing one payment template across domestic SEPA and cross-border SWIFT flows)',
                 'sepa.warn.ccyInvalid': 'Currency code not active per ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unrecognized ISO 20022 root element — partial parse only.',
                 'err.sepaEmpty': 'XML input is empty.',
@@ -4723,6 +4725,8 @@
                 'ubl.warn.percentSign': 'TaxCategory #{idx} declares a negative Percent "{v}" — EN 16931 BT-119 names <cac:TaxCategory>/<cbc:Percent> as the VAT category rate; every category-letter business rule (BR-S-08, BR-Z-08, BR-E-08, BR-AE-08, BR-K-08, BR-G-08, BR-O-08, BR-IC-08) pins the rate to a specific non-negative shape (BR-Z-08 / BR-E-08 / BR-AE-08 require Percent = 0; BR-S-08 requires Percent > 0) but every rule agrees that a negative rate has no meaning in any member-state VAT regime; UBL 2.1 declares <cbc:Percent> as Percent / xsd:decimal with no sign constraint so the negative shape is schema-valid, but PEPPOL access points reject at the BR-*-08 schematron gate, and a negative rate silently inverts the BR-CO-17 cross-product (TaxAmount = round(TaxableAmount × Percent / 100)) — a positive base produces a negative TaxAmount the buyer reads as a credit instead of a tax (common cause: a generator that derives the rate from a signed allowance / charge percentage column without flipping the sign back to positive before writing the TaxCategory/Percent slot)',
                 'ubl.ok.versionId': 'UBLVersionID declares OASIS UBL "{v}" (PEPPOL BIS Billing 3.0 is built on UBL 2.1)',
                 'ubl.warn.versionId': 'UBLVersionID "{v}" is not "{expected}" — OASIS UBL declares <cbc:UBLVersionID> as an optional free-text Identifier with no schema-level value constraint, but PEPPOL BIS Billing 3.0 is built on the OASIS UBL 2.1 schema set so when the element is present access points pin the value to "2.1"; values like "2.0" (legacy OASIS UBL), "2.2" / "2.3" (newer OASIS releases not yet adopted by PEPPOL), or "2.1.0" / "v2.1" (schema-valid free text) fail the access-point string-equality gate (common cause: a generator templated against a newer OASIS UBL release where the UBLVersionID bump landed in the template before the PEPPOL profile bumped its required version — distinct from the CustomizationID / ProfileID gates which validate the profile / process URN; this gate validates the schema version the document claims conformance to)',
+                'ubl.ok.qtyUnitCode': 'Every {field} declares a non-empty @unitCode across all {n} line(s) (EN 16931 BR-23 / BT-130 — Invoiced quantity unit of measure)',
+                'ubl.warn.qtyUnitCode': 'Line #{idx} {field} is missing a non-empty @unitCode attribute — OASIS UBL declares the Quantity type with @unitCode as xs:normalizedString without a non-empty facet so an absent or empty unitCode is schema-valid, but EN 16931 BR-23 / BT-130 require every Invoice line to carry the unit of measure (PEPPOL BIS Billing 3.0 binds the value to UN/ECE Rec 20 / Rec 21 codes such as EA, KGM, HUR, MTR); PEPPOL access points reject the file at the schematron gate because the buyer\'s AP / ERP cannot reconcile a quantity without its unit of measure (a common cause is a generator that drops the unitCode attribute on service lines templated against an older internal schema where "service hours" was implicit, then reused for mixed goods + services billing)',
                 'ubl.ok.taxTotalSign': 'Every TaxTotal declares a non-negative TaxAmount across all {n} TaxTotal block(s) (EN 16931 BR-CO-13 / BT-110 — Invoice total VAT amount)',
                 'ubl.warn.taxTotalSign': 'TaxTotal #{idx} declares a negative TaxAmount "{v}" — EN 16931 BR-CO-13 / BR-DEC-13 require the file-wide Invoice total VAT amount (BT-110) to be non-negative; an invoice\'s VAT total can be zero (zero-rated supply, exempt invoice, intra-EU reverse charge) but never negative (even a CreditNote carries a positive VAT total because the UNCL 1001 document-type code already conveys the credit direction); a negative file-wide VAT silently inverts the sign of the buyer\'s input-VAT entry and breaks the per-period VAT reporting chain (common cause: a generator reusing the same shape for charges and refunds and flipping the sign on every monetary slot instead of switching the document-type code)',
                 'ubl.ok.lmtLineSign': 'LegalMonetaryTotal/LineExtensionAmount "{v}" is non-negative (EN 16931 BT-106 — Sum of Invoice line net amounts)',
@@ -5880,6 +5884,8 @@
                 'sepa.warn.btchBookg': 'Bloc PmtInf n°{idx} : BtchBookg « {v} » n’appartient pas à l’espace lexical xs:boolean — ISO 20022 déclare <PmtInf>/<BtchBookg> comme xs:boolean, dont l’espace lexical est exactement {true, false, 1, 0} (sensible à la casse) ; une valeur comme « True » / « TRUE » / « yes » / « Y » est invalide pour le schéma et les systèmes de compensation (EBA STEP2 / STET / RT1) rejettent le fichier au contrôle de schéma xs:boolean d’ISO 20022 avant même la couche EPC SEPA Rulebook (cause fréquente : un export depuis un hub de paiement qui passe les booléens par Excel — qui capitalise « TRUE » / « FALSE » à l’enregistrement — sans les remettre en minuscules avant sérialisation en pain.001 / pain.008)',
                 'sepa.ok.lclInstrm': 'LclInstrm/Cd conforme aux règles EPC SDD : {n} bloc(s) PmtInf déclarent CORE, B2B ou COR1',
                 'sepa.warn.lclInstrm': 'LclInstrm/Cd invalide : le bloc PmtInf n°{idx} déclare « {v} » alors que les règles EPC SDD n’autorisent que CORE (schéma SEPA Core de prélèvement standard), B2B (schéma Business-to-Business — pas de droit au remboursement consommateur au-delà du délai des prélèvements non autorisés) ou COR1 (variante héritée Core 1-jour retirée en novembre 2016, encore vue sur des collectes antidatées) ; ISO 20022 déclare <PmtInf>/<PmtTpInf>/<LclInstrm>/<Cd> comme Max4Text, donc toute valeur de 4 caractères passe le schéma, mais les systèmes de compensation (EBA STEP2 / STET / RT1) rejettent le fichier au contrôle rail-level de l’instrument local (cause fréquente : un code d’instrument local non SEPA réutilisé dans un modèle SDD, ou un code LclInstrm SCT accidentellement collé dans un générateur pain.008)',
+                'sepa.ok.intrmyAgt': 'Aucun IntrmyAgt1 / IntrmyAgt2 / IntrmyAgt3 déclaré sur l’ensemble des {n} transaction(s) (EPC SCT / SDD Rulebook — SEPA est de bout en bout sans intermédiaires)',
+                'sepa.warn.intrmyAgt': 'La transaction #{idx} déclare {slots} — les règles EPC SCT et SDD interdisent les agents intermédiaires en SEPA car le règlement s’effectue via EBA STEP2 / STET / RT1 en un seul saut entre l’agent du donneur d’ordre et celui du bénéficiaire, sans rôle de routage pour une banque intermédiaire ; ISO 20022 déclare la chaîne IntrmyAgt1 / IntrmyAgt2 / IntrmyAgt3 comme optionnelle dans chaque CdtTrfTxInf / DrctDbtTxInf (héritage du modèle de paiement cover SWIFT MT103), donc le schéma accepte la construction mais les systèmes de compensation rejettent fermement le fichier au contrôle rail-level de conformité SEPA (cause fréquente : un générateur basé sur un export SWIFT MT103 où l’emplacement de la banque intermédiaire a été transporté dans la migration ISO 20022 sans être supprimé — typique des ERP hérités partageant un même modèle de paiement pour les flux SEPA domestiques et SWIFT transfrontaliers)',
                 'sepa.warn.ccyInvalid': 'Code monétaire non actif selon ISO 4217 : {code}',
                 'sepa.warn.unknownDoc': 'Élément racine ISO 20022 non reconnu — analyse partielle uniquement.',
                 'err.sepaEmpty': 'Le XML d’entrée est vide.',
@@ -6049,6 +6055,8 @@
                 'ubl.warn.percentSign': 'TaxCategory n°{idx} déclare un Percent négatif « {v} » — EN 16931 BT-119 nomme <cac:TaxCategory>/<cbc:Percent> comme le taux de catégorie TVA ; chaque règle de lettre de catégorie (BR-S-08, BR-Z-08, BR-E-08, BR-AE-08, BR-K-08, BR-G-08, BR-O-08, BR-IC-08) fixe le taux à une forme non négative spécifique (BR-Z-08 / BR-E-08 / BR-AE-08 exigent Percent = 0 ; BR-S-08 exige Percent > 0) mais toutes s’accordent : un taux négatif n’a aucune signification dans aucun régime national de TVA ; UBL 2.1 déclare <cbc:Percent> comme Percent / xsd:decimal sans contrainte de signe, donc la forme négative est conforme au schéma, mais les points d’accès PEPPOL rejettent au contrôle schématron BR-*-08, et un taux négatif inverse silencieusement le produit BR-CO-17 (TaxAmount = round(TaxableAmount × Percent / 100)) — une base positive produit un TaxAmount négatif que l’acheteur lit comme un avoir au lieu d’une taxe (cause fréquente : un générateur qui dérive le taux d’une colonne de pourcentage de remise/frais signée sans rebasculer le signe en positif avant d’écrire le slot TaxCategory/Percent)',
                 'ubl.ok.versionId': 'UBLVersionID déclare OASIS UBL « {v} » (PEPPOL BIS Billing 3.0 repose sur UBL 2.1)',
                 'ubl.warn.versionId': 'UBLVersionID « {v} » n’est pas « {expected} » — OASIS UBL déclare <cbc:UBLVersionID> comme un identifiant texte libre optionnel sans contrainte de valeur au niveau schéma, mais PEPPOL BIS Billing 3.0 est construit sur le jeu de schémas OASIS UBL 2.1 ; lorsque l’élément est présent, les points d’accès fixent la valeur à « 2.1 » ; des valeurs comme « 2.0 » (OASIS UBL hérité), « 2.2 » / « 2.3 » (versions OASIS plus récentes non encore adoptées par PEPPOL), ou « 2.1.0 » / « v2.1 » (texte libre conforme au schéma) échouent au contrôle d’égalité chaîne au point d’accès (cause fréquente : un générateur basé sur une version OASIS UBL plus récente où le bump de UBLVersionID est arrivé dans le modèle avant que le profil PEPPOL ne mette à jour la version requise — distinct des contrôles CustomizationID / ProfileID qui valident l’URN du profil / processus ; ce contrôle valide la version de schéma à laquelle le document prétend se conformer)',
+                'ubl.ok.qtyUnitCode': 'Chaque {field} déclare un attribut @unitCode non vide sur l’ensemble des {n} ligne(s) (EN 16931 BR-23 / BT-130 — unité de mesure de la quantité facturée)',
+                'ubl.warn.qtyUnitCode': 'Ligne #{idx} : {field} sans attribut @unitCode non vide — OASIS UBL déclare le type Quantity avec @unitCode en xs:normalizedString sans facette non vide, donc un unitCode absent ou vide est valide au schéma ; mais EN 16931 BR-23 / BT-130 exigent que chaque ligne de facture porte l’unité de mesure (PEPPOL BIS Billing 3.0 lie la valeur aux codes UN/ECE Rec 20 / Rec 21 tels que EA, KGM, HUR, MTR) ; les points d’accès PEPPOL rejettent le fichier au contrôle schematron, car le système AP / ERP de l’acheteur ne peut rapprocher une quantité sans son unité (cause fréquente : un générateur qui supprime l’attribut unitCode sur les lignes de service basées sur un schéma interne ancien où « heures de service » était implicite, puis réutilisé pour une facturation mixte biens + services)',
                 'ubl.ok.taxTotalSign': 'Chaque TaxTotal déclare un TaxAmount non négatif sur l’ensemble des {n} bloc(s) TaxTotal (EN 16931 BR-CO-13 / BT-110 — montant TVA total de la facture)',
                 'ubl.warn.taxTotalSign': 'TaxTotal #{idx} déclare un TaxAmount négatif « {v} » — EN 16931 BR-CO-13 / BR-DEC-13 exigent que le montant TVA total de la facture (BT-110) ne soit pas négatif ; la TVA totale d’une facture peut être nulle (livraison taxée à zéro, facture exonérée, autoliquidation intra-UE) mais jamais négative (même un avoir porte une TVA totale positive car le code de type document UNCL 1001 indique déjà le sens crédit) ; une TVA totale négative inverse silencieusement le signe de l’entrée TVA déductible de l’acheteur et rompt la chaîne de déclaration TVA par période (cause fréquente : un générateur qui réutilise le même format pour les charges et remboursements en inversant le signe sur chaque champ monétaire au lieu de changer le code de type document)',
                 'ubl.ok.lmtLineSign': 'LegalMonetaryTotal/LineExtensionAmount « {v} » est non négatif (EN 16931 BT-106 — somme des montants nets des lignes de facture)',
@@ -7176,6 +7184,8 @@
                 'sepa.warn.btchBookg': 'PmtInf 第 {idx} 块的 BtchBookg "{v}" 不属于 xs:boolean 词法空间——ISO 20022 将 <PmtInf>/<BtchBookg> 声明为 xs:boolean，其词法空间正好是 {true, false, 1, 0}（区分大小写）；像 "True" / "TRUE" / "yes" / "Y" 这样的值不符合模式，清算系统（EBA STEP2 / STET / RT1）在到达 EPC SEPA 规则书层之前就会在 ISO 20022 xs:boolean 模式校验环节拒绝该文件（常见原因：支付中心导出时让布尔标志经过 Excel——Excel 在保存单元格时会将其大写为 "TRUE" / "FALSE"——而未在序列化为 pain.001 / pain.008 之前重新转为小写）',
                 'sepa.ok.lclInstrm': 'LclInstrm/Cd 符合 EPC SDD 规则书：{n} 个 PmtInf 块声明为 CORE / B2B / COR1 之一',
                 'sepa.warn.lclInstrm': 'LclInstrm/Cd 不合法：PmtInf 第 {idx} 项声明 "{v}"，但 EPC SDD 规则书仅允许 CORE（标准 SEPA Core 直接借记方案）、B2B（企业对企业方案——超过未授权收款窗口后无消费者退款权）或 COR1（2016 年 11 月退役的旧版 1 日 Core 变体，仍在补缴收款中可见）；ISO 20022 将 <PmtInf>/<PmtTpInf>/<LclInstrm>/<Cd> 声明为 Max4Text，因此任何 4 字符值均符合模式，但清算系统（EBA STEP2 / STET / RT1）会在轨道级本地工具关卡拒绝该文件（常见原因：非 SEPA 本地工具码被复用到 SDD 模板，或 SCT LclInstrm 码意外粘贴进 pain.008 生成器）',
+                'sepa.ok.intrmyAgt': '所有 {n} 笔交易均未声明 IntrmyAgt1 / IntrmyAgt2 / IntrmyAgt3（EPC SCT / SDD 规则书——SEPA 是端到端的，无中间机构）',
+                'sepa.warn.intrmyAgt': '第 {idx} 笔交易声明了 {slots}——EPC SCT 和 SDD 规则书禁止 SEPA 中的中间代理机构，因为结算通过 EBA STEP2 / STET / RT1 在付款方代理与收款方代理之间单跳进行，中间银行没有路由角色；ISO 20022 在每个 CdtTrfTxInf / DrctDbtTxInf 中将 IntrmyAgt1 / IntrmyAgt2 / IntrmyAgt3 链声明为可选（这是 SWIFT MT103 cover-payment 模型的遗留），因此该结构通过模式校验，但清算系统会在轨道级 SEPA 合规关卡硬拒绝文件（常见原因：基于 SWIFT MT103 导出模板的生成器在 ISO 20022 迁移中保留了中间银行槽位而未剥离——常见于在国内 SEPA 与跨境 SWIFT 流程之间共用单一付款模板的旧版 ERP）',
                 'sepa.warn.ccyInvalid': '币种代码不在 ISO 4217 现行清单中：{code}',
                 'sepa.warn.unknownDoc': '无法识别的 ISO 20022 根元素 — 仅部分解析。',
                 'err.sepaEmpty': 'XML 输入为空。',
@@ -7345,6 +7355,8 @@
                 'ubl.warn.percentSign': '第 {idx} 个 TaxCategory 声明了负的 Percent "{v}"——EN 16931 BT-119 将 <cac:TaxCategory>/<cbc:Percent> 命名为增值税类别税率；每条类别字母业务规则（BR-S-08、BR-Z-08、BR-E-08、BR-AE-08、BR-K-08、BR-G-08、BR-O-08、BR-IC-08）都将该税率限定为特定的非负形式（BR-Z-08 / BR-E-08 / BR-AE-08 要求 Percent = 0；BR-S-08 要求 Percent > 0），但所有规则一致认为负税率在任何成员国增值税体制下都无意义；UBL 2.1 将 <cbc:Percent> 声明为 Percent / xsd:decimal 且无符号约束，因此负值是模式有效的，但 PEPPOL 接入点会在 BR-*-08 schematron 关卡拒绝，并且负税率会默默反转 BR-CO-17 交叉乘积（TaxAmount = round(TaxableAmount × Percent / 100)）——正数基数会产生买方读作贷项而非税额的负 TaxAmount（常见原因：生成器从带符号的折让/费用百分比列派生税率，在写入 TaxCategory/Percent 槽之前未将符号翻回正号）',
                 'ubl.ok.versionId': 'UBLVersionID 声明 OASIS UBL "{v}"（PEPPOL BIS Billing 3.0 构建于 UBL 2.1 之上）',
                 'ubl.warn.versionId': 'UBLVersionID "{v}" 不是 "{expected}"——OASIS UBL 将 <cbc:UBLVersionID> 声明为可选的自由文本标识符，模式层无值约束；但 PEPPOL BIS Billing 3.0 构建于 OASIS UBL 2.1 模式集之上，当该元素出现时，接入点将值固定为 "2.1"；类似 "2.0"（旧版 OASIS UBL）、"2.2" / "2.3"（PEPPOL 尚未采用的较新 OASIS 版本）或 "2.1.0" / "v2.1"（模式有效的自由文本）等值会在接入点字符串相等关卡失败（常见原因：基于较新 OASIS UBL 版本的模板，UBLVersionID 升级先于 PEPPOL 配置文件要求的版本升级——区别于 CustomizationID / ProfileID 关卡（验证配置文件 / 流程 URN）：此关卡验证文档声明遵循的模式版本）',
+                'ubl.ok.qtyUnitCode': '所有 {n} 个行的 {field} 均声明非空 @unitCode 属性（EN 16931 BR-23 / BT-130——计费数量计量单位）',
+                'ubl.warn.qtyUnitCode': '第 {idx} 行 {field} 缺少非空 @unitCode 属性——OASIS UBL 将 Quantity 类型的 @unitCode 声明为 xs:normalizedString（无非空 facet），因此缺失或为空的 unitCode 通过模式校验；但 EN 16931 BR-23 / BT-130 要求每个发票行携带计量单位（PEPPOL BIS Billing 3.0 将该值绑定到 UN/ECE Rec 20 / Rec 21 代码，例如 EA、KGM、HUR、MTR）；PEPPOL 接入点会在 schematron 校验时拒绝该文件，因为买方 AP / ERP 无法对账没有计量单位的数量（常见原因：生成器在基于旧版内部模式的服务行上省略 unitCode 属性，旧模式默认"服务小时"是隐式的，后续被用于商品 + 服务混合开票）',
                 'ubl.ok.taxTotalSign': '所有 {n} 个 TaxTotal 块均声明非负 TaxAmount（EN 16931 BR-CO-13 / BT-110——发票 VAT 总额）',
                 'ubl.warn.taxTotalSign': 'TaxTotal #{idx} 声明负的 TaxAmount "{v}"——EN 16931 BR-CO-13 / BR-DEC-13 要求文件级发票 VAT 总额（BT-110）非负；发票的 VAT 总额可以为零（零税率供应、免税发票、欧盟内部反向收费）但不能为负（即使贷项通知单也携带正的 VAT 总额，因为 UNCL 1001 文档类型代码已经表达了贷项方向）；负的文件级 VAT 会默默反转买方进项税条目的符号，破坏分期 VAT 申报链（常见原因是生成器在收费与退款之间复用同一形状，并在每个货币字段上翻转符号，而不是切换文档类型代码）',
                 'ubl.ok.lmtLineSign': 'LegalMonetaryTotal/LineExtensionAmount "{v}" 非负（EN 16931 BT-106——发票行净额之和）',
@@ -8487,6 +8499,8 @@
                 'sepa.warn.btchBookg': 'PmtInf #{idx} BtchBookg „{v}“ liegt nicht im xs:boolean-Lexikalraum — ISO 20022 deklariert <PmtInf>/<BtchBookg> als xs:boolean, dessen Lexikalraum genau {true, false, 1, 0} (groß-/kleinschreibungsempfindlich) ist; ein Wert wie „True“ / „TRUE“ / „yes“ / „Y“ ist schemaungültig und Clearing-Systeme (EBA STEP2 / STET / RT1) weisen die Datei am ISO-20022-xs:boolean-Schema-Gate ab, bevor sie die EPC-SEPA-Rulebook-Ebene erreicht (häufige Ursache: ein Payments-Hub-Export, der Boolean-Flags über Excel führt — Excel schreibt „TRUE“ / „FALSE“ beim Speichern groß — ohne sie vor der Serialisierung nach pain.001 / pain.008 wieder kleinzuschreiben)',
                 'sepa.ok.lclInstrm': 'LclInstrm/Cd gemäß EPC-SDD-Rulebook gültig: {n} PmtInf-Block(s) deklarieren CORE, B2B oder COR1',
                 'sepa.warn.lclInstrm': 'LclInstrm/Cd ungültig: PmtInf Nr. {idx} deklariert „{v}“, das EPC-SDD-Rulebook erlaubt jedoch nur CORE (Standard-SEPA-Core-Lastschriftverfahren), B2B (Business-to-Business-Verfahren — kein Verbraucher-Rückerstattungsrecht jenseits des Fensters für nicht autorisierte Einzüge) oder COR1 (im November 2016 stillgelegte 1-Tages-Core-Variante, noch bei rückdatierten Einzügen sichtbar); ISO 20022 deklariert <PmtInf>/<PmtTpInf>/<LclInstrm>/<Cd> als Max4Text, sodass jeder 4-Zeichen-Wert das Schema passiert, aber Clearing-Systeme (EBA STEP2 / STET / RT1) weisen die Datei am Rail-level-Gate für lokale Instrumente ab (häufige Ursache: ein nicht-SEPA-Lokalinstrument-Code, der in einem SDD-Template wiederverwendet wird, oder ein SCT-LclInstrm-Code, der versehentlich in einen pain.008-Generator eingefügt wurde)',
+                'sepa.ok.intrmyAgt': 'Kein IntrmyAgt1 / IntrmyAgt2 / IntrmyAgt3 in allen {n} Transaktion(en) deklariert (EPC SCT / SDD Rulebook — SEPA ist Ende-zu-Ende ohne Zwischeninstitute)',
+                'sepa.warn.intrmyAgt': 'Transaktion #{idx} deklariert {slots} — die EPC-SCT- und SDD-Rulebooks untersagen Intermediärbanken in SEPA, weil die Abwicklung über EBA STEP2 / STET / RT1 als einzelner Hop zwischen Auftraggeber- und Begünstigtenbank erfolgt und keine Routing-Rolle für eine Zwischenbank vorgesehen ist; ISO 20022 deklariert die Kette IntrmyAgt1 / IntrmyAgt2 / IntrmyAgt3 als optional innerhalb jedes CdtTrfTxInf / DrctDbtTxInf (ein Überbleibsel des SWIFT-MT103-Cover-Payment-Modells), sodass die Konstruktion das Schema passiert, aber Clearing-Systeme die Datei am Rail-level-Gate der SEPA-Konformität hart ablehnen (häufige Ursache: ein Generator, der gegen einen SWIFT-MT103-Export templatiert ist, wobei der Intermediärbank-Slot in die ISO-20022-Migration übernommen wurde, ohne entfernt zu werden — typisch bei Legacy-ERPs, die ein gemeinsames Zahlungs-Template für inländische SEPA- und grenzüberschreitende SWIFT-Flüsse teilen)',
                 'sepa.warn.ccyInvalid': 'Währungscode nicht aktiv nach ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unbekanntes ISO-20022-Wurzelelement — nur Teilanalyse.',
                 'err.sepaEmpty': 'Die XML-Eingabe ist leer.',
@@ -8656,6 +8670,8 @@
                 'ubl.warn.percentSign': 'TaxCategory #{idx} deklariert einen negativen Percent „{v}“ — EN 16931 BT-119 benennt <cac:TaxCategory>/<cbc:Percent> als Umsatzsteuer-Kategoriesatz; jede Kategorie-Buchstabenregel (BR-S-08, BR-Z-08, BR-E-08, BR-AE-08, BR-K-08, BR-G-08, BR-O-08, BR-IC-08) bindet den Satz an eine spezifische nicht-negative Form (BR-Z-08 / BR-E-08 / BR-AE-08 verlangen Percent = 0; BR-S-08 verlangt Percent > 0), aber alle Regeln sind sich einig: ein negativer Satz hat in keinem nationalen Umsatzsteuer-Regime eine Bedeutung; UBL 2.1 deklariert <cbc:Percent> als Percent / xsd:decimal ohne Vorzeichen-Constraint, daher ist die negative Form schemavalid, PEPPOL-Access-Points lehnen jedoch am BR-*-08-Schematron-Gate ab, und ein negativer Satz kehrt das BR-CO-17-Kreuzprodukt (TaxAmount = round(TaxableAmount × Percent / 100)) still um — eine positive Basis erzeugt einen negativen TaxAmount, den der Käufer als Gutschrift statt als Steuer liest (häufige Ursache: ein Generator, der den Satz aus einer signierten Allowance-/Charge-Prozentspalte ableitet, ohne das Vorzeichen vor dem Schreiben des TaxCategory/Percent-Slots wieder auf positiv zu wenden)',
                 'ubl.ok.versionId': 'UBLVersionID deklariert OASIS UBL „{v}“ (PEPPOL BIS Billing 3.0 basiert auf UBL 2.1)',
                 'ubl.warn.versionId': 'UBLVersionID „{v}“ ist nicht „{expected}“ — OASIS UBL deklariert <cbc:UBLVersionID> als optionalen freien Identifier-Text ohne Wert-Constraint auf Schema-Ebene, aber PEPPOL BIS Billing 3.0 basiert auf dem OASIS-UBL-2.1-Schema-Set; ist das Element vorhanden, fixieren Access Points den Wert auf „2.1“; Werte wie „2.0“ (Legacy-OASIS-UBL), „2.2“ / „2.3“ (neuere OASIS-Releases, die PEPPOL noch nicht übernommen hat) oder „2.1.0“ / „v2.1“ (schemavalider Freitext) scheitern am String-Gleichheits-Gate des Access Points (häufige Ursache: ein Generator, der gegen ein neueres OASIS-UBL-Release templatiert ist, bei dem der UBLVersionID-Bump im Template landete, bevor das PEPPOL-Profil seine geforderte Version anhob — abgegrenzt von den CustomizationID-/ProfileID-Gates, die die Profil-/Prozess-URN validieren; dieses Gate validiert die Schema-Version, deren Konformität das Dokument beansprucht)',
+                'ubl.ok.qtyUnitCode': 'Jedes {field} deklariert ein nicht-leeres @unitCode-Attribut über alle {n} Zeile(n) (EN 16931 BR-23 / BT-130 — Mengeneinheit der berechneten Menge)',
+                'ubl.warn.qtyUnitCode': 'Zeile #{idx} {field} hat kein nicht-leeres @unitCode-Attribut — OASIS UBL deklariert den Quantity-Typ mit @unitCode als xs:normalizedString ohne Non-Empty-Facet, sodass ein fehlendes oder leeres unitCode schemavalider ist; EN 16931 BR-23 / BT-130 verlangen jedoch, dass jede Rechnungszeile die Mengeneinheit trägt (PEPPOL BIS Billing 3.0 bindet den Wert an UN/ECE-Rec-20-/Rec-21-Codes wie EA, KGM, HUR, MTR); PEPPOL-Access-Points lehnen die Datei am Schematron-Gate ab, da die AP-/ERP-Systeme des Käufers eine Menge ohne ihre Einheit nicht abstimmen können (häufige Ursache: ein Generator, der das unitCode-Attribut auf Dienstleistungszeilen weglässt, die gegen ein älteres internes Schema templatiert sind, in dem „Dienstleistungsstunden“ implizit war, und dann für gemischte Waren-+-Dienstleistungs-Abrechnung wiederverwendet wird)',
                 'ubl.ok.taxTotalSign': 'Jedes TaxTotal deklariert einen nicht-negativen TaxAmount über alle {n} TaxTotal-Block(s) (EN 16931 BR-CO-13 / BT-110 — Rechnungs-Gesamt-USt-Betrag)',
                 'ubl.warn.taxTotalSign': 'TaxTotal #{idx} deklariert einen negativen TaxAmount „{v}“ — EN 16931 BR-CO-13 / BR-DEC-13 verlangen, dass der datei-weite Rechnungs-Gesamt-USt-Betrag (BT-110) nicht negativ ist; die USt-Summe einer Rechnung kann null sein (nullsatz-besteuerte Lieferung, steuerbefreite Rechnung, innergemeinschaftliches Reverse Charge), aber niemals negativ (selbst eine Gutschrift trägt eine positive USt-Summe, da der UNCL-1001-Dokumenttypcode die Gutschriftrichtung bereits ausdrückt); eine negative datei-weite USt kehrt stillschweigend das Vorzeichen des Vorsteuer-Postens des Käufers um und unterbricht die periodenbezogene USt-Meldekette (häufige Ursache: ein Generator, der dieselbe Form für Belastungen und Rückerstattungen wiederverwendet und das Vorzeichen in jedem monetären Feld umkehrt, statt den Dokumenttypcode zu wechseln)',
                 'ubl.ok.lmtLineSign': 'LegalMonetaryTotal/LineExtensionAmount „{v}“ ist nicht negativ (EN 16931 BT-106 — Summe der Rechnungszeilen-Nettobeträge)',
@@ -9783,6 +9799,8 @@
                 'sepa.warn.btchBookg': 'PmtInf #{idx} BtchBookg "{v}" xs:boolean लेक्सिकल स्पेस में नहीं है — ISO 20022 <PmtInf>/<BtchBookg> को xs:boolean के रूप में घोषित करता है, जिसका लेक्सिकल स्पेस ठीक {true, false, 1, 0} है (केस-सेंसिटिव); "True" / "TRUE" / "yes" / "Y" जैसे मान स्कीमा-अमान्य हैं और क्लियरिंग सिस्टम (EBA STEP2 / STET / RT1) EPC SEPA रूलबुक परत पर पहुँचने से पहले ही ISO 20022 xs:boolean स्कीमा गेट पर फ़ाइल को अस्वीकार कर देते हैं (आम कारण: एक भुगतान-हब निर्यात जो बूलियन फ़्लैग्स को Excel के माध्यम से पास करता है — Excel सेल-सेव पर "TRUE" / "FALSE" को बड़े अक्षरों में बदल देता है — और pain.001 / pain.008 में सीरियलाइज़ करने से पहले उन्हें पुनः लोअरकेस में नहीं बदलता)',
                 'sepa.ok.lclInstrm': 'LclInstrm/Cd EPC SDD रूलबुक के अनुरूप: {n} PmtInf ब्लॉक CORE, B2B या COR1 में से एक घोषित करते हैं',
                 'sepa.warn.lclInstrm': 'LclInstrm/Cd अमान्य: PmtInf #{idx} ने "{v}" घोषित किया, परंतु EPC SDD रूलबुक केवल CORE (मानक SEPA Core डायरेक्ट डेबिट स्कीम), B2B (बिज़नेस-टू-बिज़नेस स्कीम — अनधिकृत संग्रह विंडो से परे कोई उपभोक्ता रिफंड अधिकार नहीं) या COR1 (नवंबर 2016 में सेवानिवृत्त लीगेसी 1-दिवसीय Core वैरिएंट, अभी भी बैक-डेटेड संग्रह में दिखता है) की अनुमति देता है; ISO 20022 <PmtInf>/<PmtTpInf>/<LclInstrm>/<Cd> को Max4Text के रूप में घोषित करता है, इसलिए कोई भी 4-वर्ण मान स्कीमा को पास करता है, परंतु क्लियरिंग सिस्टम (EBA STEP2 / STET / RT1) रेल-लेवल लोकल-इंस्ट्रूमेंट गेट पर फ़ाइल को अस्वीकार कर देते हैं (आम कारण: SDD टेम्पलेट में पुनः प्रयुक्त गैर-SEPA लोकल-इंस्ट्रूमेंट कोड, या pain.008 जनरेटर में दुर्घटनावश चिपकाया गया SCT LclInstrm कोड)',
+                'sepa.ok.intrmyAgt': 'सभी {n} लेन-देन में कोई IntrmyAgt1 / IntrmyAgt2 / IntrmyAgt3 घोषित नहीं (EPC SCT / SDD Rulebook — SEPA बिना किसी मध्यवर्ती के एंड-टू-एंड है)',
+                'sepa.warn.intrmyAgt': 'लेन-देन #{idx} ने {slots} घोषित किया — EPC SCT और SDD रूलबुक SEPA में मध्यवर्ती एजेंटों को निषिद्ध करते हैं क्योंकि निपटान EBA STEP2 / STET / RT1 के माध्यम से प्रवर्तक और लाभार्थी एजेंटों के बीच एकल हॉप के रूप में चलता है, और किसी मध्यवर्ती बैंक के लिए कोई रूटिंग भूमिका नहीं है; ISO 20022 हर CdtTrfTxInf / DrctDbtTxInf में IntrmyAgt1 / IntrmyAgt2 / IntrmyAgt3 श्रृंखला को वैकल्पिक के रूप में घोषित करता है (SWIFT MT103 कवर-पेमेंट मॉडल की विरासत), इसलिए स्कीमा संरचना को स्वीकार करता है, परंतु क्लियरिंग सिस्टम रेल-लेवल SEPA-अनुपालन गेट पर फ़ाइल को कड़ाई से अस्वीकार करते हैं (आम कारण: SWIFT MT103 निर्यात के विरुद्ध टेम्पलेटेड जनरेटर जहाँ मध्यवर्ती-बैंक स्लॉट ISO 20022 माइग्रेशन में बिना हटाए ले जाया गया — पुराने ERP में सामान्य जो घरेलू SEPA और सीमा-पार SWIFT प्रवाहों के लिए एक ही भुगतान टेम्पलेट साझा करते हैं)',
                 'sepa.warn.ccyInvalid': 'मुद्रा कोड ISO 4217 में सक्रिय नहीं: {code}',
                 'sepa.warn.unknownDoc': 'अज्ञात ISO 20022 रूट तत्व — केवल आंशिक पार्सिंग।',
                 'err.sepaEmpty': 'XML इनपुट खाली है।',
@@ -9952,6 +9970,8 @@
                 'ubl.warn.percentSign': 'TaxCategory #{idx} ऋणात्मक Percent "{v}" घोषित करता है — EN 16931 BT-119 <cac:TaxCategory>/<cbc:Percent> को VAT श्रेणी दर नाम देता है; प्रत्येक श्रेणी-अक्षर व्यवसाय नियम (BR-S-08, BR-Z-08, BR-E-08, BR-AE-08, BR-K-08, BR-G-08, BR-O-08, BR-IC-08) दर को एक विशिष्ट गैर-ऋणात्मक रूप में बाँधता है (BR-Z-08 / BR-E-08 / BR-AE-08 Percent = 0 की माँग करते हैं; BR-S-08 Percent > 0 की माँग करता है) परंतु सभी नियम सहमत हैं: किसी भी सदस्य-राज्य VAT व्यवस्था में ऋणात्मक दर का कोई अर्थ नहीं है; UBL 2.1 <cbc:Percent> को बिना चिह्न प्रतिबंध के Percent / xsd:decimal के रूप में घोषित करता है, इसलिए ऋणात्मक रूप स्कीमा-मान्य है, परंतु PEPPOL एक्सेस पॉइंट्स BR-*-08 schematron गेट पर अस्वीकृत करते हैं, और ऋणात्मक दर BR-CO-17 क्रॉस-प्रोडक्ट (TaxAmount = round(TaxableAmount × Percent / 100)) को मूक रूप से उलट देती है — एक धनात्मक आधार ऋणात्मक TaxAmount उत्पन्न करता है जिसे खरीदार कर के बजाय क्रेडिट के रूप में पढ़ता है (आम कारण: एक जनरेटर जो दर को एक हस्ताक्षरित छूट/शुल्क प्रतिशत स्तंभ से प्राप्त करता है और TaxCategory/Percent स्लॉट लिखने से पहले चिह्न को धनात्मक में वापस नहीं पलटाता)',
                 'ubl.ok.versionId': 'UBLVersionID OASIS UBL "{v}" घोषित करता है (PEPPOL BIS Billing 3.0 UBL 2.1 पर निर्मित है)',
                 'ubl.warn.versionId': 'UBLVersionID "{v}" "{expected}" नहीं है — OASIS UBL <cbc:UBLVersionID> को बिना स्कीमा-स्तरीय मान बाधा के एक वैकल्पिक मुक्त-टेक्स्ट पहचानकर्ता के रूप में घोषित करता है, परंतु PEPPOL BIS Billing 3.0 OASIS UBL 2.1 स्कीमा सेट पर निर्मित है; जब तत्व उपस्थित होता है तो एक्सेस पॉइंट्स मान को "2.1" पर निश्चित करते हैं; "2.0" (लीगेसी OASIS UBL), "2.2" / "2.3" (PEPPOL द्वारा अभी तक अपनाई नहीं गई नई OASIS रिलीज़ें), या "2.1.0" / "v2.1" (स्कीमा-मान्य मुक्त टेक्स्ट) जैसे मान एक्सेस-पॉइंट स्ट्रिंग-समानता गेट पर विफल होते हैं (आम कारण: एक नए OASIS UBL रिलीज़ के विरुद्ध टेम्पलेटेड एक जनरेटर जहाँ UBLVersionID बम्प टेम्पलेट में आ गया इससे पहले कि PEPPOL प्रोफ़ाइल ने अपनी आवश्यक संस्करण को बढ़ाया — CustomizationID / ProfileID गेट्स से अलग जो प्रोफ़ाइल / प्रक्रिया URN को मान्य करते हैं; यह गेट उस स्कीमा संस्करण को मान्य करता है जिसके अनुरूपता का दावा दस्तावेज़ करता है)',
+                'ubl.ok.qtyUnitCode': 'सभी {n} पंक्ति(यों) में प्रत्येक {field} गैर-रिक्त @unitCode विशेषता घोषित करता है (EN 16931 BR-23 / BT-130 — चालान की गई मात्रा की माप इकाई)',
+                'ubl.warn.qtyUnitCode': 'पंक्ति #{idx} {field} में गैर-रिक्त @unitCode विशेषता गायब है — OASIS UBL Quantity प्रकार के @unitCode को बिना नॉन-एम्प्टी फ़ेसेट के xs:normalizedString के रूप में घोषित करता है, इसलिए अनुपस्थित या रिक्त unitCode स्कीमा-मान्य है; परंतु EN 16931 BR-23 / BT-130 के लिए आवश्यक है कि प्रत्येक चालान पंक्ति माप की इकाई ले जाए (PEPPOL BIS Billing 3.0 इस मान को UN/ECE Rec 20 / Rec 21 कोड जैसे EA, KGM, HUR, MTR से बाँधता है); PEPPOL एक्सेस पॉइंट्स फ़ाइल को schematron गेट पर अस्वीकार करते हैं क्योंकि क्रेता का AP / ERP बिना उसकी माप इकाई के मात्रा का मिलान नहीं कर सकता (आम कारण: एक जनरेटर जो पुराने आंतरिक स्कीमा के विरुद्ध टेम्पलेटेड सेवा पंक्तियों पर unitCode विशेषता गिरा देता है जहाँ "सेवा घंटे" अंतर्निहित था, फिर मिश्रित वस्तु + सेवा बिलिंग के लिए पुनः उपयोग किया जाता है)',
                 'ubl.ok.taxTotalSign': 'सभी {n} TaxTotal ब्लॉक्स में प्रत्येक TaxTotal गैर-ऋणात्मक TaxAmount घोषित करता है (EN 16931 BR-CO-13 / BT-110 — चालान कुल VAT राशि)',
                 'ubl.warn.taxTotalSign': 'TaxTotal #{idx} ऋणात्मक TaxAmount "{v}" घोषित करता है — EN 16931 BR-CO-13 / BR-DEC-13 के अनुसार फ़ाइल-व्यापी चालान कुल VAT राशि (BT-110) गैर-ऋणात्मक होनी चाहिए; चालान का VAT कुल शून्य हो सकता है (शून्य दर आपूर्ति, छूट प्राप्त चालान, EU भीतर रिवर्स चार्ज) पर कभी ऋणात्मक नहीं (क्रेडिट नोट भी सकारात्मक VAT कुल रखती है क्योंकि UNCL 1001 दस्तावेज़-प्रकार कोड पहले से ही क्रेडिट दिशा बता देता है); ऋणात्मक फ़ाइल-व्यापी VAT क्रेता की इनपुट-VAT प्रविष्टि के चिह्न को चुपचाप पलट देती है और प्रति-अवधि VAT रिपोर्टिंग शृंखला तोड़ देती है (आम कारण: जनरेटर शुल्क और वापसी के लिए समान आकार पुनः उपयोग करता है और दस्तावेज़-प्रकार कोड बदलने के बजाय प्रत्येक मौद्रिक स्लॉट का चिह्न पलटता है)',
                 'ubl.ok.lmtLineSign': 'LegalMonetaryTotal/LineExtensionAmount "{v}" गैर-ऋणात्मक है (EN 16931 BT-106 — चालान पंक्ति शुद्ध राशियों का योग)',
@@ -19319,6 +19339,60 @@
             }
         }
 
+        // EPC SCT / SDD Rulebook: intermediary agents are not
+        // allowed in SEPA (draft 138). ISO 20022 declares the
+        // optional <IntrmyAgt1>, <IntrmyAgt2>, and <IntrmyAgt3>
+        // chain inside every <CdtTrfTxInf> / <DrctDbtTxInf> so a
+        // payment can be routed through one to three intermediary
+        // banks between the originator's bank and the
+        // beneficiary's bank — the construct survives from the
+        // SWIFT MT103 cover-payment model. SEPA is by design
+        // end-to-end with no intermediaries: the EPC SCT and SDD
+        // Rulebooks explicitly forbid IntrmyAgt elements in
+        // pain.001 / pain.008 because SEPA settlement runs over
+        // EBA STEP2 / STET / RT1 as a single hop between the
+        // originator and beneficiary agents, with no routing role
+        // for an intermediary bank. A pain.001 / pain.008 file
+        // declaring any IntrmyAgt block is schema-valid XML but
+        // hard-rejected by the clearing system at the rail-level
+        // SEPA-compliance gate. The canonical real-world failure
+        // is a generator templated against a SWIFT MT103 export
+        // where the intermediary-bank slot was carried into the
+        // ISO 20022 migration without being stripped — common on
+        // legacy ERPs that share one payment template across
+        // domestic SEPA and cross-border SWIFT flows. The new
+        // sepaCheckIntrmyAgt() walks every transaction in the
+        // pain.001 / pain.008 wrapper, looks for any
+        // <IntrmyAgt1> / <IntrmyAgt2> / <IntrmyAgt3> child, and
+        // emits one green confirmation row across all clean
+        // transactions or one red row per offending transaction
+        // naming the 1-based index and the IntrmyAgt slot(s)
+        // present. camt.053 is statement-side and skips silently.
+        // Pair with draft 139 on the UBL side.
+        function sepaCheckIntrmyAgt(out, doc, detected) {
+            if (detected.type !== 'pain.001' && detected.type !== 'pain.008') return;
+            const w = detected.wrapper;
+            if (!w) return;
+            const txs = [
+                ...sepaAllLocal(w, 'CdtTrfTxInf'),
+                ...sepaAllLocal(w, 'DrctDbtTxInf')
+            ];
+            if (!txs.length) return;
+            const slots = ['IntrmyAgt1', 'IntrmyAgt2', 'IntrmyAgt3'];
+            const bad = [];
+            txs.forEach((tx, i) => {
+                const present = slots.filter(s => !!sepaFirst(tx, s));
+                if (present.length) bad.push({ idx: i + 1, slots: present.join(', ') });
+            });
+            if (bad.length === 0) {
+                tlsRenderRow(out, t('sepa.row.warning'), '✓ ' + tFormat('sepa.ok.intrmyAgt', { n: intlNumber(txs.length) }));
+            } else {
+                for (const b of bad) {
+                    tlsRenderRow(out, t('sepa.row.warning'), '✗ ' + tFormat('sepa.warn.intrmyAgt', { idx: intlNumber(b.idx), slots: b.slots }));
+                }
+            }
+        }
+
         // EPC SDD Rulebook LclInstrm/Cd enforcement on pain.008
         // (draft 136). ISO 20022 declares
         // <PmtInf>/<PmtTpInf>/<LclInstrm>/<Cd> as Max4Text (a
@@ -19691,6 +19765,7 @@
                 sepaCheckCtrlSumDecimals(out, doc, detected);
                 sepaCheckBtchBookg(out, doc, detected);
                 sepaCheckLclInstrm(out, doc, detected);
+                sepaCheckIntrmyAgt(out, doc, detected);
                 sepaCheckE2eIdCharset(out, doc, detected);
                 sepaCheckInstrIdCharset(out, doc, detected);
                 sepaCheckMndtIdCharset(out, doc, detected);
@@ -22135,6 +22210,61 @@
             }
         }
 
+        // EN 16931 BR-23 / BT-130 InvoicedQuantity / CreditedQuantity
+        // unitCode presence check (draft 139). OASIS UBL 2.1 declares
+        // <cbc:InvoicedQuantity> (Invoice line) and
+        // <cbc:CreditedQuantity> (CreditNote line) as a Quantity type
+        // whose XSD requires the @unitCode attribute, but the same XSD
+        // models @unitCode as xs:normalizedString without a non-empty
+        // facet — `unitCode=""` is schema-valid (the attribute is
+        // present, just empty). EN 16931 BR-23 narrows the rule to
+        // "Each Invoice line shall contain the Invoiced quantity unit
+        // of measure code (BT-130)" and PEPPOL BIS Billing 3.0 binds
+        // BT-130 to the UN/ECE Recommendation 20 / Rec 21 unit codes
+        // (EA, KGM, HUR, MTR, …). An empty or missing @unitCode is
+        // schema-valid UBL but rejected at the PEPPOL access-point
+        // schematron gate because the buyer's AP / ERP cannot
+        // reconcile a quantity without its unit of measure — "10" of
+        // what? items / kilograms / hours / metres all settle through
+        // different inventory and pricing-tier logic downstream. The
+        // canonical real-world failure is a generator that emits the
+        // quantity element but drops the unitCode attribute on
+        // service lines templated against an older internal schema
+        // where "service hours" was implicit, then is reused for
+        // mixed goods + services billing where the implicit
+        // assumption breaks. Distinct from draft 35's
+        // ublCheckLineQuantity which validates the *value* of the
+        // quantity element (non-empty text) — this gate validates
+        // the *unitCode attribute* on the same element. Pair with
+        // draft 138 on the SEPA side (IntrmyAgt forbidden in
+        // pain.001 / pain.008).
+        function ublCheckQuantityUnitCode(out, detected) {
+            const r = detected.root;
+            const lineLocal = detected.type === 'Invoice' ? 'InvoiceLine' : 'CreditNoteLine';
+            const qtyLocal  = detected.type === 'Invoice' ? 'InvoicedQuantity' : 'CreditedQuantity';
+            const lines = sepaAllLocal(r, lineLocal);
+            if (!lines.length) return;
+            let seen = 0;
+            const bad = [];
+            lines.forEach((line, i) => {
+                const qtyEl = sepaFirst(line, qtyLocal);
+                if (!qtyEl) return;
+                const raw = (qtyEl.textContent || '').trim();
+                if (!raw) return;
+                seen++;
+                const uc = qtyEl.hasAttribute('unitCode') ? (qtyEl.getAttribute('unitCode') || '').trim() : '';
+                if (!uc) bad.push({ idx: i + 1, field: qtyLocal });
+            });
+            if (!seen) return;
+            if (bad.length === 0) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + tFormat('ubl.ok.qtyUnitCode', { field: qtyLocal, n: intlNumber(seen) }));
+            } else {
+                for (const b of bad) {
+                    tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + tFormat('ubl.warn.qtyUnitCode', { field: b.field, idx: intlNumber(b.idx) }));
+                }
+            }
+        }
+
         // EN 16931 BT-1 (Invoice number) length check (draft 109).
         // UBL declares `<cbc:ID>` at the Invoice / CreditNote root as
         // plain Identifier text with no schema-level length cap, and
@@ -22336,6 +22466,7 @@
                 ublCheckTaxAmtDecimals(out, detected);
                 ublCheckTaxCategoryPercent(out, detected);
                 ublCheckVersionId(out, detected);
+                ublCheckQuantityUnitCode(out, detected);
                 ublCheckTaxTotalSign(out, detected);
                 ublCheckLegalMonTotalLineSign(out, detected);
                 ublCheckLegalMonTotalTaxExclSign(out, detected);

@@ -3906,6 +3906,87 @@ test('ubl: UBLVersionID flags a non-2.1 declaration', async ({ page }) => {
   await expect(page.locator('#ubl-results')).toContainText(/UBLVersionID "2\.2" is not "2\.1"/i, { timeout: 5_000 });
 });
 
+test('sepa: IntrmyAgt enforcement confirms when no intermediary agents are declared', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Canonical SEPA-compliant pain.001 — no IntrmyAgt anywhere.
+  const pain001 = `<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.001.001.03">
+  <CstmrCdtTrfInitn>
+    <GrpHdr><MsgId>MSG-IA-1</MsgId><CreDtTm>2024-05-15T09:00:00Z</CreDtTm><NbOfTxs>1</NbOfTxs><InitgPty><Nm>X</Nm></InitgPty></GrpHdr>
+    <PmtInf>
+      <PmtInfId>PI-1</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <ReqdExctnDt>2024-06-01</ReqdExctnDt>
+      <Dbtr><Nm>D</Nm></Dbtr>
+      <DbtrAcct><Id><IBAN>DE89370400440532013000</IBAN></Id></DbtrAcct>
+      <DbtrAgt><FinInstnId><BIC>COBADEFFXXX</BIC></FinInstnId></DbtrAgt>
+      <CdtTrfTxInf>
+        <PmtId><EndToEndId>E2E-1</EndToEndId></PmtId>
+        <Amt><InstdAmt Ccy="EUR">10.00</InstdAmt></Amt>
+        <CdtrAgt><FinInstnId><BIC>DEUTDEFFXXX</BIC></FinInstnId></CdtrAgt>
+        <Cdtr><Nm>C</Nm></Cdtr>
+        <CdtrAcct><Id><IBAN>DE91100000000123456789</IBAN></Id></CdtrAcct>
+      </CdtTrfTxInf>
+    </PmtInf>
+  </CstmrCdtTrfInitn>
+</Document>`;
+  await page.fill('#sepa-input', pain001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/No IntrmyAgt1 \/ IntrmyAgt2 \/ IntrmyAgt3 declared across all 1 transaction/i, { timeout: 5_000 });
+});
+
+test('sepa: IntrmyAgt enforcement flags a pain.001 carrying IntrmyAgt1', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // SWIFT MT103 cover-payment carryover: IntrmyAgt1 lives inside CdtTrfTxInf.
+  // Schema-valid, EPC SCT Rulebook-forbidden.
+  const pain001 = `<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.001.001.03">
+  <CstmrCdtTrfInitn>
+    <GrpHdr><MsgId>MSG-IA-2</MsgId><CreDtTm>2024-05-15T09:00:00Z</CreDtTm><NbOfTxs>1</NbOfTxs><InitgPty><Nm>X</Nm></InitgPty></GrpHdr>
+    <PmtInf>
+      <PmtInfId>PI-1</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <ReqdExctnDt>2024-06-01</ReqdExctnDt>
+      <Dbtr><Nm>D</Nm></Dbtr>
+      <DbtrAcct><Id><IBAN>DE89370400440532013000</IBAN></Id></DbtrAcct>
+      <DbtrAgt><FinInstnId><BIC>COBADEFFXXX</BIC></FinInstnId></DbtrAgt>
+      <CdtTrfTxInf>
+        <PmtId><EndToEndId>E2E-1</EndToEndId></PmtId>
+        <Amt><InstdAmt Ccy="EUR">10.00</InstdAmt></Amt>
+        <IntrmyAgt1><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></IntrmyAgt1>
+        <CdtrAgt><FinInstnId><BIC>DEUTDEFFXXX</BIC></FinInstnId></CdtrAgt>
+        <Cdtr><Nm>C</Nm></Cdtr>
+        <CdtrAcct><Id><IBAN>DE91100000000123456789</IBAN></Id></CdtrAcct>
+      </CdtTrfTxInf>
+    </PmtInf>
+  </CstmrCdtTrfInitn>
+</Document>`;
+  await page.fill('#sepa-input', pain001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Transaction #1 declares IntrmyAgt1/i, { timeout: 5_000 });
+});
+
+test('ubl: InvoicedQuantity unitCode confirms on canonical fixture', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Canonical UBL_INVOICE declares <cbc:InvoicedQuantity unitCode="C62">.
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Every InvoicedQuantity declares a non-empty @unitCode/i, { timeout: 5_000 });
+});
+
+test('ubl: InvoicedQuantity unitCode flags a missing unitCode attribute', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Strip the unitCode attribute — schema-valid (Quantity type allows absence
+  // as xs:normalizedString without non-empty facet), EN 16931 BR-23-broken.
+  const withBad = UBL_INVOICE.replace(
+    '<cbc:InvoicedQuantity unitCode="C62">2</cbc:InvoicedQuantity>',
+    '<cbc:InvoicedQuantity>2</cbc:InvoicedQuantity>'
+  );
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Line #1 InvoicedQuantity is missing a non-empty @unitCode/i, { timeout: 5_000 });
+});
+
 test('ubl: Buyer RegistrationName BR-07 confirms on canonical fixture', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   // Canonical UBL_INVOICE now declares PartyLegalEntity/RegistrationName=Beispiel SARL
