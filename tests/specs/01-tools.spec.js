@@ -4318,6 +4318,86 @@ test('ubl: InvoiceTypeCode BR-04 presence flags a missing root type code on cano
   await expect(page.locator('#ubl-results')).toContainText(/Root is missing <cbc:InvoiceTypeCode>/i, { timeout: 5_000 });
 });
 
+test('sepa: SeqTp presence confirms when every pain.008 PmtInf declares SeqTp', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Well-formed pain.008 with PmtTpInf/SeqTp=FRST present.
+  const pain008 = `<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.008.001.02">
+  <CstmrDrctDbtInitn>
+    <GrpHdr><MsgId>DD-ST-1</MsgId><CreDtTm>2024-05-15T09:00:00Z</CreDtTm><NbOfTxs>1</NbOfTxs><InitgPty><Nm>Creditor Inc</Nm></InitgPty></GrpHdr>
+    <PmtInf>
+      <PmtInfId>DD-PAY-1</PmtInfId>
+      <PmtMtd>DD</PmtMtd>
+      <PmtTpInf><SvcLvl><Cd>SEPA</Cd></SvcLvl><LclInstrm><Cd>CORE</Cd></LclInstrm><SeqTp>FRST</SeqTp></PmtTpInf>
+      <ReqdColltnDt>2024-06-01</ReqdColltnDt>
+      <Cdtr><Nm>Creditor Inc</Nm></Cdtr>
+      <CdtrAcct><Id><IBAN>DE91100000000123456789</IBAN></Id></CdtrAcct>
+      <CdtrAgt><FinInstnId><BIC>DEUTDEFFXXX</BIC></FinInstnId></CdtrAgt>
+      <DrctDbtTxInf>
+        <PmtId><EndToEndId>DD-E2E-1</EndToEndId></PmtId>
+        <InstdAmt Ccy="EUR">42.00</InstdAmt>
+        <DrctDbtTx><MndtRltdInf><MndtId>MANDATE-001</MndtId></MndtRltdInf></DrctDbtTx>
+        <DbtrAgt><FinInstnId><BIC>COBADEFFXXX</BIC></FinInstnId></DbtrAgt>
+        <Dbtr><Nm>Subscriber</Nm></Dbtr>
+        <DbtrAcct><Id><IBAN>DE89370400440532013000</IBAN></Id></DbtrAcct>
+      </DrctDbtTxInf>
+    </PmtInf>
+  </CstmrDrctDbtInitn>
+</Document>`;
+  await page.fill('#sepa-input', pain008);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Every PmtInf declares <PmtTpInf>\/<SeqTp> across all 1 PmtInf/i, { timeout: 5_000 });
+});
+
+test('sepa: SeqTp presence flags a pain.008 PmtInf missing SeqTp', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // pain.001 SCT template re-used for pain.008 without adding SeqTp.
+  // Schema-valid (PmtTpInf/SeqTp is 0..1), EPC SDD Rulebook-broken.
+  const pain008 = `<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.008.001.02">
+  <CstmrDrctDbtInitn>
+    <GrpHdr><MsgId>DD-ST-2</MsgId><CreDtTm>2024-05-15T09:00:00Z</CreDtTm><NbOfTxs>1</NbOfTxs><InitgPty><Nm>Creditor Inc</Nm></InitgPty></GrpHdr>
+    <PmtInf>
+      <PmtInfId>DD-PAY-1</PmtInfId>
+      <PmtMtd>DD</PmtMtd>
+      <PmtTpInf><SvcLvl><Cd>SEPA</Cd></SvcLvl><LclInstrm><Cd>CORE</Cd></LclInstrm></PmtTpInf>
+      <ReqdColltnDt>2024-06-01</ReqdColltnDt>
+      <Cdtr><Nm>Creditor Inc</Nm></Cdtr>
+      <CdtrAcct><Id><IBAN>DE91100000000123456789</IBAN></Id></CdtrAcct>
+      <CdtrAgt><FinInstnId><BIC>DEUTDEFFXXX</BIC></FinInstnId></CdtrAgt>
+      <DrctDbtTxInf>
+        <PmtId><EndToEndId>DD-E2E-1</EndToEndId></PmtId>
+        <InstdAmt Ccy="EUR">42.00</InstdAmt>
+        <DrctDbtTx><MndtRltdInf><MndtId>MANDATE-001</MndtId></MndtRltdInf></DrctDbtTx>
+        <DbtrAgt><FinInstnId><BIC>COBADEFFXXX</BIC></FinInstnId></DbtrAgt>
+        <Dbtr><Nm>Subscriber</Nm></Dbtr>
+        <DbtrAcct><Id><IBAN>DE89370400440532013000</IBAN></Id></DbtrAcct>
+      </DrctDbtTxInf>
+    </PmtInf>
+  </CstmrDrctDbtInitn>
+</Document>`;
+  await page.fill('#sepa-input', pain008);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/PmtInf #1 is missing <PmtTpInf>\/<SeqTp>/i, { timeout: 5_000 });
+});
+
+test('ubl: LegalMonetaryTotal BR-12 presence confirms on canonical fixture', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Canonical UBL_INVOICE declares <cac:LegalMonetaryTotal>.
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Root declares <cac:LegalMonetaryTotal>/i, { timeout: 5_000 });
+});
+
+test('ubl: LegalMonetaryTotal BR-12 presence flags a missing root block', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Strip the entire LegalMonetaryTotal block from the canonical fixture.
+  const withBad = UBL_INVOICE.replace(/<cac:LegalMonetaryTotal>[\s\S]*?<\/cac:LegalMonetaryTotal>/, '');
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Root is missing <cac:LegalMonetaryTotal>/i, { timeout: 5_000 });
+});
+
 test('ubl: Buyer RegistrationName BR-07 confirms on canonical fixture', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   // Canonical UBL_INVOICE now declares PartyLegalEntity/RegistrationName=Beispiel SARL
