@@ -4536,6 +4536,81 @@ test('ubl: AccountingCustomerParty presence flags a missing customer block', asy
   await expect(page.locator('#ubl-results')).toContainText(/Root is missing <cac:AccountingCustomerParty>/i, { timeout: 5_000 });
 });
 
+test('sepa: per-PmtInf Dbtr/Nm presence confirms when every PmtInf declares the debtor name', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // pain.001 with a Dbtr/Nm on its single PmtInf.
+  const pain001 = `<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.001.001.03">
+  <CstmrCdtTrfInitn>
+    <GrpHdr><MsgId>MSG-DBN-1</MsgId><CreDtTm>2024-05-15T09:00:00Z</CreDtTm><NbOfTxs>1</NbOfTxs><InitgPty><Nm>X</Nm></InitgPty></GrpHdr>
+    <PmtInf>
+      <PmtInfId>PI-1</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <ReqdExctnDt>2024-06-01</ReqdExctnDt>
+      <Dbtr><Nm>ACME GmbH</Nm></Dbtr>
+      <DbtrAcct><Id><IBAN>DE89370400440532013000</IBAN></Id></DbtrAcct>
+      <DbtrAgt><FinInstnId><BIC>COBADEFFXXX</BIC></FinInstnId></DbtrAgt>
+      <CdtTrfTxInf>
+        <PmtId><EndToEndId>E2E-1</EndToEndId></PmtId>
+        <Amt><InstdAmt Ccy="EUR">10.00</InstdAmt></Amt>
+        <CdtrAgt><FinInstnId><BIC>DEUTDEFFXXX</BIC></FinInstnId></CdtrAgt>
+        <Cdtr><Nm>C</Nm></Cdtr>
+        <CdtrAcct><Id><IBAN>DE91100000000123456789</IBAN></Id></CdtrAcct>
+      </CdtTrfTxInf>
+    </PmtInf>
+  </CstmrCdtTrfInitn>
+</Document>`;
+  await page.fill('#sepa-input', pain001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Every PmtInf declares <Dbtr>\/<Nm> across all 1 PmtInf block\(s\) \(EPC SEPA Rulebook AT-02/i, { timeout: 5_000 });
+});
+
+test('sepa: per-PmtInf Dbtr/Nm presence flags a PmtInf with Dbtr only carrying Id', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // pain.001 whose Dbtr carries only OrgId/OthrId — no <Nm>.
+  const pain001 = `<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.001.001.03">
+  <CstmrCdtTrfInitn>
+    <GrpHdr><MsgId>MSG-DBN-2</MsgId><CreDtTm>2024-05-15T09:00:00Z</CreDtTm><NbOfTxs>1</NbOfTxs><InitgPty><Nm>X</Nm></InitgPty></GrpHdr>
+    <PmtInf>
+      <PmtInfId>PI-1</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <ReqdExctnDt>2024-06-01</ReqdExctnDt>
+      <Dbtr><Id><OrgId><Othr><Id>ACMECORP01</Id></Othr></OrgId></Id></Dbtr>
+      <DbtrAcct><Id><IBAN>DE89370400440532013000</IBAN></Id></DbtrAcct>
+      <DbtrAgt><FinInstnId><BIC>COBADEFFXXX</BIC></FinInstnId></DbtrAgt>
+      <CdtTrfTxInf>
+        <PmtId><EndToEndId>E2E-1</EndToEndId></PmtId>
+        <Amt><InstdAmt Ccy="EUR">10.00</InstdAmt></Amt>
+        <CdtrAgt><FinInstnId><BIC>DEUTDEFFXXX</BIC></FinInstnId></CdtrAgt>
+        <Cdtr><Nm>C</Nm></Cdtr>
+        <CdtrAcct><Id><IBAN>DE91100000000123456789</IBAN></Id></CdtrAcct>
+      </CdtTrfTxInf>
+    </PmtInf>
+  </CstmrCdtTrfInitn>
+</Document>`;
+  await page.fill('#sepa-input', pain001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/PmtInf #1 is missing <Dbtr>\/<Nm>/i, { timeout: 5_000 });
+});
+
+test('ubl: CustomizationID presence confirms on canonical fixture', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Canonical UBL_INVOICE declares <cbc:CustomizationID>.
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Root declares <cbc:CustomizationID>/i, { timeout: 5_000 });
+});
+
+test('ubl: CustomizationID presence flags a missing CustomizationID at root', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Strip the CustomizationID element from the canonical fixture.
+  const withBad = UBL_INVOICE.replace(/<cbc:CustomizationID>[\s\S]*?<\/cbc:CustomizationID>/, '');
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Root is missing <cbc:CustomizationID>/i, { timeout: 5_000 });
+});
+
 test('ubl: Buyer RegistrationName BR-07 confirms on canonical fixture', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   // Canonical UBL_INVOICE now declares PartyLegalEntity/RegistrationName=Beispiel SARL
