@@ -4150,6 +4150,91 @@ test('ubl: DocumentCurrencyCode BR-05 presence flags a missing root code', async
   await expect(page.locator('#ubl-results')).toContainText(/Root is missing <cbc:DocumentCurrencyCode>/i, { timeout: 5_000 });
 });
 
+test('sepa: RmtInf Strd cardinality confirms when every RmtInf carries one <Strd>', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Canonical SEPA-compliant pain.001 — one <Strd> per RmtInf.
+  const pain001 = `<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.001.001.03">
+  <CstmrCdtTrfInitn>
+    <GrpHdr><MsgId>MSG-STRD-1</MsgId><CreDtTm>2024-05-15T09:00:00Z</CreDtTm><NbOfTxs>1</NbOfTxs><InitgPty><Nm>X</Nm></InitgPty></GrpHdr>
+    <PmtInf>
+      <PmtInfId>PI-1</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <ReqdExctnDt>2024-06-01</ReqdExctnDt>
+      <Dbtr><Nm>D</Nm></Dbtr>
+      <DbtrAcct><Id><IBAN>DE89370400440532013000</IBAN></Id></DbtrAcct>
+      <DbtrAgt><FinInstnId><BIC>COBADEFFXXX</BIC></FinInstnId></DbtrAgt>
+      <CdtTrfTxInf>
+        <PmtId><EndToEndId>E2E-1</EndToEndId></PmtId>
+        <Amt><InstdAmt Ccy="EUR">10.00</InstdAmt></Amt>
+        <CdtrAgt><FinInstnId><BIC>DEUTDEFFXXX</BIC></FinInstnId></CdtrAgt>
+        <Cdtr><Nm>C</Nm></Cdtr>
+        <CdtrAcct><Id><IBAN>DE91100000000123456789</IBAN></Id></CdtrAcct>
+        <RmtInf><Strd><CdtrRefInf><Ref>RF18539007547034</Ref></CdtrRefInf></Strd></RmtInf>
+      </CdtTrfTxInf>
+    </PmtInf>
+  </CstmrCdtTrfInitn>
+</Document>`;
+  await page.fill('#sepa-input', pain001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Every transaction's RmtInf carries at most one <Strd> across all 1 populated RmtInf/i, { timeout: 5_000 });
+});
+
+test('sepa: RmtInf Strd cardinality flags a RmtInf carrying two <Strd> blocks', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Two structured-remittance blocks per RmtInf: schema-valid (0..n),
+  // EPC SCT Rulebook-broken (max 1).
+  const pain001 = `<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.001.001.03">
+  <CstmrCdtTrfInitn>
+    <GrpHdr><MsgId>MSG-STRD-2</MsgId><CreDtTm>2024-05-15T09:00:00Z</CreDtTm><NbOfTxs>1</NbOfTxs><InitgPty><Nm>X</Nm></InitgPty></GrpHdr>
+    <PmtInf>
+      <PmtInfId>PI-1</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <ReqdExctnDt>2024-06-01</ReqdExctnDt>
+      <Dbtr><Nm>D</Nm></Dbtr>
+      <DbtrAcct><Id><IBAN>DE89370400440532013000</IBAN></Id></DbtrAcct>
+      <DbtrAgt><FinInstnId><BIC>COBADEFFXXX</BIC></FinInstnId></DbtrAgt>
+      <CdtTrfTxInf>
+        <PmtId><EndToEndId>E2E-1</EndToEndId></PmtId>
+        <Amt><InstdAmt Ccy="EUR">10.00</InstdAmt></Amt>
+        <CdtrAgt><FinInstnId><BIC>DEUTDEFFXXX</BIC></FinInstnId></CdtrAgt>
+        <Cdtr><Nm>C</Nm></Cdtr>
+        <CdtrAcct><Id><IBAN>DE91100000000123456789</IBAN></Id></CdtrAcct>
+        <RmtInf>
+          <Strd><CdtrRefInf><Ref>RF18539007547034</Ref></CdtrRefInf></Strd>
+          <Strd><CdtrRefInf><Ref>RF712348231</Ref></CdtrRefInf></Strd>
+        </RmtInf>
+      </CdtTrfTxInf>
+    </PmtInf>
+  </CstmrCdtTrfInitn>
+</Document>`;
+  await page.fill('#sepa-input', pain001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Transaction #1 RmtInf carries 2 <Strd> elements/i, { timeout: 5_000 });
+});
+
+test('ubl: Invoice number BR-02 presence confirms on canonical fixture', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Canonical UBL_INVOICE declares <cbc:ID>INV-2024-042</cbc:ID> at root.
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Root declares <cbc:ID> "INV-2024-042"/i, { timeout: 5_000 });
+});
+
+test('ubl: Invoice number BR-02 presence flags a missing root ID', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Strip the root <cbc:ID> — schema-valid (UBL marks it optional),
+  // EN 16931 BR-02-broken.
+  const withBad = UBL_INVOICE.replace(
+    '<cbc:ID>INV-2024-042</cbc:ID>',
+    ''
+  );
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Root is missing <cbc:ID>/i, { timeout: 5_000 });
+});
+
 test('ubl: Buyer RegistrationName BR-07 confirms on canonical fixture', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   // Canonical UBL_INVOICE now declares PartyLegalEntity/RegistrationName=Beispiel SARL
