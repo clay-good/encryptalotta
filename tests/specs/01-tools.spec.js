@@ -4855,6 +4855,96 @@ test('ubl: TaxCategory ID presence flags a TaxCategory block missing the ID', as
   await expect(page.locator('#ubl-results')).toContainText(/TaxCategory #1 is missing <cbc:ID>/i, { timeout: 5_000 });
 });
 
+test('sepa: per-DrctDbtTxInf DtOfSgntr presence confirms when every SDD transaction declares it', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  const pain008 = `<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.008.001.02">
+  <CstmrDrctDbtInitn>
+    <GrpHdr><MsgId>MSG-DS-1</MsgId><CreDtTm>2024-05-15T09:00:00Z</CreDtTm><NbOfTxs>1</NbOfTxs><InitgPty><Nm>X</Nm></InitgPty></GrpHdr>
+    <PmtInf>
+      <PmtInfId>PI-1</PmtInfId>
+      <PmtMtd>DD</PmtMtd>
+      <PmtTpInf><SeqTp>RCUR</SeqTp></PmtTpInf>
+      <ReqdColltnDt>2024-06-01</ReqdColltnDt>
+      <Cdtr><Nm>ACME GmbH</Nm></Cdtr>
+      <CdtrAcct><Id><IBAN>DE91100000000123456789</IBAN></Id></CdtrAcct>
+      <CdtrAgt><FinInstnId><BIC>DEUTDEFFXXX</BIC></FinInstnId></CdtrAgt>
+      <ChrgBr>SLEV</ChrgBr>
+      <DrctDbtTxInf>
+        <PmtId><EndToEndId>E2E-1</EndToEndId></PmtId>
+        <InstdAmt Ccy="EUR">10.00</InstdAmt>
+        <DrctDbtTx>
+          <MndtRltdInf>
+            <MndtId>MANDATE-001</MndtId>
+            <DtOfSgntr>2023-12-01</DtOfSgntr>
+          </MndtRltdInf>
+        </DrctDbtTx>
+        <DbtrAgt><FinInstnId><BIC>COBADEFFXXX</BIC></FinInstnId></DbtrAgt>
+        <Dbtr><Nm>Payer</Nm></Dbtr>
+        <DbtrAcct><Id><IBAN>DE89370400440532013000</IBAN></Id></DbtrAcct>
+      </DrctDbtTxInf>
+    </PmtInf>
+  </CstmrDrctDbtInitn>
+</Document>`;
+  await page.fill('#sepa-input', pain008);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Every direct-debit transaction declares <MndtRltdInf>\/<DtOfSgntr> across all 1 DrctDbtTxInf block\(s\) \(EPC SDD Rulebook AT-02/i, { timeout: 5_000 });
+});
+
+test('sepa: per-DrctDbtTxInf DtOfSgntr presence flags a transaction missing the signature date', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  const pain008 = `<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.008.001.02">
+  <CstmrDrctDbtInitn>
+    <GrpHdr><MsgId>MSG-DS-2</MsgId><CreDtTm>2024-05-15T09:00:00Z</CreDtTm><NbOfTxs>1</NbOfTxs><InitgPty><Nm>X</Nm></InitgPty></GrpHdr>
+    <PmtInf>
+      <PmtInfId>PI-1</PmtInfId>
+      <PmtMtd>DD</PmtMtd>
+      <PmtTpInf><SeqTp>RCUR</SeqTp></PmtTpInf>
+      <ReqdColltnDt>2024-06-01</ReqdColltnDt>
+      <Cdtr><Nm>ACME GmbH</Nm></Cdtr>
+      <CdtrAcct><Id><IBAN>DE91100000000123456789</IBAN></Id></CdtrAcct>
+      <CdtrAgt><FinInstnId><BIC>DEUTDEFFXXX</BIC></FinInstnId></CdtrAgt>
+      <ChrgBr>SLEV</ChrgBr>
+      <DrctDbtTxInf>
+        <PmtId><EndToEndId>E2E-1</EndToEndId></PmtId>
+        <InstdAmt Ccy="EUR">10.00</InstdAmt>
+        <DrctDbtTx>
+          <MndtRltdInf>
+            <MndtId>MANDATE-001</MndtId>
+          </MndtRltdInf>
+        </DrctDbtTx>
+        <DbtrAgt><FinInstnId><BIC>COBADEFFXXX</BIC></FinInstnId></DbtrAgt>
+        <Dbtr><Nm>Payer</Nm></Dbtr>
+        <DbtrAcct><Id><IBAN>DE89370400440532013000</IBAN></Id></DbtrAcct>
+      </DrctDbtTxInf>
+    </PmtInf>
+  </CstmrDrctDbtInitn>
+</Document>`;
+  await page.fill('#sepa-input', pain008);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/DrctDbtTxInf #1 is missing <DrctDbtTx>\/<MndtRltdInf>\/<DtOfSgntr>/i, { timeout: 5_000 });
+});
+
+test('ubl: TaxScheme ID presence confirms on canonical fixture', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Canonical UBL_INVOICE declares <cac:TaxScheme><cbc:ID>VAT</cbc:ID>.
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Every <cac:TaxScheme> declares <cbc:ID>/i, { timeout: 5_000 });
+});
+
+test('ubl: TaxScheme ID presence flags a TaxScheme block missing the ID', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Strip the <cbc:ID> child from every <cac:TaxScheme> block.
+  const withBad = UBL_INVOICE.replace(/<cac:TaxScheme>[\s\S]*?<\/cac:TaxScheme>/g, (block) =>
+    block.replace(/<cbc:ID>[\s\S]*?<\/cbc:ID>/, '')
+  );
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/TaxScheme #1 is missing <cbc:ID>/i, { timeout: 5_000 });
+});
+
 test('ubl: Buyer RegistrationName BR-07 confirms on canonical fixture', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   // Canonical UBL_INVOICE now declares PartyLegalEntity/RegistrationName=Beispiel SARL
