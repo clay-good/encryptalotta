@@ -4235,6 +4235,89 @@ test('ubl: Invoice number BR-02 presence flags a missing root ID', async ({ page
   await expect(page.locator('#ubl-results')).toContainText(/Root is missing <cbc:ID>/i, { timeout: 5_000 });
 });
 
+test('sepa: AmdmntInd xs:boolean confirms when every populated value is lowercase true/false', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // pain.008 with AmdmntInd=false — well-formed xs:boolean.
+  const pain008 = `<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.008.001.02">
+  <CstmrDrctDbtInitn>
+    <GrpHdr><MsgId>DD-AI-1</MsgId><CreDtTm>2024-05-15T09:00:00Z</CreDtTm><NbOfTxs>1</NbOfTxs><InitgPty><Nm>Creditor Inc</Nm></InitgPty></GrpHdr>
+    <PmtInf>
+      <PmtInfId>DD-PAY-1</PmtInfId>
+      <PmtMtd>DD</PmtMtd>
+      <PmtTpInf><SvcLvl><Cd>SEPA</Cd></SvcLvl><LclInstrm><Cd>CORE</Cd></LclInstrm><SeqTp>RCUR</SeqTp></PmtTpInf>
+      <ReqdColltnDt>2024-06-01</ReqdColltnDt>
+      <Cdtr><Nm>Creditor Inc</Nm></Cdtr>
+      <CdtrAcct><Id><IBAN>DE91100000000123456789</IBAN></Id></CdtrAcct>
+      <CdtrAgt><FinInstnId><BIC>DEUTDEFFXXX</BIC></FinInstnId></CdtrAgt>
+      <DrctDbtTxInf>
+        <PmtId><EndToEndId>DD-E2E-1</EndToEndId></PmtId>
+        <InstdAmt Ccy="EUR">42.00</InstdAmt>
+        <DrctDbtTx><MndtRltdInf><MndtId>MANDATE-001</MndtId><AmdmntInd>false</AmdmntInd></MndtRltdInf></DrctDbtTx>
+        <DbtrAgt><FinInstnId><BIC>COBADEFFXXX</BIC></FinInstnId></DbtrAgt>
+        <Dbtr><Nm>Subscriber</Nm></Dbtr>
+        <DbtrAcct><Id><IBAN>DE89370400440532013000</IBAN></Id></DbtrAcct>
+      </DrctDbtTxInf>
+    </PmtInf>
+  </CstmrDrctDbtInitn>
+</Document>`;
+  await page.fill('#sepa-input', pain008);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Every populated AmdmntInd matches the xs:boolean lexical space across all 1 MndtRltdInf/i, { timeout: 5_000 });
+});
+
+test('sepa: AmdmntInd xs:boolean flags a capitalised "True" value', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Excel-export carryover: "True" instead of lowercase "true".
+  // Schema-invalid per xs:boolean lexical space.
+  const pain008 = `<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.008.001.02">
+  <CstmrDrctDbtInitn>
+    <GrpHdr><MsgId>DD-AI-2</MsgId><CreDtTm>2024-05-15T09:00:00Z</CreDtTm><NbOfTxs>1</NbOfTxs><InitgPty><Nm>Creditor Inc</Nm></InitgPty></GrpHdr>
+    <PmtInf>
+      <PmtInfId>DD-PAY-1</PmtInfId>
+      <PmtMtd>DD</PmtMtd>
+      <PmtTpInf><SvcLvl><Cd>SEPA</Cd></SvcLvl><LclInstrm><Cd>CORE</Cd></LclInstrm><SeqTp>RCUR</SeqTp></PmtTpInf>
+      <ReqdColltnDt>2024-06-01</ReqdColltnDt>
+      <Cdtr><Nm>Creditor Inc</Nm></Cdtr>
+      <CdtrAcct><Id><IBAN>DE91100000000123456789</IBAN></Id></CdtrAcct>
+      <CdtrAgt><FinInstnId><BIC>DEUTDEFFXXX</BIC></FinInstnId></CdtrAgt>
+      <DrctDbtTxInf>
+        <PmtId><EndToEndId>DD-E2E-1</EndToEndId></PmtId>
+        <InstdAmt Ccy="EUR">42.00</InstdAmt>
+        <DrctDbtTx><MndtRltdInf><MndtId>MANDATE-001</MndtId><AmdmntInd>True</AmdmntInd></MndtRltdInf></DrctDbtTx>
+        <DbtrAgt><FinInstnId><BIC>COBADEFFXXX</BIC></FinInstnId></DbtrAgt>
+        <Dbtr><Nm>Subscriber</Nm></Dbtr>
+        <DbtrAcct><Id><IBAN>DE89370400440532013000</IBAN></Id></DbtrAcct>
+      </DrctDbtTxInf>
+    </PmtInf>
+  </CstmrDrctDbtInitn>
+</Document>`;
+  await page.fill('#sepa-input', pain008);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Transaction #1 AmdmntInd "True" is not in the xs:boolean lexical space/i, { timeout: 5_000 });
+});
+
+test('ubl: InvoiceTypeCode BR-04 presence confirms when a 380 type code is declared', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Add <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode> to the canonical fixture.
+  const withType = UBL_INVOICE.replace(
+    '<cbc:DueDate>2024-05-01</cbc:DueDate>',
+    '<cbc:DueDate>2024-05-01</cbc:DueDate>\n  <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>'
+  );
+  await page.fill('#ubl-input', withType);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Root declares <cbc:InvoiceTypeCode> "380"/i, { timeout: 5_000 });
+});
+
+test('ubl: InvoiceTypeCode BR-04 presence flags a missing root type code on canonical fixture', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Canonical UBL_INVOICE does not declare a root InvoiceTypeCode.
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Root is missing <cbc:InvoiceTypeCode>/i, { timeout: 5_000 });
+});
+
 test('ubl: Buyer RegistrationName BR-07 confirms on canonical fixture', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   // Canonical UBL_INVOICE now declares PartyLegalEntity/RegistrationName=Beispiel SARL

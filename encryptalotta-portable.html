@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <!--
   encryptalotta — single-file portable build
-  Source mtime: 2026-05-23T00:33:55.702Z
-  Source: index.html (SHA-256: f6b924ca5d2a52816c4459ae2d825779e3f55c37d807372ddad61787f54f0221)
+  Source mtime: 2026-05-23T01:35:29.706Z
+  Source: index.html (SHA-256: 9c9cdaa28e3042af841e6b81f596659fbb598d1043e555c29c7ca868a2340297)
   All vendored JavaScript inlined; favicons inlined as data: URIs.
   Identical functionality to the live site at https://encryptalotta.com.
   Runs from file://, USB stick, chat attachment, anywhere. No network calls.
@@ -6860,6 +6860,8 @@ var qrcode = function() {
                 'sepa.warn.svcLvlPrtry': 'PmtInf #{idx} declares <SvcLvl>/<Prtry> "{v}" — the EPC SCT and SDD Rulebooks pin the SEPA service level to the coded value <SvcLvl>/<Cd>=SEPA (or SEPAINST / SEPACTSY for instant variants — already gated by the SvcLvl/Cd check) because clearing-system routing (EBA STEP2 / STET / RT1) dispatches on the canonical code and cannot interpret a free-text proprietary alternative; ISO 20022 declares <SvcLvl> as a choice between <Cd> (coded ExternalServiceLevel1Code) and <Prtry> (Max35Text proprietary text) at the schema level, so a generator filling Prtry instead of Cd produces schema-valid XML that is hard-rejected at the rail-level rulebook gate (common cause: a generator templated against a non-SEPA proprietary rail where the local service-level was carried in <Prtry>, then re-used for a pain.001 / pain.008 SEPA flow without switching the choice element)',
                 'sepa.ok.rmtInfStrdCount': 'Every transaction\'s RmtInf carries at most one <Strd> across all {n} populated RmtInf block(s) (EPC SCT / SDD Rulebook narrows the ISO 20022 0..n cardinality to 0..1)',
                 'sepa.warn.rmtInfStrdCount': 'Transaction #{idx} RmtInf carries {count} <Strd> elements — the EPC SCT (pain.001) and SDD (pain.008) Rulebook Implementation Guidelines narrow ISO 20022\'s 0..n <RmtInf>/<Strd> cardinality to a single occurrence per RmtInf because the receiving bank\'s downstream reconciliation pipeline binds one structured remittance carrier to the transaction; additional <Strd> blocks are either silently dropped (so the canonical reference the originator intended is lost) or hard-rejected at the rail-level rulebook gate by EBA STEP2 / STET / RT1; ISO 20022 declares <Strd> as 0..n (multiple structured-remittance blocks per RmtInf are schema-valid), so a generator that splits multiple invoice references across separate <Strd> blocks (instead of folding them into a single <Strd>/<CdtrRefInf>/<Ref> with a delimiter) produces schema-valid XML that is rail-broken (distinct from draft 116\'s Ustrd cardinality gate which validates the *unstructured* carrier: this gate validates the *structured* carrier; draft 108\'s Strd / Ustrd XOR gate validates *which* carrier is used)',
+                'sepa.ok.amdmntInd': 'Every populated AmdmntInd matches the xs:boolean lexical space across all {n} MndtRltdInf block(s) (ISO 20022 xs:boolean — "true" / "false" lowercase, or "1" / "0")',
+                'sepa.warn.amdmntInd': 'Transaction #{idx} AmdmntInd "{v}" is not in the xs:boolean lexical space — ISO 20022 declares <DrctDbtTx>/<MndtRltdInf>/<AmdmntInd> as xs:boolean, whose lexical space is exactly {true, false, 1, 0} (case-sensitive); a value like "True" / "TRUE" / "yes" / "Y" is schema-invalid and clearing systems (EBA STEP2 / STET / RT1) reject the file at the ISO 20022 xs:boolean schema gate before it reaches the EPC SDD Rulebook layer (common cause: a payments-hub export that round-trips boolean flags through Excel — which capitalises "TRUE" / "FALSE" on cell-save — without re-lowercasing before serialising to pain.008; the same pattern as draft 134\'s BtchBookg gate on the PmtInf surface)',
                 'sepa.warn.ccyInvalid': 'Currency code not active per ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unrecognized ISO 20022 root element — partial parse only.',
                 'err.sepaEmpty': 'XML input is empty.',
@@ -7047,6 +7049,8 @@ var qrcode = function() {
                 'ubl.warn.docCcy': 'Root is missing <cbc:DocumentCurrencyCode> — EN 16931 BR-05 / BT-5 require every Invoice and CreditNote to declare the document-level currency code (the canonical ISO 4217 currency every per-amount @currencyID attribute must match — the file-wide BR-CO-04 invariant gated by draft 64 binds against this value); UBL 2.1 marks <cbc:DocumentCurrencyCode> as schema-optional at the root, so a document without one passes XML validation but is rejected by PEPPOL access points at the BR-05 schematron gate and the downstream BR-CO-04 currency-consistency gate has no anchor to bind against (common cause: a generator that emits the document shell from a template before the currency-binding workflow step has populated BT-5, or a template field-swap that fills TaxCurrencyCode (BT-6, draft 66) but leaves DocumentCurrencyCode empty assuming the buyer\'s AP system will infer it from the per-amount @currencyID attributes)',
                 'ubl.ok.invoiceIdPresence': 'Root declares <cbc:ID> "{v}" (EN 16931 BR-02 / BT-1 — Invoice number)',
                 'ubl.warn.invoiceIdPresence': 'Root is missing <cbc:ID> — EN 16931 BR-02 / BT-1 require every Invoice and CreditNote to declare an invoice number at the root (the canonical reconciliation key the buyer\'s AP system, the supplier\'s sales ledger, and downstream SEPA settlement use to bind the document end-to-end; the SEPA pain.001 EndToEndId Max35Text gate at draft 108 / 109 caps the same BT-1 value at 35 characters); UBL 2.1 marks <cbc:ID> as schema-optional at the root, so a document without one passes XML validation but is rejected by PEPPOL access points at the BR-02 schematron gate, and the downstream invoice-number length gate (draft 109) has no value to bind against and silently skips (common cause: a generator that fills the invoice-number slot from an upstream sequence-allocation workflow step which is skipped when the invoice is regenerated from a saved draft before a sequence is allocated, or a template field-swap that fills BuyerReference BT-10 / OrderReference BT-13 but leaves the root <cbc:ID> empty)',
+                'ubl.ok.docTypeCodePresence': 'Root declares <cbc:{field}> "{v}" (EN 16931 BR-04 / BT-3 — Invoice type code)',
+                'ubl.warn.docTypeCodePresence': 'Root is missing <cbc:{field}> — EN 16931 BR-04 / BT-3 require every Invoice to declare a UNCL 1001 InvoiceTypeCode and every CreditNote to declare a UNCL 1001 CreditNoteTypeCode at the root (the value identifies the document\'s business purpose — 380 commercial invoice, 381 credit note, 384 corrected invoice, 389 self-billed, etc — and the buyer\'s AP system routes the document into the right AP workflow based on it; the downstream tax-treatment and ledger-posting rules also branch on the value); UBL 2.1 marks both <cbc:InvoiceTypeCode> and <cbc:CreditNoteTypeCode> as schema-optional at the root, so a document without one passes XML validation but is rejected by PEPPOL access points at the BR-04 schematron gate, and the downstream document-type-code value gate (draft 38) has no value to bind against and silently skips (common cause: a generator that fills the type-code slot from a template column which is null when the document is regenerated from a saved draft before the document-purpose classification step has run, or a template field-swap that maps the upstream "document type" column into PaymentMeansCode (BT-81, draft 62) instead of InvoiceTypeCode)',
                 'ubl.ok.taxTotalSign': 'Every TaxTotal declares a non-negative TaxAmount across all {n} TaxTotal block(s) (EN 16931 BR-CO-13 / BT-110 — Invoice total VAT amount)',
                 'ubl.warn.taxTotalSign': 'TaxTotal #{idx} declares a negative TaxAmount "{v}" — EN 16931 BR-CO-13 / BR-DEC-13 require the file-wide Invoice total VAT amount (BT-110) to be non-negative; an invoice\'s VAT total can be zero (zero-rated supply, exempt invoice, intra-EU reverse charge) but never negative (even a CreditNote carries a positive VAT total because the UNCL 1001 document-type code already conveys the credit direction); a negative file-wide VAT silently inverts the sign of the buyer\'s input-VAT entry and breaks the per-period VAT reporting chain (common cause: a generator reusing the same shape for charges and refunds and flipping the sign on every monetary slot instead of switching the document-type code)',
                 'ubl.ok.lmtLineSign': 'LegalMonetaryTotal/LineExtensionAmount "{v}" is non-negative (EN 16931 BT-106 — Sum of Invoice line net amounts)',
@@ -8212,6 +8216,8 @@ var qrcode = function() {
                 'sepa.warn.svcLvlPrtry': 'Le bloc PmtInf n°{idx} déclare <SvcLvl>/<Prtry> « {v} » — les règles EPC SCT et SDD figent le niveau de service SEPA sur la valeur codée <SvcLvl>/<Cd>=SEPA (ou SEPAINST / SEPACTSY pour les variantes instantanées — déjà contrôlé par le check SvcLvl/Cd) car le routage des systèmes de compensation (EBA STEP2 / STET / RT1) dispatch sur le code canonique et ne peut interpréter une alternative propriétaire en texte libre ; ISO 20022 déclare <SvcLvl> comme un choix entre <Cd> (ExternalServiceLevel1Code codé) et <Prtry> (Max35Text propriétaire) au niveau du schéma, donc un générateur qui remplit Prtry au lieu de Cd produit du XML valide au schéma mais hard-rejeté au contrôle rail-level (cause fréquente : un générateur basé sur un rail propriétaire non SEPA où le niveau-de-service local était porté dans <Prtry>, puis ré-utilisé pour un flux pain.001 / pain.008 SEPA sans basculer l’élément de choix)',
                 'sepa.ok.rmtInfStrdCount': 'Le RmtInf de chaque transaction comporte au plus un <Strd> sur l’ensemble des {n} bloc(s) RmtInf renseigné(s) (les règles EPC SCT / SDD restreignent la cardinalité 0..n d’ISO 20022 à 0..1)',
                 'sepa.warn.rmtInfStrdCount': 'La transaction #{idx} comporte {count} éléments <Strd> dans RmtInf — les guides d’implémentation EPC SCT (pain.001) et SDD (pain.008) restreignent la cardinalité 0..n de <RmtInf>/<Strd> d’ISO 20022 à une seule occurrence par RmtInf car le pipeline de rapprochement aval de la banque réceptrice lie un seul porteur de remise structurée à la transaction ; les blocs <Strd> additionnels sont soit silencieusement abandonnés (la référence canonique voulue par l’émetteur est alors perdue), soit rejetés fermement au contrôle rail-level par EBA STEP2 / STET / RT1 ; ISO 20022 déclare <Strd> en 0..n (plusieurs blocs de remise structurée par RmtInf sont valides au schéma), donc un générateur qui répartit plusieurs références de facture sur plusieurs blocs <Strd> (au lieu de les concentrer dans un seul <Strd>/<CdtrRefInf>/<Ref> avec un séparateur) produit du XML valide au schéma mais rail-broken (distinct du contrôle de cardinalité Ustrd du draft 116 qui valide le porteur *non structuré* : ce contrôle valide le porteur *structuré* ; le contrôle XOR Strd / Ustrd du draft 108 valide *quel* porteur est utilisé)',
+                'sepa.ok.amdmntInd': 'Chaque AmdmntInd renseigné respecte l’espace lexical xs:boolean sur l’ensemble des {n} bloc(s) MndtRltdInf (ISO 20022 xs:boolean — « true » / « false » en minuscules, ou « 1 » / « 0 »)',
+                'sepa.warn.amdmntInd': 'Transaction #{idx} : AmdmntInd « {v} » n’appartient pas à l’espace lexical xs:boolean — ISO 20022 déclare <DrctDbtTx>/<MndtRltdInf>/<AmdmntInd> comme xs:boolean, dont l’espace lexical est exactement {true, false, 1, 0} (sensible à la casse) ; une valeur comme « True » / « TRUE » / « yes » / « Y » est invalide pour le schéma et les systèmes de compensation (EBA STEP2 / STET / RT1) rejettent le fichier au contrôle de schéma xs:boolean d’ISO 20022 avant même la couche EPC SDD Rulebook (cause fréquente : un export depuis un hub de paiement qui passe les booléens par Excel — qui capitalise « TRUE » / « FALSE » à l’enregistrement — sans les remettre en minuscules avant sérialisation en pain.008 ; même schéma que le contrôle BtchBookg du draft 134 sur la surface PmtInf)',
                 'sepa.warn.ccyInvalid': 'Code monétaire non actif selon ISO 4217 : {code}',
                 'sepa.warn.unknownDoc': 'Élément racine ISO 20022 non reconnu — analyse partielle uniquement.',
                 'err.sepaEmpty': 'Le XML d’entrée est vide.',
@@ -8389,6 +8395,8 @@ var qrcode = function() {
                 'ubl.warn.docCcy': 'La racine ne déclare pas <cbc:DocumentCurrencyCode> — EN 16931 BR-05 / BT-5 exigent que chaque Facture et Avoir déclare le code devise au niveau du document (le code ISO 4217 canonique auquel chaque attribut @currencyID par montant doit correspondre — l’invariant BR-CO-04 à l’échelle du fichier contrôlé par le draft 64 se compare à cette valeur) ; UBL 2.1 marque <cbc:DocumentCurrencyCode> comme optionnel au schéma à la racine, donc un document sans elle est valide au schéma XML mais rejeté par les points d’accès PEPPOL au contrôle schematron BR-05, et le contrôle de cohérence devise BR-CO-04 en aval n’a aucune ancre à laquelle se lier (cause fréquente : un générateur qui émet le squelette du document depuis un modèle avant que l’étape de workflow de liaison-devise n’ait peuplé BT-5, ou un échange de champs de modèle qui remplit TaxCurrencyCode (BT-6, draft 66) mais laisse DocumentCurrencyCode vide en supposant que le système AP de l’acheteur l’inférera des attributs @currencyID par montant)',
                 'ubl.ok.invoiceIdPresence': 'La racine déclare <cbc:ID> « {v} » (EN 16931 BR-02 / BT-1 — numéro de facture)',
                 'ubl.warn.invoiceIdPresence': 'La racine ne déclare pas <cbc:ID> — EN 16931 BR-02 / BT-1 exigent que chaque Facture et Avoir déclare un numéro de facture à la racine (la clé de rapprochement canonique que le système AP de l’acheteur, le livre de ventes du fournisseur et le règlement SEPA aval utilisent pour lier le document de bout en bout ; le contrôle Max35Text EndToEndId du pain.001 SEPA au draft 108 / 109 plafonne la même valeur BT-1 à 35 caractères) ; UBL 2.1 marque <cbc:ID> comme optionnel au schéma à la racine, donc un document sans elle est valide au schéma XML mais rejeté par les points d’accès PEPPOL au contrôle schematron BR-02, et le contrôle de longueur du numéro de facture en aval (draft 109) n’a aucune valeur à laquelle se lier et passe silencieusement (cause fréquente : un générateur qui remplit le numéro de facture depuis une étape de workflow d’allocation de séquence amont qui est ignorée lors d’une régénération à partir d’un brouillon enregistré avant qu’une séquence ne soit allouée, ou un échange de champs de modèle qui remplit BuyerReference BT-10 / OrderReference BT-13 mais laisse <cbc:ID> à la racine vide)',
+                'ubl.ok.docTypeCodePresence': 'La racine déclare <cbc:{field}> « {v} » (EN 16931 BR-04 / BT-3 — code type de la facture)',
+                'ubl.warn.docTypeCodePresence': 'La racine ne déclare pas <cbc:{field}> — EN 16931 BR-04 / BT-3 exigent que chaque Facture déclare un UNCL 1001 InvoiceTypeCode et que chaque Avoir déclare un UNCL 1001 CreditNoteTypeCode à la racine (la valeur identifie l’objet métier du document — 380 facture commerciale, 381 avoir, 384 facture corrigée, 389 auto-facturation, etc. — et le système AP de l’acheteur route le document vers le bon workflow AP selon cette valeur ; les règles aval de traitement fiscal et de comptabilisation se branchent également dessus) ; UBL 2.1 marque à la fois <cbc:InvoiceTypeCode> et <cbc:CreditNoteTypeCode> comme optionnels au schéma à la racine, donc un document sans elle est valide au schéma XML mais rejeté par les points d’accès PEPPOL au contrôle schematron BR-04, et le contrôle de valeur du code type de document en aval (draft 38) n’a aucune valeur à laquelle se lier et passe silencieusement (cause fréquente : un générateur qui remplit le code type depuis une colonne de modèle nulle lorsque le document est régénéré depuis un brouillon avant l’exécution de l’étape de classification d’objet, ou un échange de champs de modèle qui mappe la colonne « type de document » amont sur PaymentMeansCode (BT-81, draft 62) au lieu d’InvoiceTypeCode)',
                 'ubl.ok.taxTotalSign': 'Chaque TaxTotal déclare un TaxAmount non négatif sur l’ensemble des {n} bloc(s) TaxTotal (EN 16931 BR-CO-13 / BT-110 — montant TVA total de la facture)',
                 'ubl.warn.taxTotalSign': 'TaxTotal #{idx} déclare un TaxAmount négatif « {v} » — EN 16931 BR-CO-13 / BR-DEC-13 exigent que le montant TVA total de la facture (BT-110) ne soit pas négatif ; la TVA totale d’une facture peut être nulle (livraison taxée à zéro, facture exonérée, autoliquidation intra-UE) mais jamais négative (même un avoir porte une TVA totale positive car le code de type document UNCL 1001 indique déjà le sens crédit) ; une TVA totale négative inverse silencieusement le signe de l’entrée TVA déductible de l’acheteur et rompt la chaîne de déclaration TVA par période (cause fréquente : un générateur qui réutilise le même format pour les charges et remboursements en inversant le signe sur chaque champ monétaire au lieu de changer le code de type document)',
                 'ubl.ok.lmtLineSign': 'LegalMonetaryTotal/LineExtensionAmount « {v} » est non négatif (EN 16931 BT-106 — somme des montants nets des lignes de facture)',
@@ -9524,6 +9532,8 @@ var qrcode = function() {
                 'sepa.warn.svcLvlPrtry': '第 {idx} 个 PmtInf 块声明了 <SvcLvl>/<Prtry> "{v}"——EPC SCT 和 SDD 规则书将 SEPA 服务级别固定为编码值 <SvcLvl>/<Cd>=SEPA（即时变种为 SEPAINST / SEPACTSY——已由 SvcLvl/Cd 检查控制），因为清算系统（EBA STEP2 / STET / RT1）的路由基于规范代码进行分发，无法解释自由文本的专有替代方案；ISO 20022 在模式级别将 <SvcLvl> 声明为 <Cd>（编码的 ExternalServiceLevel1Code）与 <Prtry>（Max35Text 专有文本）之间的选择，因此填充 Prtry 而非 Cd 的生成器会产生模式有效的 XML，但在轨道级规则书关卡被硬拒绝（常见原因：基于非 SEPA 专有轨道模板的生成器，其中本地服务级别被携带在 <Prtry> 中，随后被重用于 pain.001 / pain.008 SEPA 流程而未切换 choice 元素）',
                 'sepa.ok.rmtInfStrdCount': '所有 {n} 个已填充 RmtInf 块中每笔交易的 RmtInf 至多包含一个 <Strd>（EPC SCT / SDD 规则书将 ISO 20022 的 0..n 基数收窄为 0..1）',
                 'sepa.warn.rmtInfStrdCount': '第 {idx} 笔交易的 RmtInf 包含 {count} 个 <Strd> 元素——EPC SCT（pain.001）和 SDD（pain.008）规则书实施指南将 ISO 20022 的 <RmtInf>/<Strd> 0..n 基数收窄为每个 RmtInf 仅一次出现，因为接收银行的下游对账流水线为每笔交易绑定一个结构化汇款载体；额外的 <Strd> 块会被静默丢弃（发起人意图的规范引用因此丢失）或在 EBA STEP2 / STET / RT1 的轨道级规则书关卡被硬拒绝；ISO 20022 将 <Strd> 声明为 0..n（每个 RmtInf 中多个结构化汇款块通过模式校验），因此将多个发票引用拆分到多个 <Strd> 块中的生成器（而非将其折叠到单一 <Strd>/<CdtrRefInf>/<Ref> 并使用分隔符）会产生模式有效但轨道不可用的 XML（与 draft 116 的 Ustrd 基数关卡不同——该关卡验证*非结构化*载体：本关卡验证*结构化*载体；draft 108 的 Strd / Ustrd XOR 关卡验证*使用了哪个*载体）',
+                'sepa.ok.amdmntInd': '所有 {n} 个 MndtRltdInf 块中每个已填充的 AmdmntInd 均符合 xs:boolean 词法空间（ISO 20022 xs:boolean——小写 "true" / "false"，或 "1" / "0"）',
+                'sepa.warn.amdmntInd': '第 {idx} 笔交易的 AmdmntInd "{v}" 不在 xs:boolean 词法空间内——ISO 20022 将 <DrctDbtTx>/<MndtRltdInf>/<AmdmntInd> 声明为 xs:boolean，其词法空间恰好为 {true, false, 1, 0}（区分大小写）；像 "True" / "TRUE" / "yes" / "Y" 这样的值是模式无效的，清算系统（EBA STEP2 / STET / RT1）会在 ISO 20022 xs:boolean 模式关卡（在 EPC SDD Rulebook 层之前）拒绝该文件（常见原因：通过 Excel——其在单元格保存时将 "TRUE" / "FALSE" 大写——往返布尔标记的支付中心导出，未在序列化为 pain.008 之前重新小写；与 draft 134 的 BtchBookg 关卡（在 PmtInf 表面）模式相同）',
                 'sepa.warn.ccyInvalid': '币种代码不在 ISO 4217 现行清单中：{code}',
                 'sepa.warn.unknownDoc': '无法识别的 ISO 20022 根元素 — 仅部分解析。',
                 'err.sepaEmpty': 'XML 输入为空。',
@@ -9701,6 +9711,8 @@ var qrcode = function() {
                 'ubl.warn.docCcy': '根节点缺少 <cbc:DocumentCurrencyCode>——EN 16931 BR-05 / BT-5 要求每张发票和贷项通知单都在文档级别声明币种代码（规范的 ISO 4217 货币代码，每个按金额的 @currencyID 属性必须与之匹配——draft 64 控制的文件级 BR-CO-04 不变式绑定到该值）；UBL 2.1 在根节点上将 <cbc:DocumentCurrencyCode> 标记为模式可选，因此缺少该字段的文档可通过 XML 校验，但会被 PEPPOL 接入点在 BR-05 schematron 关卡拒绝，下游的 BR-CO-04 币种一致性关卡也没有可绑定的锚点（常见原因：生成器在币种绑定工作流步骤填充 BT-5 之前就从模板发出文档骨架，或模板字段错位填充了 TaxCurrencyCode (BT-6, draft 66) 而将 DocumentCurrencyCode 留空，假定买方 AP 系统会从按金额的 @currencyID 属性推断）',
                 'ubl.ok.invoiceIdPresence': '根节点声明 <cbc:ID> "{v}"（EN 16931 BR-02 / BT-1——发票号）',
                 'ubl.warn.invoiceIdPresence': '根节点缺少 <cbc:ID>——EN 16931 BR-02 / BT-1 要求每张发票和贷项通知单都在根节点声明发票号（买方 AP 系统、供应商销售账簿和下游 SEPA 结算用以端到端绑定该文档的规范对账键；下游 draft 108 / 109 的 SEPA pain.001 EndToEndId Max35Text 关卡将同一 BT-1 值限制在 35 个字符）；UBL 2.1 在根节点上将 <cbc:ID> 标记为模式可选，因此缺少该字段的文档可通过 XML 校验，但会被 PEPPOL 接入点在 BR-02 schematron 关卡拒绝，下游的发票号长度关卡（draft 109）也没有可绑定的值并静默跳过（常见原因：生成器在保存草稿尚未分配序列就重新生成时跳过的上游序列分配工作流步骤来填充发票号，或模板字段错位填充了 BuyerReference BT-10 / OrderReference BT-13 而将根节点的 <cbc:ID> 留空）',
+                'ubl.ok.docTypeCodePresence': '根节点声明 <cbc:{field}> "{v}"（EN 16931 BR-04 / BT-3——发票类型代码）',
+                'ubl.warn.docTypeCodePresence': '根节点缺少 <cbc:{field}>——EN 16931 BR-04 / BT-3 要求每张发票在根节点声明 UNCL 1001 InvoiceTypeCode，每张贷项通知单声明 UNCL 1001 CreditNoteTypeCode（该值标识单据的业务目的——380 商业发票、381 贷项通知、384 更正发票、389 自开票等——买方 AP 系统据此将单据路由到正确的 AP 工作流；下游税务处理和账簿过账规则也基于该值分支）；UBL 2.1 在根节点上将 <cbc:InvoiceTypeCode> 与 <cbc:CreditNoteTypeCode> 均标记为模式可选，因此缺少该字段的文档可通过 XML 校验，但会被 PEPPOL 接入点在 BR-04 schematron 关卡拒绝，下游的文档类型代码值关卡（draft 38）也没有可绑定的值并静默跳过（常见原因：生成器在保存草稿尚未运行分类步骤就重新生成时，从模板中为空的类型代码列填充；或模板字段错位将上游"单据类型"列映射到 PaymentMeansCode (BT-81, draft 62) 而非 InvoiceTypeCode）',
                 'ubl.ok.taxTotalSign': '所有 {n} 个 TaxTotal 块均声明非负 TaxAmount（EN 16931 BR-CO-13 / BT-110——发票 VAT 总额）',
                 'ubl.warn.taxTotalSign': 'TaxTotal #{idx} 声明负的 TaxAmount "{v}"——EN 16931 BR-CO-13 / BR-DEC-13 要求文件级发票 VAT 总额（BT-110）非负；发票的 VAT 总额可以为零（零税率供应、免税发票、欧盟内部反向收费）但不能为负（即使贷项通知单也携带正的 VAT 总额，因为 UNCL 1001 文档类型代码已经表达了贷项方向）；负的文件级 VAT 会默默反转买方进项税条目的符号，破坏分期 VAT 申报链（常见原因是生成器在收费与退款之间复用同一形状，并在每个货币字段上翻转符号，而不是切换文档类型代码）',
                 'ubl.ok.lmtLineSign': 'LegalMonetaryTotal/LineExtensionAmount "{v}" 非负（EN 16931 BT-106——发票行净额之和）',
@@ -10851,6 +10863,8 @@ var qrcode = function() {
                 'sepa.warn.svcLvlPrtry': 'PmtInf #{idx} deklariert <SvcLvl>/<Prtry> „{v}“ — die EPC-SCT- und SDD-Rulebooks legen den SEPA-Service-Level auf den codierten Wert <SvcLvl>/<Cd>=SEPA fest (oder SEPAINST / SEPACTSY für die Instant-Varianten — bereits durch den SvcLvl/Cd-Check gegated), weil das Routing der Clearing-Systeme (EBA STEP2 / STET / RT1) anhand des kanonischen Codes dispatcht und eine proprietäre Freitext-Alternative nicht interpretieren kann; ISO 20022 deklariert <SvcLvl> als Choice zwischen <Cd> (codierter ExternalServiceLevel1Code) und <Prtry> (Max35Text proprietärer Text) auf Schemaebene, sodass ein Generator, der Prtry statt Cd füllt, schemavalides XML produziert, das am Rail-level-Rulebook-Gate hart abgelehnt wird (häufige Ursache: ein Generator, der gegen ein nicht-SEPA-proprietäres Rail templatiert ist, bei dem der lokale Service-Level in <Prtry> getragen wurde, und dann für einen SEPA-pain.001-/pain.008-Flow wiederverwendet wird, ohne das Choice-Element umzuschalten)',
                 'sepa.ok.rmtInfStrdCount': 'Das RmtInf jeder Transaktion enthält höchstens ein <Strd> über alle {n} befüllten RmtInf-Block(s) (EPC-SCT-/SDD-Rulebooks schränken die ISO-20022-Kardinalität 0..n auf 0..1 ein)',
                 'sepa.warn.rmtInfStrdCount': 'Transaktion #{idx} enthält {count} <Strd>-Elemente im RmtInf — die EPC-SCT- (pain.001) und SDD- (pain.008) Rulebook-Implementation-Guidelines schränken die 0..n-Kardinalität von <RmtInf>/<Strd> in ISO 20022 auf eine einzelne Vorkommen pro RmtInf ein, weil die nachgelagerte Abstimmungspipeline der Empfängerbank genau einen strukturierten Verwendungszweck-Träger an die Transaktion bindet; zusätzliche <Strd>-Blöcke werden entweder stillschweigend verworfen (die vom Auftraggeber beabsichtigte kanonische Referenz geht verloren) oder am Rail-level-Rulebook-Gate von EBA STEP2 / STET / RT1 hart abgelehnt; ISO 20022 deklariert <Strd> als 0..n (mehrere strukturierte Verwendungszweck-Blöcke pro RmtInf sind schemavalider), sodass ein Generator, der mehrere Rechnungsreferenzen auf separate <Strd>-Blöcke verteilt (statt sie in einem einzelnen <Strd>/<CdtrRefInf>/<Ref> mit Trenner zusammenzufassen), schemavalides XML produziert, das rail-broken ist (unterscheidet sich vom Ustrd-Kardinalitäts-Gate aus Draft 116, das den *unstrukturierten* Träger validiert: dieses Gate validiert den *strukturierten* Träger; das Strd-/Ustrd-XOR-Gate aus Draft 108 validiert, *welcher* Träger verwendet wird)',
+                'sepa.ok.amdmntInd': 'Jeder befüllte AmdmntInd entspricht dem xs:boolean-Lexikalraum über alle {n} MndtRltdInf-Block(s) (ISO 20022 xs:boolean — „true“ / „false“ in Kleinbuchstaben, oder „1“ / „0“)',
+                'sepa.warn.amdmntInd': 'Transaktion #{idx} AmdmntInd „{v}“ liegt nicht im xs:boolean-Lexikalraum — ISO 20022 deklariert <DrctDbtTx>/<MndtRltdInf>/<AmdmntInd> als xs:boolean, dessen Lexikalraum genau {true, false, 1, 0} ist (case-sensitive); ein Wert wie „True“ / „TRUE“ / „yes“ / „Y“ ist schemainvalid und Clearing-Systeme (EBA STEP2 / STET / RT1) lehnen die Datei am ISO-20022-xs:boolean-Schema-Gate ab, bevor sie die EPC-SDD-Rulebook-Schicht erreicht (häufige Ursache: ein Payments-Hub-Export, der Boolean-Flags durch Excel — das beim Speichern „TRUE“ / „FALSE“ großschreibt — round-trips, ohne sie vor der pain.008-Serialisierung wieder kleinzuschreiben; gleiche Pattern wie das BtchBookg-Gate aus Draft 134 auf der PmtInf-Surface)',
                 'sepa.warn.ccyInvalid': 'Währungscode nicht aktiv nach ISO 4217: {code}',
                 'sepa.warn.unknownDoc': 'Unbekanntes ISO-20022-Wurzelelement — nur Teilanalyse.',
                 'err.sepaEmpty': 'Die XML-Eingabe ist leer.',
@@ -11028,6 +11042,8 @@ var qrcode = function() {
                 'ubl.warn.docCcy': 'Wurzel hat kein <cbc:DocumentCurrencyCode> — EN 16931 BR-05 / BT-5 verlangen, dass jede Rechnung und Gutschrift den Beleg-Währungscode auf Dokumentebene deklariert (der kanonische ISO-4217-Code, dem jedes @currencyID-Attribut pro Betrag entsprechen muss — die dateiweite BR-CO-04-Invariante, die in Draft 64 gegated wird, bindet sich gegen diesen Wert); UBL 2.1 markiert <cbc:DocumentCurrencyCode> auf Wurzelebene als schemaoptional, sodass ein Dokument ohne diese Angabe die XML-Validierung besteht, aber von PEPPOL-Access-Points am BR-05-Schematron-Gate abgelehnt wird, und das nachgelagerte BR-CO-04-Currency-Consistency-Gate keinen Anker zum Binden hat (häufige Ursache: ein Generator, der das Dokumentgerüst aus einer Vorlage emittiert, bevor der Currency-Binding-Workflow-Schritt BT-5 befüllt hat, oder ein Template-Feldtausch, der TaxCurrencyCode (BT-6, Draft 66) füllt, aber DocumentCurrencyCode leer lässt, in der Annahme, dass das AP-System des Käufers ihn aus den @currencyID-Attributen pro Betrag herleitet)',
                 'ubl.ok.invoiceIdPresence': 'Wurzel deklariert <cbc:ID> „{v}“ (EN 16931 BR-02 / BT-1 — Rechnungsnummer)',
                 'ubl.warn.invoiceIdPresence': 'Wurzel hat kein <cbc:ID> — EN 16931 BR-02 / BT-1 verlangen, dass jede Rechnung und Gutschrift eine Rechnungsnummer auf Wurzelebene deklariert (der kanonische Abstimmungsschlüssel, mit dem das AP-System des Käufers, das Verkaufsbuch des Lieferanten und die nachgelagerte SEPA-Abrechnung das Dokument Ende-zu-Ende binden; das SEPA-pain.001-EndToEndId-Max35Text-Gate in Draft 108 / 109 deckelt denselben BT-1-Wert auf 35 Zeichen); UBL 2.1 markiert <cbc:ID> auf Wurzelebene als schemaoptional, sodass ein Dokument ohne diese Angabe die XML-Validierung besteht, aber von PEPPOL-Access-Points am BR-02-Schematron-Gate abgelehnt wird, und das nachgelagerte Rechnungsnummer-Längen-Gate (Draft 109) hat keinen Wert zum Binden und überspringt stillschweigend (häufige Ursache: ein Generator, der die Rechnungsnummer aus einem vorgelagerten Sequenz-Allokations-Workflow-Schritt füllt, der bei Neugenerierung aus einem gespeicherten Entwurf vor der Sequenz-Allokation übersprungen wird, oder ein Template-Feldtausch, der BuyerReference BT-10 / OrderReference BT-13 füllt, aber <cbc:ID> auf Wurzelebene leer lässt)',
+                'ubl.ok.docTypeCodePresence': 'Wurzel deklariert <cbc:{field}> „{v}“ (EN 16931 BR-04 / BT-3 — Rechnungstypcode)',
+                'ubl.warn.docTypeCodePresence': 'Wurzel hat kein <cbc:{field}> — EN 16931 BR-04 / BT-3 verlangen, dass jede Rechnung einen UNCL-1001-InvoiceTypeCode und jede Gutschrift einen UNCL-1001-CreditNoteTypeCode auf Wurzelebene deklariert (der Wert identifiziert den Geschäftszweck des Dokuments — 380 Handelsrechnung, 381 Gutschrift, 384 korrigierte Rechnung, 389 Self-Billing usw. — und das AP-System des Käufers routet das Dokument anhand des Werts in den richtigen AP-Workflow; auch die nachgelagerten Steuerbehandlungs- und Buchungsregeln verzweigen auf diesem Wert); UBL 2.1 markiert sowohl <cbc:InvoiceTypeCode> als auch <cbc:CreditNoteTypeCode> auf Wurzelebene als schemaoptional, sodass ein Dokument ohne diese Angabe die XML-Validierung besteht, aber von PEPPOL-Access-Points am BR-04-Schematron-Gate abgelehnt wird, und das nachgelagerte Dokumenttypcode-Wert-Gate (Draft 38) hat keinen Wert zum Binden und überspringt stillschweigend (häufige Ursache: ein Generator, der den Typcode aus einer Template-Spalte füllt, die null ist, wenn das Dokument aus einem gespeicherten Entwurf vor dem Klassifizierungs-Schritt regeneriert wird, oder ein Template-Feldtausch, der die vorgelagerte „Dokumenttyp“-Spalte auf PaymentMeansCode (BT-81, Draft 62) statt InvoiceTypeCode abbildet)',
                 'ubl.ok.taxTotalSign': 'Jedes TaxTotal deklariert einen nicht-negativen TaxAmount über alle {n} TaxTotal-Block(s) (EN 16931 BR-CO-13 / BT-110 — Rechnungs-Gesamt-USt-Betrag)',
                 'ubl.warn.taxTotalSign': 'TaxTotal #{idx} deklariert einen negativen TaxAmount „{v}“ — EN 16931 BR-CO-13 / BR-DEC-13 verlangen, dass der datei-weite Rechnungs-Gesamt-USt-Betrag (BT-110) nicht negativ ist; die USt-Summe einer Rechnung kann null sein (nullsatz-besteuerte Lieferung, steuerbefreite Rechnung, innergemeinschaftliches Reverse Charge), aber niemals negativ (selbst eine Gutschrift trägt eine positive USt-Summe, da der UNCL-1001-Dokumenttypcode die Gutschriftrichtung bereits ausdrückt); eine negative datei-weite USt kehrt stillschweigend das Vorzeichen des Vorsteuer-Postens des Käufers um und unterbricht die periodenbezogene USt-Meldekette (häufige Ursache: ein Generator, der dieselbe Form für Belastungen und Rückerstattungen wiederverwendet und das Vorzeichen in jedem monetären Feld umkehrt, statt den Dokumenttypcode zu wechseln)',
                 'ubl.ok.lmtLineSign': 'LegalMonetaryTotal/LineExtensionAmount „{v}“ ist nicht negativ (EN 16931 BT-106 — Summe der Rechnungszeilen-Nettobeträge)',
@@ -12163,6 +12179,8 @@ var qrcode = function() {
                 'sepa.warn.svcLvlPrtry': 'PmtInf #{idx} ने <SvcLvl>/<Prtry> "{v}" घोषित किया — EPC SCT और SDD रूलबुक SEPA सेवा स्तर को कोडेड मान <SvcLvl>/<Cd>=SEPA पर तय करते हैं (इंस्टेंट वैरिएंट्स के लिए SEPAINST / SEPACTSY — पहले से SvcLvl/Cd चेक द्वारा नियंत्रित), क्योंकि क्लियरिंग सिस्टम (EBA STEP2 / STET / RT1) रूटिंग कैनोनिकल कोड पर डिस्पैच करता है और मुक्त-पाठ प्रोप्राइटरी विकल्प की व्याख्या नहीं कर सकता; ISO 20022 स्कीमा स्तर पर <SvcLvl> को <Cd> (कोडेड ExternalServiceLevel1Code) और <Prtry> (Max35Text प्रोप्राइटरी पाठ) के बीच चयन के रूप में घोषित करता है, इसलिए Cd के बजाय Prtry भरने वाला जनरेटर स्कीमा-मान्य XML उत्पन्न करता है जो रेल-लेवल रूलबुक गेट पर कड़ाई से अस्वीकार होता है (आम कारण: गैर-SEPA प्रोप्राइटरी रेल के विरुद्ध टेम्पलेटेड जनरेटर जहाँ स्थानीय सेवा-स्तर <Prtry> में ले जाया गया था, फिर बिना choice तत्व बदले pain.001 / pain.008 SEPA प्रवाह के लिए पुनः उपयोग किया गया)',
                 'sepa.ok.rmtInfStrdCount': 'सभी {n} भरे हुए RmtInf ब्लॉक में प्रत्येक लेन-देन का RmtInf अधिकतम एक <Strd> रखता है (EPC SCT / SDD रूलबुक ISO 20022 की 0..n कार्डिनैलिटी को 0..1 तक सीमित करते हैं)',
                 'sepa.warn.rmtInfStrdCount': 'लेन-देन #{idx} के RmtInf में {count} <Strd> तत्व हैं — EPC SCT (pain.001) और SDD (pain.008) रूलबुक कार्यान्वयन दिशानिर्देश ISO 20022 की <RmtInf>/<Strd> 0..n कार्डिनैलिटी को प्रति RmtInf एकल घटना तक सीमित करते हैं क्योंकि प्राप्तकर्ता बैंक का डाउनस्ट्रीम सुलह पाइपलाइन प्रत्येक लेन-देन के लिए एक संरचित प्रेषण वाहक बाँधता है; अतिरिक्त <Strd> ब्लॉक या तो चुपचाप गिरा दिए जाते हैं (प्रवर्तक की इच्छित कैनोनिकल संदर्भ खो जाता है) या EBA STEP2 / STET / RT1 के रेल-स्तरीय रूलबुक गेट पर कड़ाई से अस्वीकार किए जाते हैं; ISO 20022 <Strd> को 0..n के रूप में घोषित करता है (प्रति RmtInf कई संरचित प्रेषण ब्लॉक स्कीमा-मान्य हैं), इसलिए कई चालान संदर्भों को अलग-अलग <Strd> ब्लॉक में विभाजित करने वाला जनरेटर (एकल <Strd>/<CdtrRefInf>/<Ref> में एक डिलिमिटर के साथ संक्षेपित करने के बजाय) स्कीमा-मान्य लेकिन रेल-अनुपयोगी XML उत्पन्न करता है (draft 116 के Ustrd कार्डिनैलिटी गेट से भिन्न जो *असंरचित* वाहक को मान्य करता है: यह गेट *संरचित* वाहक को मान्य करता है; draft 108 का Strd / Ustrd XOR गेट *कौन सा* वाहक उपयोग किया जाता है यह मान्य करता है)',
+                'sepa.ok.amdmntInd': 'सभी {n} MndtRltdInf ब्लॉक में प्रत्येक भरा हुआ AmdmntInd xs:boolean लेक्सिकल स्पेस के अनुरूप है (ISO 20022 xs:boolean — लोअरकेस "true" / "false", या "1" / "0")',
+                'sepa.warn.amdmntInd': 'लेन-देन #{idx} का AmdmntInd "{v}" xs:boolean लेक्सिकल स्पेस में नहीं है — ISO 20022 <DrctDbtTx>/<MndtRltdInf>/<AmdmntInd> को xs:boolean के रूप में घोषित करता है, जिसका लेक्सिकल स्पेस ठीक {true, false, 1, 0} है (केस-सेंसिटिव); "True" / "TRUE" / "yes" / "Y" जैसा मान स्कीमा-अमान्य है और क्लियरिंग सिस्टम (EBA STEP2 / STET / RT1) EPC SDD Rulebook परत तक पहुँचने से पहले ISO 20022 xs:boolean स्कीमा गेट पर फ़ाइल को अस्वीकार करते हैं (आम कारण: एक भुगतान-हब निर्यात जो Excel के माध्यम से बूलियन फ़्लैग राउंड-ट्रिप करता है — जो सेल-सेव पर "TRUE" / "FALSE" को कैपिटलाइज़ करता है — बिना pain.008 में सीरियलाइज़ करने से पहले फिर से लोअरकेस किए; draft 134 के BtchBookg गेट (PmtInf सतह पर) के समान पैटर्न)',
                 'sepa.warn.ccyInvalid': 'मुद्रा कोड ISO 4217 में सक्रिय नहीं: {code}',
                 'sepa.warn.unknownDoc': 'अज्ञात ISO 20022 रूट तत्व — केवल आंशिक पार्सिंग।',
                 'err.sepaEmpty': 'XML इनपुट खाली है।',
@@ -12340,6 +12358,8 @@ var qrcode = function() {
                 'ubl.warn.docCcy': 'रूट में <cbc:DocumentCurrencyCode> नहीं है — EN 16931 BR-05 / BT-5 के लिए आवश्यक है कि हर चालान और क्रेडिट नोट दस्तावेज़-स्तर पर मुद्रा कोड घोषित करे (कैनोनिकल ISO 4217 मुद्रा कोड जिससे प्रत्येक प्रति-राशि @currencyID विशेषता मेल खानी चाहिए — draft 64 द्वारा नियंत्रित फ़ाइल-स्तरीय BR-CO-04 अपरिवर्तनीयता इस मान पर बंधती है); UBL 2.1 रूट पर <cbc:DocumentCurrencyCode> को स्कीमा-वैकल्पिक के रूप में चिह्नित करता है, इसलिए इसके बिना दस्तावेज़ XML सत्यापन पास करता है लेकिन PEPPOL एक्सेस पॉइंट्स BR-05 schematron गेट पर अस्वीकार कर देते हैं, और डाउनस्ट्रीम BR-CO-04 मुद्रा-संगति गेट के पास बाँधने के लिए कोई एंकर नहीं है (आम कारण: एक जनरेटर जो मुद्रा-बंधन वर्कफ़्लो चरण के BT-5 भरने से पहले टेम्पलेट से दस्तावेज़ शेल जारी करता है, या एक टेम्पलेट फ़ील्ड-स्वैप जो TaxCurrencyCode (BT-6, draft 66) भरता है लेकिन DocumentCurrencyCode को खाली छोड़ देता है, यह मानते हुए कि क्रेता का AP सिस्टम प्रति-राशि @currencyID विशेषताओं से इसका अनुमान लगाएगा)',
                 'ubl.ok.invoiceIdPresence': 'रूट <cbc:ID> "{v}" घोषित करता है (EN 16931 BR-02 / BT-1 — चालान संख्या)',
                 'ubl.warn.invoiceIdPresence': 'रूट में <cbc:ID> नहीं है — EN 16931 BR-02 / BT-1 के लिए आवश्यक है कि हर चालान और क्रेडिट नोट रूट पर एक चालान संख्या घोषित करे (कैनोनिकल सुलह कुंजी जिसका उपयोग क्रेता का AP सिस्टम, आपूर्तिकर्ता का बिक्री खाता और डाउनस्ट्रीम SEPA निपटान दस्तावेज़ को एंड-टू-एंड बाँधने के लिए करते हैं; draft 108 / 109 का SEPA pain.001 EndToEndId Max35Text गेट उसी BT-1 मान को 35 अक्षरों तक सीमित करता है); UBL 2.1 रूट पर <cbc:ID> को स्कीमा-वैकल्पिक के रूप में चिह्नित करता है, इसलिए इसके बिना दस्तावेज़ XML सत्यापन पास करता है लेकिन PEPPOL एक्सेस पॉइंट्स BR-02 schematron गेट पर अस्वीकार कर देते हैं, और डाउनस्ट्रीम चालान-संख्या लंबाई गेट (draft 109) के पास बाँधने के लिए कोई मान नहीं है और चुपचाप छोड़ देता है (आम कारण: एक जनरेटर जो ऊपरी अनुक्रम-आवंटन वर्कफ़्लो चरण से चालान संख्या भरता है जो अनुक्रम आवंटित होने से पहले सहेजे गए मसौदे से पुनर्जनन पर छोड़ दिया जाता है, या एक टेम्पलेट फ़ील्ड-स्वैप जो BuyerReference BT-10 / OrderReference BT-13 भरता है लेकिन रूट के <cbc:ID> को खाली छोड़ देता है)',
+                'ubl.ok.docTypeCodePresence': 'रूट <cbc:{field}> "{v}" घोषित करता है (EN 16931 BR-04 / BT-3 — चालान प्रकार कोड)',
+                'ubl.warn.docTypeCodePresence': 'रूट में <cbc:{field}> नहीं है — EN 16931 BR-04 / BT-3 के लिए आवश्यक है कि हर चालान रूट पर एक UNCL 1001 InvoiceTypeCode और हर क्रेडिट नोट एक UNCL 1001 CreditNoteTypeCode घोषित करे (मान दस्तावेज़ के व्यावसायिक उद्देश्य की पहचान करता है — 380 वाणिज्यिक चालान, 381 क्रेडिट नोट, 384 सुधारित चालान, 389 स्व-बिल आदि — और क्रेता का AP सिस्टम इस मान के आधार पर दस्तावेज़ को सही AP वर्कफ़्लो में रूट करता है; डाउनस्ट्रीम कर-उपचार और बही-पोस्टिंग नियम भी इस मान पर शाखा करते हैं); UBL 2.1 रूट पर <cbc:InvoiceTypeCode> और <cbc:CreditNoteTypeCode> दोनों को स्कीमा-वैकल्पिक के रूप में चिह्नित करता है, इसलिए इसके बिना दस्तावेज़ XML सत्यापन पास करता है लेकिन PEPPOL एक्सेस पॉइंट्स BR-04 schematron गेट पर अस्वीकार कर देते हैं, और डाउनस्ट्रीम दस्तावेज़ प्रकार कोड मान गेट (draft 38) के पास बाँधने के लिए कोई मान नहीं है और चुपचाप छोड़ देता है (आम कारण: एक जनरेटर जो टेम्पलेट कॉलम से प्रकार कोड भरता है जो वर्गीकरण चरण चलने से पहले सहेजे गए मसौदे से दस्तावेज़ पुनर्जनन पर null होता है, या एक टेम्पलेट फ़ील्ड-स्वैप जो ऊपरी "दस्तावेज़ प्रकार" कॉलम को InvoiceTypeCode के बजाय PaymentMeansCode (BT-81, draft 62) में मैप करता है)',
                 'ubl.ok.taxTotalSign': 'सभी {n} TaxTotal ब्लॉक्स में प्रत्येक TaxTotal गैर-ऋणात्मक TaxAmount घोषित करता है (EN 16931 BR-CO-13 / BT-110 — चालान कुल VAT राशि)',
                 'ubl.warn.taxTotalSign': 'TaxTotal #{idx} ऋणात्मक TaxAmount "{v}" घोषित करता है — EN 16931 BR-CO-13 / BR-DEC-13 के अनुसार फ़ाइल-व्यापी चालान कुल VAT राशि (BT-110) गैर-ऋणात्मक होनी चाहिए; चालान का VAT कुल शून्य हो सकता है (शून्य दर आपूर्ति, छूट प्राप्त चालान, EU भीतर रिवर्स चार्ज) पर कभी ऋणात्मक नहीं (क्रेडिट नोट भी सकारात्मक VAT कुल रखती है क्योंकि UNCL 1001 दस्तावेज़-प्रकार कोड पहले से ही क्रेडिट दिशा बता देता है); ऋणात्मक फ़ाइल-व्यापी VAT क्रेता की इनपुट-VAT प्रविष्टि के चिह्न को चुपचाप पलट देती है और प्रति-अवधि VAT रिपोर्टिंग शृंखला तोड़ देती है (आम कारण: जनरेटर शुल्क और वापसी के लिए समान आकार पुनः उपयोग करता है और दस्तावेज़-प्रकार कोड बदलने के बजाय प्रत्येक मौद्रिक स्लॉट का चिह्न पलटता है)',
                 'ubl.ok.lmtLineSign': 'LegalMonetaryTotal/LineExtensionAmount "{v}" गैर-ऋणात्मक है (EN 16931 BT-106 — चालान पंक्ति शुद्ध राशियों का योग)',
@@ -21919,6 +21939,57 @@ var qrcode = function() {
             }
         }
 
+        // ISO 20022 xs:boolean lexical-space check on per-transaction
+        // <DrctDbtTx>/<MndtRltdInf>/<AmdmntInd> in pain.008 (draft
+        // 146). ISO 20022 declares <AmdmntInd> (mandate-amendment
+        // indicator: true = the mandate is being amended in this
+        // transaction, false = unchanged from the previous
+        // collection) as xs:boolean, whose lexical space is exactly
+        // {true, false, 1, 0} (case-sensitive). Many real-world
+        // generators source the value from Excel-exported CSV
+        // columns or Java's Boolean.toString(true) and write "True",
+        // "TRUE", "yes", "Y", "T" — every one of which is schema-
+        // invalid and rejected by clearing systems (EBA STEP2 /
+        // STET / RT1) at the ISO 20022 xs:boolean schema gate
+        // before the file ever reaches the EPC SDD Rulebook layer.
+        // Mirror in shape of draft 134's sepaCheckBtchBookg on the
+        // PmtInf surface; together drafts 134 / 146 cover the two
+        // xs:boolean fields the EPC SDD Rulebook touches. pain.001
+        // and camt.053 skip silently (no MndtRltdInf surface).
+        // Optional element so blocks omitting AmdmntInd skip
+        // silently (the receiving bank defaults to "unchanged"
+        // when absent — only RCUR transactions need to flip it on
+        // amendment). Pair with draft 147 on the UBL side.
+        function sepaCheckAmdmntInd(out, doc, detected) {
+            if (detected.type !== 'pain.008') return;
+            const w = detected.wrapper;
+            if (!w) return;
+            const txs = sepaAllLocal(w, 'DrctDbtTxInf');
+            if (!txs.length) return;
+            let seen = 0;
+            const bad = [];
+            txs.forEach((tx, i) => {
+                const dd = sepaFirstChildLocal(tx, 'DrctDbtTx');
+                if (!dd) return;
+                const mri = sepaFirstChildLocal(dd, 'MndtRltdInf');
+                if (!mri) return;
+                const el = sepaFirstChildLocal(mri, 'AmdmntInd');
+                if (!el) return;
+                const raw = (el.textContent || '').trim();
+                if (!raw) return;
+                seen++;
+                if (!/^(true|false|1|0)$/.test(raw)) bad.push({ idx: i + 1, v: raw });
+            });
+            if (!seen) return;
+            if (bad.length === 0) {
+                tlsRenderRow(out, t('sepa.row.warning'), '✓ ' + tFormat('sepa.ok.amdmntInd', { n: intlNumber(seen) }));
+            } else {
+                for (const b of bad) {
+                    tlsRenderRow(out, t('sepa.row.warning'), '✗ ' + tFormat('sepa.warn.amdmntInd', { idx: intlNumber(b.idx), v: b.v }));
+                }
+            }
+        }
+
         // EPC SDD Rulebook LclInstrm/Cd enforcement on pain.008
         // (draft 136). ISO 20022 declares
         // <PmtInf>/<PmtTpInf>/<LclInstrm>/<Cd> as Max4Text (a
@@ -22295,6 +22366,7 @@ var qrcode = function() {
                 sepaCheckChrgsAcct(out, doc, detected);
                 sepaCheckSvcLvlPrtry(out, doc, detected);
                 sepaCheckRmtInfStrdCount(out, doc, detected);
+                sepaCheckAmdmntInd(out, doc, detected);
                 sepaCheckE2eIdCharset(out, doc, detected);
                 sepaCheckInstrIdCharset(out, doc, detected);
                 sepaCheckMndtIdCharset(out, doc, detected);
@@ -24916,6 +24988,51 @@ var qrcode = function() {
             }
         }
 
+        // EN 16931 BR-04 / BT-3 Invoice type code presence check
+        // (draft 147). PEPPOL BIS Billing 3.0 / EN 16931 require
+        // every Invoice to declare a UNCL 1001 InvoiceTypeCode at
+        // the document root via <cbc:InvoiceTypeCode>, and every
+        // CreditNote to declare a UNCL 1001 CreditNoteTypeCode via
+        // <cbc:CreditNoteTypeCode> — the value identifies the
+        // document's business purpose (380 commercial invoice, 381
+        // credit note, 384 corrected invoice, 389 self-billed,
+        // etc) and the buyer's AP system routes the document into
+        // the right AP workflow based on it; downstream tax-
+        // treatment and ledger-posting rules also branch on the
+        // value. UBL 2.1 marks both <cbc:InvoiceTypeCode> and
+        // <cbc:CreditNoteTypeCode> as schema-optional at the root,
+        // so a document without one passes XML validation but is
+        // rejected by PEPPOL access points at the BR-04 schematron
+        // gate; the downstream document-type-code value gate
+        // (draft 38) has no value to bind against and silently
+        // skips. The canonical real-world failure is a generator
+        // that fills the type-code slot from a template column
+        // which is null when the document is regenerated from a
+        // saved draft before the document-purpose classification
+        // step has run, or a template field-swap that maps the
+        // upstream "document type" column into PaymentMeansCode
+        // (BT-81, draft 62) instead of InvoiceTypeCode. Distinct
+        // from draft 38's ublCheckDocumentTypeCode which only
+        // fires when the type code is present — this gate catches
+        // the degenerate absent case so the downstream value gate
+        // doesn't silently skip. Mirror in shape of drafts 141
+        // (IssueDate), 143 (DocumentCurrencyCode), 145 (Invoice
+        // ID) on the same root-mandatory-but-schema-optional
+        // pattern. Pair with draft 146 on the SEPA side.
+        function ublCheckDocTypeCodePresence(out, detected) {
+            const r = detected.root;
+            if (!r) return;
+            const isCreditNote = detected.type === 'CreditNote';
+            const field = isCreditNote ? 'CreditNoteTypeCode' : 'InvoiceTypeCode';
+            const el = sepaFirstChildLocal(r, field);
+            const v = el ? (el.textContent || '').trim() : '';
+            if (v) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + tFormat('ubl.ok.docTypeCodePresence', { field, v }));
+            } else {
+                tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + tFormat('ubl.warn.docTypeCodePresence', { field }));
+            }
+        }
+
         // EN 16931 BT-1 (Invoice number) length check (draft 109).
         // UBL declares `<cbc:ID>` at the Invoice / CreditNote root as
         // plain Identifier text with no schema-level length cap, and
@@ -25121,6 +25238,7 @@ var qrcode = function() {
                 ublCheckIssueDate(out, detected);
                 ublCheckDocCurrencyCode(out, detected);
                 ublCheckInvoiceIdPresence(out, detected);
+                ublCheckDocTypeCodePresence(out, detected);
                 ublCheckTaxTotalSign(out, detected);
                 ublCheckLegalMonTotalLineSign(out, detected);
                 ublCheckLegalMonTotalTaxExclSign(out, detected);
