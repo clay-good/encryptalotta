@@ -4398,6 +4398,84 @@ test('ubl: LegalMonetaryTotal BR-12 presence flags a missing root block', async 
   await expect(page.locator('#ubl-results')).toContainText(/Root is missing <cac:LegalMonetaryTotal>/i, { timeout: 5_000 });
 });
 
+test('sepa: UltmtCdtr Nm length confirms when every populated value fits the 70-char cap', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // pain.001 with a 12-char UltmtCdtr/Nm — well within the EPC 70-char cap.
+  const pain001 = `<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.001.001.03">
+  <CstmrCdtTrfInitn>
+    <GrpHdr><MsgId>MSG-UP-1</MsgId><CreDtTm>2024-05-15T09:00:00Z</CreDtTm><NbOfTxs>1</NbOfTxs><InitgPty><Nm>X</Nm></InitgPty></GrpHdr>
+    <PmtInf>
+      <PmtInfId>PI-1</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <ReqdExctnDt>2024-06-01</ReqdExctnDt>
+      <Dbtr><Nm>D</Nm></Dbtr>
+      <DbtrAcct><Id><IBAN>DE89370400440532013000</IBAN></Id></DbtrAcct>
+      <DbtrAgt><FinInstnId><BIC>COBADEFFXXX</BIC></FinInstnId></DbtrAgt>
+      <CdtTrfTxInf>
+        <PmtId><EndToEndId>E2E-1</EndToEndId></PmtId>
+        <Amt><InstdAmt Ccy="EUR">10.00</InstdAmt></Amt>
+        <CdtrAgt><FinInstnId><BIC>DEUTDEFFXXX</BIC></FinInstnId></CdtrAgt>
+        <Cdtr><Nm>C</Nm></Cdtr>
+        <CdtrAcct><Id><IBAN>DE91100000000123456789</IBAN></Id></CdtrAcct>
+        <UltmtCdtr><Nm>End Customer</Nm></UltmtCdtr>
+      </CdtTrfTxInf>
+    </PmtInf>
+  </CstmrCdtTrfInitn>
+</Document>`;
+  await page.fill('#sepa-input', pain001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Every populated <UltmtCdtr>\/<Nm> fits within the EPC SEPA Rulebook 70-character cap across all 1 ultimate-party/i, { timeout: 5_000 });
+});
+
+test('sepa: UltmtCdtr Nm length flags a 72-character ultimate-party name', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // 72-character UltmtCdtr/Nm — over the EPC SCT AT-08 70-char cap.
+  const longName = 'Marketplace End Customer Limited Liability Company International Trading';
+  const pain001 = `<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.001.001.03">
+  <CstmrCdtTrfInitn>
+    <GrpHdr><MsgId>MSG-UP-2</MsgId><CreDtTm>2024-05-15T09:00:00Z</CreDtTm><NbOfTxs>1</NbOfTxs><InitgPty><Nm>X</Nm></InitgPty></GrpHdr>
+    <PmtInf>
+      <PmtInfId>PI-1</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <ReqdExctnDt>2024-06-01</ReqdExctnDt>
+      <Dbtr><Nm>D</Nm></Dbtr>
+      <DbtrAcct><Id><IBAN>DE89370400440532013000</IBAN></Id></DbtrAcct>
+      <DbtrAgt><FinInstnId><BIC>COBADEFFXXX</BIC></FinInstnId></DbtrAgt>
+      <CdtTrfTxInf>
+        <PmtId><EndToEndId>E2E-1</EndToEndId></PmtId>
+        <Amt><InstdAmt Ccy="EUR">10.00</InstdAmt></Amt>
+        <CdtrAgt><FinInstnId><BIC>DEUTDEFFXXX</BIC></FinInstnId></CdtrAgt>
+        <Cdtr><Nm>C</Nm></Cdtr>
+        <CdtrAcct><Id><IBAN>DE91100000000123456789</IBAN></Id></CdtrAcct>
+        <UltmtCdtr><Nm>${longName}</Nm></UltmtCdtr>
+      </CdtTrfTxInf>
+    </PmtInf>
+  </CstmrCdtTrfInitn>
+</Document>`;
+  await page.fill('#sepa-input', pain001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Ultimate-party #1 <UltmtCdtr>\/<Nm> ".*" exceeds the 70-character cap \(72\/70 characters\)/i, { timeout: 5_000 });
+});
+
+test('ubl: AccountingSupplierParty presence confirms on canonical fixture', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Canonical UBL_INVOICE declares <cac:AccountingSupplierParty>.
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Root declares <cac:AccountingSupplierParty>/i, { timeout: 5_000 });
+});
+
+test('ubl: AccountingSupplierParty presence flags a missing supplier block', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Strip the entire AccountingSupplierParty block from the canonical fixture.
+  const withBad = UBL_INVOICE.replace(/<cac:AccountingSupplierParty>[\s\S]*?<\/cac:AccountingSupplierParty>/, '');
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Root is missing <cac:AccountingSupplierParty>/i, { timeout: 5_000 });
+});
+
 test('ubl: Buyer RegistrationName BR-07 confirms on canonical fixture', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   // Canonical UBL_INVOICE now declares PartyLegalEntity/RegistrationName=Beispiel SARL
