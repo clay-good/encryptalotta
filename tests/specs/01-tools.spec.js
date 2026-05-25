@@ -5016,6 +5016,40 @@ test('ubl: per-line Price/PriceAmount presence flags a line missing the price (d
   await expect(page.locator('#ubl-results')).toContainText(/Line #1 is missing <cac:Price>\/<cbc:PriceAmount>/i, { timeout: 5_000 });
 });
 
+test('sepa: per-transaction EndToEndId presence confirms on canonical pain.001 (draft 168)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  await page.fill('#sepa-input', SEPA_PAIN001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Every transaction declares <PmtId>\/<EndToEndId> across all 1 transaction block\(s\) \(EPC SCT Rulebook AT-04/i, { timeout: 5_000 });
+});
+
+test('sepa: per-transaction EndToEndId presence flags a transaction missing the key (draft 168)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Strip the <PmtId> block from the single CdtTrfTxInf in the fixture.
+  const withBad = SEPA_PAIN001.replace(/<PmtId>[\s\S]*?<\/PmtId>\s*/, '');
+  await page.fill('#sepa-input', withBad);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Transaction #1 is missing <PmtId>\/<EndToEndId>/i, { timeout: 5_000 });
+});
+
+test('ubl: per-line cbc:ID presence confirms on canonical fixture (draft 169)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Every InvoiceLine \/ CreditNoteLine declares <cbc:ID>.*EN 16931 BR-21/i, { timeout: 5_000 });
+});
+
+test('ubl: per-line cbc:ID presence flags a line missing the identifier (draft 169)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Strip the direct-child <cbc:ID> from every <cac:InvoiceLine>.
+  const withBad = UBL_INVOICE.replace(/<cac:InvoiceLine>[\s\S]*?<\/cac:InvoiceLine>/g, (block) =>
+    block.replace(/<cbc:ID>[\s\S]*?<\/cbc:ID>\s*/, '')
+  );
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Line #1 is missing <cbc:ID>/i, { timeout: 5_000 });
+});
+
 test('ubl: Buyer RegistrationName BR-07 confirms on canonical fixture', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   // Canonical UBL_INVOICE now declares PartyLegalEntity/RegistrationName=Beispiel SARL
