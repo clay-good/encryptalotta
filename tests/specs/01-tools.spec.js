@@ -4945,6 +4945,43 @@ test('ubl: TaxScheme ID presence flags a TaxScheme block missing the ID', async 
   await expect(page.locator('#ubl-results')).toContainText(/TaxScheme #1 is missing <cbc:ID>/i, { timeout: 5_000 });
 });
 
+test('ubl: per-line LineExtensionAmount presence confirms on canonical fixture (draft 165)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Canonical UBL_INVOICE declares <cbc:LineExtensionAmount> on every InvoiceLine.
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Every InvoiceLine \/ CreditNoteLine declares <cbc:LineExtensionAmount>.*EN 16931 BR-24/i, { timeout: 5_000 });
+});
+
+test('ubl: per-line LineExtensionAmount presence flags a line missing the amount (draft 165)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Strip the direct <cbc:LineExtensionAmount> child from every <cac:InvoiceLine> block.
+  // We carefully only strip the direct child, not any nested LineExtensionAmount the
+  // schema doesn't use here.
+  const withBad = UBL_INVOICE.replace(/<cac:InvoiceLine>[\s\S]*?<\/cac:InvoiceLine>/g, (block) =>
+    block.replace(/<cbc:LineExtensionAmount[^>]*>[\s\S]*?<\/cbc:LineExtensionAmount>\s*/, '')
+  );
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Line #1 is missing <cbc:LineExtensionAmount>/i, { timeout: 5_000 });
+});
+
+test('sepa: per-CdtTrfTxInf CdtrAcct presence confirms on canonical pain.001 (draft 164)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  await page.fill('#sepa-input', SEPA_PAIN001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Every credit-transfer transaction declares <CdtrAcct> across all 1 CdtTrfTxInf block\(s\) \(EPC SCT Rulebook AT-21/i, { timeout: 5_000 });
+});
+
+test('sepa: per-CdtTrfTxInf CdtrAcct presence flags a transaction missing the account (draft 164)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Strip the <CdtrAcct> block from the single CdtTrfTxInf in the fixture.
+  const withBad = SEPA_PAIN001.replace(/<CdtrAcct>[\s\S]*?<\/CdtrAcct>\s*/, '');
+  await page.fill('#sepa-input', withBad);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/CdtTrfTxInf #1 is missing <CdtrAcct>/i, { timeout: 5_000 });
+});
+
 test('ubl: Buyer RegistrationName BR-07 confirms on canonical fixture', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   // Canonical UBL_INVOICE now declares PartyLegalEntity/RegistrationName=Beispiel SARL
