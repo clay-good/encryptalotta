@@ -5117,6 +5117,42 @@ test('ubl: root cac:TaxTotal presence flags a document missing the TaxTotal bloc
   await expect(page.locator('#ubl-results')).toContainText(/Root is missing <cac:TaxTotal>/i, { timeout: 5_000 });
 });
 
+test('sepa: per-PmtInf ReqdExctnDt presence confirms on canonical pain.001 (draft 174)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  await page.fill('#sepa-input', SEPA_PAIN001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Every PmtInf declares <ReqdExctnDt> across all 1 PmtInf block\(s\)/i, { timeout: 5_000 });
+});
+
+test('sepa: per-PmtInf ReqdExctnDt presence flags a PmtInf missing the execution date (draft 174)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  const withBad = SEPA_PAIN001.replace(/<ReqdExctnDt>[\s\S]*?<\/ReqdExctnDt>\s*/, '');
+  await page.fill('#sepa-input', withBad);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/PmtInf #1 is missing <ReqdExctnDt>/i, { timeout: 5_000 });
+});
+
+test('ubl: per-TaxTotal cbc:TaxAmount presence confirms on canonical fixture (draft 175)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Every root <cac:TaxTotal> declares <cbc:TaxAmount> across all 1 TaxTotal block\(s\).*EN 16931 BR-CO-15/i, { timeout: 5_000 });
+});
+
+test('ubl: per-TaxTotal cbc:TaxAmount presence flags a TaxTotal missing the header amount (draft 175)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Strip the direct-child <cbc:TaxAmount> from every root TaxTotal — leave any
+  // TaxSubtotal/TaxAmount children intact.
+  const withBad = UBL_INVOICE.replace(/<cac:TaxTotal>[\s\S]*?<\/cac:TaxTotal>/g, (block) =>
+    // Remove the first <cbc:TaxAmount …>…</cbc:TaxAmount> that appears as a
+    // direct child of TaxTotal (i.e. before any TaxSubtotal opens).
+    block.replace(/(<cac:TaxTotal>\s*)<cbc:TaxAmount[^>]*>[\s\S]*?<\/cbc:TaxAmount>\s*/, '$1')
+  );
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Root TaxTotal #1 is missing <cbc:TaxAmount>/i, { timeout: 5_000 });
+});
+
 test('ubl: Buyer RegistrationName BR-07 confirms on canonical fixture', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   // Canonical UBL_INVOICE now declares PartyLegalEntity/RegistrationName=Beispiel SARL
