@@ -5139,6 +5139,40 @@ test('ubl: per-TaxTotal cbc:TaxAmount presence confirms on canonical fixture (dr
   await expect(page.locator('#ubl-results')).toContainText(/Every root <cac:TaxTotal> declares <cbc:TaxAmount> across all 1 TaxTotal block\(s\).*EN 16931 BR-CO-15/i, { timeout: 5_000 });
 });
 
+test('sepa: per-PmtInf PmtInfId presence confirms on canonical pain.001 (draft 176)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  await page.fill('#sepa-input', SEPA_PAIN001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Every PmtInf declares <PmtInfId> with non-empty content across all 1 PmtInf block\(s\)/i, { timeout: 5_000 });
+});
+
+test('sepa: per-PmtInf PmtInfId presence flags an empty PmtInfId element (draft 176)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Replace the populated <PmtInfId>PAY-001</PmtInfId> with an empty <PmtInfId/>.
+  const withBad = SEPA_PAIN001.replace(/<PmtInfId>[\s\S]*?<\/PmtInfId>/, '<PmtInfId></PmtInfId>');
+  await page.fill('#sepa-input', withBad);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/PmtInf #1 is missing <PmtInfId>/i, { timeout: 5_000 });
+});
+
+test('ubl: LegalMonetaryTotal/LineExtensionAmount presence confirms on canonical fixture (draft 177)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/LegalMonetaryTotal declares <cbc:LineExtensionAmount>.*EN 16931 BR-CO-10/i, { timeout: 5_000 });
+});
+
+test('ubl: LegalMonetaryTotal/LineExtensionAmount presence flags a missing slot (draft 177)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Strip the direct-child <cbc:LineExtensionAmount> from inside <cac:LegalMonetaryTotal>.
+  const withBad = UBL_INVOICE.replace(/<cac:LegalMonetaryTotal>[\s\S]*?<\/cac:LegalMonetaryTotal>/g, (block) =>
+    block.replace(/<cbc:LineExtensionAmount[^>]*>[\s\S]*?<\/cbc:LineExtensionAmount>\s*/, '')
+  );
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/LegalMonetaryTotal is missing <cbc:LineExtensionAmount>/i, { timeout: 5_000 });
+});
+
 test('ubl: per-TaxTotal cbc:TaxAmount presence flags a TaxTotal missing the header amount (draft 175)', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   // Strip the direct-child <cbc:TaxAmount> from every root TaxTotal — leave any
