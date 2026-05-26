@@ -5185,6 +5185,38 @@ test('ubl: LegalMonetaryTotal/TaxExclusiveAmount presence confirms on canonical 
   await expect(page.locator('#ubl-results')).toContainText(/LegalMonetaryTotal declares <cbc:TaxExclusiveAmount>.*EN 16931 BR-14/i, { timeout: 5_000 });
 });
 
+test('sepa: per-CdtTrfTxInf CdtrAgt presence confirms on canonical pain.001 (draft 180)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  await page.fill('#sepa-input', SEPA_PAIN001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Every credit-transfer transaction declares <CdtrAgt> across all 1 CdtTrfTxInf block\(s\) \(EPC SCT Rulebook AT-23/i, { timeout: 5_000 });
+});
+
+test('sepa: per-CdtTrfTxInf CdtrAgt presence flags a transaction missing the beneficiary bank (draft 180)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  const withBad = SEPA_PAIN001.replace(/<CdtrAgt>[\s\S]*?<\/CdtrAgt>\s*/, '');
+  await page.fill('#sepa-input', withBad);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/CdtTrfTxInf #1 is missing <CdtrAgt>/i, { timeout: 5_000 });
+});
+
+test('ubl: LegalMonetaryTotal/TaxInclusiveAmount presence confirms on canonical fixture (draft 181)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/LegalMonetaryTotal declares <cbc:TaxInclusiveAmount>.*EN 16931 BR-15/i, { timeout: 5_000 });
+});
+
+test('ubl: LegalMonetaryTotal/TaxInclusiveAmount presence flags a missing slot (draft 181)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  const withBad = UBL_INVOICE.replace(/<cac:LegalMonetaryTotal>[\s\S]*?<\/cac:LegalMonetaryTotal>/g, (block) =>
+    block.replace(/<cbc:TaxInclusiveAmount[^>]*>[\s\S]*?<\/cbc:TaxInclusiveAmount>\s*/, '')
+  );
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/LegalMonetaryTotal is missing <cbc:TaxInclusiveAmount>/i, { timeout: 5_000 });
+});
+
 test('ubl: LegalMonetaryTotal/TaxExclusiveAmount presence flags a missing slot (draft 179)', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   const withBad = UBL_INVOICE.replace(/<cac:LegalMonetaryTotal>[\s\S]*?<\/cac:LegalMonetaryTotal>/g, (block) =>
