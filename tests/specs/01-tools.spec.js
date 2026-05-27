@@ -1108,6 +1108,7 @@ const SEPA_PAIN001 = `<?xml version="1.0" encoding="UTF-8"?>
     <PmtInf>
       <PmtInfId>PAY-001</PmtInfId>
       <PmtMtd>TRF</PmtMtd>
+      <CtrlSum>100.00</CtrlSum>
       <ReqdExctnDt>2024-01-20</ReqdExctnDt>
       <Dbtr><Nm>ACME Corp</Nm></Dbtr>
       <DbtrAcct><Id><IBAN>DE89370400440532013000</IBAN></Id></DbtrAcct>
@@ -5327,6 +5328,42 @@ test('ubl: per-TaxCategory Percent presence flags a TaxCategory missing the rate
   await page.fill('#ubl-input', withBad);
   await page.click('#btn-ubl-parse');
   await expect(page.locator('#ubl-results')).toContainText(/TaxCategory #1 is missing <cbc:Percent>/i, { timeout: 5_000 });
+});
+
+test('sepa: per-PmtInf CtrlSum presence confirms on canonical pain.001 (draft 190)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  await page.fill('#sepa-input', SEPA_PAIN001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Every PmtInf declares <CtrlSum> with non-empty content across all 1 PmtInf block\(s\)/i, { timeout: 5_000 });
+});
+
+test('sepa: per-PmtInf CtrlSum presence flags an empty per-PmtInf CtrlSum (draft 190)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Strip the per-PmtInf CtrlSum while leaving GrpHdr/CtrlSum intact.
+  const withBad = SEPA_PAIN001.replace(/<PmtInf>[\s\S]*?<\/PmtInf>/, (block) =>
+    block.replace(/<CtrlSum>[\s\S]*?<\/CtrlSum>/, '<CtrlSum></CtrlSum>')
+  );
+  await page.fill('#sepa-input', withBad);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/PmtInf #1 is missing <CtrlSum>/i, { timeout: 5_000 });
+});
+
+test('ubl: per-TaxSubtotal TaxCategory presence confirms on canonical fixture (draft 191)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Every <cac:TaxSubtotal> declares <cac:TaxCategory>.*BR-S-01/i, { timeout: 5_000 });
+});
+
+test('ubl: per-TaxSubtotal TaxCategory presence flags a TaxSubtotal missing the category block (draft 191)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Strip the direct-child <cac:TaxCategory> from every <cac:TaxSubtotal>.
+  const withBad = UBL_INVOICE.replace(/<cac:TaxSubtotal>[\s\S]*?<\/cac:TaxSubtotal>/g, (block) =>
+    block.replace(/<cac:TaxCategory>[\s\S]*?<\/cac:TaxCategory>\s*/, '')
+  );
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/TaxSubtotal #1 is missing <cac:TaxCategory>/i, { timeout: 5_000 });
 });
 
 test('ubl: LegalMonetaryTotal/PayableAmount presence flags a missing slot (draft 183)', async ({ page }) => {
