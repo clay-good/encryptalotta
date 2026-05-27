@@ -1667,7 +1667,7 @@ const UBL_INVOICE = `<?xml version="1.0" encoding="UTF-8"?>
     <cbc:ID>1</cbc:ID>
     <cbc:InvoicedQuantity unitCode="C62">2</cbc:InvoicedQuantity>
     <cbc:LineExtensionAmount currencyID="EUR">100.00</cbc:LineExtensionAmount>
-    <cac:Item><cbc:Name>Widget Pro</cbc:Name></cac:Item>
+    <cac:Item><cbc:Name>Widget Pro</cbc:Name><cac:ClassifiedTaxCategory><cbc:ID>S</cbc:ID><cbc:Percent>19</cbc:Percent><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:ClassifiedTaxCategory></cac:Item>
     <cac:Price><cbc:PriceAmount currencyID="EUR">50.00</cbc:PriceAmount></cac:Price>
   </cac:InvoiceLine>
 </Invoice>`;
@@ -2467,8 +2467,8 @@ test('ubl: Item OriginCountry/IdentificationCode check confirms on a valid ISO 3
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   // Inject a cac:OriginCountry block under the Item — EN 16931 BT-159 country of origin.
   const withOrigin = UBL_INVOICE.replace(
-    '<cac:Item><cbc:Name>Widget Pro</cbc:Name></cac:Item>',
-    '<cac:Item><cbc:Name>Widget Pro</cbc:Name><cac:OriginCountry><cbc:IdentificationCode>DE</cbc:IdentificationCode></cac:OriginCountry></cac:Item>'
+    '<cbc:Name>Widget Pro</cbc:Name>',
+    '<cbc:Name>Widget Pro</cbc:Name><cac:OriginCountry><cbc:IdentificationCode>DE</cbc:IdentificationCode></cac:OriginCountry>'
   );
   await page.fill('#ubl-input', withOrigin);
   await page.click('#btn-ubl-parse');
@@ -2478,8 +2478,8 @@ test('ubl: Item OriginCountry/IdentificationCode check confirms on a valid ISO 3
 test('ubl: Item OriginCountry/IdentificationCode check flags UK (not an ISO code — Great Britain is GB)', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   const withOrigin = UBL_INVOICE.replace(
-    '<cac:Item><cbc:Name>Widget Pro</cbc:Name></cac:Item>',
-    '<cac:Item><cbc:Name>Widget Pro</cbc:Name><cac:OriginCountry><cbc:IdentificationCode>UK</cbc:IdentificationCode></cac:OriginCountry></cac:Item>'
+    '<cbc:Name>Widget Pro</cbc:Name>',
+    '<cbc:Name>Widget Pro</cbc:Name><cac:OriginCountry><cbc:IdentificationCode>UK</cbc:IdentificationCode></cac:OriginCountry>'
   );
   await page.fill('#ubl-input', withOrigin);
   await page.click('#btn-ubl-parse');
@@ -3153,11 +3153,9 @@ test('ubl: Item Name presence check confirms when every line declares an Item/Na
 
 test('ubl: Item Name presence check flags a line that omits Item/Name', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
-  // Strip the <cbc:Name>Widget Pro</cbc:Name> from the single line in the fixture.
-  const noName = UBL_INVOICE.replace(
-    '<cac:Item><cbc:Name>Widget Pro</cbc:Name></cac:Item>',
-    '<cac:Item></cac:Item>'
-  );
+  // Strip the <cbc:Name>Widget Pro</cbc:Name> from the per-line Item block in the fixture
+  // (the Item also carries a ClassifiedTaxCategory subblock since draft 193 — leave that intact).
+  const noName = UBL_INVOICE.replace('<cbc:Name>Widget Pro</cbc:Name>', '');
   await page.fill('#ubl-input', noName);
   await page.click('#btn-ubl-parse');
   await expect(page.locator('#ubl-results')).toContainText(/Line #1 is missing an Item\/Name/i, { timeout: 5_000 });
@@ -3226,8 +3224,8 @@ test('ubl: StandardItemIdentification GTIN check confirms on a valid GS1 GTIN', 
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   // Inject a canonical EAN-13 GTIN with schemeID="0160" into the single InvoiceLine's Item.
   const withGtin = UBL_INVOICE.replace(
-    '<cac:Item><cbc:Name>Widget Pro</cbc:Name></cac:Item>',
-    '<cac:Item><cbc:Name>Widget Pro</cbc:Name><cac:StandardItemIdentification><cbc:ID schemeID="0160">5901234123457</cbc:ID></cac:StandardItemIdentification></cac:Item>'
+    '<cbc:Name>Widget Pro</cbc:Name>',
+    '<cbc:Name>Widget Pro</cbc:Name><cac:StandardItemIdentification><cbc:ID schemeID="0160">5901234123457</cbc:ID></cac:StandardItemIdentification>'
   );
   await page.fill('#ubl-input', withGtin);
   await page.click('#btn-ubl-parse');
@@ -3238,8 +3236,8 @@ test('ubl: StandardItemIdentification GTIN check flags a typo\'d GTIN', async ({
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   // Last digit flipped 7 → 8 — MOD-10 now fails.
   const badGtin = UBL_INVOICE.replace(
-    '<cac:Item><cbc:Name>Widget Pro</cbc:Name></cac:Item>',
-    '<cac:Item><cbc:Name>Widget Pro</cbc:Name><cac:StandardItemIdentification><cbc:ID schemeID="0160">5901234123458</cbc:ID></cac:StandardItemIdentification></cac:Item>'
+    '<cbc:Name>Widget Pro</cbc:Name>',
+    '<cbc:Name>Widget Pro</cbc:Name><cac:StandardItemIdentification><cbc:ID schemeID="0160">5901234123458</cbc:ID></cac:StandardItemIdentification>'
   );
   await page.fill('#ubl-input', badGtin);
   await page.click('#btn-ubl-parse');
@@ -3743,7 +3741,7 @@ test('sepa: CtrlSum 2-decimal cap confirms when GrpHdr/CtrlSum declares 2 decima
   // Canonical SEPA_PAIN001 declares GrpHdr/CtrlSum=100.00.
   await page.fill('#sepa-input', SEPA_PAIN001);
   await page.click('#btn-sepa-parse');
-  await expect(page.locator('#sepa-results')).toContainText(/Every declared CtrlSum fits within the EPC SEPA Rulebook 2-decimal cap across all 1 control-sum slot/i, { timeout: 5_000 });
+  await expect(page.locator('#sepa-results')).toContainText(/Every declared CtrlSum fits within the EPC SEPA Rulebook 2-decimal cap across all 2 control-sum slot/i, { timeout: 5_000 });
 });
 
 test('sepa: CtrlSum 2-decimal cap flags an over-precision GrpHdr/CtrlSum', async ({ page }) => {
@@ -5424,6 +5422,21 @@ test('sepa: per-DrctDbtTxInf Dbtr/Nm presence flags an empty per-transaction deb
   await page.fill('#sepa-input', pain008);
   await page.click('#btn-sepa-parse');
   await expect(page.locator('#sepa-results')).toContainText(/DrctDbtTxInf #1 is missing <Dbtr>\/<Nm>/i, { timeout: 5_000 });
+});
+
+test('ubl: per-line ClassifiedTaxCategory presence confirms on canonical fixture (draft 193)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Every InvoiceLine \/ CreditNoteLine declares <cac:Item>\/<cac:ClassifiedTaxCategory> across all 1 line/i, { timeout: 5_000 });
+});
+
+test('ubl: per-line ClassifiedTaxCategory presence flags a line missing the subblock (draft 193)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  const withBad = UBL_INVOICE.replace(/<cac:ClassifiedTaxCategory>[\s\S]*?<\/cac:ClassifiedTaxCategory>\s*/g, '');
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Line #1 is missing <cac:Item>\/<cac:ClassifiedTaxCategory>/i, { timeout: 5_000 });
 });
 
 test('ubl: LegalMonetaryTotal/PayableAmount presence flags a missing slot (draft 183)', async ({ page }) => {
