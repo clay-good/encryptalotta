@@ -5366,6 +5366,66 @@ test('ubl: per-TaxSubtotal TaxCategory presence flags a TaxSubtotal missing the 
   await expect(page.locator('#ubl-results')).toContainText(/TaxSubtotal #1 is missing <cac:TaxCategory>/i, { timeout: 5_000 });
 });
 
+test('sepa: per-DrctDbtTxInf Dbtr/Nm presence confirms on a Rulebook-clean pain.008 (draft 192)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  const pain008 = `<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.008.001.02">
+  <CstmrDrctDbtInitn>
+    <GrpHdr><MsgId>DD-NM-1</MsgId><CreDtTm>2024-05-15T09:00:00Z</CreDtTm><NbOfTxs>1</NbOfTxs><InitgPty><Nm>Creditor Inc</Nm></InitgPty></GrpHdr>
+    <PmtInf>
+      <PmtInfId>DD-PAY-1</PmtInfId>
+      <PmtMtd>DD</PmtMtd>
+      <PmtTpInf><SvcLvl><Cd>SEPA</Cd></SvcLvl><LclInstrm><Cd>CORE</Cd></LclInstrm><SeqTp>FRST</SeqTp></PmtTpInf>
+      <ReqdColltnDt>2024-06-01</ReqdColltnDt>
+      <Cdtr><Nm>Creditor Inc</Nm></Cdtr>
+      <CdtrAcct><Id><IBAN>DE91100000000123456789</IBAN></Id></CdtrAcct>
+      <CdtrAgt><FinInstnId><BIC>DEUTDEFFXXX</BIC></FinInstnId></CdtrAgt>
+      <DrctDbtTxInf>
+        <PmtId><EndToEndId>DD-E2E-1</EndToEndId></PmtId>
+        <InstdAmt Ccy="EUR">42.00</InstdAmt>
+        <DrctDbtTx><MndtRltdInf><MndtId>MANDATE-001</MndtId><DtOfSgntr>2024-03-15</DtOfSgntr></MndtRltdInf></DrctDbtTx>
+        <DbtrAgt><FinInstnId><BIC>COBADEFFXXX</BIC></FinInstnId></DbtrAgt>
+        <Dbtr><Nm>Subscriber</Nm></Dbtr>
+        <DbtrAcct><Id><IBAN>DE89370400440532013000</IBAN></Id></DbtrAcct>
+      </DrctDbtTxInf>
+    </PmtInf>
+  </CstmrDrctDbtInitn>
+</Document>`;
+  await page.fill('#sepa-input', pain008);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Every DrctDbtTxInf declares <Dbtr>\/<Nm> with non-empty content across all 1 direct-debit transaction/i, { timeout: 5_000 });
+});
+
+test('sepa: per-DrctDbtTxInf Dbtr/Nm presence flags an empty per-transaction debtor name (draft 192)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  const pain008 = `<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.008.001.02">
+  <CstmrDrctDbtInitn>
+    <GrpHdr><MsgId>DD-NM-2</MsgId><CreDtTm>2024-05-15T09:00:00Z</CreDtTm><NbOfTxs>1</NbOfTxs><InitgPty><Nm>Creditor Inc</Nm></InitgPty></GrpHdr>
+    <PmtInf>
+      <PmtInfId>DD-PAY-1</PmtInfId>
+      <PmtMtd>DD</PmtMtd>
+      <PmtTpInf><SvcLvl><Cd>SEPA</Cd></SvcLvl><LclInstrm><Cd>CORE</Cd></LclInstrm><SeqTp>FRST</SeqTp></PmtTpInf>
+      <ReqdColltnDt>2024-06-01</ReqdColltnDt>
+      <Cdtr><Nm>Creditor Inc</Nm></Cdtr>
+      <CdtrAcct><Id><IBAN>DE91100000000123456789</IBAN></Id></CdtrAcct>
+      <CdtrAgt><FinInstnId><BIC>DEUTDEFFXXX</BIC></FinInstnId></CdtrAgt>
+      <DrctDbtTxInf>
+        <PmtId><EndToEndId>DD-E2E-1</EndToEndId></PmtId>
+        <InstdAmt Ccy="EUR">42.00</InstdAmt>
+        <DrctDbtTx><MndtRltdInf><MndtId>MANDATE-001</MndtId><DtOfSgntr>2024-03-15</DtOfSgntr></MndtRltdInf></DrctDbtTx>
+        <DbtrAgt><FinInstnId><BIC>COBADEFFXXX</BIC></FinInstnId></DbtrAgt>
+        <Dbtr><Nm></Nm></Dbtr>
+        <DbtrAcct><Id><IBAN>DE89370400440532013000</IBAN></Id></DbtrAcct>
+      </DrctDbtTxInf>
+    </PmtInf>
+  </CstmrDrctDbtInitn>
+</Document>`;
+  await page.fill('#sepa-input', pain008);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/DrctDbtTxInf #1 is missing <Dbtr>\/<Nm>/i, { timeout: 5_000 });
+});
+
 test('ubl: LegalMonetaryTotal/PayableAmount presence flags a missing slot (draft 183)', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   const withBad = UBL_INVOICE.replace(/<cac:LegalMonetaryTotal>[\s\S]*?<\/cac:LegalMonetaryTotal>/g, (block) =>
