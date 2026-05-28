@@ -5869,6 +5869,40 @@ test('ubl: Seller Party wrapper presence flags a missing Party block (draft 205)
   await expect(page.locator('#ubl-results')).toContainText(/AccountingSupplierParty is missing <cac:Party>/i, { timeout: 5_000 });
 });
 
+test('sepa: per-CdtTrfTxInf Cdtr wrapper presence confirms on canonical pain.001 (draft 206)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  await page.fill('#sepa-input', SEPA_PAIN001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Every CdtTrfTxInf declares <Cdtr> across all 1 credit-transfer transaction/i, { timeout: 5_000 });
+});
+
+test('sepa: per-CdtTrfTxInf Cdtr wrapper presence flags a transaction missing the wrapper (draft 206)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Strip the <Cdtr>...</Cdtr> wrapper from the single CdtTrfTxInf in the fixture.
+  const withBad = SEPA_PAIN001.replace(/<Cdtr>[\s\S]*?<\/Cdtr>\s*/g, '');
+  await page.fill('#sepa-input', withBad);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/CdtTrfTxInf #1 is missing <Cdtr>/i, { timeout: 5_000 });
+});
+
+test('ubl: Buyer Party wrapper presence confirms on canonical fixture (draft 207)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/AccountingCustomerParty declares <cac:Party>/i, { timeout: 5_000 });
+});
+
+test('ubl: Buyer Party wrapper presence flags a missing Party block (draft 207)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Strip the Party wrapper from inside AccountingCustomerParty only (leave its children orphaned).
+  const withBad = UBL_INVOICE.replace(/<cac:AccountingCustomerParty>[\s\S]*?<\/cac:AccountingCustomerParty>/, (block) =>
+    block.replace(/<cac:Party>([\s\S]*?)<\/cac:Party>/, '$1')
+  );
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/AccountingCustomerParty is missing <cac:Party>/i, { timeout: 5_000 });
+});
+
 test('ubl: LegalMonetaryTotal/PayableAmount presence flags a missing slot (draft 183)', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   const withBad = UBL_INVOICE.replace(/<cac:LegalMonetaryTotal>[\s\S]*?<\/cac:LegalMonetaryTotal>/g, (block) =>
