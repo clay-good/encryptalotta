@@ -5937,6 +5937,70 @@ test('ubl: Seller PartyLegalEntity wrapper presence flags a missing PartyLegalEn
   await expect(page.locator('#ubl-results')).toContainText(/AccountingSupplierParty\/Party is missing <cac:PartyLegalEntity>/i, { timeout: 5_000 });
 });
 
+const SEPA_PAIN008 = `<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.008.001.02">
+  <CstmrDrctDbtInitn>
+    <GrpHdr>
+      <MsgId>DD-MSG-2024-099</MsgId>
+      <CreDtTm>2024-05-15T09:00:00</CreDtTm>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>42.00</CtrlSum>
+      <InitgPty><Nm>Creditor Inc</Nm></InitgPty>
+    </GrpHdr>
+    <PmtInf>
+      <PmtInfId>DD-PAY-001</PmtInfId>
+      <PmtMtd>DD</PmtMtd>
+      <ReqdColltnDt>2024-06-01</ReqdColltnDt>
+      <Cdtr><Nm>Creditor Inc</Nm></Cdtr>
+      <CdtrAcct><Id><IBAN>DE91100000000123456789</IBAN></Id></CdtrAcct>
+      <CdtrAgt><FinInstnId><BIC>DEUTDEFFXXX</BIC></FinInstnId></CdtrAgt>
+      <DrctDbtTxInf>
+        <PmtId><EndToEndId>DD-E2E-077</EndToEndId></PmtId>
+        <InstdAmt Ccy="EUR">42.00</InstdAmt>
+        <DrctDbtTx><MndtRltdInf><MndtId>MANDATE-2024-XYZ</MndtId></MndtRltdInf></DrctDbtTx>
+        <DbtrAgt><FinInstnId><BIC>COBADEFFXXX</BIC></FinInstnId></DbtrAgt>
+        <Dbtr><Nm>Subscriber</Nm></Dbtr>
+        <DbtrAcct><Id><IBAN>DE89370400440532013000</IBAN></Id></DbtrAcct>
+        <RmtInf><Ustrd>Subscription May 2024</Ustrd></RmtInf>
+      </DrctDbtTxInf>
+    </PmtInf>
+  </CstmrDrctDbtInitn>
+</Document>`;
+
+test('sepa: per-PmtInf Cdtr wrapper presence confirms on canonical pain.008 (draft 210)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  await page.fill('#sepa-input', SEPA_PAIN008);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Every PmtInf declares <Cdtr> across all 1 PmtInf block/i, { timeout: 5_000 });
+});
+
+test('sepa: per-PmtInf Cdtr wrapper presence flags a PmtInf missing the wrapper on pain.008 (draft 210)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Strip the PmtInf-level <Cdtr>...</Cdtr> wrapper (single block in the fixture).
+  const withBad = SEPA_PAIN008.replace(/<Cdtr>[\s\S]*?<\/Cdtr>\s*/g, '');
+  await page.fill('#sepa-input', withBad);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/PmtInf #1 is missing <Cdtr>/i, { timeout: 5_000 });
+});
+
+test('ubl: Buyer PartyLegalEntity wrapper presence confirms on canonical fixture (draft 211)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/AccountingCustomerParty\/Party declares <cac:PartyLegalEntity>/i, { timeout: 5_000 });
+});
+
+test('ubl: Buyer PartyLegalEntity wrapper presence flags a missing PartyLegalEntity block (draft 211)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Strip the PartyLegalEntity block from inside AccountingCustomerParty only.
+  const withBad = UBL_INVOICE.replace(/<cac:AccountingCustomerParty>[\s\S]*?<\/cac:AccountingCustomerParty>/, (block) =>
+    block.replace(/<cac:PartyLegalEntity>[\s\S]*?<\/cac:PartyLegalEntity>\s*/, '')
+  );
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/AccountingCustomerParty\/Party is missing <cac:PartyLegalEntity>/i, { timeout: 5_000 });
+});
+
 test('ubl: LegalMonetaryTotal/PayableAmount presence flags a missing slot (draft 183)', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   const withBad = UBL_INVOICE.replace(/<cac:LegalMonetaryTotal>[\s\S]*?<\/cac:LegalMonetaryTotal>/g, (block) =>
