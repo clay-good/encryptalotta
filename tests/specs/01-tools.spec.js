@@ -6037,6 +6037,42 @@ test('ubl: Seller PostalAddress/Country wrapper presence flags a missing Country
   await expect(page.locator('#ubl-results')).toContainText(/AccountingSupplierParty\/Party\/PostalAddress is missing <cac:Country>/i, { timeout: 5_000 });
 });
 
+test('sepa: per-DrctDbtTxInf DbtrAgt/FinInstnId wrapper presence confirms on canonical pain.008 (draft 214)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  await page.fill('#sepa-input', SEPA_PAIN008);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Every DrctDbtTxInf with <DbtrAgt> declares <FinInstnId> across all 1 block/i, { timeout: 5_000 });
+});
+
+test('sepa: per-DrctDbtTxInf DbtrAgt/FinInstnId wrapper presence flags a DbtrAgt missing FinInstnId (draft 214)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Strip the <FinInstnId>...</FinInstnId> inside DbtrAgt only, leaving DbtrAgt as an empty shell.
+  const withBad = SEPA_PAIN008.replace(/<DbtrAgt>[\s\S]*?<\/DbtrAgt>/, (block) =>
+    block.replace(/<FinInstnId>[\s\S]*?<\/FinInstnId>\s*/, '')
+  );
+  await page.fill('#sepa-input', withBad);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/DrctDbtTxInf #1 has <DbtrAgt> but is missing <FinInstnId>/i, { timeout: 5_000 });
+});
+
+test('ubl: Buyer PostalAddress/Country wrapper presence confirms on canonical fixture (draft 215)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/AccountingCustomerParty\/Party\/PostalAddress declares <cac:Country>/i, { timeout: 5_000 });
+});
+
+test('ubl: Buyer PostalAddress/Country wrapper presence flags a missing Country block (draft 215)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Strip the Country block from inside AccountingCustomerParty only.
+  const withBad = UBL_INVOICE.replace(/<cac:AccountingCustomerParty>[\s\S]*?<\/cac:AccountingCustomerParty>/, (block) =>
+    block.replace(/<cac:Country>[\s\S]*?<\/cac:Country>\s*/, '')
+  );
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/AccountingCustomerParty\/Party\/PostalAddress is missing <cac:Country>/i, { timeout: 5_000 });
+});
+
 test('ubl: LegalMonetaryTotal/PayableAmount presence flags a missing slot (draft 183)', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   const withBad = UBL_INVOICE.replace(/<cac:LegalMonetaryTotal>[\s\S]*?<\/cac:LegalMonetaryTotal>/g, (block) =>
