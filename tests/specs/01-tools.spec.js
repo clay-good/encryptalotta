@@ -6113,6 +6113,46 @@ test('ubl: Seller Party/PartyTaxScheme wrapper presence flags a missing PartyTax
   await expect(page.locator('#ubl-results')).toContainText(/AccountingSupplierParty\/Party is missing <cac:PartyTaxScheme>/i, { timeout: 5_000 });
 });
 
+test('sepa: per-PmtInf CdtrAgt/FinInstnId wrapper presence confirms on canonical pain.008 (draft 218)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  await page.fill('#sepa-input', SEPA_PAIN008);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Every PmtInf with <CdtrAgt> declares <FinInstnId> across all 1 PmtInf block/i, { timeout: 5_000 });
+});
+
+test('sepa: per-PmtInf CdtrAgt/FinInstnId wrapper presence flags a CdtrAgt missing FinInstnId (draft 218)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Strip the <FinInstnId>...</FinInstnId> inside the PmtInf-level CdtrAgt only.
+  const withBad = SEPA_PAIN008.replace(/<CdtrAgt>[\s\S]*?<\/CdtrAgt>/, (block) =>
+    block.replace(/<FinInstnId>[\s\S]*?<\/FinInstnId>\s*/, '')
+  );
+  await page.fill('#sepa-input', withBad);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/PmtInf #1 has <CdtrAgt> but is missing <FinInstnId>/i, { timeout: 5_000 });
+});
+
+test('ubl: Buyer Party/PartyTaxScheme wrapper presence confirms when PartyTaxScheme is declared (draft 219)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Canonical fixture omits PartyTaxScheme on the customer — inject one alongside PartyLegalEntity.
+  const withGood = UBL_INVOICE.replace(/<cac:AccountingCustomerParty>[\s\S]*?<\/cac:AccountingCustomerParty>/, (block) =>
+    block.replace(
+      '<cac:PartyLegalEntity><cbc:RegistrationName>Beispiel SARL</cbc:RegistrationName></cac:PartyLegalEntity>',
+      '<cac:PartyLegalEntity><cbc:RegistrationName>Beispiel SARL</cbc:RegistrationName></cac:PartyLegalEntity>\n      <cac:PartyTaxScheme><cbc:CompanyID>FR12345678901</cbc:CompanyID><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:PartyTaxScheme>'
+    )
+  );
+  await page.fill('#ubl-input', withGood);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/AccountingCustomerParty\/Party declares <cac:PartyTaxScheme>/i, { timeout: 5_000 });
+});
+
+test('ubl: Buyer Party/PartyTaxScheme wrapper presence flags a missing PartyTaxScheme (draft 219)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Canonical fixture already omits PartyTaxScheme on the customer — the check should flag it.
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/AccountingCustomerParty\/Party is missing <cac:PartyTaxScheme>/i, { timeout: 5_000 });
+});
+
 test('ubl: LegalMonetaryTotal/PayableAmount presence flags a missing slot (draft 183)', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   const withBad = UBL_INVOICE.replace(/<cac:LegalMonetaryTotal>[\s\S]*?<\/cac:LegalMonetaryTotal>/g, (block) =>
