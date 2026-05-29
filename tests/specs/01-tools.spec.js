@@ -6491,6 +6491,38 @@ test('ubl: per-TaxCategory TaxScheme/cbc:ID content presence flags an empty ID (
   await expect(page.locator('#ubl-results')).toContainText(/TaxCategory #1 has <cac:TaxScheme> but it is missing <cbc:ID>/i, { timeout: 5_000 });
 });
 
+test('sepa: per-PmtInf CdtrAcct/Id content presence confirms on canonical pain.008 (draft 236)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  await page.fill('#sepa-input', SEPA_PAIN008);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Every PmtInf with <CdtrAcct>\/<Id> carries an <IBAN> or <Othr> identification across all 1 PmtInf block/i, { timeout: 5_000 });
+});
+
+test('sepa: per-PmtInf CdtrAcct/Id content presence flags an empty Id on pain.008 (draft 236)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Empty the creditor <CdtrAcct>/<Id> (leave the wrapper so draft 228 still passes; the debtor DbtrAcct IBAN is untouched).
+  const withBad = SEPA_PAIN008.replace('<CdtrAcct><Id><IBAN>DE91100000000123456789</IBAN></Id></CdtrAcct>', '<CdtrAcct><Id></Id></CdtrAcct>');
+  await page.fill('#sepa-input', withBad);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/PmtInf #1 has <CdtrAcct>\/<Id> but it carries neither <IBAN> nor <Othr>/i, { timeout: 5_000 });
+});
+
+test('ubl: root TaxTotal/TaxSubtotal presence confirms on canonical fixture (draft 237)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Every root <cac:TaxTotal> declares at least one <cac:TaxSubtotal> across all 1 root TaxTotal block/i, { timeout: 5_000 });
+});
+
+test('ubl: root TaxTotal/TaxSubtotal presence flags a TaxTotal with no breakdown (draft 237)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Strip the <cac:TaxSubtotal> from the root TaxTotal (keep the root TaxTotal wrapper + its TaxAmount so drafts 173 / 175 still pass).
+  const withBad = UBL_INVOICE.replace(/<cac:TaxSubtotal>[\s\S]*?<\/cac:TaxSubtotal>\s*/, '');
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Root <cac:TaxTotal> #1 carries no <cac:TaxSubtotal>/i, { timeout: 5_000 });
+});
+
 test('ubl: LegalMonetaryTotal/PayableAmount presence flags a missing slot (draft 183)', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   const withBad = UBL_INVOICE.replace(/<cac:LegalMonetaryTotal>[\s\S]*?<\/cac:LegalMonetaryTotal>/g, (block) =>
