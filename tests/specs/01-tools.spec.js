@@ -6245,6 +6245,52 @@ test('ubl: Buyer PartyTaxScheme/TaxScheme wrapper presence flags a PartyTaxSchem
   await expect(page.locator('#ubl-results')).toContainText(/AccountingCustomerParty\/Party\/PartyTaxScheme #1 is missing <cac:TaxScheme>/i, { timeout: 5_000 });
 });
 
+test('sepa: per-DrctDbtTxInf DbtrAcct/Id wrapper presence confirms on canonical pain.008 (draft 224)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  await page.fill('#sepa-input', SEPA_PAIN008);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Every DrctDbtTxInf with <DbtrAcct> declares <Id> across all 1 direct-debit transaction/i, { timeout: 5_000 });
+});
+
+test('sepa: per-DrctDbtTxInf DbtrAcct/Id wrapper presence flags a DbtrAcct missing Id (draft 224)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Strip the <Id>...</Id> inside the per-transaction DbtrAcct only (pain.008 has a single DbtrAcct).
+  const withBad = SEPA_PAIN008.replace(/<DbtrAcct>[\s\S]*?<\/DbtrAcct>/, (block) =>
+    block.replace(/<Id>[\s\S]*?<\/Id>\s*/, '')
+  );
+  await page.fill('#sepa-input', withBad);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/DrctDbtTxInf #1 has <DbtrAcct> but is missing <Id>/i, { timeout: 5_000 });
+});
+
+test('ubl: Seller PartyTaxScheme/TaxScheme/cbc:ID presence confirms when ID is populated (draft 225)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Inject a complete supplier PartyTaxScheme (TaxScheme with a non-empty ID).
+  const withGood = UBL_INVOICE.replace(/<cac:AccountingSupplierParty>[\s\S]*?<\/cac:AccountingSupplierParty>/, (block) =>
+    block.replace(
+      '<cac:PartyLegalEntity><cbc:RegistrationName>ACME Widgets GmbH</cbc:RegistrationName></cac:PartyLegalEntity>',
+      '<cac:PartyLegalEntity><cbc:RegistrationName>ACME Widgets GmbH</cbc:RegistrationName></cac:PartyLegalEntity>\n      <cac:PartyTaxScheme><cbc:CompanyID>DE136695976</cbc:CompanyID><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:PartyTaxScheme>'
+    )
+  );
+  await page.fill('#ubl-input', withGood);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Every AccountingSupplierParty\/Party\/PartyTaxScheme with <cac:TaxScheme> declares a non-empty <cbc:ID> across all 1 PartyTaxScheme block/i, { timeout: 5_000 });
+});
+
+test('ubl: Seller PartyTaxScheme/TaxScheme/cbc:ID presence flags a TaxScheme with empty ID (draft 225)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Inject a PartyTaxScheme whose TaxScheme wrapper is present but carries no <cbc:ID>.
+  const withBad = UBL_INVOICE.replace(/<cac:AccountingSupplierParty>[\s\S]*?<\/cac:AccountingSupplierParty>/, (block) =>
+    block.replace(
+      '<cac:PartyLegalEntity><cbc:RegistrationName>ACME Widgets GmbH</cbc:RegistrationName></cac:PartyLegalEntity>',
+      '<cac:PartyLegalEntity><cbc:RegistrationName>ACME Widgets GmbH</cbc:RegistrationName></cac:PartyLegalEntity>\n      <cac:PartyTaxScheme><cbc:CompanyID>DE136695976</cbc:CompanyID><cac:TaxScheme></cac:TaxScheme></cac:PartyTaxScheme>'
+    )
+  );
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/AccountingSupplierParty\/Party\/PartyTaxScheme #1 has <cac:TaxScheme> but is missing a non-empty <cbc:ID>/i, { timeout: 5_000 });
+});
+
 test('ubl: LegalMonetaryTotal/PayableAmount presence flags a missing slot (draft 183)', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   const withBad = UBL_INVOICE.replace(/<cac:LegalMonetaryTotal>[\s\S]*?<\/cac:LegalMonetaryTotal>/g, (block) =>
