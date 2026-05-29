@@ -6423,6 +6423,40 @@ test('ubl: Buyer PartyTaxScheme/cbc:CompanyID presence flags a VAT scheme with e
   await expect(page.locator('#ubl-results')).toContainText(/AccountingCustomerParty\/Party\/PartyTaxScheme #1 has TaxScheme\/ID="VAT" but is missing a non-empty <cbc:CompanyID>/i, { timeout: 5_000 });
 });
 
+test('sepa: per-PmtInf DbtrAcct/Id content presence confirms on canonical pain.001 (draft 232)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  await page.fill('#sepa-input', SEPA_PAIN001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Every PmtInf with <DbtrAcct>\/<Id> carries an <IBAN> or <Othr> identification across all 1 PmtInf block/i, { timeout: 5_000 });
+});
+
+test('sepa: per-PmtInf DbtrAcct/Id content presence flags an empty Id on pain.001 (draft 232)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Empty the originator <DbtrAcct>/<Id> (leave the wrapper so draft 222 still passes; the beneficiary CdtrAcct IBAN is untouched).
+  const withBad = SEPA_PAIN001.replace('<DbtrAcct><Id><IBAN>DE89370400440532013000</IBAN></Id></DbtrAcct>', '<DbtrAcct><Id></Id></DbtrAcct>');
+  await page.fill('#sepa-input', withBad);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/PmtInf #1 has <DbtrAcct>\/<Id> but it carries neither <IBAN> nor <Othr>/i, { timeout: 5_000 });
+});
+
+test('ubl: per-TaxCategory TaxScheme wrapper presence confirms on canonical fixture (draft 233)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Every <cac:TaxCategory> declares a <cac:TaxScheme> across all 1 TaxCategory block/i, { timeout: 5_000 });
+});
+
+test('ubl: per-TaxCategory TaxScheme wrapper presence flags a TaxCategory missing the wrapper (draft 233)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Strip the <cac:TaxScheme> from inside the document-level cac:TaxCategory only (the line-level cac:ClassifiedTaxCategory keeps its TaxScheme).
+  const withBad = UBL_INVOICE.replace(/<cac:TaxCategory>[\s\S]*?<\/cac:TaxCategory>/, (block) =>
+    block.replace(/<cac:TaxScheme>[\s\S]*?<\/cac:TaxScheme>/, '')
+  );
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/TaxCategory #1 is missing <cac:TaxScheme>/i, { timeout: 5_000 });
+});
+
 test('ubl: LegalMonetaryTotal/PayableAmount presence flags a missing slot (draft 183)', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   const withBad = UBL_INVOICE.replace(/<cac:LegalMonetaryTotal>[\s\S]*?<\/cac:LegalMonetaryTotal>/g, (block) =>
