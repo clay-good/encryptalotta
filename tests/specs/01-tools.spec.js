@@ -6523,6 +6523,46 @@ test('ubl: root TaxTotal/TaxSubtotal presence flags a TaxTotal with no breakdown
   await expect(page.locator('#ubl-results')).toContainText(/Root <cac:TaxTotal> #1 carries no <cac:TaxSubtotal>/i, { timeout: 5_000 });
 });
 
+test('sepa: per-CdtTrfTxInf CdtrAgt/FinInstnId routing content confirms on canonical pain.001 (draft 238)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  await page.fill('#sepa-input', SEPA_PAIN001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Every CdtTrfTxInf with <CdtrAgt>\/<FinInstnId> carries a routing identifier .* across all 1 FinInstnId block/i, { timeout: 5_000 });
+});
+
+test('sepa: per-CdtTrfTxInf CdtrAgt/FinInstnId routing content flags a name-only FinInstnId on pain.001 (draft 238)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Keep the FinInstnId wrapper (so draft 212 still passes) but replace its <BIC> routing identifier with a human-readable <Nm> only.
+  const withBad = SEPA_PAIN001.replace('<CdtrAgt><FinInstnId><BIC>DEUTDEFFXXX</BIC></FinInstnId></CdtrAgt>', '<CdtrAgt><FinInstnId><Nm>Beneficiary Bank</Nm></FinInstnId></CdtrAgt>');
+  await page.fill('#sepa-input', withBad);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/CdtTrfTxInf #1 has <CdtrAgt>\/<FinInstnId> but it carries no <BIC>\/<BICFI>, <ClrSysMmbId> or <Othr> routing identifier/i, { timeout: 5_000 });
+});
+
+test('ubl: credit-transfer PayeeFinancialAccount/ID presence confirms when the account is declared (draft 239)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Canonical fixture has no <cac:PaymentMeans>; inject a credit-transfer (code 30) carrying the PayeeFinancialAccount/ID.
+  const withMeans = UBL_INVOICE.replace(
+    '</cac:LegalMonetaryTotal>',
+    '</cac:LegalMonetaryTotal>\n  <cac:PaymentMeans>\n    <cbc:PaymentMeansCode>30</cbc:PaymentMeansCode>\n    <cac:PayeeFinancialAccount>\n      <cbc:ID>DE89370400440532013000</cbc:ID>\n    </cac:PayeeFinancialAccount>\n  </cac:PaymentMeans>'
+  );
+  await page.fill('#ubl-input', withMeans);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Every credit-transfer <cac:PaymentMeans> \(UNCL 4461 code 30 \/ 58\) declares <cac:PayeeFinancialAccount>\/<cbc:ID> across all 1 credit-transfer block/i, { timeout: 5_000 });
+});
+
+test('ubl: credit-transfer PayeeFinancialAccount/ID presence flags a credit transfer missing the account (draft 239)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Inject a credit-transfer (code 30) with NO PayeeFinancialAccount/ID.
+  const withBad = UBL_INVOICE.replace(
+    '</cac:LegalMonetaryTotal>',
+    '</cac:LegalMonetaryTotal>\n  <cac:PaymentMeans>\n    <cbc:PaymentMeansCode>30</cbc:PaymentMeansCode>\n  </cac:PaymentMeans>'
+  );
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Credit-transfer <cac:PaymentMeans> #1 \(UNCL 4461 code 30 \/ 58\) is missing <cac:PayeeFinancialAccount>\/<cbc:ID>/i, { timeout: 5_000 });
+});
+
 test('ubl: LegalMonetaryTotal/PayableAmount presence flags a missing slot (draft 183)', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   const withBad = UBL_INVOICE.replace(/<cac:LegalMonetaryTotal>[\s\S]*?<\/cac:LegalMonetaryTotal>/g, (block) =>
