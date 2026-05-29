@@ -6379,6 +6379,50 @@ test('ubl: Seller PartyTaxScheme/cbc:CompanyID presence flags a VAT scheme with 
   await expect(page.locator('#ubl-results')).toContainText(/AccountingSupplierParty\/Party\/PartyTaxScheme #1 has TaxScheme\/ID="VAT" but is missing a non-empty <cbc:CompanyID>/i, { timeout: 5_000 });
 });
 
+test('sepa: per-CdtTrfTxInf CdtrAcct/Id content presence confirms on canonical pain.001 (draft 230)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  await page.fill('#sepa-input', SEPA_PAIN001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Every CdtTrfTxInf with <CdtrAcct>\/<Id> carries an <IBAN> or <Othr> identification across all 1 transaction/i, { timeout: 5_000 });
+});
+
+test('sepa: per-CdtTrfTxInf CdtrAcct/Id content presence flags an empty Id on pain.001 (draft 230)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Empty the beneficiary <CdtrAcct>/<Id> (leave the wrapper so draft 220 still passes; the debtor IBAN is untouched).
+  const withBad = SEPA_PAIN001.replace('<CdtrAcct><Id><IBAN>DE91100000000123456789</IBAN></Id></CdtrAcct>', '<CdtrAcct><Id></Id></CdtrAcct>');
+  await page.fill('#sepa-input', withBad);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/CdtTrfTxInf #1 has <CdtrAcct>\/<Id> but it carries neither <IBAN> nor <Othr>/i, { timeout: 5_000 });
+});
+
+test('ubl: Buyer PartyTaxScheme/cbc:CompanyID presence confirms when CompanyID is populated (draft 231)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Inject a complete customer PartyTaxScheme (VAT TaxScheme with a non-empty CompanyID).
+  const withGood = UBL_INVOICE.replace(/<cac:AccountingCustomerParty>[\s\S]*?<\/cac:AccountingCustomerParty>/, (block) =>
+    block.replace(
+      '<cac:PartyLegalEntity><cbc:RegistrationName>Beispiel SARL</cbc:RegistrationName></cac:PartyLegalEntity>',
+      '<cac:PartyLegalEntity><cbc:RegistrationName>Beispiel SARL</cbc:RegistrationName></cac:PartyLegalEntity>\n      <cac:PartyTaxScheme><cbc:CompanyID>FR12345678901</cbc:CompanyID><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:PartyTaxScheme>'
+    )
+  );
+  await page.fill('#ubl-input', withGood);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Every AccountingCustomerParty\/Party\/PartyTaxScheme whose <cac:TaxScheme>\/<cbc:ID> is "VAT" declares a non-empty <cbc:CompanyID> across all 1 VAT PartyTaxScheme block/i, { timeout: 5_000 });
+});
+
+test('ubl: Buyer PartyTaxScheme/cbc:CompanyID presence flags a VAT scheme with empty CompanyID (draft 231)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Inject a customer PartyTaxScheme whose TaxScheme/ID="VAT" but whose CompanyID is present-but-empty.
+  const withBad = UBL_INVOICE.replace(/<cac:AccountingCustomerParty>[\s\S]*?<\/cac:AccountingCustomerParty>/, (block) =>
+    block.replace(
+      '<cac:PartyLegalEntity><cbc:RegistrationName>Beispiel SARL</cbc:RegistrationName></cac:PartyLegalEntity>',
+      '<cac:PartyLegalEntity><cbc:RegistrationName>Beispiel SARL</cbc:RegistrationName></cac:PartyLegalEntity>\n      <cac:PartyTaxScheme><cbc:CompanyID></cbc:CompanyID><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:PartyTaxScheme>'
+    )
+  );
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/AccountingCustomerParty\/Party\/PartyTaxScheme #1 has TaxScheme\/ID="VAT" but is missing a non-empty <cbc:CompanyID>/i, { timeout: 5_000 });
+});
+
 test('ubl: LegalMonetaryTotal/PayableAmount presence flags a missing slot (draft 183)', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   const withBad = UBL_INVOICE.replace(/<cac:LegalMonetaryTotal>[\s\S]*?<\/cac:LegalMonetaryTotal>/g, (block) =>
