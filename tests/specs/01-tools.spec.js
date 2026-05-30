@@ -6603,6 +6603,46 @@ test('ubl: direct-debit PaymentMandate/ID presence flags a direct debit missing 
   await expect(page.locator('#ubl-results')).toContainText(/Direct-debit <cac:PaymentMeans> #1 \(UNCL 4461 code 49 \/ 59\) is missing <cac:PaymentMandate>\/<cbc:ID>/i, { timeout: 5_000 });
 });
 
+test('sepa: per-DrctDbtTxInf DbtrAgt/FinInstnId routing content confirms on canonical pain.008 (draft 242)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  await page.fill('#sepa-input', SEPA_PAIN008);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Every DrctDbtTxInf with <DbtrAgt>\/<FinInstnId> carries a routing identifier .* across all 1 FinInstnId block/i, { timeout: 5_000 });
+});
+
+test('sepa: per-DrctDbtTxInf DbtrAgt/FinInstnId routing content flags a name-only FinInstnId on pain.008 (draft 242)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Keep the per-transaction DbtrAgt FinInstnId wrapper (so draft 214 still passes) but replace its <BIC> with a human-readable <Nm> only.
+  const withBad = SEPA_PAIN008.replace('<DbtrAgt><FinInstnId><BIC>COBADEFFXXX</BIC></FinInstnId></DbtrAgt>', '<DbtrAgt><FinInstnId><Nm>Debtor Bank</Nm></FinInstnId></DbtrAgt>');
+  await page.fill('#sepa-input', withBad);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/DrctDbtTxInf #1 has <DbtrAgt>\/<FinInstnId> but it carries no <BIC>\/<BICFI>, <ClrSysMmbId> or <Othr> routing identifier/i, { timeout: 5_000 });
+});
+
+test('ubl: direct-debit PayerFinancialAccount/ID presence confirms when the debited account is declared (draft 243)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Canonical fixture has no <cac:PaymentMeans>; inject a SEPA direct debit (code 59) whose mandate carries the debited account.
+  const withMeans = UBL_INVOICE.replace(
+    '</cac:LegalMonetaryTotal>',
+    '</cac:LegalMonetaryTotal>\n  <cac:PaymentMeans>\n    <cbc:PaymentMeansCode>59</cbc:PaymentMeansCode>\n    <cac:PaymentMandate>\n      <cbc:ID>MANDATE-2024-001</cbc:ID>\n      <cac:PayerFinancialAccount>\n        <cbc:ID>DE89370400440532013000</cbc:ID>\n      </cac:PayerFinancialAccount>\n    </cac:PaymentMandate>\n  </cac:PaymentMeans>'
+  );
+  await page.fill('#ubl-input', withMeans);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Every direct-debit <cac:PaymentMeans> \(UNCL 4461 code 49 \/ 59\) declares <cac:PaymentMandate>\/<cac:PayerFinancialAccount>\/<cbc:ID> across all 1 direct-debit block/i, { timeout: 5_000 });
+});
+
+test('ubl: direct-debit PayerFinancialAccount/ID presence flags a direct debit missing the debited account (draft 243)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Inject a SEPA direct debit (code 59) whose mandate carries the reference but NO PayerFinancialAccount/ID.
+  const withBad = UBL_INVOICE.replace(
+    '</cac:LegalMonetaryTotal>',
+    '</cac:LegalMonetaryTotal>\n  <cac:PaymentMeans>\n    <cbc:PaymentMeansCode>59</cbc:PaymentMeansCode>\n    <cac:PaymentMandate>\n      <cbc:ID>MANDATE-2024-001</cbc:ID>\n    </cac:PaymentMandate>\n  </cac:PaymentMeans>'
+  );
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Direct-debit <cac:PaymentMeans> #1 \(UNCL 4461 code 49 \/ 59\) is missing <cac:PaymentMandate>\/<cac:PayerFinancialAccount>\/<cbc:ID>/i, { timeout: 5_000 });
+});
+
 test('ubl: LegalMonetaryTotal/PayableAmount presence flags a missing slot (draft 183)', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   const withBad = UBL_INVOICE.replace(/<cac:LegalMonetaryTotal>[\s\S]*?<\/cac:LegalMonetaryTotal>/g, (block) =>
