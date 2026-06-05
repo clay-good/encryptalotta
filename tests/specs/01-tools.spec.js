@@ -313,6 +313,62 @@ test('jwt: decode RFC 7519 example', async ({ page }) => {
   await expect(page.locator('#jwt-results')).toContainText(/Issued at .*2018-01-18T01:30:22/);
 });
 
+// Minimal CBOR encoder (test-only) to build a valid ISO 18013-5 mdoc fixture for
+// the credential inspector (draft 289). Supports the subset the fixture needs.
+function cborHead(major, n) {
+  const mt = major << 5;
+  if (n < 24) return Buffer.from([mt | n]);
+  if (n < 256) return Buffer.from([mt | 24, n]);
+  if (n < 65536) return Buffer.from([mt | 25, (n >> 8) & 0xff, n & 0xff]);
+  return Buffer.from([mt | 26, (n >>> 24) & 0xff, (n >> 16) & 0xff, (n >> 8) & 0xff, n & 0xff]);
+}
+class CborTag { constructor(tag, val) { this.tag = tag; this.val = val; } }
+function cborEnc(v) {
+  if (v instanceof CborTag) return Buffer.concat([cborHead(6, v.tag), cborEnc(v.val)]);
+  if (typeof v === 'number') return v < 0 ? cborHead(1, -1 - v) : cborHead(0, v);
+  if (typeof v === 'boolean') return Buffer.from([v ? 0xf5 : 0xf4]);
+  if (v === null) return Buffer.from([0xf6]);
+  if (typeof v === 'string') { const b = Buffer.from(v, 'utf8'); return Buffer.concat([cborHead(3, b.length), b]); }
+  if (Buffer.isBuffer(v)) return Buffer.concat([cborHead(2, v.length), v]);
+  if (Array.isArray(v)) return Buffer.concat([cborHead(4, v.length), ...v.map(cborEnc)]);
+  if (v instanceof Map) { const p = [cborHead(5, v.size)]; for (const [k, val] of v) { p.push(cborEnc(k)); p.push(cborEnc(val)); } return Buffer.concat(p); }
+  if (typeof v === 'object') { const ks = Object.keys(v); const p = [cborHead(5, ks.length)]; for (const k of ks) { p.push(cborEnc(k)); p.push(cborEnc(v[k])); } return Buffer.concat(p); }
+  throw new Error('cborEnc: unsupported ' + typeof v);
+}
+const tag24Of = (inner) => new CborTag(24, cborEnc(inner));
+
+test('jwt: decodes an ISO 18013-5 mdoc credential (draft 289)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'jwt');
+  const item0 = tag24Of({ digestID: 0, random: Buffer.from('00112233', 'hex'), elementIdentifier: 'family_name', elementValue: 'Doe' });
+  const item1 = tag24Of({ digestID: 1, random: Buffer.from('44556677', 'hex'), elementIdentifier: 'given_name', elementValue: 'Jane' });
+  const mso = {
+    version: '1.0', digestAlgorithm: 'SHA-256',
+    valueDigests: new Map([['org.iso.18013.5.1', new Map([[0, Buffer.from('aa', 'hex')], [1, Buffer.from('bb', 'hex')]])]]),
+    deviceKeyInfo: { deviceKey: new Map([[1, 2], [-1, 1]]) },
+    docType: 'org.iso.18013.5.1.mDL',
+    validityInfo: { signed: new CborTag(0, '2024-01-01T00:00:00Z'), validFrom: new CborTag(0, '2024-01-01T00:00:00Z'), validUntil: new CborTag(0, '2029-01-01T00:00:00Z') },
+  };
+  const issuerAuth = new CborTag(18, [
+    Buffer.from(cborEnc(new Map([[1, -7]]))),          // protected header {1:-7} = ES256
+    new Map([[33, Buffer.from(XADES_CERT_B64, 'base64')]]),  // unprotected: x5chain
+    tag24Of(mso),                                       // payload = MobileSecurityObjectBytes
+    Buffer.from('00', 'hex'),                           // signature (dummy)
+  ]);
+  const issuerSigned = { nameSpaces: { 'org.iso.18013.5.1': [item0, item1] }, issuerAuth };
+  const mdoc = { version: '1.0', documents: [{ docType: 'org.iso.18013.5.1.mDL', issuerSigned }], status: 0 };
+  await page.fill('#jwt-input', cborEnc(mdoc).toString('hex'));
+  await page.click('#btn-jwt-decode');
+  const res = page.locator('#jwt-results');
+  await expect(res).toContainText(/ISO 18013-5 mdoc/i, { timeout: 5_000 });
+  await expect(res).toContainText('org.iso.18013.5.1.mDL');     // docType
+  await expect(res).toContainText('family_name');               // data element id
+  await expect(res).toContainText('Doe');                       // element value
+  await expect(res).toContainText('SHA-256');                   // MSO digest algorithm
+  await expect(res).toContainText('2029-01-01T00:00:00Z');      // validUntil
+  await expect(res).toContainText('ES256');                     // COSE protected-header alg
+  await expect(res).toContainText(/XAdES Test Signer/);         // issuer signer cert (x5chain)
+});
+
 test('jwt: nbf in the future flags token as not yet valid', async ({ page }) => {
   const errs=[]; autoDismissDialogs(page, errs);
   await page.goto('/index.html'); await gotoTool(page, 'jwt');

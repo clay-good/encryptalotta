@@ -34,7 +34,7 @@ A comprehensive single-page web app with **45 cryptographic, encoding, parsing, 
 - **Sign** — Produce detached, attached, or cleartext PGP signatures for files or text using your private key.
 - **Verify** — Verify any PGP signature against a public key.
 - **HMAC** — Sign and verify with HMAC-SHA-1 / 256 / 384 / 512. Constant-time comparison on verify; key buffer zeroized after use.
-- **JWT Inspector** — Decode the three Base64-URL parts; verify HS256/384/512 (shared secret), RS256/384/512 (PEM SPKI public key), or ES256/384/512 (PEM SPKI ECDSA key). Expiry indicator from the `exp` claim.
+- **JWT / credential Inspector** — Decode the three Base64-URL parts; verify HS256/384/512 (shared secret), RS256/384/512 (PEM SPKI public key), or ES256/384/512 (PEM SPKI ECDSA key). Expiry indicator from the `exp` claim. Doubles as the **EUDI-wallet credential decoder**: it decodes **SD-JWT** (selective-disclosure JWT — disclosures, `_sd` digest matching, KB-JWT verification, `sd_hash` / `aud` / `nonce` checks) and **ISO 18013-5 mdoc** (paste the CBOR as hex / base64url — surfaces docType, per-namespace data elements, and the COSE_Sign1 MSO: digest algorithm, validity window, value-digest count, device key, and the x5chain issuer certificate). Decode-only; no issuer-trust verification.
 
 ### Utilities (28 tools)
 - **Strong Password Generator** — Cryptographically random passwords with customizable charset and length.
@@ -379,7 +379,7 @@ All 45 tools are organized into four groups. Every tool has a deep-link route.
 | **Sign** | `#/signing/sign` | Digitally sign messages or files (detached, attached, cleartext) |
 | **Verify** | `#/signing/verify` | Verify a PGP signature against a public key |
 | **HMAC** | `#/signing/hmac` | HMAC-SHA-1/256/384/512 sign and verify (constant-time compare) |
-| **JWT Inspector** | `#/signing/jwt` | Decode + verify HS / RS / ES JWTs; surface `exp` claim |
+| **JWT / credential Inspector** | `#/signing/jwt` | Decode + verify HS / RS / ES JWTs; decode SD-JWT and ISO 18013-5 mdoc (EUDI wallet) |
 
 ### Utilities (28)
 | Tool | Route | What it does |
@@ -487,6 +487,7 @@ Every tool maps to a published standard so its output is checkable against an au
 | HMAC | RFC 2104, FIPS 198-1; vectors RFC 4231 | HMAC |
 | Hashing | FIPS 180-4 (SHA-1/2), RFC 7693 (BLAKE2b) | Hash & Checksum |
 | JWT / JOSE | RFC 7519, 7515, 7518; RFC 8725 (BCP) | JWT Inspector |
+| EUDI credentials | SD-JWT (IETF draft), ISO 18013-5 mdoc | JWT / credential Inspector |
 | TOTP / HOTP | RFC 6238, RFC 4226 | TOTP / 2FA |
 | X.509 / ASN.1 | RFC 5280, X.690 (DER) | TLS Certificate Parser |
 | PKCS#7 / CMS | RFC 5652 (SignedData), CAdES-BES (ETSI EN 319 122) | TLS Certificate Parser |

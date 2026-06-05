@@ -3479,7 +3479,19 @@
                 'view.totp.h2': 'TOTP / 2FA Code Generator',
                 'jwt.warnTitle': 'Reminder:',
                 'jwt.warnBody': 'JWT payloads are Base64-encoded, not encrypted. Treat any production token like a credential — verify locally, never paste it into untrusted online inspectors.',
-                'jwt.label.token': 'JWT (paste the full token):',
+                'jwt.label.token': 'JWT / SD-JWT, or an ISO 18013-5 mdoc (CBOR as hex / base64):',
+                'mdoc.type': 'ISO 18013-5 mdoc (EUDI credential)',
+                'mdoc.version': 'Version',
+                'mdoc.doc': 'Document #{n}',
+                'mdoc.docType': 'Document type',
+                'mdoc.dataElements': 'Data elements',
+                'mdoc.mso': 'Issuer authentication (MSO)',
+                'mdoc.signed': 'Signed',
+                'mdoc.validFrom': 'Valid from',
+                'mdoc.validUntil': 'Valid until',
+                'mdoc.valueDigests': 'Value digests',
+                'mdoc.deviceKey': 'Device key',
+                'mdoc.signer': 'Issuer signer certificate',
                 'jwt.ph.token': 'eyJhbGciOi…',
                 'jwt.row.header': 'Header (decoded JSON)',
                 'jwt.row.payload': 'Payload (decoded JSON)',
@@ -5330,7 +5342,19 @@
                 'view.totp.h2': 'Générateur de codes TOTP / 2FA',
                 'jwt.warnTitle': 'Rappel :',
                 'jwt.warnBody': 'Les charges JWT sont encodées en Base64, pas chiffrées. Traitez tout token de production comme une crédential — vérifiez localement, ne le collez jamais dans un inspecteur en ligne non fiable.',
-                'jwt.label.token': 'JWT (coller le token complet) :',
+                'jwt.label.token': 'JWT / SD-JWT, ou un mdoc ISO 18013-5 (CBOR en hex / base64) :',
+                'mdoc.type': 'mdoc ISO 18013-5 (justificatif EUDI)',
+                'mdoc.version': 'Version',
+                'mdoc.doc': 'Document n°{n}',
+                'mdoc.docType': 'Type de document',
+                'mdoc.dataElements': 'Éléments de données',
+                'mdoc.mso': 'Authentification de l’émetteur (MSO)',
+                'mdoc.signed': 'Signé',
+                'mdoc.validFrom': 'Valide à partir du',
+                'mdoc.validUntil': 'Valide jusqu’au',
+                'mdoc.valueDigests': 'Empreintes de valeurs',
+                'mdoc.deviceKey': 'Clé de l’appareil',
+                'mdoc.signer': 'Certificat du signataire émetteur',
                 'jwt.ph.token': 'eyJhbGciOi…',
                 'jwt.row.header': 'En-tête (JSON décodé)',
                 'jwt.row.payload': 'Charge utile (JSON décodé)',
@@ -6957,7 +6981,19 @@
                 'view.totp.h2': 'TOTP / 双因素验证码生成器',
                 'jwt.warnTitle': '提醒：',
                 'jwt.warnBody': 'JWT 载荷是 Base64 编码的，并未加密。把生产 token 当作凭证处理 — 在本地验证，切勿粘贴到不可信的在线检查器。',
-                'jwt.label.token': 'JWT（粘贴完整 token）：',
+                'jwt.label.token': 'JWT / SD-JWT，或 ISO 18013-5 mdoc（CBOR 十六进制 / base64）：',
+                'mdoc.type': 'ISO 18013-5 mdoc（EUDI 凭证）',
+                'mdoc.version': '版本',
+                'mdoc.doc': '文档 #{n}',
+                'mdoc.docType': '文档类型',
+                'mdoc.dataElements': '数据元素',
+                'mdoc.mso': '签发方认证（MSO）',
+                'mdoc.signed': '签名时间',
+                'mdoc.validFrom': '有效起始',
+                'mdoc.validUntil': '有效截止',
+                'mdoc.valueDigests': '值摘要',
+                'mdoc.deviceKey': '设备密钥',
+                'mdoc.signer': '签发方签名证书',
                 'jwt.ph.token': 'eyJhbGciOi…',
                 'jwt.row.header': '头部（解码后的 JSON）',
                 'jwt.row.payload': '载荷（解码后的 JSON）',
@@ -8569,7 +8605,19 @@
                 'view.totp.h2': 'TOTP / 2FA-Code-Generator',
                 'jwt.warnTitle': 'Hinweis:',
                 'jwt.warnBody': 'JWT-Payloads sind Base64-kodiert, nicht verschlüsselt. Behandle Produktions-Tokens wie Anmeldedaten — lokal verifizieren, niemals in unsichere Online-Inspektoren einfügen.',
-                'jwt.label.token': 'JWT (vollständigen Token einfügen):',
+                'jwt.label.token': 'JWT / SD-JWT oder ein ISO-18013-5-mdoc (CBOR als Hex / base64):',
+                'mdoc.type': 'ISO-18013-5-mdoc (EUDI-Nachweis)',
+                'mdoc.version': 'Version',
+                'mdoc.doc': 'Dokument #{n}',
+                'mdoc.docType': 'Dokumenttyp',
+                'mdoc.dataElements': 'Datenelemente',
+                'mdoc.mso': 'Aussteller-Authentifizierung (MSO)',
+                'mdoc.signed': 'Signiert',
+                'mdoc.validFrom': 'Gültig ab',
+                'mdoc.validUntil': 'Gültig bis',
+                'mdoc.valueDigests': 'Wert-Hashes',
+                'mdoc.deviceKey': 'Geräteschlüssel',
+                'mdoc.signer': 'Aussteller-Signaturzertifikat',
                 'jwt.ph.token': 'eyJhbGciOi…',
                 'jwt.row.header': 'Header (dekodiertes JSON)',
                 'jwt.row.payload': 'Payload (dekodiertes JSON)',
@@ -10196,7 +10244,19 @@
                 'view.totp.h2': 'TOTP / 2FA कोड जनरेटर',
                 'jwt.warnTitle': 'याद रखें:',
                 'jwt.warnBody': 'JWT पेलोड Base64 में एनकोड है, एन्क्रिप्टेड नहीं। उत्पादन टोकन को क्रेडेंशियल मानें — स्थानीय रूप से सत्यापित करें, अविश्वसनीय ऑनलाइन उपकरणों में पेस्ट न करें।',
-                'jwt.label.token': 'JWT (पूरा टोकन पेस्ट करें):',
+                'jwt.label.token': 'JWT / SD-JWT, या एक ISO 18013-5 mdoc (CBOR हेक्स / base64):',
+                'mdoc.type': 'ISO 18013-5 mdoc (EUDI क्रेडेंशियल)',
+                'mdoc.version': 'संस्करण',
+                'mdoc.doc': 'दस्तावेज़ #{n}',
+                'mdoc.docType': 'दस्तावेज़ प्रकार',
+                'mdoc.dataElements': 'डेटा तत्व',
+                'mdoc.mso': 'जारीकर्ता प्रमाणीकरण (MSO)',
+                'mdoc.signed': 'हस्ताक्षरित',
+                'mdoc.validFrom': 'इससे मान्य',
+                'mdoc.validUntil': 'इस तक मान्य',
+                'mdoc.valueDigests': 'मान डाइजेस्ट',
+                'mdoc.deviceKey': 'डिवाइस कुंजी',
+                'mdoc.signer': 'जारीकर्ता हस्ताक्षरकर्ता प्रमाणपत्र',
                 'jwt.ph.token': 'eyJhbGciOi…',
                 'jwt.row.header': 'हेडर (डिकोड किया गया JSON)',
                 'jwt.row.payload': 'पेलोड (डिकोड किया गया JSON)',
@@ -15989,10 +16049,102 @@
             return { header, payload, parts, signingInput: parts[0] + '.' + parts[1], sigBytes, sdJwt: split };
         }
 
+        // ISO 18013-5 mdoc (the second EUDI-wallet credential format, alongside
+        // SD-JWT). The credential is CBOR — a DeviceResponse / Document / IssuerSigned
+        // pasted as hex or base64url. The recursive tag-24 CBOR decoder (draft 288)
+        // already expands the MobileSecurityObject inside issuerAuth, so this layer is
+        // just navigation + a labelled summary: docType, the disclosed data elements
+        // per namespace, the MSO (digest algorithm, validity window, value-digest
+        // count, device key), and — when an x5chain is present — the issuer signer
+        // certificate via the X.509 parser. Decode only; no issuer-trust verification.
+        const MDOC_COSE_ALG = { '-7': 'ES256', '-35': 'ES384', '-36': 'ES512', '-8': 'EdDSA', '-257': 'RS256', '-258': 'RS384', '-259': 'RS512' };
+        function mdocHexToBytes(h) { const u = new Uint8Array(h.length / 2); for (let i = 0; i < h.length; i += 2) u[i / 2] = parseInt(h.substr(i, 2), 16); return u; }
+        function mdocVal(v) {
+            if (v === null || v === undefined) return 'null';
+            if (typeof v === 'string') return v;
+            if (typeof v === 'number' || typeof v === 'boolean') return String(v);
+            if (v.$bytes !== undefined) return "h'" + v.$bytes + "'";
+            if (v.$tag === 0 || v.$tag === 1) return String(v.$value);
+            return JSON.stringify(v);
+        }
+        function mdocTryDecode(token) {
+            if (token.indexOf('.') !== -1 || token.indexOf('~') !== -1) return null;   // JWT / SD-JWT, not mdoc
+            let d;
+            try { d = cborParse(token); } catch (e) { return null; }
+            if (d && typeof d === 'object' && !Array.isArray(d) && (d.documents || d.issuerSigned || d.nameSpaces || d.issuerAuth)) return d;
+            return null;
+        }
+        async function mdocRender(d, resultsEl) {
+            while (resultsEl.firstChild) resultsEl.removeChild(resultsEl.firstChild);
+            resultsEl.classList.remove('hidden');
+            tlsRenderRow(resultsEl, t('tls-cert.row.type'), t('mdoc.type'));
+            if (typeof d.version === 'string') tlsRenderRow(resultsEl, t('mdoc.version'), d.version);
+            const docs = Array.isArray(d.documents) ? d.documents : [d];
+            for (let di = 0; di < docs.length; di++) {
+                const doc = docs[di];
+                const issuerSigned = doc.issuerSigned || (doc.nameSpaces ? doc : null);
+                const docType = doc.docType || (issuerSigned && issuerSigned.docType) || '';
+                tlsRenderHeading(resultsEl, tFormat('mdoc.doc', { n: intlNumber(di + 1) }));
+                if (docType) tlsRenderRow(resultsEl, t('mdoc.docType'), docType);
+                const ns = issuerSigned && issuerSigned.nameSpaces;
+                if (ns && typeof ns === 'object') {
+                    tlsRenderHeading(resultsEl, t('mdoc.dataElements'));
+                    for (const nsName of Object.keys(ns)) {
+                        const items = ns[nsName];
+                        if (!Array.isArray(items)) continue;
+                        for (const it of items) {
+                            const item = (it && it.$tag === 24) ? it.$value : it;
+                            if (item && item.elementIdentifier !== undefined) {
+                                tlsRenderRow(resultsEl, nsName + ' · ' + item.elementIdentifier, mdocVal(item.elementValue));
+                            }
+                        }
+                    }
+                }
+                const ia = issuerSigned && issuerSigned.issuerAuth;
+                const arr = (ia && Array.isArray(ia.$value)) ? ia.$value : (Array.isArray(ia) ? ia : null);
+                if (arr && arr.length >= 3) {
+                    tlsRenderHeading(resultsEl, t('mdoc.mso'));
+                    const prot = arr[0];
+                    if (prot && prot.$bytes) {
+                        try { const ph = cborDecode(mdocHexToBytes(prot.$bytes)); if (ph && ph['1'] !== undefined) tlsRenderRow(resultsEl, t('tls-cert.row.sigAlg'), MDOC_COSE_ALG[String(ph['1'])] || ('COSE alg ' + ph['1'])); } catch (e) {}
+                    }
+                    let mso = arr[2];
+                    if (mso && mso.$tag === 24) mso = mso.$value;
+                    if (mso && typeof mso === 'object') {
+                        if (mso.digestAlgorithm) tlsRenderRow(resultsEl, t('cms.row.digestAlg'), String(mso.digestAlgorithm));
+                        const vi = mso.validityInfo;
+                        if (vi && typeof vi === 'object') {
+                            if (vi.signed !== undefined) tlsRenderRow(resultsEl, t('mdoc.signed'), mdocVal(vi.signed));
+                            if (vi.validFrom !== undefined) tlsRenderRow(resultsEl, t('mdoc.validFrom'), mdocVal(vi.validFrom));
+                            if (vi.validUntil !== undefined) tlsRenderRow(resultsEl, t('mdoc.validUntil'), mdocVal(vi.validUntil));
+                        }
+                        const vd = mso.valueDigests;
+                        if (vd && typeof vd === 'object') {
+                            let cnt = 0;
+                            for (const k of Object.keys(vd)) { const inner = vd[k]; if (inner && typeof inner === 'object') cnt += Object.keys(inner).length; }
+                            tlsRenderRow(resultsEl, t('mdoc.valueDigests'), intlNumber(cnt));
+                        }
+                        const dk = mso.deviceKeyInfo && mso.deviceKeyInfo.deviceKey;
+                        if (dk) tlsRenderRow(resultsEl, t('mdoc.deviceKey'), '✓');
+                    }
+                    const unprot = arr[1];
+                    const chain = unprot && unprot['33'] !== undefined ? unprot['33'] : null;
+                    let certHex = null;
+                    if (chain) { if (Array.isArray(chain) && chain[0] && chain[0].$bytes) certHex = chain[0].$bytes; else if (chain.$bytes) certHex = chain.$bytes; }
+                    if (certHex) {
+                        tlsRenderHeading(resultsEl, t('mdoc.signer'));
+                        try { const info = await tlsCertParseDer(mdocHexToBytes(certHex)); tlsRenderRow(resultsEl, t('tls-cert.row.subject'), info.subject || '(empty)'); tlsRenderRow(resultsEl, t('tls-cert.row.issuer'), info.issuer || '(empty)'); } catch (e) {}
+                    }
+                }
+            }
+        }
+
         document.getElementById('btn-jwt-decode').addEventListener('click', async () => {
             const token = document.getElementById('jwt-input').value.trim();
             if (!token) { alert(t('err.jwtEmpty')); return; }
             try {
+                const mdoc = mdocTryDecode(token);
+                if (mdoc) { await mdocRender(mdoc, document.getElementById('jwt-results')); return; }
                 const decoded = jwtRender(token);
                 if (decoded.sdJwt && (decoded.sdJwt.disclosures.length || decoded.sdJwt.kbJwt)) {
                     const expected = {
