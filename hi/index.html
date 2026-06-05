@@ -4763,6 +4763,10 @@
                 'cii.warn.itemName': 'CII line #{line} is missing its item name (BT-153, ram:SpecifiedTradeProduct/ram:Name) — EN 16931 BR-25 requires every invoice line to name the item supplied; a Factur-X / ZUGFeRD document with an unnamed line is rejected at the schematron gate and the buyer’s AP has nothing to reconcile the charge against (the CII analogue of the UBL BR-25 item-name check)',
                 'cii.ok.qtyUnitCode': 'Every CII billed quantity declares a unit code across all {n} line(s) (EN 16931 BT-130, ram:BilledQuantity/@unitCode)',
                 'cii.warn.qtyUnitCode': 'CII line #{line} billed quantity is missing its @unitCode (BT-130, ram:BilledQuantity) — EN 16931 requires every line quantity to declare its unit of measure (UN/ECE Recommendation 20 / 21); a Factur-X / ZUGFeRD document without it is rejected at the schematron gate because the receiver cannot interpret the quantity without a unit (the CII analogue of the UBL InvoicedQuantity/@unitCode check)',
+                'cii.ok.priceAmount': 'Every CII line declares a net price across all {n} line(s) (EN 16931 BR-26 / BT-146, ram:NetPriceProductTradePrice/ram:ChargeAmount)',
+                'cii.warn.priceAmount': 'CII line #{line} is missing its net price (BT-146, ram:NetPriceProductTradePrice/ram:ChargeAmount) — EN 16931 BR-26 requires every invoice line to declare the item net price; a Factur-X / ZUGFeRD document with a priceless line is rejected at the schematron gate and the line net cross-product (BR-CO-04) has no price basis to verify against (the CII analogue of the UBL BR-26 price-amount presence check)',
+                'cii.ok.lineQuantity': 'Every CII line declares a billed quantity across all {n} line(s) (EN 16931 BT-129, ram:BilledQuantity)',
+                'cii.warn.lineQuantity': 'CII line #{line} is missing its billed quantity (BT-129, ram:SpecifiedLineTradeDelivery/ram:BilledQuantity) — EN 16931 requires every invoice line to declare the quantity invoiced; a Factur-X / ZUGFeRD document with a quantity-less line is rejected at the schematron gate and the line net cross-product (BR-CO-04) loses its derivable basis (the CII analogue of the UBL InvoicedQuantity presence check)',
                 'ubl.row.issueDate': 'Issue date',
                 'ubl.row.dueDate': 'Due date',
                 'ubl.row.currency': 'Currency',
@@ -6361,6 +6365,10 @@
                 'cii.warn.itemName': 'La ligne CII n°{line} ne déclare pas le nom de son article (BT-153, ram:SpecifiedTradeProduct/ram:Name) — EN 16931 BR-25 exige que chaque ligne de facture nomme l’article fourni ; un document Factur-X / ZUGFeRD avec une ligne sans nom est rejeté au contrôle schematron et la comptabilité fournisseurs de l’acheteur n’a rien pour rapprocher la charge (l’analogue CII du contrôle UBL BR-25 du nom d’article)',
                 'cii.ok.qtyUnitCode': 'Chaque quantité facturée CII déclare un code d’unité sur l’ensemble des {n} ligne(s) (EN 16931 BT-130, ram:BilledQuantity/@unitCode)',
                 'cii.warn.qtyUnitCode': 'La quantité facturée de la ligne CII n°{line} ne déclare pas son @unitCode (BT-130, ram:BilledQuantity) — EN 16931 exige que chaque quantité de ligne déclare son unité de mesure (Recommandation UN/ECE 20 / 21) ; un document Factur-X / ZUGFeRD sans elle est rejeté au contrôle schematron car le destinataire ne peut interpréter la quantité sans unité (l’analogue CII du contrôle UBL InvoicedQuantity/@unitCode)',
+                'cii.ok.priceAmount': 'Chaque ligne CII déclare un prix net sur l’ensemble des {n} ligne(s) (EN 16931 BR-26 / BT-146, ram:NetPriceProductTradePrice/ram:ChargeAmount)',
+                'cii.warn.priceAmount': 'La ligne CII n°{line} ne déclare pas son prix net (BT-146, ram:NetPriceProductTradePrice/ram:ChargeAmount) — EN 16931 BR-26 exige que chaque ligne de facture déclare le prix net de l’article ; un document Factur-X / ZUGFeRD avec une ligne sans prix est rejeté au contrôle schematron et le produit croisé net de ligne (BR-CO-04) n’a aucune base de prix à vérifier (l’analogue CII du contrôle UBL BR-26 de présence du prix)',
+                'cii.ok.lineQuantity': 'Chaque ligne CII déclare une quantité facturée sur l’ensemble des {n} ligne(s) (EN 16931 BT-129, ram:BilledQuantity)',
+                'cii.warn.lineQuantity': 'La ligne CII n°{line} ne déclare pas sa quantité facturée (BT-129, ram:SpecifiedLineTradeDelivery/ram:BilledQuantity) — EN 16931 exige que chaque ligne de facture déclare la quantité facturée ; un document Factur-X / ZUGFeRD avec une ligne sans quantité est rejeté au contrôle schematron et le produit croisé net de ligne (BR-CO-04) perd sa base dérivable (l’analogue CII du contrôle UBL de présence d’InvoicedQuantity)',
                 'ubl.row.issueDate': 'Date d’émission',
                 'ubl.row.dueDate': 'Date d’échéance',
                 'ubl.row.currency': 'Devise',
@@ -7937,6 +7945,10 @@
                 'cii.warn.itemName': 'CII 第 {line} 行缺少其项目名称（BT-153，ram:SpecifiedTradeProduct/ram:Name）——EN 16931 BR-25 要求每个发票行为所供项目命名；带有未命名行的 Factur-X / ZUGFeRD 文档会在 schematron 关卡被拒绝，且买方应付账款无法据以核对该费用（UBL BR-25 项目名称校验的 CII 对应物）',
                 'cii.ok.qtyUnitCode': '所有 {n} 个 CII 行的计费数量均声明单位代码（EN 16931 BT-130，ram:BilledQuantity/@unitCode）',
                 'cii.warn.qtyUnitCode': 'CII 第 {line} 行的计费数量缺少其 @unitCode（BT-130，ram:BilledQuantity）——EN 16931 要求每个行数量声明其计量单位（UN/ECE 建议 20 / 21）；缺少它的 Factur-X / ZUGFeRD 文档会在 schematron 关卡被拒绝，因为接收方无法在没有单位的情况下解释数量（UBL InvoicedQuantity/@unitCode 校验的 CII 对应物）',
+                'cii.ok.priceAmount': '所有 {n} 个 CII 行均声明净单价（EN 16931 BR-26 / BT-146，ram:NetPriceProductTradePrice/ram:ChargeAmount）',
+                'cii.warn.priceAmount': 'CII 第 {line} 行缺少其净单价（BT-146，ram:NetPriceProductTradePrice/ram:ChargeAmount）——EN 16931 BR-26 要求每个发票行声明项目净单价；带有无价格行的 Factur-X / ZUGFeRD 文档会在 schematron 关卡被拒绝，且行净额交叉乘积（BR-CO-04）没有价格基础可供校验（UBL BR-26 价格金额存在性校验的 CII 对应物）',
+                'cii.ok.lineQuantity': '所有 {n} 个 CII 行均声明计费数量（EN 16931 BT-129，ram:BilledQuantity）',
+                'cii.warn.lineQuantity': 'CII 第 {line} 行缺少其计费数量（BT-129，ram:SpecifiedLineTradeDelivery/ram:BilledQuantity）——EN 16931 要求每个发票行声明所开票数量；带有无数量行的 Factur-X / ZUGFeRD 文档会在 schematron 关卡被拒绝，且行净额交叉乘积（BR-CO-04）失去其可推导基础（UBL InvoicedQuantity 存在性校验的 CII 对应物）',
                 'ubl.row.issueDate': '开票日期',
                 'ubl.row.dueDate': '到期日期',
                 'ubl.row.currency': '货币',
@@ -9528,6 +9540,10 @@
                 'cii.warn.itemName': 'Der CII-Zeile #{line} fehlt der Artikelname (BT-153, ram:SpecifiedTradeProduct/ram:Name) — EN 16931 BR-25 verlangt, dass jede Rechnungszeile den gelieferten Artikel benennt; ein Factur-X-/ZUGFeRD-Dokument mit einer unbenannten Zeile wird am Schematron-Gate abgelehnt, und die Kreditorenbuchhaltung des Käufers hat nichts, womit sie die Position abgleichen kann (das CII-Pendant zur UBL-BR-25-Artikelnamenprüfung)',
                 'cii.ok.qtyUnitCode': 'Jede CII-berechnete Menge deklariert einen Einheitencode über alle {n} Zeile(n) (EN 16931 BT-130, ram:BilledQuantity/@unitCode)',
                 'cii.warn.qtyUnitCode': 'Der berechneten Menge der CII-Zeile #{line} fehlt ihr @unitCode (BT-130, ram:BilledQuantity) — EN 16931 verlangt, dass jede Zeilenmenge ihre Maßeinheit deklariert (UN/ECE-Empfehlung 20 / 21); ein Factur-X-/ZUGFeRD-Dokument ohne sie wird am Schematron-Gate abgelehnt, da der Empfänger die Menge ohne Einheit nicht interpretieren kann (das CII-Pendant zur UBL-Prüfung InvoicedQuantity/@unitCode)',
+                'cii.ok.priceAmount': 'Jede CII-Zeile deklariert einen Nettopreis über alle {n} Zeile(n) (EN 16931 BR-26 / BT-146, ram:NetPriceProductTradePrice/ram:ChargeAmount)',
+                'cii.warn.priceAmount': 'Der CII-Zeile #{line} fehlt ihr Nettopreis (BT-146, ram:NetPriceProductTradePrice/ram:ChargeAmount) — EN 16931 BR-26 verlangt, dass jede Rechnungszeile den Artikel-Nettopreis deklariert; ein Factur-X-/ZUGFeRD-Dokument mit einer preislosen Zeile wird am Schematron-Gate abgelehnt, und das Zeilennetto-Kreuzprodukt (BR-CO-04) hat keine Preisbasis zur Prüfung (das CII-Pendant zur UBL-BR-26-Preisbetrag-Präsenzprüfung)',
+                'cii.ok.lineQuantity': 'Jede CII-Zeile deklariert eine berechnete Menge über alle {n} Zeile(n) (EN 16931 BT-129, ram:BilledQuantity)',
+                'cii.warn.lineQuantity': 'Der CII-Zeile #{line} fehlt ihre berechnete Menge (BT-129, ram:SpecifiedLineTradeDelivery/ram:BilledQuantity) — EN 16931 verlangt, dass jede Rechnungszeile die berechnete Menge deklariert; ein Factur-X-/ZUGFeRD-Dokument mit einer mengenlosen Zeile wird am Schematron-Gate abgelehnt, und das Zeilennetto-Kreuzprodukt (BR-CO-04) verliert seine ableitbare Basis (das CII-Pendant zur UBL-InvoicedQuantity-Präsenzprüfung)',
                 'ubl.row.issueDate': 'Ausstellungsdatum',
                 'ubl.row.dueDate': 'Fälligkeitsdatum',
                 'ubl.row.currency': 'Währung',
@@ -11104,6 +11120,10 @@
                 'cii.warn.itemName': 'CII पंक्ति #{line} में उसका वस्तु नाम अनुपस्थित है (BT-153, ram:SpecifiedTradeProduct/ram:Name) — EN 16931 BR-25 के लिए प्रत्येक चालान पंक्ति का आपूर्ति की गई वस्तु का नाम देना आवश्यक है; बिना नाम वाली पंक्ति वाला Factur-X / ZUGFeRD दस्तावेज़ schematron गेट पर अस्वीकृत होता है और क्रेता की देय-राशि टीम के पास उस शुल्क का मिलान करने के लिए कुछ नहीं होता (UBL BR-25 वस्तु-नाम जाँच का CII समकक्ष)',
                 'cii.ok.qtyUnitCode': 'सभी {n} पंक्तियों में प्रत्येक CII बिल की गई मात्रा एक इकाई कोड घोषित करती है (EN 16931 BT-130, ram:BilledQuantity/@unitCode)',
                 'cii.warn.qtyUnitCode': 'CII पंक्ति #{line} की बिल की गई मात्रा में उसका @unitCode अनुपस्थित है (BT-130, ram:BilledQuantity) — EN 16931 के लिए प्रत्येक पंक्ति मात्रा का अपनी माप इकाई घोषित करना आवश्यक है (UN/ECE अनुशंसा 20 / 21); इसके बिना Factur-X / ZUGFeRD दस्तावेज़ schematron गेट पर अस्वीकृत होता है क्योंकि प्राप्तकर्ता इकाई के बिना मात्रा की व्याख्या नहीं कर सकता (UBL InvoicedQuantity/@unitCode जाँच का CII समकक्ष)',
+                'cii.ok.priceAmount': 'सभी {n} पंक्तियों में प्रत्येक CII पंक्ति एक शुद्ध मूल्य घोषित करती है (EN 16931 BR-26 / BT-146, ram:NetPriceProductTradePrice/ram:ChargeAmount)',
+                'cii.warn.priceAmount': 'CII पंक्ति #{line} में उसका शुद्ध मूल्य अनुपस्थित है (BT-146, ram:NetPriceProductTradePrice/ram:ChargeAmount) — EN 16931 BR-26 के लिए प्रत्येक चालान पंक्ति का वस्तु शुद्ध मूल्य घोषित करना आवश्यक है; बिना मूल्य वाली पंक्ति वाला Factur-X / ZUGFeRD दस्तावेज़ schematron गेट पर अस्वीकृत होता है और पंक्ति शुद्ध क्रॉस-उत्पाद (BR-CO-04) के पास सत्यापन हेतु कोई मूल्य आधार नहीं होता (UBL BR-26 मूल्य-राशि उपस्थिति जाँच का CII समकक्ष)',
+                'cii.ok.lineQuantity': 'सभी {n} पंक्तियों में प्रत्येक CII पंक्ति एक बिल की गई मात्रा घोषित करती है (EN 16931 BT-129, ram:BilledQuantity)',
+                'cii.warn.lineQuantity': 'CII पंक्ति #{line} में उसकी बिल की गई मात्रा अनुपस्थित है (BT-129, ram:SpecifiedLineTradeDelivery/ram:BilledQuantity) — EN 16931 के लिए प्रत्येक चालान पंक्ति का चालान की गई मात्रा घोषित करना आवश्यक है; बिना मात्रा वाली पंक्ति वाला Factur-X / ZUGFeRD दस्तावेज़ schematron गेट पर अस्वीकृत होता है और पंक्ति शुद्ध क्रॉस-उत्पाद (BR-CO-04) अपना व्युत्पन्न आधार खो देता है (UBL InvoicedQuantity उपस्थिति जाँच का CII समकक्ष)',
                 'ubl.row.issueDate': 'जारी करने की तिथि',
                 'ubl.row.dueDate': 'देय तिथि',
                 'ubl.row.currency': 'मुद्रा',
@@ -25213,6 +25233,77 @@
             }
         }
 
+        // CII line net-price presence (draft 279). EN 16931 BR-26 requires every
+        // invoice line to declare the item net price (BT-146) — in CII the
+        // ram:SpecifiedLineTradeAgreement/ram:NetPriceProductTradePrice/
+        // ram:ChargeAmount (≈ the UBL cac:Price/cbc:PriceAmount). A line with no net
+        // price is rejected at the schematron gate, and the line net cross-product
+        // (draft 273 / BR-CO-04) has no price basis to verify against — it silently
+        // skips a priceless line, so this presence gate is the companion that
+        // surfaces the absence. The CII analogue of ublCheckPriceAmountPresence.
+        // ChargeAmount is read as a direct child of NetPriceProductTradePrice so a
+        // nested AppliedTradeAllowanceCharge (ram:ActualAmount) is never mistaken for
+        // the net price. No-ops when the document carries no lines (draft 262 owns
+        // the no-line defect).
+        function ciiCheckPriceAmount(out, detected) {
+            const r = detected.root;
+            const txn = sepaFirst(r, 'SupplyChainTradeTransaction');
+            if (!txn) return;
+            const lines = sepaAllLocal(txn, 'IncludedSupplyChainTradeLineItem');
+            if (!lines.length) return;
+            const bad = [];
+            lines.forEach((line, i) => {
+                const lineDoc = sepaFirst(line, 'AssociatedDocumentLineDocument');
+                const lineId = (lineDoc ? (sepaTextOf(lineDoc, 'LineID') || '').trim() : '') || String(i + 1);
+                const agreement = sepaFirst(line, 'SpecifiedLineTradeAgreement');
+                const priceEl = agreement ? sepaFirst(agreement, 'NetPriceProductTradePrice') : null;
+                const chargeEl = priceEl ? sepaFirstChildLocal(priceEl, 'ChargeAmount') : null;
+                const v = chargeEl ? (chargeEl.textContent || '').trim() : '';
+                if (!v) bad.push(lineId);
+            });
+            if (bad.length === 0) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + tFormat('cii.ok.priceAmount', { n: intlNumber(lines.length) }));
+            } else {
+                for (const id of bad) {
+                    tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + tFormat('cii.warn.priceAmount', { line: id }));
+                }
+            }
+        }
+
+        // CII line billed-quantity presence (draft 280). EN 16931 BT-129 requires
+        // every invoice line to declare the quantity invoiced — in CII the
+        // ram:SpecifiedLineTradeDelivery/ram:BilledQuantity (≈ the UBL
+        // cbc:InvoicedQuantity / cbc:CreditedQuantity). A line with no quantity is
+        // rejected at the schematron gate, and the line net cross-product (draft 273
+        // / BR-CO-04) loses its derivable basis (LineTotalAmount = NetPrice ×
+        // BilledQuantity) — it silently skips a quantity-less line, so this presence
+        // gate surfaces the absence. The CII analogue of ublCheckLineQuantity; the
+        // quantity-value companion to the @unitCode gate (draft 278). No-ops when the
+        // document carries no lines.
+        function ciiCheckLineQuantity(out, detected) {
+            const r = detected.root;
+            const txn = sepaFirst(r, 'SupplyChainTradeTransaction');
+            if (!txn) return;
+            const lines = sepaAllLocal(txn, 'IncludedSupplyChainTradeLineItem');
+            if (!lines.length) return;
+            const missing = [];
+            lines.forEach((line, i) => {
+                const lineDoc = sepaFirst(line, 'AssociatedDocumentLineDocument');
+                const lineId = (lineDoc ? (sepaTextOf(lineDoc, 'LineID') || '').trim() : '') || String(i + 1);
+                const delivery = sepaFirst(line, 'SpecifiedLineTradeDelivery');
+                const qtyEl = delivery ? sepaFirst(delivery, 'BilledQuantity') : null;
+                const raw = qtyEl ? (qtyEl.textContent || '').trim() : '';
+                if (!raw) missing.push(lineId);
+            });
+            if (missing.length === 0) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + tFormat('cii.ok.lineQuantity', { n: intlNumber(lines.length) }));
+            } else {
+                for (const id of missing) {
+                    tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + tFormat('cii.warn.lineQuantity', { line: id }));
+                }
+            }
+        }
+
         // EN 16931 totals consistency check. Two invariants are independent of any
         // PrepaidAmount / PayableRoundingAmount complications and catch the
         // overwhelming majority of real-world arithmetic errors:
@@ -30442,6 +30533,8 @@
                     ciiCheckTaxTypeCode(out, detected);
                     ciiCheckItemName(out, detected);
                     ciiCheckQuantityUnitCode(out, detected);
+                    ciiCheckPriceAmount(out, detected);
+                    ciiCheckLineQuantity(out, detected);
                     return;
                 }
                 ublRenderHeader(out, detected);

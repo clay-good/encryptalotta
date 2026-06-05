@@ -7265,6 +7265,36 @@ test('cii: billed-quantity unit code flags a missing @unitCode BT-130 (draft 278
   await expect(page.locator('#ubl-results')).toContainText(/CII line #1 billed quantity is missing its @unitCode \(BT-130, ram:BilledQuantity\)/i, { timeout: 5_000 });
 });
 
+test('cii: net-price presence confirms when every line declares a price (draft 279)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', CII_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Every CII line declares a net price/i, { timeout: 5_000 });
+});
+
+test('cii: net-price presence flags a line missing its net price BT-146 (draft 279)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  const withBad = CII_INVOICE.replace('<ram:ChargeAmount>40.00</ram:ChargeAmount>', '');
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/CII line #1 is missing its net price \(BT-146, ram:NetPriceProductTradePrice\/ram:ChargeAmount\)/i, { timeout: 5_000 });
+});
+
+test('cii: line-quantity presence confirms when every line declares a quantity (draft 280)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', CII_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Every CII line declares a billed quantity/i, { timeout: 5_000 });
+});
+
+test('cii: line-quantity presence flags a line missing its billed quantity BT-129 (draft 280)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  const withBad = CII_INVOICE.replace('<ram:BilledQuantity unitCode="C62">3</ram:BilledQuantity>', '');
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/CII line #1 is missing its billed quantity \(BT-129, ram:SpecifiedLineTradeDelivery\/ram:BilledQuantity\)/i, { timeout: 5_000 });
+});
+
 test('ubl: LegalMonetaryTotal/PayableAmount presence flags a missing slot (draft 183)', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   const withBad = UBL_INVOICE.replace(/<cac:LegalMonetaryTotal>[\s\S]*?<\/cac:LegalMonetaryTotal>/g, (block) =>
