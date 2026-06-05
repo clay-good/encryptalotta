@@ -6883,7 +6883,7 @@ const CII_INVOICE = `<?xml version="1.0" encoding="UTF-8"?>
       <ram:SpecifiedLineTradeSettlement><ram:SpecifiedTradeSettlementLineMonetarySummation><ram:LineTotalAmount>120.00</ram:LineTotalAmount></ram:SpecifiedTradeSettlementLineMonetarySummation></ram:SpecifiedLineTradeSettlement>
     </ram:IncludedSupplyChainTradeLineItem>
     <ram:ApplicableHeaderTradeAgreement>
-      <ram:SellerTradeParty><ram:Name>Fournisseur SARL</ram:Name><ram:PostalTradeAddress><ram:CountryID>FR</ram:CountryID></ram:PostalTradeAddress></ram:SellerTradeParty>
+      <ram:SellerTradeParty><ram:Name>Fournisseur SARL</ram:Name><ram:PostalTradeAddress><ram:CountryID>FR</ram:CountryID></ram:PostalTradeAddress><ram:SpecifiedTaxRegistration><ram:ID schemeID="VA">FR40303265045</ram:ID></ram:SpecifiedTaxRegistration></ram:SellerTradeParty>
       <ram:BuyerTradeParty><ram:Name>Kaeufer GmbH</ram:Name><ram:PostalTradeAddress><ram:CountryID>DE</ram:CountryID></ram:PostalTradeAddress></ram:BuyerTradeParty>
     </ram:ApplicableHeaderTradeAgreement>
     <ram:ApplicableHeaderTradeSettlement>
@@ -7293,6 +7293,36 @@ test('cii: line-quantity presence flags a line missing its billed quantity BT-12
   await page.fill('#ubl-input', withBad);
   await page.click('#btn-ubl-parse');
   await expect(page.locator('#ubl-results')).toContainText(/CII line #1 is missing its billed quantity \(BT-129, ram:SpecifiedLineTradeDelivery\/ram:BilledQuantity\)/i, { timeout: 5_000 });
+});
+
+test('cii: profile identification detects EN 16931 (COMFORT) from the CustomizationID (draft 281)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', CII_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Factur-X \/ ZUGFeRD profile detected: EN 16931 \(COMFORT\)/i, { timeout: 5_000 });
+});
+
+test('cii: profile identification detects the Factur-X EXTENDED profile (draft 281)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  const withExt = CII_INVOICE.replace('<ram:ID>urn:cen.eu:en16931:2017</ram:ID>', '<ram:ID>urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended</ram:ID>');
+  await page.fill('#ubl-input', withExt);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Factur-X \/ ZUGFeRD profile detected: Factur-X \/ ZUGFeRD EXTENDED/i, { timeout: 5_000 });
+});
+
+test('cii: seller VAT validity confirms a well-formed FR VAT id (draft 282)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', CII_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/CII seller VAT identifier FR40303265045 is valid/i, { timeout: 5_000 });
+});
+
+test('cii: seller VAT validity flags a malformed VAT id BT-31 (draft 282)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  const withBad = CII_INVOICE.replace('<ram:ID schemeID="VA">FR40303265045</ram:ID>', '<ram:ID schemeID="VA">FR00</ram:ID>');
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/CII seller VAT identifier FR00 .* is invalid/i, { timeout: 5_000 });
 });
 
 test('ubl: LegalMonetaryTotal/PayableAmount presence flags a missing slot (draft 183)', async ({ page }) => {

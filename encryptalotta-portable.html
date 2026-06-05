@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <!--
   encryptalotta — single-file portable build
-  Source mtime: 2026-06-05T20:23:10.036Z
-  Source: index.html (SHA-256: d91b772b2d087aa080c67f9c42a5590e96aa78cf0c4275990d128cce6432e7ae)
+  Source mtime: 2026-06-05T20:36:47.551Z
+  Source: index.html (SHA-256: 90f989ed8228c56eeb62b3a1f1acad7c8c5cc9a5444a82e4a95a84f3ad36112f)
   All vendored JavaScript inlined; favicons inlined as data: URIs.
   Identical functionality to the live site at https://encryptalotta.com.
   Runs from file://, USB stick, chat attachment, anywhere. No network calls.
@@ -7078,6 +7078,10 @@ var qrcode = function() {
                 'cii.warn.priceAmount': 'CII line #{line} is missing its net price (BT-146, ram:NetPriceProductTradePrice/ram:ChargeAmount) — EN 16931 BR-26 requires every invoice line to declare the item net price; a Factur-X / ZUGFeRD document with a priceless line is rejected at the schematron gate and the line net cross-product (BR-CO-04) has no price basis to verify against (the CII analogue of the UBL BR-26 price-amount presence check)',
                 'cii.ok.lineQuantity': 'Every CII line declares a billed quantity across all {n} line(s) (EN 16931 BT-129, ram:BilledQuantity)',
                 'cii.warn.lineQuantity': 'CII line #{line} is missing its billed quantity (BT-129, ram:SpecifiedLineTradeDelivery/ram:BilledQuantity) — EN 16931 requires every invoice line to declare the quantity invoiced; a Factur-X / ZUGFeRD document with a quantity-less line is rejected at the schematron gate and the line net cross-product (BR-CO-04) loses its derivable basis (the CII analogue of the UBL InvoicedQuantity presence check)',
+                'cii.ok.profile': 'Factur-X / ZUGFeRD profile detected: {name} (EN 16931 BT-24 CustomizationID — the conformance level that sets which data is mandatory)',
+                'cii.info.profile': 'CII profile URN {urn} is not a recognized Factur-X / ZUGFeRD / XRechnung / PEPPOL profile (EN 16931 BT-24 CustomizationID) — it may be a newer or private profile; the EN 16931 conformance gates still apply',
+                'cii.ok.sellerVat': 'CII seller VAT identifier {vat} is valid (EN 16931 BT-31, ram:SpecifiedTaxRegistration/ram:ID schemeID="VA" — ISO 3166-1 country prefix + member-state format and checksum)',
+                'cii.warn.sellerVat': 'CII seller VAT identifier {vat} (BT-31, ram:SpecifiedTaxRegistration/ram:ID schemeID="VA") is invalid — EN 16931 / PEPPOL require an ISO 3166-1 alpha-2 country prefix followed by the member-state VAT format; a malformed value passes XML validation but is rejected at the BR-CO-09 schematron gate (the CII analogue of the UBL seller-VAT check, reusing the shared EU VAT validator)',
                 'ubl.row.issueDate': 'Issue date',
                 'ubl.row.dueDate': 'Due date',
                 'ubl.row.currency': 'Currency',
@@ -8680,6 +8684,10 @@ var qrcode = function() {
                 'cii.warn.priceAmount': 'La ligne CII n°{line} ne déclare pas son prix net (BT-146, ram:NetPriceProductTradePrice/ram:ChargeAmount) — EN 16931 BR-26 exige que chaque ligne de facture déclare le prix net de l’article ; un document Factur-X / ZUGFeRD avec une ligne sans prix est rejeté au contrôle schematron et le produit croisé net de ligne (BR-CO-04) n’a aucune base de prix à vérifier (l’analogue CII du contrôle UBL BR-26 de présence du prix)',
                 'cii.ok.lineQuantity': 'Chaque ligne CII déclare une quantité facturée sur l’ensemble des {n} ligne(s) (EN 16931 BT-129, ram:BilledQuantity)',
                 'cii.warn.lineQuantity': 'La ligne CII n°{line} ne déclare pas sa quantité facturée (BT-129, ram:SpecifiedLineTradeDelivery/ram:BilledQuantity) — EN 16931 exige que chaque ligne de facture déclare la quantité facturée ; un document Factur-X / ZUGFeRD avec une ligne sans quantité est rejeté au contrôle schematron et le produit croisé net de ligne (BR-CO-04) perd sa base dérivable (l’analogue CII du contrôle UBL de présence d’InvoicedQuantity)',
+                'cii.ok.profile': 'Profil Factur-X / ZUGFeRD détecté : {name} (EN 16931 BT-24 CustomizationID — le niveau de conformité qui détermine les données obligatoires)',
+                'cii.info.profile': 'L’URN de profil CII {urn} n’est pas un profil Factur-X / ZUGFeRD / XRechnung / PEPPOL reconnu (EN 16931 BT-24 CustomizationID) — il peut s’agir d’un profil plus récent ou privé ; les contrôles de conformité EN 16931 s’appliquent toujours',
+                'cii.ok.sellerVat': 'L’identifiant de TVA du vendeur CII {vat} est valide (EN 16931 BT-31, ram:SpecifiedTaxRegistration/ram:ID schemeID="VA" — préfixe pays ISO 3166-1 + format et somme de contrôle de l’État membre)',
+                'cii.warn.sellerVat': 'L’identifiant de TVA du vendeur CII {vat} (BT-31, ram:SpecifiedTaxRegistration/ram:ID schemeID="VA") est invalide — EN 16931 / PEPPOL exigent un préfixe pays ISO 3166-1 alpha-2 suivi du format de TVA de l’État membre ; une valeur mal formée passe la validation XML mais est rejetée au contrôle schematron BR-CO-09 (l’analogue CII du contrôle UBL de la TVA du vendeur, réutilisant le validateur de TVA de l’UE partagé)',
                 'ubl.row.issueDate': 'Date d’émission',
                 'ubl.row.dueDate': 'Date d’échéance',
                 'ubl.row.currency': 'Devise',
@@ -10260,6 +10268,10 @@ var qrcode = function() {
                 'cii.warn.priceAmount': 'CII 第 {line} 行缺少其净单价（BT-146，ram:NetPriceProductTradePrice/ram:ChargeAmount）——EN 16931 BR-26 要求每个发票行声明项目净单价；带有无价格行的 Factur-X / ZUGFeRD 文档会在 schematron 关卡被拒绝，且行净额交叉乘积（BR-CO-04）没有价格基础可供校验（UBL BR-26 价格金额存在性校验的 CII 对应物）',
                 'cii.ok.lineQuantity': '所有 {n} 个 CII 行均声明计费数量（EN 16931 BT-129，ram:BilledQuantity）',
                 'cii.warn.lineQuantity': 'CII 第 {line} 行缺少其计费数量（BT-129，ram:SpecifiedLineTradeDelivery/ram:BilledQuantity）——EN 16931 要求每个发票行声明所开票数量；带有无数量行的 Factur-X / ZUGFeRD 文档会在 schematron 关卡被拒绝，且行净额交叉乘积（BR-CO-04）失去其可推导基础（UBL InvoicedQuantity 存在性校验的 CII 对应物）',
+                'cii.ok.profile': '检测到 Factur-X / ZUGFeRD 配置文件：{name}（EN 16931 BT-24 CustomizationID——决定哪些数据为必填的合规级别）',
+                'cii.info.profile': 'CII 配置文件 URN {urn} 不是已识别的 Factur-X / ZUGFeRD / XRechnung / PEPPOL 配置文件（EN 16931 BT-24 CustomizationID）——它可能是较新或私有的配置文件；EN 16931 合规关卡仍然适用',
+                'cii.ok.sellerVat': 'CII 卖方增值税识别号 {vat} 有效（EN 16931 BT-31，ram:SpecifiedTaxRegistration/ram:ID schemeID="VA"——ISO 3166-1 国家前缀 + 成员国格式与校验和）',
+                'cii.warn.sellerVat': 'CII 卖方增值税识别号 {vat}（BT-31，ram:SpecifiedTaxRegistration/ram:ID schemeID="VA"）无效——EN 16931 / PEPPOL 要求 ISO 3166-1 alpha-2 国家前缀后跟成员国增值税格式；格式错误的值可通过 XML 验证但会在 BR-CO-09 schematron 关卡被拒绝（UBL 卖方增值税校验的 CII 对应物，复用共享的欧盟增值税验证器）',
                 'ubl.row.issueDate': '开票日期',
                 'ubl.row.dueDate': '到期日期',
                 'ubl.row.currency': '货币',
@@ -11855,6 +11867,10 @@ var qrcode = function() {
                 'cii.warn.priceAmount': 'Der CII-Zeile #{line} fehlt ihr Nettopreis (BT-146, ram:NetPriceProductTradePrice/ram:ChargeAmount) — EN 16931 BR-26 verlangt, dass jede Rechnungszeile den Artikel-Nettopreis deklariert; ein Factur-X-/ZUGFeRD-Dokument mit einer preislosen Zeile wird am Schematron-Gate abgelehnt, und das Zeilennetto-Kreuzprodukt (BR-CO-04) hat keine Preisbasis zur Prüfung (das CII-Pendant zur UBL-BR-26-Preisbetrag-Präsenzprüfung)',
                 'cii.ok.lineQuantity': 'Jede CII-Zeile deklariert eine berechnete Menge über alle {n} Zeile(n) (EN 16931 BT-129, ram:BilledQuantity)',
                 'cii.warn.lineQuantity': 'Der CII-Zeile #{line} fehlt ihre berechnete Menge (BT-129, ram:SpecifiedLineTradeDelivery/ram:BilledQuantity) — EN 16931 verlangt, dass jede Rechnungszeile die berechnete Menge deklariert; ein Factur-X-/ZUGFeRD-Dokument mit einer mengenlosen Zeile wird am Schematron-Gate abgelehnt, und das Zeilennetto-Kreuzprodukt (BR-CO-04) verliert seine ableitbare Basis (das CII-Pendant zur UBL-InvoicedQuantity-Präsenzprüfung)',
+                'cii.ok.profile': 'Factur-X-/ZUGFeRD-Profil erkannt: {name} (EN 16931 BT-24 CustomizationID — die Konformitätsstufe, die festlegt, welche Daten verpflichtend sind)',
+                'cii.info.profile': 'Die CII-Profil-URN {urn} ist kein erkanntes Factur-X-/ZUGFeRD-/XRechnung-/PEPPOL-Profil (EN 16931 BT-24 CustomizationID) — möglicherweise ein neueres oder privates Profil; die EN-16931-Konformitätsprüfungen gelten weiterhin',
+                'cii.ok.sellerVat': 'Die CII-Verkäufer-USt-IdNr. {vat} ist gültig (EN 16931 BT-31, ram:SpecifiedTaxRegistration/ram:ID schemeID="VA" — ISO-3166-1-Länderpräfix + Format und Prüfsumme des Mitgliedstaats)',
+                'cii.warn.sellerVat': 'Die CII-Verkäufer-USt-IdNr. {vat} (BT-31, ram:SpecifiedTaxRegistration/ram:ID schemeID="VA") ist ungültig — EN 16931 / PEPPOL verlangen ein ISO-3166-1-alpha-2-Länderpräfix gefolgt vom USt-Format des Mitgliedstaats; ein fehlerhafter Wert besteht die XML-Validierung, wird aber am BR-CO-09-Schematron-Gate abgelehnt (das CII-Pendant zur UBL-Verkäufer-USt-Prüfung, das den gemeinsamen EU-USt-Validator wiederverwendet)',
                 'ubl.row.issueDate': 'Ausstellungsdatum',
                 'ubl.row.dueDate': 'Fälligkeitsdatum',
                 'ubl.row.currency': 'Währung',
@@ -13435,6 +13451,10 @@ var qrcode = function() {
                 'cii.warn.priceAmount': 'CII पंक्ति #{line} में उसका शुद्ध मूल्य अनुपस्थित है (BT-146, ram:NetPriceProductTradePrice/ram:ChargeAmount) — EN 16931 BR-26 के लिए प्रत्येक चालान पंक्ति का वस्तु शुद्ध मूल्य घोषित करना आवश्यक है; बिना मूल्य वाली पंक्ति वाला Factur-X / ZUGFeRD दस्तावेज़ schematron गेट पर अस्वीकृत होता है और पंक्ति शुद्ध क्रॉस-उत्पाद (BR-CO-04) के पास सत्यापन हेतु कोई मूल्य आधार नहीं होता (UBL BR-26 मूल्य-राशि उपस्थिति जाँच का CII समकक्ष)',
                 'cii.ok.lineQuantity': 'सभी {n} पंक्तियों में प्रत्येक CII पंक्ति एक बिल की गई मात्रा घोषित करती है (EN 16931 BT-129, ram:BilledQuantity)',
                 'cii.warn.lineQuantity': 'CII पंक्ति #{line} में उसकी बिल की गई मात्रा अनुपस्थित है (BT-129, ram:SpecifiedLineTradeDelivery/ram:BilledQuantity) — EN 16931 के लिए प्रत्येक चालान पंक्ति का चालान की गई मात्रा घोषित करना आवश्यक है; बिना मात्रा वाली पंक्ति वाला Factur-X / ZUGFeRD दस्तावेज़ schematron गेट पर अस्वीकृत होता है और पंक्ति शुद्ध क्रॉस-उत्पाद (BR-CO-04) अपना व्युत्पन्न आधार खो देता है (UBL InvoicedQuantity उपस्थिति जाँच का CII समकक्ष)',
+                'cii.ok.profile': 'Factur-X / ZUGFeRD प्रोफ़ाइल पहचानी गई: {name} (EN 16931 BT-24 CustomizationID — वह अनुरूपता स्तर जो तय करता है कि कौन-सा डेटा अनिवार्य है)',
+                'cii.info.profile': 'CII प्रोफ़ाइल URN {urn} कोई पहचानी गई Factur-X / ZUGFeRD / XRechnung / PEPPOL प्रोफ़ाइल नहीं है (EN 16931 BT-24 CustomizationID) — यह कोई नई या निजी प्रोफ़ाइल हो सकती है; EN 16931 अनुरूपता जाँचें फिर भी लागू होती हैं',
+                'cii.ok.sellerVat': 'CII विक्रेता VAT पहचानकर्ता {vat} मान्य है (EN 16931 BT-31, ram:SpecifiedTaxRegistration/ram:ID schemeID="VA" — ISO 3166-1 देश उपसर्ग + सदस्य-राज्य प्रारूप और चेकसम)',
+                'cii.warn.sellerVat': 'CII विक्रेता VAT पहचानकर्ता {vat} (BT-31, ram:SpecifiedTaxRegistration/ram:ID schemeID="VA") अमान्य है — EN 16931 / PEPPOL के लिए ISO 3166-1 alpha-2 देश उपसर्ग के बाद सदस्य-राज्य VAT प्रारूप आवश्यक है; गलत प्रारूप वाला मान XML सत्यापन पास करता है परन्तु BR-CO-09 schematron गेट पर अस्वीकृत होता है (UBL विक्रेता-VAT जाँच का CII समकक्ष, साझा EU VAT सत्यापक का पुन: उपयोग)',
                 'ubl.row.issueDate': 'जारी करने की तिथि',
                 'ubl.row.dueDate': 'देय तिथि',
                 'ubl.row.currency': 'मुद्रा',
@@ -27615,6 +27635,88 @@ var qrcode = function() {
             }
         }
 
+        // Map a Factur-X / ZUGFeRD / XRechnung / PEPPOL CustomizationID URN (BT-24,
+        // ram:GuidelineSpecifiedDocumentContextParameter/ram:ID) to its profile name.
+        // ZUGFeRD 2.x is the German co-publication of Factur-X and shares the same
+        // urn:factur-x.eu:1p0:* / urn:cen.eu:en16931:2017 URN family. Order matters:
+        // "basicwl" must be tested before "basic" (it contains the substring), and the
+        // CIUS variants (XRechnung / PEPPOL) before the bare EN 16931 URN they extend.
+        function ciiProfileName(urn) {
+            const u = (urn || '').trim().toLowerCase();
+            if (!u) return '';
+            if (u.includes('xrechnung')) return 'XRechnung (CIUS)';
+            if (u.includes('peppol')) return 'PEPPOL BIS Billing 3.0';
+            if (u.includes(':minimum')) return 'Factur-X / ZUGFeRD MINIMUM';
+            if (u.includes('basicwl')) return 'Factur-X / ZUGFeRD BASIC WL';
+            if (u.includes(':basic')) return 'Factur-X / ZUGFeRD BASIC';
+            if (u.includes('extended')) return 'Factur-X / ZUGFeRD EXTENDED';
+            if (u === 'urn:cen.eu:en16931:2017') return 'EN 16931 (COMFORT)';
+            if (u.startsWith('urn:cen.eu:en16931:2017')) return 'EN 16931 (compliant CIUS)';
+            return '';
+        }
+
+        // CII Factur-X / ZUGFeRD / XRechnung profile identification (draft 281).
+        // The deferred "profile-level highlighting" slice: EN 16931 BT-24 carries the
+        // CustomizationID URN that names the conformance profile a Cross Industry
+        // Invoice was authored to (Factur-X / ZUGFeRD MINIMUM → BASIC WL → BASIC →
+        // EN 16931 (COMFORT) → EXTENDED, plus the XRechnung / PEPPOL CIUS variants).
+        // The profile sets which data is mandatory and which gates apply downstream,
+        // so surfacing it tells the user what the document claims to be. Informational
+        // (not a hard pass/fail): emits a ✓ row naming a recognised profile, or a
+        // neutral row echoing the raw URN when it is outside the known set (a newer
+        // profile is not an error). No-ops when the CustomizationID is absent
+        // (draft 275 owns BR-01 presence).
+        function ciiCheckProfile(out, detected) {
+            const r = detected.root;
+            const ctx = sepaFirst(r, 'ExchangedDocumentContext');
+            const guide = ctx ? sepaFirst(ctx, 'GuidelineSpecifiedDocumentContextParameter') : null;
+            const urn = guide ? (sepaTextOf(guide, 'ID') || '').trim() : '';
+            if (!urn) return;
+            const name = ciiProfileName(urn);
+            if (name) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + tFormat('cii.ok.profile', { name }));
+            } else {
+                tlsRenderRow(out, t('ubl.row.warning'), tFormat('cii.info.profile', { urn }));
+            }
+        }
+
+        // CII seller VAT identifier validity (draft 282). EN 16931 BT-31: the Seller
+        // VAT identifier is carried in CII as ram:SellerTradeParty/
+        // ram:SpecifiedTaxRegistration/ram:ID with schemeID="VA" (UNCL 1153 — the VAT
+        // scheme; "FC" would be a fiscal/tax number, not the VAT id). PEPPOL / Factur-X
+        // require it to be an ISO 3166-1 alpha-2 country prefix followed by the member-
+        // state VAT body; a malformed value passes XML validation but is rejected at
+        // the BR-CO-09 schematron gate. Reuses the shared vatValidate() (same format +
+        // checksum logic as the §2.3 EU VAT tool). The CII analogue of
+        // ublCheckSellerVat. Value-validation only: skips when the seller declares no
+        // VAT registration (BR-CO-26 lets a seller identify via tax or legal
+        // registration instead), firing only on a present-but-invalid VAT id.
+        function ciiCheckSellerVat(out, detected) {
+            const r = detected.root;
+            const txn = sepaFirst(r, 'SupplyChainTradeTransaction');
+            const agreement = txn ? sepaFirst(txn, 'ApplicableHeaderTradeAgreement') : null;
+            const seller = agreement ? sepaFirst(agreement, 'SellerTradeParty') : null;
+            if (!seller) return;
+            const regs = sepaAllLocal(seller, 'SpecifiedTaxRegistration');
+            if (!regs.length) return;
+            let raw = null;
+            for (const reg of regs) {
+                const idEl = sepaFirstChildLocal(reg, 'ID');
+                if (!idEl) continue;
+                const scheme = (idEl.getAttribute('schemeID') || '').trim().toUpperCase();
+                const val = (idEl.textContent || '').trim();
+                if (scheme === 'VA' && val) { raw = val; break; }
+            }
+            if (!raw) return;
+            let ok = false;
+            try { const v = vatValidate(raw); ok = !!(v && v.ok); } catch (e) { ok = false; }
+            if (ok) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + tFormat('cii.ok.sellerVat', { vat: raw }));
+            } else {
+                tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + tFormat('cii.warn.sellerVat', { vat: raw }));
+            }
+        }
+
         // EN 16931 totals consistency check. Two invariants are independent of any
         // PrepaidAmount / PayableRoundingAmount complications and catch the
         // overwhelming majority of real-world arithmetic errors:
@@ -32846,6 +32948,8 @@ var qrcode = function() {
                     ciiCheckQuantityUnitCode(out, detected);
                     ciiCheckPriceAmount(out, detected);
                     ciiCheckLineQuantity(out, detected);
+                    ciiCheckProfile(out, detected);
+                    ciiCheckSellerVat(out, detected);
                     return;
                 }
                 ublRenderHeader(out, detected);
