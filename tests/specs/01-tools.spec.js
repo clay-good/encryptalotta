@@ -6643,6 +6643,75 @@ test('ubl: direct-debit PayerFinancialAccount/ID presence flags a direct debit m
   await expect(page.locator('#ubl-results')).toContainText(/Direct-debit <cac:PaymentMeans> #1 \(UNCL 4461 code 49 \/ 59\) is missing <cac:PaymentMandate>\/<cac:PayerFinancialAccount>\/<cbc:ID>/i, { timeout: 5_000 });
 });
 
+test('sepa: per-PmtInf CdtrAgt/FinInstnId routing content confirms on canonical pain.008 (draft 244)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  await page.fill('#sepa-input', SEPA_PAIN008);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Every PmtInf with <CdtrAgt>\/<FinInstnId> carries a routing identifier .* across all 1 FinInstnId block/i, { timeout: 5_000 });
+});
+
+test('sepa: per-PmtInf CdtrAgt/FinInstnId routing content flags a name-only FinInstnId on pain.008 (draft 244)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Keep the per-PmtInf CdtrAgt FinInstnId wrapper (so draft 218 still passes) but replace its <BIC> with a human-readable <Nm> only.
+  const withBad = SEPA_PAIN008.replace('<CdtrAgt><FinInstnId><BIC>DEUTDEFFXXX</BIC></FinInstnId></CdtrAgt>', '<CdtrAgt><FinInstnId><Nm>Creditor Bank</Nm></FinInstnId></CdtrAgt>');
+  await page.fill('#sepa-input', withBad);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/PmtInf #1 has <CdtrAgt>\/<FinInstnId> but it carries no <BIC>\/<BICFI>, <ClrSysMmbId> or <Othr> routing identifier/i, { timeout: 5_000 });
+});
+
+test('ubl: EndpointID schemeID presence confirms when the electronic address carries a scheme (draft 245)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Canonical fixture has no <cbc:EndpointID>; inject a supplier endpoint carrying its mandatory schemeID.
+  const withEp = UBL_INVOICE.replace('<cac:PartyName><cbc:Name>ACME Widgets GmbH</cbc:Name></cac:PartyName>', '<cbc:EndpointID schemeID="0088">5790000435975</cbc:EndpointID><cac:PartyName><cbc:Name>ACME Widgets GmbH</cbc:Name></cac:PartyName>');
+  await page.fill('#ubl-input', withEp);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Every declared <cbc:EndpointID> \(supplier \/ customer\) carries its mandatory schemeID attribute across all 1 electronic address/i, { timeout: 5_000 });
+});
+
+test('ubl: EndpointID schemeID presence flags an endpoint missing the scheme attribute (draft 245)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Inject a supplier endpoint whose value is present but carries NO schemeID attribute.
+  const withBad = UBL_INVOICE.replace('<cac:PartyName><cbc:Name>ACME Widgets GmbH</cbc:Name></cac:PartyName>', '<cbc:EndpointID>5790000435975</cbc:EndpointID><cac:PartyName><cbc:Name>ACME Widgets GmbH</cbc:Name></cac:PartyName>');
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Supplier \(BT-34-1\) <cbc:EndpointID> is present but carries no schemeID attribute/i, { timeout: 5_000 });
+});
+
+test('sepa: per-transaction amount cap confirms on a canonical pain.001 (draft 246)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  await page.fill('#sepa-input', SEPA_PAIN001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Every transaction amount is within the EPC SEPA per-instruction cap of €999,999,999\.99/i, { timeout: 5_000 });
+});
+
+test('sepa: per-transaction amount cap flags an instruction above €999,999,999.99 (draft 246)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Push the first transaction amount one euro past the EPC per-instruction cap.
+  const withBad = SEPA_PAIN001.replace('<InstdAmt Ccy="EUR">100.00</InstdAmt>', '<InstdAmt Ccy="EUR">1000000000.00</InstdAmt>');
+  await page.fill('#sepa-input', withBad);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Transaction #1 declares InstdAmt \/ Amt "1000000000\.00" which exceeds the EPC SEPA per-instruction cap of €999,999,999\.99/i, { timeout: 5_000 });
+});
+
+test('ubl: BR-CO-14 VAT-breakdown sum confirms on a canonical invoice (draft 247)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Every root-level <cac:TaxTotal>\/<cbc:TaxAmount> equals the sum of its per-rate <cac:TaxSubtotal>\/<cbc:TaxAmount>/i, { timeout: 5_000 });
+});
+
+test('ubl: BR-CO-14 VAT-breakdown sum flags a subtotal that disagrees with the header TaxAmount (draft 247)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Lower only the per-rate TaxSubtotal TaxAmount (17.00) while the rolled-up header stays 19.00.
+  const withBad = UBL_INVOICE.replace(
+    '<cbc:TaxableAmount currencyID="EUR">100.00</cbc:TaxableAmount>\n      <cbc:TaxAmount currencyID="EUR">19.00</cbc:TaxAmount>',
+    '<cbc:TaxableAmount currencyID="EUR">100.00</cbc:TaxableAmount>\n      <cbc:TaxAmount currencyID="EUR">17.00</cbc:TaxAmount>'
+  );
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Σ per-rate <cac:TaxSubtotal>\/<cbc:TaxAmount> = 17\.00 EUR ≠ declared <cac:TaxTotal>\/<cbc:TaxAmount> 19\.00 EUR/i, { timeout: 5_000 });
+});
+
 test('ubl: LegalMonetaryTotal/PayableAmount presence flags a missing slot (draft 183)', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   const withBad = UBL_INVOICE.replace(/<cac:LegalMonetaryTotal>[\s\S]*?<\/cac:LegalMonetaryTotal>/g, (block) =>

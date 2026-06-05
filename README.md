@@ -1,5 +1,7 @@
 # encryptalotta
 
+![encryptalotta — 45 client-side privacy and developer tools, zero server uploads](encryptalotta.png)
+
 **Free, client-side privacy and developer toolbox — 45 tools, zero server uploads.**
 
 A comprehensive single-page web app with **45 cryptographic, encoding, parsing, and developer utilities** that run entirely in your browser. PGP key generation, key inspection, revocation certificates, QR public-key sharing, TLS / X.509 certificate parsing, OpenSSH public key parsing, PEM ↔ DER conversion, BIP39 mnemonic generation and validation, file and text encryption / decryption, password-only (symmetric) file encryption, image steganography, digital signing and verification, HMAC, JWT inspection and verification, PBKDF2 key derivation, TOTP / 2FA, password generation, ASCII armor conversion, Shamir's Secret Sharing, EXIF metadata stripping, hashing and checksums (SHA-1 / 256 / 384 / 512), Base64 / Base32 / Base58 / hex encoding, number base conversion (binary / octal / decimal / hex / any base 2–36), UUID v4 / v7 and ULID generation, Unix timestamp conversion, URL parsing, line-level diff, CSV ↔ JSON ↔ TSV conversion, regex testing, cron decoding, color conversion with WCAG contrast checking, JSON / YAML / XML formatting, and CIDR / IPv4 subnet calculation. Searchable command palette (`⌘K` / `Ctrl+K`), full keyboard navigation, five UI languages. No server uploads, no analytics, no CDN, no tracking.
@@ -34,7 +36,7 @@ A comprehensive single-page web app with **45 cryptographic, encoding, parsing, 
 - **HMAC** — Sign and verify with HMAC-SHA-1 / 256 / 384 / 512. Constant-time comparison on verify; key buffer zeroized after use.
 - **JWT Inspector** — Decode the three Base64-URL parts; verify HS256/384/512 (shared secret), RS256/384/512 (PEM SPKI public key), or ES256/384/512 (PEM SPKI ECDSA key). Expiry indicator from the `exp` claim.
 
-### Utilities (25 tools)
+### Utilities (28 tools)
 - **Strong Password Generator** — Cryptographically random passwords with customizable charset and length.
 - **ASCII Armor Converter** — Round-trip between PGP binary and ASCII-armored encodings.
 - **Shamir Secret Sharing** — Split a secret into N shares where any K reconstruct it; share format `EAL-SSS/v1/{K}-of-{N}/{rawShare}`.
@@ -60,7 +62,9 @@ A comprehensive single-page web app with **45 cryptographic, encoding, parsing, 
 - **EU VAT Number Validator** — Format check for all 27 EU member states + GB, NO, CH, XI (Northern Ireland). Computes the published checksum where one exists (ISO 7064 MOD 11,10 for DE/HR; Luhn for IT/SE; mod-97 for BE; mod-89 for LU; mod-11 weighted for many others). ES support is limited to the CIF (corporate) subset by design; individual NIF/NIE inputs are explicitly rejected with a pointer to the spec. No VIES round-trip — fully offline.
 - **Ed25519 Sign / Verify** — Generate Ed25519 keypairs and produce or verify signatures via native Web Crypto (RFC 8032). Keys round-trip as the 32-byte seed; signatures as 64-byte hex. Same primitive used by SSH ed25519 keys, age, Signal, Noise, and sigstore. Detects lack of browser support (needs Safari 17 / Chrome 113 / Firefox 130) and shows an explicit banner rather than failing silently.
 - **X25519 Key Agreement** — Generate X25519 keypairs and derive a shared secret (ECDH, RFC 7748) via native Web Crypto, with optional HKDF-SHA-256 / HKDF-SHA-512 post-processing and a user-supplied "info" context. Underlies WireGuard, age, Signal, Noise, X3DH, TLS 1.3.
-- **PEPPOL / UBL Invoice Inspector** — Decode OASIS UBL 2.1 `<Invoice>` and `<CreditNote>` documents (PEPPOL BIS Billing 3.0, EN 16931) entirely in the browser. Renders the header (customization / profile / invoice number / dates / currency), supplier and customer, totals (sum of line amounts, tax-exclusive, tax-inclusive, payable), line items (quantity, unit price, line amount), and per-rate VAT breakdown. Namespace-blind `DOMParser` walk — same code handles every minor UBL 2.1 revision. Factur-X / ZUGFeRD hybrid PDF and UN/CEFACT CII variant are a later slice that shares the §2.5 PDF attachment extractor.
+- **PEPPOL / UBL Invoice Inspector** — Decode OASIS UBL 2.1 `<Invoice>` and `<CreditNote>` documents (PEPPOL BIS Billing 3.0, EN 16931) entirely in the browser. Renders the header (customization / profile / invoice number / dates / currency), supplier and customer, totals (sum of line amounts, tax-exclusive, tax-inclusive, payable), line items (quantity, unit price, line amount), and per-rate VAT breakdown. Beyond rendering it runs **100+ EN 16931 / PEPPOL conformance gates** — mandatory-field presence (BR-*), arithmetic invariants (BR-CO-10 line totals, BR-CO-13/15 tax consistency, BR-CO-14 VAT-breakdown sum, BR-CO-16 payable reconciliation), 2-decimal caps (BR-DEC), code-list membership (UNCL 1001 / 4461, ISO 4217, PEPPOL EAS), and IBAN MOD-97 — each catching documents that are XML-valid but rail-rejected by an access point. Namespace-blind `DOMParser` walk — same code handles every minor UBL 2.1 revision. Factur-X / ZUGFeRD hybrid PDF and UN/CEFACT CII variant are a later slice that shares the §2.5 PDF attachment extractor.
+- **SEPA ISO 20022 XML Inspector** — Decode `pain.001` (credit-transfer initiation), `pain.008` (direct-debit initiation), and `camt.053` (bank-to-customer statement) entirely in the browser. Surfaces the group header, per-payment-info blocks, and per-transaction detail, then runs **110+ EPC SEPA Rulebook conformance gates**: IBAN MOD-97 + per-country structure, BIC ISO 9362 format and IBAN↔BIC country parity, EPC character-set restrictions across every free-text field, Rulebook length caps (AdrLine 70 / TwnNm 35 / PstCd 16), mandatory-element presence down to the per-transaction `FinInstnId` routing identifier, EUR-only currency, `NbOfTxs` / `CtrlSum` arithmetic invariants, the €999,999,999.99 per-instruction amount cap, and EndToEndId uniqueness — each catching files that pass XSD validation but get bounced by EBA STEP2 / STET / RT1. Namespace-blind walk; no-ops cleanly on message types a given gate does not apply to.
+- **eIDAS Trust List (LOTL / TSL) Viewer** — Parse an EU List of Trusted Lists or a national Trusted Service List (ETSI TS 119 612) and browse per-country trust service providers, their services, and current status (granted / withdrawn / supervision-in-cessation), entirely offline. Paste the XML; no network round-trip to the LOTL endpoint.
 
 ### Languages
 
@@ -87,6 +91,77 @@ Language is auto-detected from `navigator.language` on first visit, persisted in
 - **Works Offline** - Download and use without internet connection. A minimal service worker (`sw.js`) precaches the shell on first visit so subsequent loads work offline straight from the cache.
 
 ---
+
+## Architecture & data flow
+
+The whole application is one HTML file plus four vendored libraries. There is no server, no API, no build step at deploy time, and — enforced by CSP — no outbound network call. Every byte you type is processed in the page's own JavaScript heap and never crosses the trust boundary.
+
+### Trust boundary
+
+```
+            YOUR DEVICE  (the entire trust boundary)
+  ┌─────────────────────────────────────────────────────────────┐
+  │  Browser tab                                                  │
+  │  ┌───────────────────────────────────────────────────────┐   │
+  │  │  index.html  (one origin, one document)               │   │
+  │  │                                                        │   │
+  │  │   user input ─▶ tool logic ─▶ Web Crypto / vendored   │   │
+  │  │      ▲              │            libs (local)          │   │
+  │  │      │              ▼                                   │   │
+  │  │   keyboard      rendered output (createElement /       │   │
+  │  │   / paste /     textContent — never innerHTML)         │   │
+  │  │   file picker                                          │   │
+  │  │                                                        │   │
+  │  │   localStorage: theme, language, lastTool ONLY         │   │
+  │  │   (never keys, secrets, plaintext, or inputs)          │   │
+  │  └───────────────────────────────────────────────────────┘   │
+  │        ╳  connect-src 'none'  ╳   form-action 'self'          │
+  │        ╳  no fetch / XHR / WebSocket / EventSource / Beacon   │
+  └─────────────────────────────────────────────────────────────┘
+            ╳  NOTHING crosses this line at runtime  ╳
+  ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
+            network  (used once to load the page, then never again)
+```
+
+The only time the network is touched is the initial GET that loads the page and its four scripts; after that the service worker serves the shell from cache and `connect-src 'none'` makes a runtime exfiltration call physically impossible. Load it once, pull your network cable, and every tool still works.
+
+### Module map
+
+```
+index.html
+├─ <meta CSP>            connect-src 'none'; frame-ancestors 'none'; …
+├─ inline <style>        CSS logical properties (RTL-ready), no external sheet
+├─ STRINGS {}            1,724 keys × 5 locales — i18n table, vendored inline
+├─ tool registry         45 tools → {id, group, route, render()}
+│    ├─ Keys (8)         OpenPGP.js · hand-rolled ASN.1/DER · SSH wire format
+│    ├─ Encrypt (5)      OpenPGP.js · LSB stego (Web Crypto keystream)
+│    ├─ Sign (4)         OpenPGP.js · Web Crypto HMAC / JWT verify
+│    └─ Utilities (28)   Web Crypto · BigInt · hand-rolled codecs/parsers
+│                        + IBAN/BIC/VAT/GS1, SEPA & UBL conformance engines
+├─ router               hashchange → render(route); deep-linkable #/group/tool
+└─ clearSensitiveFields()  beforeunload → wipe every secret-bearing field
+   vendored: openpgp.min.js · qrcode.js · secrets.min.js · js-yaml.min.js
+             (each pinned by SHA-384, cross-checked on every commit)
+```
+
+### Request lifecycle of a single operation (e.g. "encrypt text")
+
+```
+ paste plaintext + public key
+        │
+        ▼
+ render() reads DOM values  ──▶  openpgp.encrypt({message, encryptionKeys})
+        │                              │  (runs in this tab's JS heap)
+        │                              ▼
+        │                       armored ciphertext (string)
+        ▼                              │
+ textContent = ciphertext  ◀───────────┘
+        │
+        ▼
+ beforeunload ─▶ clearSensitiveFields() zeroizes the plaintext + key inputs
+```
+
+No step in that chain has a network egress point — there is nowhere for the plaintext or key to go except back into the same DOM.
 
 ## Security Architecture
 
@@ -305,7 +380,7 @@ All 45 tools are organized into four groups. Every tool has a deep-link route.
 | **HMAC** | `#/signing/hmac` | HMAC-SHA-1/256/384/512 sign and verify (constant-time compare) |
 | **JWT Inspector** | `#/signing/jwt` | Decode + verify HS / RS / ES JWTs; surface `exp` claim |
 
-### Utilities (25)
+### Utilities (28)
 | Tool | Route | What it does |
 |---|---|---|
 | **Passwords** | `#/utilities/passwords` | Generate cryptographically strong random passwords |
@@ -333,7 +408,9 @@ All 45 tools are organized into four groups. Every tool has a deep-link route.
 | **EU VAT** | `#/utilities/vat` | Format + checksum check for EU / GB / NO / CH / XI VAT numbers (offline) |
 | **Ed25519** | `#/utilities/ed25519` | Generate / sign / verify with native Ed25519 (RFC 8032) via Web Crypto |
 | **X25519** | `#/utilities/x25519` | ECDH key agreement (RFC 7748) with optional HKDF-SHA-256 / SHA-512 |
-| **PEPPOL Invoice** | `#/utilities/ubl` | OASIS UBL 2.1 Invoice / CreditNote (PEPPOL BIS Billing 3.0, EN 16931) inspector |
+| **PEPPOL Invoice** | `#/utilities/ubl` | OASIS UBL 2.1 Invoice / CreditNote (PEPPOL BIS Billing 3.0, EN 16931) inspector + 100+ conformance gates |
+| **SEPA XML** | `#/utilities/sepa` | ISO 20022 `pain.001` / `pain.008` / `camt.053` inspector + 110+ EPC Rulebook conformance gates |
+| **eIDAS Trust List** | `#/utilities/lotl` | ETSI TS 119 612 LOTL / TSL viewer — per-country trust service providers, services, status |
 
 ---
 
@@ -395,6 +472,86 @@ All 45 tools are organized into four groups. Every tool has a deep-link route.
 - **Single-file deployment** (`index.html`) plus four vendored libraries — every script pinned with a SHA-384 hash that is cross-checked against the README manifest and the on-disk bytes by `scripts/audit-release.js` on every commit.
 
 ---
+
+## Standards & RFCs implemented (cheat sheet)
+
+Every tool maps to a published standard so its output is checkable against an authoritative source. No proprietary formats.
+
+| Domain | Standard / RFC | Tool(s) |
+|---|---|---|
+| PGP / OpenPGP | RFC 9580 (formerly 4880) | Generate, Key Info, Revoke, Encrypt, Decrypt, Text, Sign, Verify, Armor |
+| Symmetric KDF | RFC 8018 (PBKDF2), BIP-0039 | PBKDF2, BIP39 |
+| Signatures (EdDSA) | RFC 8032 (Ed25519) | Ed25519 |
+| Key agreement (ECDH) | RFC 7748 (X25519), RFC 5869 (HKDF) | X25519 |
+| HMAC | RFC 2104, FIPS 198-1; vectors RFC 4231 | HMAC |
+| Hashing | FIPS 180-4 (SHA-1/2), RFC 7693 (BLAKE2b) | Hash & Checksum |
+| JWT / JOSE | RFC 7519, 7515, 7518; RFC 8725 (BCP) | JWT Inspector |
+| TOTP / HOTP | RFC 6238, RFC 4226 | TOTP / 2FA |
+| X.509 / ASN.1 | RFC 5280, X.690 (DER) | TLS Certificate Parser |
+| SSH wire format | RFC 4253, RFC 4716 | SSH Key Parser |
+| UUID / ULID | RFC 9562 (UUID v4 / v7) | UUID / ULID |
+| Base encodings | RFC 4648 (Base64/32), Base58 (Bitcoin) | Encode |
+| CSV | RFC 4180 | CSV ↔ JSON ↔ TSV |
+| CIDR / subnetting | RFC 4632, RFC 3021 (/31), RFC 1918 | CIDR / Subnet |
+| Color | WCAG 2.1 contrast, OKLCH (Oklab) | Color Converter |
+| IBAN | ISO 13616, MOD-97-10 (ISO 7064) | IBAN |
+| BIC | ISO 9362 | BIC / SWIFT |
+| GS1 barcodes | GS1 General Specs (mod-10) | GS1 / EAN / GTIN |
+| EU VAT | per-MS algorithms (ISO 7064 MOD 11,10; Luhn; mod-97) | EU VAT |
+| SEPA payments | ISO 20022 (pain.001 / pain.008 / camt.053) + EPC SCT/SDD Rulebooks | SEPA XML |
+| E-invoicing | OASIS UBL 2.1, EN 16931, PEPPOL BIS Billing 3.0 | PEPPOL / UBL |
+| Trust lists | ETSI TS 119 612, eIDAS LOTL / TSL | eIDAS Trust List |
+| Shamir | Shamir (1979) over GF(256), 256-bit param | Shamir Split |
+
+## Conformance-gate cheat sheet (SEPA + UBL)
+
+The SEPA and UBL inspectors share one idea: **schema-valid is not rail-valid.** A `pain.001` that passes the ISO 20022 XSD, or a UBL invoice that passes the OASIS schema, can still be bounced by a clearing system (EBA STEP2 / STET / RT1) or a PEPPOL access point for a Rulebook reason the XSD does not encode. Each gate below catches one such reject, emits a single ✓ (clean) or ✗ (offending value cited) row, and no-ops on documents it does not apply to.
+
+```
+  paste XML
+     │
+     ▼
+  DOMParser  ──▶  namespace-blind walk (localName only)
+     │             one code path for every pain.001.001.03 … .09,
+     │             camt.053, pain.008, UBL 2.1.x, PEPPOL BIS 3.0
+     ▼
+  detect message/document type  ──▶  render header + lines
+     │
+     ▼
+  run every applicable gate (each independent, order-free)
+     ├─ structural / checksum   ─ IBAN MOD-97, BIC ISO 9362, IBAN↔BIC country parity
+     ├─ character-set & length  ─ EPC charset; AdrLine 70 / TwnNm 35 / PstCd 16 / Nm 70
+     ├─ presence (wrapper→leaf) ─ element down to FinInstnId routing identifier / account Id
+     ├─ code-list membership    ─ EUR-only, LclInstrm CORE/B2B/COR1, UNCL 4461/5305/5153, ISO 3166/4217
+     ├─ arithmetic invariants   ─ NbOfTxs, CtrlSum 2-dec, amount cap €999,999,999.99 │ BR-CO-10/13/14/15/16
+     ├─ cardinality / forbidden ─ single Strd per RmtInf; IntrmyAgt / ChrgsAcct / SvcLvl·Prtry forbidden
+     └─ uniqueness              ─ EndToEndId
+     ▼
+  ✓ / ✗ rows  (no network — verdicts computed entirely in-tab)
+```
+
+| Family | SEPA (ISO 20022 / EPC, 111 gates) | UBL (EN 16931 / PEPPOL, 109 gates) |
+|---|---|---|
+| Structural / checksum | IBAN MOD-97 + per-country BBAN structure; BIC ISO 9362; IBAN↔BIC country parity | IBAN MOD-97 on Payee/Payer account |
+| Character-set & length | EPC restricted charset on every free-text field; AdrLine 70 / TwnNm 35 / PstCd 16 / party Nm 70 caps | — (UTF-8 per EN 16931) |
+| Presence (wrapper → leaf) | `<PmtInf>` → `<Dbtr>`/`<Cdtr>` → `<DbtrAgt>`/`<CdtrAgt>` → `<FinInstnId>` routing-id content; account `<Id>` → IBAN content | BR-* root, line, and party mandatory-field presence down to `PayeeFinancialAccount`/`PaymentMandate`/`EndpointID@schemeID` |
+| Code-list membership | EUR-only `<Ccy>`; `LclInstrm/Cd` CORE/B2B/COR1; `SeqTp`; `CtryOfRes` ISO 3166 | UNCL 1001 type, UNCL 4461 means, UNCL 5305/5153 VAT codes; ISO 4217 currency; PEPPOL EAS schemeID |
+| Arithmetic | `NbOfTxs`/`CtrlSum` non-empty + 2-decimal cap; per-tx 2-decimal precision; amount cap €999,999,999.99 | BR-CO-10 line totals, BR-CO-13/15 tax consistency, BR-CO-14 breakdown sum, BR-CO-16 payable; BR-DEC 2-decimal caps |
+| Cardinality / forbidden | single `<Strd>` per `<RmtInf>`; `IntrmyAgt` / `ChrgsAcct` / `SvcLvl·Prtry` forbidden | at-least-one `<InvoiceLine>`; conditional gates scoped by payment-means code |
+| Uniqueness | `EndToEndId` across the file | — |
+
+Each gate ships as a four-part unit — **spec entry (`SPEC-INTERNATIONAL.md` §2.4 / §2.7) + implementation + i18n strings × 5 locales + a Playwright confirm/flag pair** — so the catalogue grows without regressions. The full per-draft history (drafts 16 → 247) lives in the spec.
+
+## Design decisions
+
+The non-obvious engineering choices, and why they were made:
+
+- **Single HTML file, no build step.** What is in the repository is byte-for-byte what runs in your browser — there is no transpiler, bundler, or minifier between source and shipped artifact to audit. The cost is a large source file; the benefit is that a reviewer can read exactly what executes.
+- **Zero network by construction, not by policy.** `connect-src 'none'` plus an `audit-release.js` gate that greps for `fetch` / `XHR` / `WebSocket` / `EventSource` / `sendBeacon` call sites means "no exfiltration" is a property the browser enforces and CI verifies, not a promise in a privacy policy.
+- **Hand-rolled parsers over vendoring** for ASN.1/DER, the SSH wire format, Base32/Base58, OKLCH matrices, the cron parser, CIDR arithmetic, the LCS diff, and the RFC 4180 CSV parser. Each is small, auditable, and keeps the page under the 2 MB gzipped budget — vendoring a library for each would multiply the supply-chain surface for a few hundred lines of logic.
+- **`textContent` / `createElement` only — never `innerHTML`.** A grep-verifiable invariant (zero `innerHTML =` assignments) removes the most common XSS sink even for fully developer-controlled content.
+- **SHA-384 pinning instead of SRI.** Same-origin scripts gain nothing from SRI's CORS requirements, so the integrity claim lives as a hash recorded in three places (HTML comment, README manifest, on-disk bytes) and is cross-checked on every commit — a forger has to defeat all three.
+- **Conformance gates as an incremental, test-backed methodology.** The SEPA and UBL inspectors are not one-shot parsers — they are growing libraries of narrow, independent validation gates (220+ and counting — 111 SEPA, 109 UBL as of this writing), each one shipped as a *spec entry + implementation + i18n strings × 5 locales + Playwright confirm/flag pair*. The thesis: a document that passes XSD validation can still be rejected by a clearing system or PEPPOL access point for a Rulebook reason the schema does not encode (a name-only `FinInstnId` with no routable BIC, a VAT breakdown whose subtotals don't sum to the header, an amount over the scheme cap). Each gate catches one such real-world reject, no-ops cleanly on documents it doesn't apply to, and is pinned by a green test before it lands. The full catalogue lives in [SPEC-INTERNATIONAL.md](SPEC-INTERNATIONAL.md) §2.4 (SEPA) and §2.7 (UBL).
 
 ## Key Generation Options
 
