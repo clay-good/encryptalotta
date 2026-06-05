@@ -62,7 +62,7 @@ A comprehensive single-page web app with **45 cryptographic, encoding, parsing, 
 - **EU VAT Number Validator** — Format check for all 27 EU member states + GB, NO, CH, XI (Northern Ireland). Computes the published checksum where one exists (ISO 7064 MOD 11,10 for DE/HR; Luhn for IT/SE; mod-97 for BE; mod-89 for LU; mod-11 weighted for many others). ES support is limited to the CIF (corporate) subset by design; individual NIF/NIE inputs are explicitly rejected with a pointer to the spec. No VIES round-trip — fully offline.
 - **Ed25519 Sign / Verify** — Generate Ed25519 keypairs and produce or verify signatures via native Web Crypto (RFC 8032). Keys round-trip as the 32-byte seed; signatures as 64-byte hex. Same primitive used by SSH ed25519 keys, age, Signal, Noise, and sigstore. Detects lack of browser support (needs Safari 17 / Chrome 113 / Firefox 130) and shows an explicit banner rather than failing silently.
 - **X25519 Key Agreement** — Generate X25519 keypairs and derive a shared secret (ECDH, RFC 7748) via native Web Crypto, with optional HKDF-SHA-256 / HKDF-SHA-512 post-processing and a user-supplied "info" context. Underlies WireGuard, age, Signal, Noise, X3DH, TLS 1.3.
-- **PEPPOL / UBL + Factur-X / ZUGFeRD Invoice Inspector** — Decode OASIS UBL 2.1 `<Invoice>` and `<CreditNote>` documents (PEPPOL BIS Billing 3.0, EN 16931) entirely in the browser, **plus UN/CEFACT Cross Industry Invoice (CII)** — the XML syntax inside Factur-X / ZUGFeRD / Order-X hybrid PDFs (paste the standalone CII XML; the same EN 16931 model, the `rsm:`/`ram:` vocabulary, rendered by a sister walker). Renders the header (customization / profile / invoice number / dates / currency), supplier and customer, totals (sum of line amounts, tax-exclusive, tax-inclusive, payable), line items (quantity, unit price, line amount), and per-rate VAT breakdown. Beyond rendering it runs **100+ EN 16931 / PEPPOL conformance gates** (UBL syntax; a parallel CII-native gate family has started — mandatory-header presence, grand-total arithmetic, party-name presence, line presence, currency-code and document-type-code validity, the line-sum (BR-CO-10), tax-basis (BR-CO-13), payable (BR-CO-16) and VAT-breakdown-sum (BR-CO-14) invariants that complete the CII header monetary chain end to end, the per-rate VAT cross-product (BR-CO-17) and category-code (UNCL 5305) validation of the breakdown it rolls up from, seller/buyer country presence (BR-09 / BR-11) and ISO 3166-1 validity, the per-line net cross-product (BR-CO-04) and due-date ≥ issue-date ordering, plus the specification-identifier (BR-01) presence and tax-scheme type-code (UNCL 5153 "VAT") validity, eighteen gates so far) — mandatory-field presence (BR-*), arithmetic invariants (BR-CO-10 line totals, BR-CO-13/15 tax consistency, BR-CO-14 VAT-breakdown sum, BR-CO-17 per-rate cross-product, BR-CO-16 payable reconciliation), 2-decimal caps (BR-DEC), code-list membership (UNCL 1001 / 4461, ISO 4217, PEPPOL EAS), and IBAN MOD-97 — each catching documents that are XML-valid but rail-rejected by an access point. Namespace-blind `DOMParser` walk — same code handles every minor UBL 2.1 revision. Factur-X / ZUGFeRD hybrid PDF and UN/CEFACT CII variant are a later slice that shares the §2.5 PDF attachment extractor.
+- **PEPPOL / UBL + Factur-X / ZUGFeRD Invoice Inspector** — Decode OASIS UBL 2.1 `<Invoice>` and `<CreditNote>` documents (PEPPOL BIS Billing 3.0, EN 16931) entirely in the browser, **plus UN/CEFACT Cross Industry Invoice (CII)** — the XML syntax inside Factur-X / ZUGFeRD / Order-X hybrid PDFs (paste the standalone CII XML; the same EN 16931 model, the `rsm:`/`ram:` vocabulary, rendered by a sister walker). Renders the header (customization / profile / invoice number / dates / currency), supplier and customer, totals (sum of line amounts, tax-exclusive, tax-inclusive, payable), line items (quantity, unit price, line amount), and per-rate VAT breakdown. Beyond rendering it runs **100+ EN 16931 / PEPPOL conformance gates** (UBL syntax; a parallel CII-native gate family has started — mandatory-header presence, grand-total arithmetic, party-name presence, line presence, currency-code and document-type-code validity, the line-sum (BR-CO-10), tax-basis (BR-CO-13), payable (BR-CO-16) and VAT-breakdown-sum (BR-CO-14) invariants that complete the CII header monetary chain end to end, the per-rate VAT cross-product (BR-CO-17) and category-code (UNCL 5305) validation of the breakdown it rolls up from, seller/buyer country presence (BR-09 / BR-11) and ISO 3166-1 validity, the per-line net cross-product (BR-CO-04) and due-date ≥ issue-date ordering, the specification-identifier (BR-01) presence and tax-scheme type-code (UNCL 5153 "VAT") validity, plus per-line item-name (BR-25) and billed-quantity unit-code (BT-130) presence, twenty gates so far — see the [CII-native gates cheat sheet](#cii-native-gates-uncefact--factur-x--zugferd) below) — mandatory-field presence (BR-*), arithmetic invariants (BR-CO-10 line totals, BR-CO-13/15 tax consistency, BR-CO-14 VAT-breakdown sum, BR-CO-17 per-rate cross-product, BR-CO-16 payable reconciliation), 2-decimal caps (BR-DEC), code-list membership (UNCL 1001 / 4461, ISO 4217, PEPPOL EAS), and IBAN MOD-97 — each catching documents that are XML-valid but rail-rejected by an access point. Namespace-blind `DOMParser` walk — same code handles every minor UBL 2.1 revision. Factur-X / ZUGFeRD hybrid PDF and UN/CEFACT CII variant are a later slice that shares the §2.5 PDF attachment extractor.
 - **SEPA ISO 20022 XML Inspector** — Decode `pain.001` (credit-transfer initiation), `pain.008` (direct-debit initiation), and `camt.053` (bank-to-customer statement) entirely in the browser. Surfaces the group header, per-payment-info blocks, and per-transaction detail, then runs **110+ EPC SEPA Rulebook conformance gates**: IBAN MOD-97 + per-country structure, BIC ISO 9362 format and IBAN↔BIC country parity, EPC character-set restrictions across every free-text field, Rulebook length caps (AdrLine 70 / TwnNm 35 / PstCd 16), mandatory-element presence down to the per-transaction `FinInstnId` routing identifier, EUR-only currency, `NbOfTxs` / `CtrlSum` arithmetic invariants, strictly-positive amounts and the €999,999,999.99 per-instruction amount cap, and EndToEndId uniqueness — each catching files that pass XSD validation but get bounced by EBA STEP2 / STET / RT1. Namespace-blind walk; no-ops cleanly on message types a given gate does not apply to.
 - **eIDAS Trust List (LOTL / TSL) Viewer** — Parse an EU List of Trusted Lists or a national Trusted Service List (ETSI TS 119 612) and browse per-country trust service providers, their services, and current status (granted / withdrawn / supervision-in-cessation), entirely offline. Paste the XML; no network round-trip to the LOTL endpoint.
 
@@ -504,7 +504,7 @@ Every tool maps to a published standard so its output is checkable against an au
 | Trust lists | ETSI TS 119 612, eIDAS LOTL / TSL | eIDAS Trust List |
 | Shamir | Shamir (1979) over GF(256), 256-bit param | Shamir Split |
 
-## Conformance-gate cheat sheet (SEPA + UBL)
+## Conformance-gate cheat sheet (SEPA + UBL + CII)
 
 The SEPA and UBL inspectors share one idea: **schema-valid is not rail-valid.** A `pain.001` that passes the ISO 20022 XSD, or a UBL invoice that passes the OASIS schema, can still be bounced by a clearing system (EBA STEP2 / STET / RT1) or a PEPPOL access point for a Rulebook reason the XSD does not encode. Each gate below catches one such reject, emits a single ✓ (clean) or ✗ (offending value cited) row, and no-ops on documents it does not apply to.
 
@@ -541,7 +541,57 @@ The SEPA and UBL inspectors share one idea: **schema-valid is not rail-valid.** 
 | Cardinality / forbidden | single `<Strd>` per `<RmtInf>`; `IntrmyAgt` / `ChrgsAcct` / `SvcLvl·Prtry` forbidden | at-least-one `<InvoiceLine>`; conditional gates scoped by payment-means code |
 | Uniqueness | `EndToEndId` across the file | — |
 
-Each gate ships as a four-part unit — **spec entry (`SPEC-INTERNATIONAL.md` §2.4 / §2.7) + implementation + i18n strings × 5 locales + a Playwright confirm/flag pair** — so the catalogue grows without regressions. The full per-draft history (drafts 16 → 266) lives in the spec.
+Each gate ships as a four-part unit — **spec entry (`SPEC-INTERNATIONAL.md` §2.4 / §2.7) + implementation + i18n strings × 5 locales + a Playwright confirm/flag pair** — so the catalogue grows without regressions. The full per-draft history (drafts 16 → 278) lives in the spec.
+
+### CII-native gates (UN/CEFACT / Factur-X / ZUGFeRD)
+
+UBL and CII carry the **same EN 16931 semantic model in two different vocabularies** — UBL's `cbc:`/`cac:` versus UN/CEFACT's `rsm:`/`ram:`. The ~118 `ublCheck*` gates are written against UBL element names and never fire on a CII document, so a parallel `ciiCheck*` family walks the `rsm:`/`ram:` tree. Each CII gate is the syntactic mirror of a UBL gate it cites, reuses the shared validators (`ublParseCents`, `ISO_3166_1_ALPHA2`, `ISO_4217_ACTIVE`, `UBL_VAT_CATS`, `ublCiiDate`), and no-ops on documents it does not apply to. The family currently stands at **20 gates** (drafts 259 → 278).
+
+The header monetary chain reconciles **end to end** — each arrow is one gate proving the next figure is derivable from the previous, with a ±1-cent tolerance per EN 16931's rounding policy:
+
+```
+  Σ per-line LineTotalAmount (BT-131)              ← line cross-product 273: each = NetPrice × BilledQty
+        │  line-sum 265 (BR-CO-10)
+        ▼
+  header LineTotalAmount (BT-106)
+        │  tax-basis 266 (BR-CO-13):  − AllowanceTotal (BT-107) + ChargeTotal (BT-108)
+        ▼
+  TaxBasisTotalAmount (BT-109) ──┐
+        │                        │  Σ per-category CalculatedAmount (BT-117)
+        │                        ▼   ▲ VAT-breakdown sum 268 (BR-CO-14)
+        │              header TaxTotalAmount (BT-110)   ▲ per-rate cross-product 269 (BR-CO-17):
+        │  grand-total 260 (BR-CO-15):  + TaxTotal       each CalculatedAmount = BasisAmount × Rate
+        ▼
+  GrandTotalAmount (BT-112)
+        │  payable 267 (BR-CO-16):  − TotalPrepaid (BT-113) + Rounding (BT-114)
+        ▼
+  DuePayableAmount (BT-115)
+```
+
+| CII gate (draft) | EN 16931 | `ram:` anchor | UBL analogue |
+|---|---|---|---|
+| Header presence (259) | BR-01/02/03/05 | `ExchangedDocument/ID` · `IssueDateTime` · `TypeCode` · `InvoiceCurrencyCode` | root mandatory-field presence |
+| Grand-total arithmetic (260) | BR-CO-15 | `…HeaderMonetarySummation/GrandTotalAmount` | `ublCheckTotals` |
+| Party names (261) | BR-06/07 | `Seller/BuyerTradeParty/Name` | `ublCheckSellerName`/`…BuyerName` |
+| Line presence + anchor (262) | BR-16 / BT-131 | `IncludedSupplyChainTradeLineItem` · `…/LineTotalAmount` | `ublCheckLinePresence` |
+| Currency ISO 4217 (263) | BT-5 | `InvoiceCurrencyCode` | `ublCheckDocCurrencyCode` |
+| Document type UNCL 1001 (264) | BT-3 | `ExchangedDocument/TypeCode` | `ublCheckDocumentTypeCode` |
+| Line-sum (265) | BR-CO-10 | Σ line `LineTotalAmount` = header BT-106 | `ublCheckTotals` inv. 1 |
+| Tax-basis (266) | BR-CO-13 | `TaxBasisTotalAmount` = BT-106 − BT-107 + BT-108 | `ublCheckTotals` |
+| Payable (267) | BR-CO-16 | `DuePayableAmount` = BT-112 − BT-113 + BT-114 | `ublCheckPayable` |
+| VAT-breakdown sum (268) | BR-CO-14 | Σ `ApplicableTradeTax/CalculatedAmount` = BT-110 | `ublCheckTaxTotalBreakdownSum` |
+| VAT per-rate cross-product (269) | BR-CO-17 | `CalculatedAmount` = `BasisAmount` × `RateApplicablePercent` | `ublCheckTaxCrossProduct` |
+| VAT category code (270) | UNCL 5305 | `ApplicableTradeTax/CategoryCode` | `ublCheckVatCategories` |
+| Seller/buyer country presence (271) | BR-09/11 | `…TradeParty/PostalTradeAddress/CountryID` | `ublCheck{Seller,Buyer}PostalAddressCountry` |
+| Country-code ISO 3166-1 (272) | BT-40/55 | `PostalTradeAddress/CountryID` | `ublCheckCountryCode` |
+| Line net cross-product (273) | BR-CO-04 | `LineTotalAmount` = `NetPriceProductTradePrice/ChargeAmount` × `BilledQuantity` | `ublCheckLineAmount` |
+| Due-date ordering (274) | BT-9 ≥ BT-2 | `SpecifiedTradePaymentTerms/DueDateDateTime` | `ublCheckDates` |
+| Specification id (275) | BR-01 / BT-24 | `GuidelineSpecifiedDocumentContextParameter/ID` | `ublCheckCustomizationIdPresence` |
+| Tax-scheme type code (276) | UNCL 5153 | `ApplicableTradeTax/TypeCode` = `VAT` | `ublCheckTaxScheme` |
+| Line item name (277) | BR-25 / BT-153 | `SpecifiedTradeProduct/Name` | `ublCheckItemName` |
+| Billed-qty unit code (278) | BT-130 | `BilledQuantity/@unitCode` | `ublCheckQuantityUnitCode` |
+
+CII rendering and the embedded standalone-XML path ship today; **hybrid PDF/A-3 attachment extraction** (the `/EmbeddedFiles` walk shared with the §2.5 PAdES work) and **ZUGFeRD / Factur-X profile-level highlighting** (Minimum / Basic WL / Basic / EN 16931 / Extended) are documented as later slices in `SPEC-INTERNATIONAL.md` §2.7.
 
 ## Design decisions
 
@@ -552,7 +602,7 @@ The non-obvious engineering choices, and why they were made:
 - **Hand-rolled parsers over vendoring** for ASN.1/DER, the SSH wire format, Base32/Base58, OKLCH matrices, the cron parser, CIDR arithmetic, the LCS diff, and the RFC 4180 CSV parser. Each is small, auditable, and keeps the page under the 2 MB gzipped budget — vendoring a library for each would multiply the supply-chain surface for a few hundred lines of logic.
 - **`textContent` / `createElement` only — never `innerHTML`.** A grep-verifiable invariant (zero `innerHTML =` assignments) removes the most common XSS sink even for fully developer-controlled content.
 - **SHA-384 pinning instead of SRI.** Same-origin scripts gain nothing from SRI's CORS requirements, so the integrity claim lives as a hash recorded in three places (HTML comment, README manifest, on-disk bytes) and is cross-checked on every commit — a forger has to defeat all three.
-- **Conformance gates as an incremental, test-backed methodology.** The SEPA and UBL inspectors are not one-shot parsers — they are growing libraries of narrow, independent validation gates (247+ and counting — 111 SEPA, 118 UBL, and a CII-native family at 18 — as of this writing), each one shipped as a *spec entry + implementation + i18n strings × 5 locales + Playwright confirm/flag pair*. The thesis: a document that passes XSD validation can still be rejected by a clearing system or PEPPOL access point for a Rulebook reason the schema does not encode (a name-only `FinInstnId` with no routable BIC, a VAT breakdown whose subtotals don't sum to the header, an amount over the scheme cap). Each gate catches one such real-world reject, no-ops cleanly on documents it doesn't apply to, and is pinned by a green test before it lands. The full catalogue lives in [SPEC-INTERNATIONAL.md](SPEC-INTERNATIONAL.md) §2.4 (SEPA) and §2.7 (UBL).
+- **Conformance gates as an incremental, test-backed methodology.** The SEPA and UBL inspectors are not one-shot parsers — they are growing libraries of narrow, independent validation gates (249+ and counting — 111 SEPA, 118 UBL, and a CII-native family at 20 — as of this writing), each one shipped as a *spec entry + implementation + i18n strings × 5 locales + Playwright confirm/flag pair*. The thesis: a document that passes XSD validation can still be rejected by a clearing system or PEPPOL access point for a Rulebook reason the schema does not encode (a name-only `FinInstnId` with no routable BIC, a VAT breakdown whose subtotals don't sum to the header, an amount over the scheme cap). Each gate catches one such real-world reject, no-ops cleanly on documents it doesn't apply to, and is pinned by a green test before it lands. The full catalogue lives in [SPEC-INTERNATIONAL.md](SPEC-INTERNATIONAL.md) §2.4 (SEPA) and §2.7 (UBL).
 
 ## Key Generation Options
 

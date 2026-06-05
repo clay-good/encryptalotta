@@ -7234,6 +7234,37 @@ test('cii: tax-scheme type code flags a non-VAT scheme (draft 276)', async ({ pa
   await expect(page.locator('#ubl-results')).toContainText(/CII tax scheme type code XYZ \(ram:ApplicableTradeTax\/ram:TypeCode\) is not "VAT"/i, { timeout: 5_000 });
 });
 
+test('cii: item-name presence confirms when every line names its item (draft 277)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', CII_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Every CII line names its item/i, { timeout: 5_000 });
+});
+
+test('cii: item-name presence flags a line missing its item name BT-153 (draft 277)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  const withBad = CII_INVOICE.replace('<ram:Name>Gadget Deluxe</ram:Name>', '');
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/CII line #1 is missing its item name \(BT-153, ram:SpecifiedTradeProduct\/ram:Name\)/i, { timeout: 5_000 });
+});
+
+test('cii: billed-quantity unit code confirms when @unitCode is present (draft 278)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', CII_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Every CII billed quantity declares a unit code/i, { timeout: 5_000 });
+});
+
+test('cii: billed-quantity unit code flags a missing @unitCode BT-130 (draft 278)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Strip the unitCode attribute, leaving the bare quantity value.
+  const withBad = CII_INVOICE.replace('<ram:BilledQuantity unitCode="C62">3</ram:BilledQuantity>', '<ram:BilledQuantity>3</ram:BilledQuantity>');
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/CII line #1 billed quantity is missing its @unitCode \(BT-130, ram:BilledQuantity\)/i, { timeout: 5_000 });
+});
+
 test('ubl: LegalMonetaryTotal/PayableAmount presence flags a missing slot (draft 183)', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   const withBad = UBL_INVOICE.replace(/<cac:LegalMonetaryTotal>[\s\S]*?<\/cac:LegalMonetaryTotal>/g, (block) =>
