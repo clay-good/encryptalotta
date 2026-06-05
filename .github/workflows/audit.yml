@@ -1,0 +1,45 @@
+name: Audit (release gate)
+
+# Why this exists: the pre-commit hook (scripts/git-hooks/pre-commit) runs
+# scripts/audit-release.js locally, but a contributor can bypass it (git commit
+# --no-verify) or push from a clone where the hook was never installed. This
+# workflow re-runs the *same* audit server-side on every push and pull request to
+# main, so the mechanically-checkable security / quality invariants are enforced in
+# CI, not just on the author's machine:
+#
+#   - innerHTML hygiene (0 assignments)        - vendored SHA-384 integrity
+#   - STRINGS parity across all 5 locales      - CSP connect-src 'none' + no
+#   - data-i18n key resolution                   outbound vectors (fetch/XHR/...)
+#   - page-weight budget (<= 2 MB gzipped)     - locale-variant /<lang>/ sync
+#   - robots.txt / sitemap.xml / JSON-LD       - SBOM + portable-build presence
+#   - SEO prose key coverage                   - regulator-preset freshness
+#
+# The audit uses only Node built-ins (fs / path / crypto / zlib) — no npm install,
+# no browser, no network — so the job runs in seconds and is deterministic (never
+# flaky). The Playwright end-to-end suite (tests/, ~739 serial cases, workers:1,
+# ~14 min–1.8 h) and the responsive-overflow sweep stay a local / manual gate by
+# design; trigger them with `cd tests && npm ci && npx playwright test`.
+#
+# Runs in GitHub Actions only. The shipped site never makes a network call, so this
+# does not violate the page's `connect-src 'none'` CSP.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run release-gate audit
+        run: node scripts/audit-release.js
