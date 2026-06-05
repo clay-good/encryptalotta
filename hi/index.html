@@ -4743,6 +4743,10 @@
                 'cii.warn.payable': 'CII payable mismatch: GrandTotalAmount {grand} − TotalPrepaidAmount {prepaid} + RoundingAmount {rounding} = {expected} ≠ DuePayableAmount {due} — EN 16931 (the CII analogue of UBL BR-CO-16) requires the amount due for payment to equal the tax-inclusive grand total net of any prepayment and cash rounding; a Factur-X / ZUGFeRD document failing this is rejected at the schematron gate (±1 cent rounding tolerance)',
                 'cii.ok.vatBreakdown': 'CII VAT breakdown sums to the header tax total: Σ per-category CalculatedAmount = header TaxTotalAmount (EN 16931 — the CII analogue of UBL BR-CO-14, Σ BT-117 = BT-110 across each ram:ApplicableTradeTax)',
                 'cii.warn.vatBreakdown': 'CII VAT-breakdown mismatch: the per-category VAT amounts total {sum} but the header TaxTotalAmount (BT-110) declares {head} — EN 16931 (the CII analogue of UBL BR-CO-14) requires the sum of every ram:ApplicableTradeTax/ram:CalculatedAmount (BT-117) to equal the rolled-up header tax total; a Factur-X / ZUGFeRD document failing this is rejected at the schematron gate (±1 cent rounding tolerance)',
+                'cii.ok.vatCrossProduct': 'Every CII VAT category amount equals its base × rate across all {n} breakdown(s) (EN 16931 — the CII analogue of UBL BR-CO-17, CalculatedAmount BT-117 = BasisAmount BT-116 × RateApplicablePercent BT-119 / 100)',
+                'cii.warn.vatCrossProduct': 'CII VAT breakdown #{idx} cross-product mismatch: BasisAmount {base} × {pct}% = {expected} ≠ CalculatedAmount {declared} — EN 16931 (the CII analogue of UBL BR-CO-17) requires each ram:ApplicableTradeTax CalculatedAmount (BT-117) to equal its BasisAmount (BT-116) times its RateApplicablePercent (BT-119); a Factur-X / ZUGFeRD document failing this is rejected at the schematron gate (±1 cent rounding tolerance)',
+                'cii.ok.vatCategory': 'Every CII VAT category code is a valid UNCL 5305 value ({codes}) (EN 16931 BT-118 / BT-151, ram:ApplicableTradeTax/ram:CategoryCode)',
+                'cii.warn.vatCategory': 'CII VAT category code {code} (ram:ApplicableTradeTax/ram:CategoryCode, BT-118 / BT-151) is not a valid UNCL 5305 value — EN 16931 requires the VAT category to be one of S (standard), Z (zero), E (exempt), AE (reverse charge), K (intra-community), G (export), O (out of scope), L (Canary Islands) or M (Ceuta & Melilla); a Factur-X / ZUGFeRD document with an out-of-set code is rejected at the schematron gate and the per-category VAT rollup mis-bins the amount (the CII analogue of the UBL TaxCategory/ID UNCL 5305 check)',
                 'ubl.row.issueDate': 'Issue date',
                 'ubl.row.dueDate': 'Due date',
                 'ubl.row.currency': 'Currency',
@@ -6321,6 +6325,10 @@
                 'cii.warn.payable': 'Incohérence du montant à payer CII : GrandTotalAmount {grand} − TotalPrepaidAmount {prepaid} + RoundingAmount {rounding} = {expected} ≠ DuePayableAmount {due} — EN 16931 (l’analogue CII d’UBL BR-CO-16) exige que le montant dû au paiement égale le total général TTC net de tout acompte et arrondi ; un document Factur-X / ZUGFeRD qui échoue est rejeté au contrôle schematron (tolérance d’arrondi de ±1 centime)',
                 'cii.ok.vatBreakdown': 'La ventilation de TVA CII s’additionne au total de taxe d’en-tête : Σ CalculatedAmount par catégorie = TaxTotalAmount d’en-tête (EN 16931 — l’analogue CII d’UBL BR-CO-14, Σ BT-117 = BT-110 sur chaque ram:ApplicableTradeTax)',
                 'cii.warn.vatBreakdown': 'Incohérence de la ventilation de TVA CII : les montants de TVA par catégorie totalisent {sum} mais le TaxTotalAmount d’en-tête (BT-110) déclare {head} — EN 16931 (l’analogue CII d’UBL BR-CO-14) exige que la somme de chaque ram:ApplicableTradeTax/ram:CalculatedAmount (BT-117) égale le total de taxe d’en-tête consolidé ; un document Factur-X / ZUGFeRD qui échoue est rejeté au contrôle schematron (tolérance d’arrondi de ±1 centime)',
+                'cii.ok.vatCrossProduct': 'Chaque montant de TVA par catégorie CII égale sa base × son taux sur l’ensemble des {n} ventilation(s) (EN 16931 — l’analogue CII d’UBL BR-CO-17, CalculatedAmount BT-117 = BasisAmount BT-116 × RateApplicablePercent BT-119 / 100)',
+                'cii.warn.vatCrossProduct': 'Incohérence du produit croisé de la ventilation de TVA CII n°{idx} : BasisAmount {base} × {pct} % = {expected} ≠ CalculatedAmount {declared} — EN 16931 (l’analogue CII d’UBL BR-CO-17) exige que le CalculatedAmount (BT-117) de chaque ram:ApplicableTradeTax égale son BasisAmount (BT-116) multiplié par son RateApplicablePercent (BT-119) ; un document Factur-X / ZUGFeRD qui échoue est rejeté au contrôle schematron (tolérance d’arrondi de ±1 centime)',
+                'cii.ok.vatCategory': 'Chaque code de catégorie de TVA CII est une valeur UNCL 5305 valide ({codes}) (EN 16931 BT-118 / BT-151, ram:ApplicableTradeTax/ram:CategoryCode)',
+                'cii.warn.vatCategory': 'Le code de catégorie de TVA CII {code} (ram:ApplicableTradeTax/ram:CategoryCode, BT-118 / BT-151) n’est pas une valeur UNCL 5305 valide — EN 16931 exige que la catégorie de TVA soit l’une de S (normal), Z (taux zéro), E (exonéré), AE (autoliquidation), K (intracommunautaire), G (export), O (hors champ), L (îles Canaries) ou M (Ceuta et Melilla) ; un document Factur-X / ZUGFeRD avec un code hors ensemble est rejeté au contrôle schematron et la consolidation de TVA par catégorie classe mal le montant (l’analogue CII du contrôle UNCL 5305 du TaxCategory/ID UBL)',
                 'ubl.row.issueDate': 'Date d’émission',
                 'ubl.row.dueDate': 'Date d’échéance',
                 'ubl.row.currency': 'Devise',
@@ -7877,6 +7885,10 @@
                 'cii.warn.payable': 'CII 应付金额不一致：GrandTotalAmount {grand} − TotalPrepaidAmount {prepaid} + RoundingAmount {rounding} = {expected} ≠ DuePayableAmount {due} — EN 16931（UBL BR-CO-16 的 CII 对应物）要求应付金额等于含税总计扣除任何预付款和现金舍入后的净额；未通过的 Factur-X / ZUGFeRD 文档会在 schematron 关卡被拒绝（舍入容差 ±1 分）',
                 'cii.ok.vatBreakdown': 'CII 增值税明细累加到表头税额总额：Σ 每类别 CalculatedAmount = 表头 TaxTotalAmount（EN 16931——UBL BR-CO-14 的 CII 对应物，Σ BT-117 = BT-110，遍及每个 ram:ApplicableTradeTax）',
                 'cii.warn.vatBreakdown': 'CII 增值税明细不一致：各类别增值税额合计为 {sum}，但表头 TaxTotalAmount（BT-110）声明为 {head} — EN 16931（UBL BR-CO-14 的 CII 对应物）要求每个 ram:ApplicableTradeTax/ram:CalculatedAmount（BT-117）之和等于汇总的表头税额总额；未通过的 Factur-X / ZUGFeRD 文档会在 schematron 关卡被拒绝（舍入容差 ±1 分）',
+                'cii.ok.vatCrossProduct': '所有 {n} 个 CII 增值税类别金额均等于其税基 × 税率（EN 16931——UBL BR-CO-17 的 CII 对应物，CalculatedAmount BT-117 = BasisAmount BT-116 × RateApplicablePercent BT-119 / 100）',
+                'cii.warn.vatCrossProduct': 'CII 增值税明细第 {idx} 项交叉乘积不一致：BasisAmount {base} × {pct}% = {expected} ≠ CalculatedAmount {declared} — EN 16931（UBL BR-CO-17 的 CII 对应物）要求每个 ram:ApplicableTradeTax 的 CalculatedAmount（BT-117）等于其 BasisAmount（BT-116）乘以其 RateApplicablePercent（BT-119）；未通过的 Factur-X / ZUGFeRD 文档会在 schematron 关卡被拒绝（舍入容差 ±1 分）',
+                'cii.ok.vatCategory': '每个 CII 增值税类别代码均为有效的 UNCL 5305 值（{codes}）（EN 16931 BT-118 / BT-151，ram:ApplicableTradeTax/ram:CategoryCode）',
+                'cii.warn.vatCategory': 'CII 增值税类别代码 {code}（ram:ApplicableTradeTax/ram:CategoryCode，BT-118 / BT-151）不是有效的 UNCL 5305 值——EN 16931 要求增值税类别为 S（标准）、Z（零税率）、E（免税）、AE（反向征收）、K（欧盟内部）、G（出口）、O（不适用）、L（加那利群岛）或 M（休达和梅利利亚）之一；带有集合外代码的 Factur-X / ZUGFeRD 文档会在 schematron 关卡被拒绝，且按类别的增值税汇总会错误归类该金额（UBL TaxCategory/ID UNCL 5305 校验的 CII 对应物）',
                 'ubl.row.issueDate': '开票日期',
                 'ubl.row.dueDate': '到期日期',
                 'ubl.row.currency': '货币',
@@ -9448,6 +9460,10 @@
                 'cii.warn.payable': 'CII-Zahlbetrags-Abweichung: GrandTotalAmount {grand} − TotalPrepaidAmount {prepaid} + RoundingAmount {rounding} = {expected} ≠ DuePayableAmount {due} — EN 16931 (das CII-Pendant zu UBL BR-CO-16) verlangt, dass der fällige Zahlbetrag dem Brutto-Gesamtbetrag abzüglich etwaiger Vorauszahlung und Rundung entspricht; ein Factur-X-/ZUGFeRD-Dokument, das dies nicht erfüllt, wird am Schematron-Gate abgelehnt (±1 Cent Rundungstoleranz)',
                 'cii.ok.vatBreakdown': 'Die CII-USt-Aufschlüsselung summiert sich zum USt-Gesamtbetrag im Kopf: Σ CalculatedAmount je Kategorie = TaxTotalAmount im Kopf (EN 16931 — das CII-Pendant zu UBL BR-CO-14, Σ BT-117 = BT-110 über jede ram:ApplicableTradeTax)',
                 'cii.warn.vatBreakdown': 'CII-USt-Aufschlüsselungs-Abweichung: die USt-Beträge je Kategorie ergeben in Summe {sum}, aber der TaxTotalAmount im Kopf (BT-110) deklariert {head} — EN 16931 (das CII-Pendant zu UBL BR-CO-14) verlangt, dass die Summe jeder ram:ApplicableTradeTax/ram:CalculatedAmount (BT-117) dem aggregierten USt-Gesamtbetrag im Kopf entspricht; ein Factur-X-/ZUGFeRD-Dokument, das dies nicht erfüllt, wird am Schematron-Gate abgelehnt (±1 Cent Rundungstoleranz)',
+                'cii.ok.vatCrossProduct': 'Jeder CII-USt-Kategoriebetrag entspricht seiner Basis × seinem Satz über alle {n} Aufschlüsselung(en) (EN 16931 — das CII-Pendant zu UBL BR-CO-17, CalculatedAmount BT-117 = BasisAmount BT-116 × RateApplicablePercent BT-119 / 100)',
+                'cii.warn.vatCrossProduct': 'CII-USt-Aufschlüsselung #{idx} Kreuzprodukt-Abweichung: BasisAmount {base} × {pct}% = {expected} ≠ CalculatedAmount {declared} — EN 16931 (das CII-Pendant zu UBL BR-CO-17) verlangt, dass der CalculatedAmount (BT-117) jeder ram:ApplicableTradeTax dem Produkt aus ihrem BasisAmount (BT-116) und ihrem RateApplicablePercent (BT-119) entspricht; ein Factur-X-/ZUGFeRD-Dokument, das dies nicht erfüllt, wird am Schematron-Gate abgelehnt (±1 Cent Rundungstoleranz)',
+                'cii.ok.vatCategory': 'Jeder CII-USt-Kategoriecode ist ein gültiger UNCL-5305-Wert ({codes}) (EN 16931 BT-118 / BT-151, ram:ApplicableTradeTax/ram:CategoryCode)',
+                'cii.warn.vatCategory': 'Der CII-USt-Kategoriecode {code} (ram:ApplicableTradeTax/ram:CategoryCode, BT-118 / BT-151) ist kein gültiger UNCL-5305-Wert — EN 16931 verlangt, dass die USt-Kategorie einer von S (Normalsatz), Z (Nullsatz), E (steuerbefreit), AE (Umkehrung der Steuerschuld), K (innergemeinschaftlich), G (Ausfuhr), O (nicht im Geltungsbereich), L (Kanarische Inseln) oder M (Ceuta und Melilla) ist; ein Factur-X-/ZUGFeRD-Dokument mit einem Code außerhalb der Menge wird am Schematron-Gate abgelehnt, und die USt-Aufschlüsselung je Kategorie ordnet den Betrag falsch zu (das CII-Pendant zur UBL-TaxCategory/ID-UNCL-5305-Prüfung)',
                 'ubl.row.issueDate': 'Ausstellungsdatum',
                 'ubl.row.dueDate': 'Fälligkeitsdatum',
                 'ubl.row.currency': 'Währung',
@@ -11004,6 +11020,10 @@
                 'cii.warn.payable': 'CII देय राशि बेमेल: GrandTotalAmount {grand} − TotalPrepaidAmount {prepaid} + RoundingAmount {rounding} = {expected} ≠ DuePayableAmount {due} — EN 16931 (UBL BR-CO-16 का CII समकक्ष) के लिए देय राशि का कर-सहित कुल योग में से किसी भी पूर्वभुगतान और पूर्णांकन घटाने के बाद के बराबर होना आवश्यक है; इसमें विफल Factur-X / ZUGFeRD दस्तावेज़ schematron गेट पर अस्वीकृत होता है (±1 सेंट पूर्णांकन सहनशीलता)',
                 'cii.ok.vatBreakdown': 'CII VAT विवरण शीर्ष कर योग में जुड़ता है: Σ प्रति-श्रेणी CalculatedAmount = शीर्ष TaxTotalAmount (EN 16931 — UBL BR-CO-14 का CII समकक्ष, प्रत्येक ram:ApplicableTradeTax पर Σ BT-117 = BT-110)',
                 'cii.warn.vatBreakdown': 'CII VAT-विवरण बेमेल: प्रति-श्रेणी VAT राशियाँ कुल {sum} होती हैं परन्तु शीर्ष TaxTotalAmount (BT-110) {head} घोषित करता है — EN 16931 (UBL BR-CO-14 का CII समकक्ष) के लिए प्रत्येक ram:ApplicableTradeTax/ram:CalculatedAmount (BT-117) के योग का समेकित शीर्ष कर योग के बराबर होना आवश्यक है; इसमें विफल Factur-X / ZUGFeRD दस्तावेज़ schematron गेट पर अस्वीकृत होता है (±1 सेंट पूर्णांकन सहनशीलता)',
+                'cii.ok.vatCrossProduct': 'सभी {n} विवरण में प्रत्येक CII VAT श्रेणी राशि अपने आधार × दर के बराबर है (EN 16931 — UBL BR-CO-17 का CII समकक्ष, CalculatedAmount BT-117 = BasisAmount BT-116 × RateApplicablePercent BT-119 / 100)',
+                'cii.warn.vatCrossProduct': 'CII VAT विवरण #{idx} क्रॉस-उत्पाद बेमेल: BasisAmount {base} × {pct}% = {expected} ≠ CalculatedAmount {declared} — EN 16931 (UBL BR-CO-17 का CII समकक्ष) के लिए प्रत्येक ram:ApplicableTradeTax के CalculatedAmount (BT-117) का उसके BasisAmount (BT-116) गुणा उसके RateApplicablePercent (BT-119) के बराबर होना आवश्यक है; इसमें विफल Factur-X / ZUGFeRD दस्तावेज़ schematron गेट पर अस्वीकृत होता है (±1 सेंट पूर्णांकन सहनशीलता)',
+                'cii.ok.vatCategory': 'प्रत्येक CII VAT श्रेणी कोड एक मान्य UNCL 5305 मान है ({codes}) (EN 16931 BT-118 / BT-151, ram:ApplicableTradeTax/ram:CategoryCode)',
+                'cii.warn.vatCategory': 'CII VAT श्रेणी कोड {code} (ram:ApplicableTradeTax/ram:CategoryCode, BT-118 / BT-151) एक मान्य UNCL 5305 मान नहीं है — EN 16931 के लिए VAT श्रेणी का S (मानक), Z (शून्य), E (छूट), AE (रिवर्स चार्ज), K (अंतर-समुदाय), G (निर्यात), O (दायरे से बाहर), L (कैनरी द्वीप) या M (सेउटा और मेलिला) में से एक होना आवश्यक है; सेट से बाहर कोड वाला Factur-X / ZUGFeRD दस्तावेज़ schematron गेट पर अस्वीकृत होता है और प्रति-श्रेणी VAT रोलअप राशि को गलत वर्ग में रखता है (UBL TaxCategory/ID UNCL 5305 जाँच का CII समकक्ष)',
                 'ubl.row.issueDate': 'जारी करने की तिथि',
                 'ubl.row.dueDate': 'देय तिथि',
                 'ubl.row.currency': 'मुद्रा',
@@ -24743,6 +24763,88 @@
             }
         }
 
+        // CII VAT per-rate cross-product (draft 269). The CII analogue of UBL
+        // BR-CO-17 (ublCheckTaxCrossProduct): on each header-level
+        // ram:ApplicableTradeTax block, the CalculatedAmount (BT-117) must equal the
+        // BasisAmount (BT-116) × the RateApplicablePercent (BT-119) / 100, rounded to
+        // two decimals. The breakdown-sum gate (draft 268 / BR-CO-14) verifies the
+        // per-rate amounts add up to the rolled-up header tax, but a breakdown can
+        // sum correctly while each per-rate amount is internally inconsistent with
+        // its own base and rate — PEPPOL rejects at the BR-CO-17 schematron gate.
+        // The internal-arithmetic companion to draft 268's breakdown sum (mirroring
+        // how UBL draft 249 followed draft 247). Scoped to *direct children* of
+        // ram:ApplicableHeaderTradeSettlement so it never touches a per-line
+        // ram:ApplicableTradeTax. Integer-cent comparison, ±1 cent tolerance. No-ops
+        // on any block whose BasisAmount, CalculatedAmount, or RateApplicablePercent
+        // is missing or unparsable.
+        function ciiCheckVatCrossProduct(out, detected) {
+            const r = detected.root;
+            const txn = sepaFirst(r, 'SupplyChainTradeTransaction');
+            const settlement = txn ? sepaFirst(txn, 'ApplicableHeaderTradeSettlement') : null;
+            if (!settlement) return;
+            let seen = 0;
+            const bad = [];
+            for (const c of settlement.children) {
+                if (c.localName !== 'ApplicableTradeTax') continue;
+                const baseEl = sepaFirstChildLocal(c, 'BasisAmount');
+                const taxEl = sepaFirstChildLocal(c, 'CalculatedAmount');
+                if (!baseEl || !taxEl) continue; // presence is a future gate's territory
+                const base = ublParseCents(baseEl.textContent);
+                const tax = ublParseCents(taxEl.textContent);
+                if (base == null || tax == null) continue;
+                const pctEl = sepaFirstChildLocal(c, 'RateApplicablePercent');
+                if (!pctEl) continue;
+                const pct = parseFloat((pctEl.textContent || '').trim().replace(',', '.'));
+                if (!isFinite(pct)) continue;
+                seen++;
+                const expected = Math.round(base * pct / 100);
+                if (Math.abs(expected - tax) > 1) bad.push({ idx: seen, base, tax, pct, expected });
+            }
+            if (!seen) return;
+            const fmt = (cnt) => (cnt / 100).toFixed(2);
+            if (bad.length === 0) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + tFormat('cii.ok.vatCrossProduct', { n: intlNumber(seen) }));
+            } else {
+                for (const b of bad) {
+                    tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + tFormat('cii.warn.vatCrossProduct', { idx: intlNumber(b.idx), base: fmt(b.base), pct: b.pct, expected: fmt(b.expected), declared: fmt(b.tax) }));
+                }
+            }
+        }
+
+        // CII VAT category-code UNCL 5305 validity (draft 270). The CII analogue of
+        // UBL BR-CO-04 / ublCheckVatCategories: every ram:ApplicableTradeTax declares
+        // its VAT category in ram:CategoryCode (BT-118 at the header VAT-breakdown,
+        // BT-151 at the line), and that code must be a real UNCL 5305 value
+        // (S standard / Z zero / E exempt / AE reverse charge / K intra-community /
+        // G export / O out-of-scope / L Canary Islands / M Ceuta & Melilla). An
+        // out-of-set code is schema-valid plain text but rail-rejected, and it
+        // mis-bins the adjustment in the per-category VAT rollup. Reuses the shared
+        // UBL_VAT_CATS set. Walks every ram:ApplicableTradeTax (header + line) so it
+        // mirrors the document-wide UBL check. No-ops when no block declares a code.
+        function ciiCheckVatCategoryCode(out, detected) {
+            const r = detected.root;
+            const txn = sepaFirst(r, 'SupplyChainTradeTransaction');
+            if (!txn) return;
+            const taxes = sepaAllLocal(txn, 'ApplicableTradeTax');
+            if (!taxes.length) return;
+            const seen = new Set();
+            const bad = new Set();
+            for (const tax of taxes) {
+                const raw = (sepaTextOf(tax, 'CategoryCode') || '').trim().toUpperCase();
+                if (!raw) continue;
+                seen.add(raw);
+                if (!UBL_VAT_CATS.has(raw)) bad.add(raw);
+            }
+            if (!seen.size) return;
+            if (bad.size === 0) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + tFormat('cii.ok.vatCategory', { codes: intlList(Array.from(seen)) }));
+            } else {
+                for (const code of bad) {
+                    tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + tFormat('cii.warn.vatCategory', { code }));
+                }
+            }
+        }
+
         // EN 16931 totals consistency check. Two invariants are independent of any
         // PrepaidAmount / PayableRoundingAmount complications and catch the
         // overwhelming majority of real-world arithmetic errors:
@@ -29962,6 +30064,8 @@
                     ciiCheckTaxBasis(out, detected);
                     ciiCheckPayable(out, detected);
                     ciiCheckVatBreakdown(out, detected);
+                    ciiCheckVatCrossProduct(out, detected);
+                    ciiCheckVatCategoryCode(out, detected);
                     return;
                 }
                 ublRenderHeader(out, detected);

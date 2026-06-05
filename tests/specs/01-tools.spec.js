@@ -7100,6 +7100,39 @@ test('cii: VAT-breakdown sum flags a per-category amount that disagrees with the
   await expect(page.locator('#ubl-results')).toContainText(/CII VAT-breakdown mismatch: the per-category VAT amounts total 19\.00 but the header TaxTotalAmount \(BT-110\) declares 22\.80/i, { timeout: 5_000 });
 });
 
+test('cii: VAT cross-product confirms when each category amount = base × rate (draft 269)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', CII_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Every CII VAT category amount equals its base × rate/i, { timeout: 5_000 });
+});
+
+test('cii: VAT cross-product flags a category amount inconsistent with its base and rate (draft 269)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Bump the rate to 25% without touching CalculatedAmount (22.80): 120.00 × 25% =
+  // 30.00 ≠ 22.80, tripping BR-CO-17. CalculatedAmount still equals the header tax
+  // total, so the draft-268 breakdown-sum gate stays clean — this isolates 269.
+  const withBad = CII_INVOICE.replace('<ram:RateApplicablePercent>19.00</ram:RateApplicablePercent>', '<ram:RateApplicablePercent>25.00</ram:RateApplicablePercent>');
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/CII VAT breakdown #1 cross-product mismatch: BasisAmount 120\.00 × 25% = 30\.00 ≠ CalculatedAmount 22\.80/i, { timeout: 5_000 });
+});
+
+test('cii: VAT category code confirms on a valid UNCL 5305 value (draft 270)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', CII_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Every CII VAT category code is a valid UNCL 5305 value/i, { timeout: 5_000 });
+});
+
+test('cii: VAT category code flags an out-of-set UNCL 5305 value (draft 270)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  const withBad = CII_INVOICE.replace('<ram:CategoryCode>S</ram:CategoryCode>', '<ram:CategoryCode>X</ram:CategoryCode>');
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/CII VAT category code X \(ram:ApplicableTradeTax\/ram:CategoryCode, BT-118 \/ BT-151\) is not a valid UNCL 5305 value/i, { timeout: 5_000 });
+});
+
 test('ubl: LegalMonetaryTotal/PayableAmount presence flags a missing slot (draft 183)', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   const withBad = UBL_INVOICE.replace(/<cac:LegalMonetaryTotal>[\s\S]*?<\/cac:LegalMonetaryTotal>/g, (block) =>
