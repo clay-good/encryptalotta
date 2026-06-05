@@ -6712,6 +6712,39 @@ test('ubl: BR-CO-14 VAT-breakdown sum flags a subtotal that disagrees with the h
   await expect(page.locator('#ubl-results')).toContainText(/Σ per-rate <cac:TaxSubtotal>\/<cbc:TaxAmount> = 17\.00 EUR ≠ declared <cac:TaxTotal>\/<cbc:TaxAmount> 19\.00 EUR/i, { timeout: 5_000 });
 });
 
+test('sepa: per-transaction amount floor confirms on a canonical pain.001 (draft 248)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  await page.fill('#sepa-input', SEPA_PAIN001);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Every transaction amount is at or above the EPC SEPA per-instruction minimum of €0\.01/i, { timeout: 5_000 });
+});
+
+test('sepa: per-transaction amount floor flags a zero-amount instruction (draft 248)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'sepa');
+  // Drop the first transaction amount to the schema-valid but rail-rejected 0.00.
+  const withBad = SEPA_PAIN001.replace('<InstdAmt Ccy="EUR">100.00</InstdAmt>', '<InstdAmt Ccy="EUR">0.00</InstdAmt>');
+  await page.fill('#sepa-input', withBad);
+  await page.click('#btn-sepa-parse');
+  await expect(page.locator('#sepa-results')).toContainText(/Transaction #1 declares InstdAmt \/ Amt "0\.00" which is below the EPC SEPA per-instruction minimum of €0\.01/i, { timeout: 5_000 });
+});
+
+test('ubl: BR-CO-17 cross-product confirms on a canonical invoice (draft 249)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', UBL_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Every root-level <cac:TaxSubtotal> tax amount equals its taxable amount × rate/i, { timeout: 5_000 });
+});
+
+test('ubl: BR-CO-17 cross-product flags a tax amount inconsistent with base × rate (draft 249)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Bump only the header TaxSubtotal rate to 25% (first <cbc:Percent>) — the TaxAmount
+  // stays 19.00, so the per-rate cross-product breaks while BR-CO-14 (Σ = header) still holds.
+  const withBad = UBL_INVOICE.replace('<cbc:Percent>19</cbc:Percent>', '<cbc:Percent>25</cbc:Percent>');
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/VAT breakdown #1 declares <cbc:TaxAmount> 19\.00 EUR but 100\.00 EUR × 25% = 25\.00 EUR/i, { timeout: 5_000 });
+});
+
 test('ubl: LegalMonetaryTotal/PayableAmount presence flags a missing slot (draft 183)', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   const withBad = UBL_INVOICE.replace(/<cac:LegalMonetaryTotal>[\s\S]*?<\/cac:LegalMonetaryTotal>/g, (block) =>
