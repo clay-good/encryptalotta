@@ -6883,8 +6883,8 @@ const CII_INVOICE = `<?xml version="1.0" encoding="UTF-8"?>
       <ram:SpecifiedLineTradeSettlement><ram:SpecifiedTradeSettlementLineMonetarySummation><ram:LineTotalAmount>120.00</ram:LineTotalAmount></ram:SpecifiedTradeSettlementLineMonetarySummation></ram:SpecifiedLineTradeSettlement>
     </ram:IncludedSupplyChainTradeLineItem>
     <ram:ApplicableHeaderTradeAgreement>
-      <ram:SellerTradeParty><ram:Name>Fournisseur SARL</ram:Name></ram:SellerTradeParty>
-      <ram:BuyerTradeParty><ram:Name>Kaeufer GmbH</ram:Name></ram:BuyerTradeParty>
+      <ram:SellerTradeParty><ram:Name>Fournisseur SARL</ram:Name><ram:PostalTradeAddress><ram:CountryID>FR</ram:CountryID></ram:PostalTradeAddress></ram:SellerTradeParty>
+      <ram:BuyerTradeParty><ram:Name>Kaeufer GmbH</ram:Name><ram:PostalTradeAddress><ram:CountryID>DE</ram:CountryID></ram:PostalTradeAddress></ram:BuyerTradeParty>
     </ram:ApplicableHeaderTradeAgreement>
     <ram:ApplicableHeaderTradeSettlement>
       <ram:InvoiceCurrencyCode>EUR</ram:InvoiceCurrencyCode>
@@ -7131,6 +7131,38 @@ test('cii: VAT category code flags an out-of-set UNCL 5305 value (draft 270)', a
   await page.fill('#ubl-input', withBad);
   await page.click('#btn-ubl-parse');
   await expect(page.locator('#ubl-results')).toContainText(/CII VAT category code X \(ram:ApplicableTradeTax\/ram:CategoryCode, BT-118 \/ BT-151\) is not a valid UNCL 5305 value/i, { timeout: 5_000 });
+});
+
+test('cii: party-country presence confirms when seller and buyer declare a country (draft 271)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', CII_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Both CII trade parties declare a postal-address country code/i, { timeout: 5_000 });
+});
+
+test('cii: party-country presence flags a missing seller country BT-40 (draft 271)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Drop the seller's PostalTradeAddress; the seller party itself remains (so the
+  // party-name gate stays clean) but its mandatory BT-40 country is now absent.
+  const withBad = CII_INVOICE.replace('<ram:PostalTradeAddress><ram:CountryID>FR</ram:CountryID></ram:PostalTradeAddress>', '');
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/CII country code BT-40 \(ram:SellerTradeParty\/ram:PostalTradeAddress\/ram:CountryID\) is missing/i, { timeout: 5_000 });
+});
+
+test('cii: country-code ISO 3166-1 confirms on valid codes (draft 272)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', CII_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Every CII trade-party country code is a valid ISO 3166-1 alpha-2 code/i, { timeout: 5_000 });
+});
+
+test('cii: country-code ISO 3166-1 flags an unknown code (draft 272)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  const withBad = CII_INVOICE.replace('<ram:CountryID>FR</ram:CountryID>', '<ram:CountryID>XX</ram:CountryID>');
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/CII country code XX \(ram:PostalTradeAddress\/ram:CountryID, BT-40 \/ BT-55\) is not a valid ISO 3166-1 alpha-2 code/i, { timeout: 5_000 });
 });
 
 test('ubl: LegalMonetaryTotal/PayableAmount presence flags a missing slot (draft 183)', async ({ page }) => {
