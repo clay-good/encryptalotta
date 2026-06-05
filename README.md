@@ -18,7 +18,7 @@ A comprehensive single-page web app with **45 cryptographic, encoding, parsing, 
 - **Key Info** — Inspect any PGP public key: fingerprint, user IDs, algorithm, key size, creation and expiration dates.
 - **Revocation Certificate** — Generate a pre-signed certificate to retire a compromised key.
 - **QR Share** — Encode a PGP public key or encrypted message as one or more scannable QR codes (multi-QR `EAL-QR/v1/{n}/{total}/` for long inputs).
-- **TLS Certificate Parser** — Hand-rolled ASN.1 / DER decoder for X.509 certificates: subject, issuer, SAN, validity, public key algorithm, SHA-1 + SHA-256 fingerprints. Also decodes **PKCS#7 / CMS (RFC 5652) SignedData** — certs-only bundles (`.p7b` / `.p7c`) and CAdES-BES signatures: it surfaces every embedded certificate plus each signer's digest algorithm, signature algorithm, and signed signing-time. And it ingests a **PAdES-signed PDF** directly (load the file): it pulls each signature dictionary's `/Contents` CMS blob out of the PDF in-tab and decodes it the same way. (The §2.5 eIDAS signature inspector — CAdES + PAdES; XAdES deferred. No network, no revocation checking.)
+- **TLS Certificate Parser** — Hand-rolled ASN.1 / DER decoder for X.509 certificates: subject, issuer, SAN, validity, public key algorithm, SHA-1 + SHA-256 fingerprints. Also decodes **PKCS#7 / CMS (RFC 5652) SignedData** — certs-only bundles (`.p7b` / `.p7c`) and CAdES-BES signatures: it surfaces every embedded certificate plus each signer's digest algorithm, signature algorithm, and signed signing-time. It ingests a **PAdES-signed PDF** directly (load the file): it pulls each signature dictionary's `/Contents` CMS blob out of the PDF in-tab and decodes it the same way. And it decodes a pasted **XAdES / XML-DSig** signature: XAdES level (B-B / B-T / B-LT / B-LTA), signature + canonicalization methods, reference digests, signing time, and embedded certificates. (This is the **§2.5 eIDAS signature inspector — CAdES + PAdES + XAdES, the three eIDAS signature families**. No network, no cryptographic-verification or revocation checking — it reports structure + signer identity, not a validity verdict.)
 - **SSH Key Parser** — OpenSSH RFC 4253 wire-format parser: key type (rsa / ed25519 / ecdsa-sha2-nistp{256,384,521}), bit size, `SHA256:<base64>` fingerprint, comment.
 - **PEM ↔ DER** — Round-trip between PEM (Base64 with header/footer) and DER (raw binary as hex).
 - **BIP39 Mnemonic** — Generate cryptographically random 12 / 15 / 18 / 21 / 24-word seed phrases (BIP-0039) or validate the checksum of any existing mnemonic. Computes the BIP39 PBKDF2-HMAC-SHA512 seed locally with optional passphrase.
@@ -359,7 +359,7 @@ All 45 tools are organized into four groups. Every tool has a deep-link route.
 | **Key Info** | `#/keys/key-info` | Inspect any PGP key's fingerprint, user ID, algorithm, expiry |
 | **Revoke Key** | `#/keys/revoke` | Create a revocation certificate for a compromised key |
 | **QR Share** | `#/keys/qr` | Encode a public key or message into a QR (multi-QR for long inputs) |
-| **TLS Certificate Parser** | `#/keys/tls-cert` | Decode an X.509 cert (subject, SAN, validity, fingerprint), a PKCS#7 / CMS bundle / CAdES signature, or a PAdES-signed PDF |
+| **TLS Certificate Parser** | `#/keys/tls-cert` | Decode an X.509 cert, a PKCS#7 / CMS / CAdES signature, a PAdES-signed PDF, or a XAdES / XML-DSig signature (the eIDAS signature inspector) |
 | **SSH Key Parser** | `#/keys/ssh-key` | Inspect an OpenSSH public key: type, bits, SHA-256 fingerprint |
 | **PEM ↔ DER** | `#/keys/pem-der` | Convert between PEM (Base64) and DER (binary) encodings |
 | **BIP39 Mnemonic** | `#/keys/bip39` | Generate or validate BIP-0039 mnemonic seed phrases (12 / 15 / 18 / 21 / 24 words) |
@@ -491,6 +491,7 @@ Every tool maps to a published standard so its output is checkable against an au
 | X.509 / ASN.1 | RFC 5280, X.690 (DER) | TLS Certificate Parser |
 | PKCS#7 / CMS | RFC 5652 (SignedData), CAdES-BES (ETSI EN 319 122) | TLS Certificate Parser |
 | PAdES (PDF signatures) | ETSI EN 319 142, ISO 32000 signature dictionary | TLS Certificate Parser |
+| XAdES / XML-DSig | ETSI EN 319 132, XML Signature (RFC 3275) | TLS Certificate Parser |
 | SSH wire format | RFC 4253, RFC 4716 | SSH Key Parser |
 | UUID / ULID | RFC 9562 (UUID v4 / v7) | UUID / ULID |
 | Base encodings | RFC 4648 (Base64/32), Base58 (Bitcoin) | Encode |

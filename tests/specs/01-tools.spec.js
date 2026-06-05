@@ -150,6 +150,38 @@ test('tls-cert: reports a PDF with no PAdES signature (draft 285)', async ({ pag
   await expect(page.locator('#tls-pdf-status')).toContainText(/No PAdES \/ CMS signature found in unsigned\.pdf/i, { timeout: 5_000 });
 });
 
+// XAdES / XML-DSig (draft 286): a B-B signature (SignedProperties present, no
+// timestamp) with an embedded EC cert ("XAdES Test Signer"), pasted as XML.
+const XADES_CERT_B64 = 'MIIB2DCCAX2gAwIBAgIUIbL/nRHO5r2YRlF0eeCDH5kJS1IwCgYIKoZIzj0EAwIwQTEaMBgGA1UEAwwRWEFkRVMgVGVzdCBTaWduZXIxFjAUBgNVBAoMDWVuY3J5cHRhbG90dGExCzAJBgNVBAYTAkRFMB4XDTI2MDYwNTIxMjUxOFoXDTM2MDYwMjIxMjUxOFowQTEaMBgGA1UEAwwRWEFkRVMgVGVzdCBTaWduZXIxFjAUBgNVBAoMDWVuY3J5cHRhbG90dGExCzAJBgNVBAYTAkRFMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEWkjUlfYbxk8X450ZwDF+a6pQZBi7a6wjlduxiXyoIVZRwx9P6DYIqNdA8p0vmpbL6XaXYT3vGYO8Sr0NkwrBa6NTMFEwHQYDVR0OBBYEFBUDhh/EIdzlyXpSLZHqO4JHOj5PMB8GA1UdIwQYMBaAFBUDhh/EIdzlyXpSLZHqO4JHOj5PMA8GA1UdEwEB/wQFMAMBAf8wCgYIKoZIzj0EAwIDSQAwRgIhAPvKfh8ojNEGjTZEcv5QXsE8R3FWaLpPevb0aUIkTlnqAiEAn12S2S99uktHW1hi83l4LoyOcjCtPZ7/DmQVf9MDu+8=';
+const XADES_XML = `<?xml version="1.0" encoding="UTF-8"?>
+<ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xades="http://uri.etsi.org/01903/v1.3.2#">
+  <ds:SignedInfo>
+    <ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+    <ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256"/>
+    <ds:Reference URI="">
+      <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+      <ds:DigestValue>aGVsbG8=</ds:DigestValue>
+    </ds:Reference>
+  </ds:SignedInfo>
+  <ds:SignatureValue>c2ln</ds:SignatureValue>
+  <ds:KeyInfo><ds:X509Data><ds:X509Certificate>${XADES_CERT_B64}</ds:X509Certificate></ds:X509Data></ds:KeyInfo>
+  <ds:Object><xades:QualifyingProperties><xades:SignedProperties><xades:SignedSignatureProperties>
+    <xades:SigningTime>2024-03-15T10:30:00Z</xades:SigningTime>
+  </xades:SignedSignatureProperties></xades:SignedProperties></xades:QualifyingProperties></ds:Object>
+</ds:Signature>`;
+
+test('tls-cert: decodes a XAdES / XML-DSig signature (draft 286)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'tls-cert');
+  await page.fill('#tls-cert-input', XADES_XML);
+  await page.click('#btn-tls-cert-parse');
+  const res = page.locator('#tls-cert-results');
+  await expect(res).toContainText(/XAdES \/ XML-DSig — 1 signature\(s\)/i, { timeout: 5_000 });
+  await expect(res).toContainText('B-B');               // XAdES level (SignedProperties, no timestamp)
+  await expect(res).toContainText('ecdsa-sha256');      // signature method
+  await expect(res).toContainText('2024-03-15');        // SigningTime
+  await expect(res).toContainText(/XAdES Test Signer/);  // embedded cert subject
+});
+
 test('ssh-key', async ({ page }) => {
   const errs=[]; autoDismissDialogs(page, errs);
   await page.goto('/index.html'); await gotoTool(page, 'ssh-key');

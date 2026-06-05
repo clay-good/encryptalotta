@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <!--
   encryptalotta — single-file portable build
-  Source mtime: 2026-06-05T21:18:08.998Z
-  Source: index.html (SHA-256: 53acac5e79a493565133377a4845277fd6679bc0bfb30e0dfb4756222231402a)
+  Source mtime: 2026-06-05T21:27:26.375Z
+  Source: index.html (SHA-256: ee1bb0e6acefe36f1696666157ee9edbd7b51b4798576fa39cbc98dbfa335b1a)
   All vendored JavaScript inlined; favicons inlined as data: URIs.
   Identical functionality to the live site at https://encryptalotta.com.
   Runs from file://, USB stick, chat attachment, anywhere. No network calls.
@@ -6246,7 +6246,7 @@ var qrcode = function() {
                 'view.pem-der.h2': 'PEM ↔ DER Converter',
                 'view.cron.h2': 'Cron Decoder',
                 'view.color.h2': 'Color Converter',
-                'tls-cert.label.input': 'PEM X.509 certificate, or a PKCS#7 / CMS bundle or signature (.p7b / .p7c / CAdES):',
+                'tls-cert.label.input': 'PEM X.509 certificate, a PKCS#7 / CMS bundle or signature (.p7b / .p7c / CAdES), or an XML signature (XAdES / XML-DSig) — or load a signed PDF (PAdES) below:',
                 'tls-cert.ph.input': '-----BEGIN CERTIFICATE-----…',
                 'btn.tlsCertParse': 'Parse',
                 'tls-cert.row.version': 'Version',
@@ -6274,6 +6274,14 @@ var qrcode = function() {
                 'pades.summary': 'PAdES — {n} signature(s) found in {name}',
                 'pades.sig': 'Signature #{n}',
                 'pades.none': 'No PAdES / CMS signature found in {name} — the PDF carries no signature dictionary with a /Contents CMS blob.',
+                'xades.summary': 'XAdES / XML-DSig — {n} signature(s)',
+                'xades.level': 'XAdES level',
+                'xades.row.sigMethod': 'Signature method',
+                'xades.row.canon': 'Canonicalization',
+                'xades.row.digest': 'Reference digest',
+                'xades.plainDsig': 'XML-DSig (no XAdES qualifying properties)',
+                'xades.noSig': 'No XML signature found — the pasted XML has no <ds:Signature> element (XML-DSig / XAdES).',
+                'xades.errParse': 'The pasted XML did not parse.',
                 'tls-cert.valid': 'Currently valid',
                 'tls-cert.expired': 'EXPIRED',
                 'tls-cert.notYetValid': 'Not yet valid',
@@ -8067,7 +8075,7 @@ var qrcode = function() {
                 'view.pem-der.h2': 'Convertisseur PEM ↔ DER',
                 'view.cron.h2': 'Décodeur cron',
                 'view.color.h2': 'Convertisseur de couleur',
-                'tls-cert.label.input': 'Certificat X.509 PEM, ou un lot / une signature PKCS#7 / CMS (.p7b / .p7c / CAdES) :',
+                'tls-cert.label.input': 'Certificat X.509 PEM, un lot / une signature PKCS#7 / CMS (.p7b / .p7c / CAdES), ou une signature XML (XAdES / XML-DSig) — ou charger un PDF signé (PAdES) ci-dessous :',
                 'tls-cert.ph.input': '-----BEGIN CERTIFICATE-----…',
                 'btn.tlsCertParse': 'Analyser',
                 'tls-cert.row.version': 'Version',
@@ -8095,6 +8103,14 @@ var qrcode = function() {
                 'pades.summary': 'PAdES — {n} signature(s) trouvée(s) dans {name}',
                 'pades.sig': 'Signature n°{n}',
                 'pades.none': 'Aucune signature PAdES / CMS trouvée dans {name} — le PDF ne contient aucun dictionnaire de signature avec un blob CMS /Contents.',
+                'xades.summary': 'XAdES / XML-DSig — {n} signature(s)',
+                'xades.level': 'Niveau XAdES',
+                'xades.row.sigMethod': 'Méthode de signature',
+                'xades.row.canon': 'Canonicalisation',
+                'xades.row.digest': 'Empreinte de référence',
+                'xades.plainDsig': 'XML-DSig (aucune propriété qualifiante XAdES)',
+                'xades.noSig': 'Aucune signature XML trouvée — le XML collé ne contient pas d’élément <ds:Signature> (XML-DSig / XAdES).',
+                'xades.errParse': 'Le XML collé n’a pas pu être analysé.',
                 'tls-cert.valid': 'Actuellement valide',
                 'tls-cert.expired': 'EXPIRÉ',
                 'tls-cert.notYetValid': 'Pas encore valide',
@@ -9685,7 +9701,7 @@ var qrcode = function() {
                 'view.pem-der.h2': 'PEM ↔ DER 转换器',
                 'view.cron.h2': 'Cron 解码器',
                 'view.color.h2': '颜色转换器',
-                'tls-cert.label.input': 'PEM X.509 证书，或 PKCS#7 / CMS 捆绑包或签名（.p7b / .p7c / CAdES）:',
+                'tls-cert.label.input': 'PEM X.509 证书、PKCS#7 / CMS 捆绑包或签名（.p7b / .p7c / CAdES），或 XML 签名（XAdES / XML-DSig）——或在下方加载已签名的 PDF（PAdES）:',
                 'tls-cert.ph.input': '-----BEGIN CERTIFICATE-----…',
                 'btn.tlsCertParse': '解析',
                 'tls-cert.row.version': '版本',
@@ -9713,6 +9729,14 @@ var qrcode = function() {
                 'pades.summary': 'PAdES——在 {name} 中找到 {n} 个签名',
                 'pades.sig': '签名 #{n}',
                 'pades.none': '在 {name} 中未找到 PAdES / CMS 签名——该 PDF 不含带有 /Contents CMS blob 的签名字典。',
+                'xades.summary': 'XAdES / XML-DSig——{n} 个签名',
+                'xades.level': 'XAdES 级别',
+                'xades.row.sigMethod': '签名方法',
+                'xades.row.canon': '规范化',
+                'xades.row.digest': '引用摘要',
+                'xades.plainDsig': 'XML-DSig（无 XAdES 限定属性）',
+                'xades.noSig': '未找到 XML 签名——粘贴的 XML 不含 <ds:Signature> 元素（XML-DSig / XAdES）。',
+                'xades.errParse': '粘贴的 XML 无法解析。',
                 'tls-cert.valid': '当前有效',
                 'tls-cert.expired': '已过期',
                 'tls-cert.notYetValid': '尚未生效',
@@ -11288,7 +11312,7 @@ var qrcode = function() {
                 'view.pem-der.h2': 'PEM ↔ DER-Konverter',
                 'view.cron.h2': 'Cron-Decoder',
                 'view.color.h2': 'Farbkonverter',
-                'tls-cert.label.input': 'PEM-X.509-Zertifikat oder ein PKCS#7-/CMS-Bündel bzw. eine Signatur (.p7b / .p7c / CAdES):',
+                'tls-cert.label.input': 'PEM-X.509-Zertifikat, ein PKCS#7-/CMS-Bündel bzw. eine Signatur (.p7b / .p7c / CAdES) oder eine XML-Signatur (XAdES / XML-DSig) — oder unten ein signiertes PDF (PAdES) laden:',
                 'tls-cert.ph.input': '-----BEGIN CERTIFICATE-----…',
                 'btn.tlsCertParse': 'Analysieren',
                 'tls-cert.row.version': 'Version',
@@ -11316,6 +11340,14 @@ var qrcode = function() {
                 'pades.summary': 'PAdES — {n} Signatur(en) in {name} gefunden',
                 'pades.sig': 'Signatur #{n}',
                 'pades.none': 'Keine PAdES-/CMS-Signatur in {name} gefunden — das PDF enthält kein Signaturwörterbuch mit einem /Contents-CMS-Blob.',
+                'xades.summary': 'XAdES / XML-DSig — {n} Signatur(en)',
+                'xades.level': 'XAdES-Stufe',
+                'xades.row.sigMethod': 'Signaturverfahren',
+                'xades.row.canon': 'Kanonisierung',
+                'xades.row.digest': 'Referenz-Hash',
+                'xades.plainDsig': 'XML-DSig (keine qualifizierenden XAdES-Eigenschaften)',
+                'xades.noSig': 'Keine XML-Signatur gefunden — das eingefügte XML enthält kein <ds:Signature>-Element (XML-DSig / XAdES).',
+                'xades.errParse': 'Das eingefügte XML konnte nicht geparst werden.',
                 'tls-cert.valid': 'Aktuell gültig',
                 'tls-cert.expired': 'ABGELAUFEN',
                 'tls-cert.notYetValid': 'Noch nicht gültig',
@@ -12906,7 +12938,7 @@ var qrcode = function() {
                 'view.pem-der.h2': 'PEM ↔ DER कन्वर्टर',
                 'view.cron.h2': 'Cron डिकोडर',
                 'view.color.h2': 'रंग कन्वर्टर',
-                'tls-cert.label.input': 'PEM X.509 प्रमाणपत्र, या एक PKCS#7 / CMS बंडल या हस्ताक्षर (.p7b / .p7c / CAdES):',
+                'tls-cert.label.input': 'PEM X.509 प्रमाणपत्र, एक PKCS#7 / CMS बंडल या हस्ताक्षर (.p7b / .p7c / CAdES), या एक XML हस्ताक्षर (XAdES / XML-DSig) — या नीचे एक हस्ताक्षरित PDF (PAdES) लोड करें:',
                 'tls-cert.ph.input': '-----BEGIN CERTIFICATE-----…',
                 'btn.tlsCertParse': 'पार्स करें',
                 'tls-cert.row.version': 'संस्करण',
@@ -12934,6 +12966,14 @@ var qrcode = function() {
                 'pades.summary': 'PAdES — {name} में {n} हस्ताक्षर मिले',
                 'pades.sig': 'हस्ताक्षर #{n}',
                 'pades.none': '{name} में कोई PAdES / CMS हस्ताक्षर नहीं मिला — PDF में /Contents CMS blob वाला कोई हस्ताक्षर शब्दकोश नहीं है।',
+                'xades.summary': 'XAdES / XML-DSig — {n} हस्ताक्षर',
+                'xades.level': 'XAdES स्तर',
+                'xades.row.sigMethod': 'हस्ताक्षर विधि',
+                'xades.row.canon': 'कैनॉनिकलीकरण',
+                'xades.row.digest': 'संदर्भ डाइजेस्ट',
+                'xades.plainDsig': 'XML-DSig (कोई XAdES योग्यता गुण नहीं)',
+                'xades.noSig': 'कोई XML हस्ताक्षर नहीं मिला — चिपकाए गए XML में कोई <ds:Signature> तत्व नहीं है (XML-DSig / XAdES)।',
+                'xades.errParse': 'चिपकाया गया XML पार्स नहीं हो सका।',
                 'tls-cert.valid': 'अभी मान्य',
                 'tls-cert.expired': 'समाप्त',
                 'tls-cert.notYetValid': 'अभी तक मान्य नहीं',
@@ -19218,12 +19258,93 @@ var qrcode = function() {
             }
         });
 
+        // XAdES (ETSI EN 319 132) / XML-DSig (RFC 3275) — the third §2.5 slice.
+        // DOMParser-based, namespace-blind by localName like the SEPA / UBL / LOTL
+        // tools. Per <ds:Signature> it surfaces the XAdES level (B-B / B-T / B-LT /
+        // B-LTA, inferred from the qualifying properties present), the signature +
+        // canonicalization methods, per-Reference digest methods, the SigningTime,
+        // and every embedded <ds:X509Certificate> decoded through the X.509 parser.
+        const XADES_ALG_NAMES = {
+            'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256': 'rsa-sha256',
+            'http://www.w3.org/2001/04/xmldsig-more#rsa-sha384': 'rsa-sha384',
+            'http://www.w3.org/2001/04/xmldsig-more#rsa-sha512': 'rsa-sha512',
+            'http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256': 'ecdsa-sha256',
+            'http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha384': 'ecdsa-sha384',
+            'http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha512': 'ecdsa-sha512',
+            'http://www.w3.org/2000/09/xmldsig#rsa-sha1': 'rsa-sha1',
+            'http://www.w3.org/2000/09/xmldsig#dsa-sha1': 'dsa-sha1',
+            'http://www.w3.org/2001/04/xmlenc#sha256': 'sha256',
+            'http://www.w3.org/2001/04/xmlenc#sha512': 'sha512',
+            'http://www.w3.org/2001/04/xmldsig-more#sha384': 'sha384',
+            'http://www.w3.org/2000/09/xmldsig#sha1': 'sha1',
+            'http://www.w3.org/2001/10/xml-exc-c14n#': 'Exclusive XML C14N',
+            'http://www.w3.org/2001/10/xml-exc-c14n#WithComments': 'Exclusive XML C14N (with comments)',
+            'http://www.w3.org/TR/2001/REC-xml-c14n-20010315': 'Inclusive XML C14N',
+            'http://www.w3.org/2006/12/xml-c14n11': 'Inclusive XML C14N 1.1'
+        };
+        function xadesAlgName(uri) {
+            if (!uri) return '(none)';
+            if (XADES_ALG_NAMES[uri]) return XADES_ALG_NAMES[uri];
+            return uri.split('#')[1] || uri.split('/').pop() || uri;
+        }
+        function xadesSignatures(xmlText) {
+            const doc = new DOMParser().parseFromString(xmlText, 'application/xml');
+            if (doc.getElementsByTagName('parsererror').length) throw new Error(t('xades.errParse'));
+            const sigs = [];
+            for (const s of doc.getElementsByTagNameNS('*', 'Signature')) {
+                if (sepaFirstChildLocal(s, 'SignedInfo')) sigs.push(s);   // a genuine XML-DSig Signature
+            }
+            return sigs;
+        }
+        async function renderXadesInto(out, sig) {
+            const signedInfo = sepaFirst(sig, 'SignedInfo');
+            const sigMethod = signedInfo ? sepaFirst(signedInfo, 'SignatureMethod') : null;
+            const canon = signedInfo ? sepaFirst(signedInfo, 'CanonicalizationMethod') : null;
+            const hasSignedProps = !!sepaFirst(sig, 'SignedProperties');
+            const hasSigTs = !!sepaFirst(sig, 'SignatureTimeStamp');
+            const hasLt = !!(sepaFirst(sig, 'CertificateValues') || sepaFirst(sig, 'RevocationValues'));
+            const hasLta = !!sepaFirst(sig, 'ArchiveTimeStamp');
+            const level = hasLta ? 'B-LTA' : hasLt ? 'B-LT' : hasSigTs ? 'B-T' : hasSignedProps ? 'B-B' : t('xades.plainDsig');
+            tlsRenderRow(out, t('xades.level'), level);
+            tlsRenderRow(out, t('xades.row.sigMethod'), xadesAlgName(sigMethod && sigMethod.getAttribute('Algorithm')));
+            tlsRenderRow(out, t('xades.row.canon'), xadesAlgName(canon && canon.getAttribute('Algorithm')));
+            const refs = signedInfo ? sepaAllLocal(signedInfo, 'Reference') : [];
+            const digests = refs.map(r => { const dm = sepaFirst(r, 'DigestMethod'); return xadesAlgName(dm && dm.getAttribute('Algorithm')); });
+            if (digests.length) tlsRenderRow(out, t('xades.row.digest'), digests.join(', '));
+            const signingTime = sepaFirst(sig, 'SigningTime');
+            const st = signingTime ? (signingTime.textContent || '').trim() : '';
+            tlsRenderRow(out, t('cms.row.signingTime'), st || t('cms.noSigningTime'));
+            const certEls = sepaAllLocal(sig, 'X509Certificate');
+            for (let i = 0; i < certEls.length; i++) {
+                const b64 = (certEls[i].textContent || '').replace(/\s+/g, '');
+                if (!b64) continue;
+                tlsRenderHeading(out, tFormat('cms.cert', { n: intlNumber(i + 1) }));
+                try {
+                    tlsRenderCert(out, await tlsCertParseDer(base64ToBytes(b64, false)));
+                } catch (e) {
+                    tlsRenderRow(out, t('tls-cert.row.error'), e.message);
+                }
+            }
+        }
+
         document.getElementById('btn-tls-cert-parse').addEventListener('click', async () => {
             const out = document.getElementById('tls-cert-results');
             while (out.firstChild) out.removeChild(out.firstChild);
             out.classList.remove('hidden');
             try {
-                const der = new Uint8Array(pemToArrayBuffer(document.getElementById('tls-cert-input').value));
+                const raw = document.getElementById('tls-cert-input').value;
+                if (raw.trim().startsWith('<')) {
+                    // XML → XAdES / XML-DSig signature.
+                    const sigs = xadesSignatures(raw);
+                    if (!sigs.length) { tlsRenderRow(out, t('tls-cert.row.error'), t('xades.noSig')); return; }
+                    tlsRenderRow(out, t('tls-cert.row.type'), tFormat('xades.summary', { n: intlNumber(sigs.length) }));
+                    for (let i = 0; i < sigs.length; i++) {
+                        tlsRenderHeading(out, tFormat('pades.sig', { n: intlNumber(i + 1) }));
+                        await renderXadesInto(out, sigs[i]);
+                    }
+                    return;
+                }
+                const der = new Uint8Array(pemToArrayBuffer(raw));
                 if (cmsIsSignedData(der)) {
                     await renderCmsInto(out, der);
                     return;
