@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <!--
   encryptalotta — single-file portable build
-  Source mtime: 2026-06-05T19:35:08.489Z
-  Source: index.html (SHA-256: 4d5c82dc050af5e94476da866a4c1445956caf7db531484f39ac47cd365aed6f)
+  Source mtime: 2026-06-05T19:49:12.850Z
+  Source: index.html (SHA-256: f3db277e7d73514846df035fc35d9cdc1916fd9bc36ce97f8efb80b16399da0c)
   All vendored JavaScript inlined; favicons inlined as data: URIs.
   Identical functionality to the live site at https://encryptalotta.com.
   Runs from file://, USB stick, chat attachment, anywhere. No network calls.
@@ -7062,6 +7062,10 @@ var qrcode = function() {
                 'cii.warn.partyCountries': 'CII country code {field} is missing — EN 16931 requires every Cross Industry Invoice to declare the seller and buyer postal-address country; the code anchors which member state’s VAT regime governs each side of the supply, so a Factur-X / ZUGFeRD document without it is rejected at the schematron gate (the CII analogue of the UBL BR-09 / BR-11 presence rules)',
                 'cii.ok.countryCode': 'Every CII trade-party country code is a valid ISO 3166-1 alpha-2 code across all {n} party address(es) (EN 16931 BT-40 / BT-55)',
                 'cii.warn.countryCode': 'CII country code {code} (ram:PostalTradeAddress/ram:CountryID, BT-40 / BT-55) is not a valid ISO 3166-1 alpha-2 code — EN 16931 requires the seller and buyer country to be a real ISO 3166-1 country; a Factur-X / ZUGFeRD document with an unknown code is rejected at the schematron gate (the CII analogue of the UBL country-code ISO 3166-1 check)',
+                'cii.ok.lineCrossProduct': 'Every CII line net amount equals net price × billed quantity across all {n} line(s) (EN 16931 — the CII analogue of UBL BR-CO-04, LineTotalAmount BT-131 = NetPriceProductTradePrice BT-146 × BilledQuantity BT-129 / BasisQuantity BT-149)',
+                'cii.warn.lineCrossProduct': 'CII line #{idx} net cross-product mismatch: net price × billed quantity = {expected} ≠ LineTotalAmount {declared} — EN 16931 (the CII analogue of UBL BR-CO-04) requires each line net amount (BT-131) to equal its net price (BT-146) times its billed quantity (BT-129); a Factur-X / ZUGFeRD document failing this is rejected at the schematron gate (±1 cent rounding tolerance)',
+                'cii.ok.dueDate': 'CII payment due date {due} is on or after the issue date {issue} (EN 16931 BT-9 ≥ BT-2)',
+                'cii.warn.dueDate': 'CII payment due date {due} precedes the issue date {issue} — payment cannot fall due before the invoice is issued; EN 16931 implementations (PEPPOL / Factur-X) reject a backdated due date (the CII analogue of the UBL DueDate ≥ IssueDate check)',
                 'ubl.row.issueDate': 'Issue date',
                 'ubl.row.dueDate': 'Due date',
                 'ubl.row.currency': 'Currency',
@@ -8648,6 +8652,10 @@ var qrcode = function() {
                 'cii.warn.partyCountries': 'Le code pays CII {field} est absent — EN 16931 exige que chaque Cross Industry Invoice déclare le pays d’adresse postale du vendeur et de l’acheteur ; le code détermine le régime de TVA de l’État membre qui régit chaque côté de l’opération, donc un document Factur-X / ZUGFeRD sans lui est rejeté au contrôle schematron (l’analogue CII des règles de présence UBL BR-09 / BR-11)',
                 'cii.ok.countryCode': 'Chaque code pays de partie commerciale CII est un code ISO 3166-1 alpha-2 valide sur l’ensemble des {n} adresse(s) de partie (EN 16931 BT-40 / BT-55)',
                 'cii.warn.countryCode': 'Le code pays CII {code} (ram:PostalTradeAddress/ram:CountryID, BT-40 / BT-55) n’est pas un code ISO 3166-1 alpha-2 valide — EN 16931 exige que le pays du vendeur et de l’acheteur soit un vrai pays ISO 3166-1 ; un document Factur-X / ZUGFeRD avec un code inconnu est rejeté au contrôle schematron (l’analogue CII du contrôle ISO 3166-1 des codes pays UBL)',
+                'cii.ok.lineCrossProduct': 'Chaque montant net de ligne CII égale le prix net × la quantité facturée sur l’ensemble des {n} ligne(s) (EN 16931 — l’analogue CII d’UBL BR-CO-04, LineTotalAmount BT-131 = NetPriceProductTradePrice BT-146 × BilledQuantity BT-129 / BasisQuantity BT-149)',
+                'cii.warn.lineCrossProduct': 'Incohérence du produit croisé de la ligne CII n°{idx} : prix net × quantité facturée = {expected} ≠ LineTotalAmount {declared} — EN 16931 (l’analogue CII d’UBL BR-CO-04) exige que le montant net de chaque ligne (BT-131) égale son prix net (BT-146) multiplié par sa quantité facturée (BT-129) ; un document Factur-X / ZUGFeRD qui échoue est rejeté au contrôle schematron (tolérance d’arrondi de ±1 centime)',
+                'cii.ok.dueDate': 'La date d’échéance de paiement CII {due} est postérieure ou égale à la date d’émission {issue} (EN 16931 BT-9 ≥ BT-2)',
+                'cii.warn.dueDate': 'La date d’échéance de paiement CII {due} précède la date d’émission {issue} — un paiement ne peut être dû avant l’émission de la facture ; les implémentations EN 16931 (PEPPOL / Factur-X) rejettent une date d’échéance antidatée (l’analogue CII du contrôle UBL DueDate ≥ IssueDate)',
                 'ubl.row.issueDate': 'Date d’émission',
                 'ubl.row.dueDate': 'Date d’échéance',
                 'ubl.row.currency': 'Devise',
@@ -10212,6 +10220,10 @@ var qrcode = function() {
                 'cii.warn.partyCountries': 'CII 国家代码 {field} 缺失——EN 16931 要求每个 Cross Industry Invoice 都声明卖方和买方的邮寄地址国家；该代码确定由哪个成员国的增值税制度管辖交易的各方，因此缺少它的 Factur-X / ZUGFeRD 文档会在 schematron 关卡被拒绝（UBL BR-09 / BR-11 存在性规则的 CII 对应物）',
                 'cii.ok.countryCode': '所有 {n} 个交易方地址中每个 CII 交易方国家代码均为有效的 ISO 3166-1 alpha-2 代码（EN 16931 BT-40 / BT-55）',
                 'cii.warn.countryCode': 'CII 国家代码 {code}（ram:PostalTradeAddress/ram:CountryID，BT-40 / BT-55）不是有效的 ISO 3166-1 alpha-2 代码——EN 16931 要求卖方和买方国家为真实的 ISO 3166-1 国家；带有未知代码的 Factur-X / ZUGFeRD 文档会在 schematron 关卡被拒绝（UBL 国家代码 ISO 3166-1 校验的 CII 对应物）',
+                'cii.ok.lineCrossProduct': '所有 {n} 个 CII 行的净额均等于净单价 × 计费数量（EN 16931——UBL BR-CO-04 的 CII 对应物，LineTotalAmount BT-131 = NetPriceProductTradePrice BT-146 × BilledQuantity BT-129 / BasisQuantity BT-149）',
+                'cii.warn.lineCrossProduct': 'CII 第 {idx} 行净额交叉乘积不一致：净单价 × 计费数量 = {expected} ≠ LineTotalAmount {declared} — EN 16931（UBL BR-CO-04 的 CII 对应物）要求每行净额（BT-131）等于其净单价（BT-146）乘以其计费数量（BT-129）；未通过的 Factur-X / ZUGFeRD 文档会在 schematron 关卡被拒绝（舍入容差 ±1 分）',
+                'cii.ok.dueDate': 'CII 付款到期日 {due} 不早于开具日期 {issue}（EN 16931 BT-9 ≥ BT-2）',
+                'cii.warn.dueDate': 'CII 付款到期日 {due} 早于开具日期 {issue}——付款不能在发票开具之前到期；EN 16931 实现（PEPPOL / Factur-X）会拒绝倒填的到期日（UBL DueDate ≥ IssueDate 校验的 CII 对应物）',
                 'ubl.row.issueDate': '开票日期',
                 'ubl.row.dueDate': '到期日期',
                 'ubl.row.currency': '货币',
@@ -11791,6 +11803,10 @@ var qrcode = function() {
                 'cii.warn.partyCountries': 'Der CII-Ländercode {field} fehlt — EN 16931 verlangt, dass jede Cross Industry Invoice das Postanschrift-Land von Verkäufer und Käufer deklariert; der Code bestimmt, welches USt-Regime des Mitgliedstaats jede Seite des Umsatzes regelt, daher wird ein Factur-X-/ZUGFeRD-Dokument ohne ihn am Schematron-Gate abgelehnt (das CII-Pendant der UBL-Präsenzregeln BR-09 / BR-11)',
                 'cii.ok.countryCode': 'Jeder CII-Handelspartei-Ländercode ist ein gültiger ISO-3166-1-alpha-2-Code über alle {n} Parteiadresse(n) (EN 16931 BT-40 / BT-55)',
                 'cii.warn.countryCode': 'Der CII-Ländercode {code} (ram:PostalTradeAddress/ram:CountryID, BT-40 / BT-55) ist kein gültiger ISO-3166-1-alpha-2-Code — EN 16931 verlangt, dass das Verkäufer- und Käuferland ein echtes ISO-3166-1-Land ist; ein Factur-X-/ZUGFeRD-Dokument mit einem unbekannten Code wird am Schematron-Gate abgelehnt (das CII-Pendant zur UBL-Ländercode-ISO-3166-1-Prüfung)',
+                'cii.ok.lineCrossProduct': 'Jeder CII-Zeilennettobetrag entspricht dem Nettopreis × der berechneten Menge über alle {n} Zeile(n) (EN 16931 — das CII-Pendant zu UBL BR-CO-04, LineTotalAmount BT-131 = NetPriceProductTradePrice BT-146 × BilledQuantity BT-129 / BasisQuantity BT-149)',
+                'cii.warn.lineCrossProduct': 'CII-Zeile #{idx} Kreuzprodukt-Abweichung: Nettopreis × berechnete Menge = {expected} ≠ LineTotalAmount {declared} — EN 16931 (das CII-Pendant zu UBL BR-CO-04) verlangt, dass der Nettobetrag jeder Zeile (BT-131) dem Produkt aus ihrem Nettopreis (BT-146) und ihrer berechneten Menge (BT-129) entspricht; ein Factur-X-/ZUGFeRD-Dokument, das dies nicht erfüllt, wird am Schematron-Gate abgelehnt (±1 Cent Rundungstoleranz)',
+                'cii.ok.dueDate': 'Das CII-Zahlungsfälligkeitsdatum {due} liegt am oder nach dem Ausstellungsdatum {issue} (EN 16931 BT-9 ≥ BT-2)',
+                'cii.warn.dueDate': 'Das CII-Zahlungsfälligkeitsdatum {due} liegt vor dem Ausstellungsdatum {issue} — eine Zahlung kann nicht vor Rechnungsausstellung fällig werden; EN-16931-Implementierungen (PEPPOL / Factur-X) lehnen ein rückdatiertes Fälligkeitsdatum ab (das CII-Pendant zur UBL-Prüfung DueDate ≥ IssueDate)',
                 'ubl.row.issueDate': 'Ausstellungsdatum',
                 'ubl.row.dueDate': 'Fälligkeitsdatum',
                 'ubl.row.currency': 'Währung',
@@ -13355,6 +13371,10 @@ var qrcode = function() {
                 'cii.warn.partyCountries': 'CII देश कोड {field} अनुपस्थित है — EN 16931 के लिए प्रत्येक Cross Industry Invoice का विक्रेता और क्रेता के डाक-पता देश को घोषित करना आवश्यक है; यह कोड निर्धारित करता है कि किस सदस्य राज्य की VAT व्यवस्था लेन-देन के प्रत्येक पक्ष को नियंत्रित करती है, इसलिए इसके बिना Factur-X / ZUGFeRD दस्तावेज़ schematron गेट पर अस्वीकृत होता है (UBL BR-09 / BR-11 उपस्थिति नियमों का CII समकक्ष)',
                 'cii.ok.countryCode': 'सभी {n} पक्ष पते में प्रत्येक CII व्यापार-पक्ष देश कोड एक मान्य ISO 3166-1 alpha-2 कोड है (EN 16931 BT-40 / BT-55)',
                 'cii.warn.countryCode': 'CII देश कोड {code} (ram:PostalTradeAddress/ram:CountryID, BT-40 / BT-55) एक मान्य ISO 3166-1 alpha-2 कोड नहीं है — EN 16931 के लिए विक्रेता और क्रेता देश का एक वास्तविक ISO 3166-1 देश होना आवश्यक है; अज्ञात कोड वाला Factur-X / ZUGFeRD दस्तावेज़ schematron गेट पर अस्वीकृत होता है (UBL देश कोड ISO 3166-1 जाँच का CII समकक्ष)',
+                'cii.ok.lineCrossProduct': 'सभी {n} पंक्तियों में प्रत्येक CII पंक्ति का शुद्ध मान शुद्ध मूल्य × बिल की गई मात्रा के बराबर है (EN 16931 — UBL BR-CO-04 का CII समकक्ष, LineTotalAmount BT-131 = NetPriceProductTradePrice BT-146 × BilledQuantity BT-129 / BasisQuantity BT-149)',
+                'cii.warn.lineCrossProduct': 'CII पंक्ति #{idx} शुद्ध क्रॉस-उत्पाद बेमेल: शुद्ध मूल्य × बिल की गई मात्रा = {expected} ≠ LineTotalAmount {declared} — EN 16931 (UBL BR-CO-04 का CII समकक्ष) के लिए प्रत्येक पंक्ति के शुद्ध मान (BT-131) का उसके शुद्ध मूल्य (BT-146) गुणा उसकी बिल की गई मात्रा (BT-129) के बराबर होना आवश्यक है; इसमें विफल Factur-X / ZUGFeRD दस्तावेज़ schematron गेट पर अस्वीकृत होता है (±1 सेंट पूर्णांकन सहनशीलता)',
+                'cii.ok.dueDate': 'CII भुगतान देय तिथि {due} जारी तिथि {issue} पर या उसके बाद है (EN 16931 BT-9 ≥ BT-2)',
+                'cii.warn.dueDate': 'CII भुगतान देय तिथि {due} जारी तिथि {issue} से पहले है — भुगतान चालान जारी होने से पहले देय नहीं हो सकता; EN 16931 कार्यान्वयन (PEPPOL / Factur-X) पूर्वदिनांकित देय तिथि को अस्वीकार करते हैं (UBL DueDate ≥ IssueDate जाँच का CII समकक्ष)',
                 'ubl.row.issueDate': 'जारी करने की तिथि',
                 'ubl.row.dueDate': 'देय तिथि',
                 'ubl.row.currency': 'मुद्रा',
@@ -27245,6 +27265,96 @@ var qrcode = function() {
             }
         }
 
+        // CII line-level net cross-product (draft 273). The CII analogue of UBL
+        // BR-CO-04 / EN16931-R120 (ublCheckLineAmount): on each line, the
+        // LineTotalAmount (BT-131, ram:SpecifiedLineTradeSettlement/…/
+        // ram:LineTotalAmount) must equal the net price (BT-146,
+        // ram:SpecifiedLineTradeAgreement/ram:NetPriceProductTradePrice/
+        // ram:ChargeAmount) × the billed quantity (BT-129, ram:SpecifiedLine-
+        // TradeDelivery/ram:BilledQuantity) / the price base quantity (BT-149,
+        // ram:NetPriceProductTradePrice/ram:BasisQuantity, defaulting to 1).
+        // The header line-sum gate (draft 265) verifies the per-line totals add up
+        // to the header figure, but a line total can be internally inconsistent
+        // with its own price × quantity while the lines still sum correctly — the
+        // per-line companion to draft 265, just as draft 269 is to draft 268.
+        // ram:ChargeAmount / ram:BasisQuantity are read as direct children of
+        // NetPriceProductTradePrice so a nested AppliedTradeAllowanceCharge (which
+        // carries ram:ActualAmount) is never mistaken for the net price. Integer-
+        // cent comparison, ±1 cent tolerance. Skips a line missing its price,
+        // quantity, or total (presence is draft 262's territory).
+        function ciiCheckLineAmount(out, detected) {
+            const r = detected.root;
+            const txn = sepaFirst(r, 'SupplyChainTradeTransaction');
+            if (!txn) return;
+            const lines = sepaAllLocal(txn, 'IncludedSupplyChainTradeLineItem');
+            if (!lines.length) return;
+            const bad = [];
+            let seen = 0;
+            lines.forEach((line, i) => {
+                const lineDoc = sepaFirst(line, 'AssociatedDocumentLineDocument');
+                const lineId = (lineDoc ? (sepaTextOf(lineDoc, 'LineID') || '').trim() : '') || String(i + 1);
+                const agreement = sepaFirst(line, 'SpecifiedLineTradeAgreement');
+                const priceEl = agreement ? sepaFirst(agreement, 'NetPriceProductTradePrice') : null;
+                const chargeEl = priceEl ? sepaFirstChildLocal(priceEl, 'ChargeAmount') : null;
+                const delivery = sepaFirst(line, 'SpecifiedLineTradeDelivery');
+                const qtyEl = delivery ? sepaFirst(delivery, 'BilledQuantity') : null;
+                const settle = sepaFirst(line, 'SpecifiedLineTradeSettlement');
+                const lineSum = settle ? sepaFirst(settle, 'SpecifiedTradeSettlementLineMonetarySummation') : null;
+                const totEl = lineSum ? sepaFirst(lineSum, 'LineTotalAmount') : null;
+                if (!chargeEl || !qtyEl || !totEl) return;
+                const price = Number((chargeEl.textContent || '').trim());
+                const qty = Number((qtyEl.textContent || '').trim());
+                const declared = Number((totEl.textContent || '').trim());
+                const baseEl = priceEl ? sepaFirstChildLocal(priceEl, 'BasisQuantity') : null;
+                const base = baseEl ? Number((baseEl.textContent || '').trim()) : 1;
+                if (!Number.isFinite(price) || !Number.isFinite(qty) || !Number.isFinite(declared) || !Number.isFinite(base) || base === 0) return;
+                seen++;
+                const expectedCents = Math.round((price * qty / base) * 100);
+                const declaredCents = Math.round(declared * 100);
+                if (Math.abs(expectedCents - declaredCents) > 1) {
+                    bad.push({ idx: lineId, declared: declared.toFixed(2), expected: (expectedCents / 100).toFixed(2) });
+                }
+            });
+            if (!seen) return;
+            if (bad.length === 0) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + tFormat('cii.ok.lineCrossProduct', { n: intlNumber(seen) }));
+            } else {
+                for (const b of bad) {
+                    tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + tFormat('cii.warn.lineCrossProduct', { idx: b.idx, declared: b.declared, expected: b.expected }));
+                }
+            }
+        }
+
+        // CII payment-due-date temporal ordering (draft 274). The CII analogue of
+        // the UBL DueDate ≥ IssueDate gate (ublCheckDates): the payment due date
+        // (BT-9, ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradePaymentTerms/
+        // ram:DueDateDateTime) must not precede the issue date (BT-2,
+        // ram:ExchangedDocument/ram:IssueDateTime). EN 16931 does not number this as
+        // a business rule, but payment cannot fall due before the invoice is issued
+        // and PEPPOL / Factur-X implementations universally reject a backdated due
+        // date. Both dates decode through ublCiiDate (udt:DateTimeString format-102
+        // CCYYMMDD → ISO). No-ops when either date is absent or unparsable (the
+        // header-presence gate draft 259 owns the missing-issue-date defect, and a
+        // document with no payment terms simply carries no due date).
+        function ciiCheckDueDate(out, detected) {
+            const r = detected.root;
+            const docEl = sepaFirst(r, 'ExchangedDocument');
+            const issue = docEl ? ublCiiDate(docEl, 'IssueDateTime') : '';
+            const txn = sepaFirst(r, 'SupplyChainTradeTransaction');
+            const settlement = txn ? sepaFirst(txn, 'ApplicableHeaderTradeSettlement') : null;
+            const terms = settlement ? sepaFirst(settlement, 'SpecifiedTradePaymentTerms') : null;
+            const due = terms ? ublCiiDate(terms, 'DueDateDateTime') : '';
+            if (!issue || !due) return;
+            const issueTs = Date.parse(issue);
+            const dueTs = Date.parse(due);
+            if (!Number.isFinite(issueTs) || !Number.isFinite(dueTs)) return;
+            if (dueTs >= issueTs) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + tFormat('cii.ok.dueDate', { due: due, issue: issue }));
+            } else {
+                tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + tFormat('cii.warn.dueDate', { due: due, issue: issue }));
+            }
+        }
+
         // EN 16931 totals consistency check. Two invariants are independent of any
         // PrepaidAmount / PayableRoundingAmount complications and catch the
         // overwhelming majority of real-world arithmetic errors:
@@ -32468,6 +32578,8 @@ var qrcode = function() {
                     ciiCheckVatCategoryCode(out, detected);
                     ciiCheckPartyCountries(out, detected);
                     ciiCheckCountryCodes(out, detected);
+                    ciiCheckLineAmount(out, detected);
+                    ciiCheckDueDate(out, detected);
                     return;
                 }
                 ublRenderHeader(out, detected);

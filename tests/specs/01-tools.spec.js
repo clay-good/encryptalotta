@@ -6902,6 +6902,7 @@ const CII_INVOICE = `<?xml version="1.0" encoding="UTF-8"?>
         <ram:GrandTotalAmount>142.80</ram:GrandTotalAmount>
         <ram:DuePayableAmount>142.80</ram:DuePayableAmount>
       </ram:SpecifiedTradeSettlementHeaderMonetarySummation>
+      <ram:SpecifiedTradePaymentTerms><ram:DueDateDateTime><udt:DateTimeString format="102">20240515</udt:DateTimeString></ram:DueDateDateTime></ram:SpecifiedTradePaymentTerms>
     </ram:ApplicableHeaderTradeSettlement>
   </rsm:SupplyChainTradeTransaction>
 </rsm:CrossIndustryInvoice>`;
@@ -7163,6 +7164,40 @@ test('cii: country-code ISO 3166-1 flags an unknown code (draft 272)', async ({ 
   await page.fill('#ubl-input', withBad);
   await page.click('#btn-ubl-parse');
   await expect(page.locator('#ubl-results')).toContainText(/CII country code XX \(ram:PostalTradeAddress\/ram:CountryID, BT-40 \/ BT-55\) is not a valid ISO 3166-1 alpha-2 code/i, { timeout: 5_000 });
+});
+
+test('cii: line cross-product confirms when net price × quantity = line total (draft 273)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', CII_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Every CII line net amount equals net price × billed quantity/i, { timeout: 5_000 });
+});
+
+test('cii: line cross-product flags a line total inconsistent with price × quantity (draft 273)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Net price 40.00 × billed quantity 3 = 120.00 = LineTotalAmount. Drop the billed
+  // quantity to 2 so 40.00 × 2 = 80.00 ≠ 120.00, tripping BR-CO-04. The header line
+  // total is unchanged, so the line-sum gate (draft 265) stays clean — isolates 273.
+  const withBad = CII_INVOICE.replace('<ram:BilledQuantity unitCode="C62">3</ram:BilledQuantity>', '<ram:BilledQuantity unitCode="C62">2</ram:BilledQuantity>');
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/CII line #1 net cross-product mismatch: net price × billed quantity = 80\.00 ≠ LineTotalAmount 120\.00/i, { timeout: 5_000 });
+});
+
+test('cii: due-date ordering confirms when due date is on or after issue date (draft 274)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', CII_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/CII payment due date 2024-05-15 is on or after the issue date 2024-04-15/i, { timeout: 5_000 });
+});
+
+test('cii: due-date ordering flags a due date that precedes the issue date (draft 274)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Issue date is 20240415; back-date the due date to 20240315 so due < issue.
+  const withBad = CII_INVOICE.replace('<ram:DueDateDateTime><udt:DateTimeString format="102">20240515</udt:DateTimeString></ram:DueDateDateTime>', '<ram:DueDateDateTime><udt:DateTimeString format="102">20240315</udt:DateTimeString></ram:DueDateDateTime>');
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/CII payment due date 2024-03-15 precedes the issue date 2024-04-15/i, { timeout: 5_000 });
 });
 
 test('ubl: LegalMonetaryTotal/PayableAmount presence flags a missing slot (draft 183)', async ({ page }) => {
