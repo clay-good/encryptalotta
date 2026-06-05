@@ -6795,6 +6795,43 @@ test('ubl: document-level AllowanceCharge VAT category flags a missing TaxCatego
   await expect(page.locator('#ubl-results')).toContainText(/Document-level AllowanceCharge #1 is missing <cac:TaxCategory>\/<cbc:ID>/i, { timeout: 5_000 });
 });
 
+// A line-level allowance injected inside the InvoiceLine (after its
+// LineExtensionAmount, before <cac:Item>) for the line-level AllowanceCharge
+// gates (drafts 254 / 255). 5.00 is unique to this block.
+const UBL_LINE_ALLOWANCE = UBL_INVOICE.replace(
+  '<cbc:LineExtensionAmount currencyID="EUR">100.00</cbc:LineExtensionAmount>\n    <cac:Item>',
+  '<cbc:LineExtensionAmount currencyID="EUR">100.00</cbc:LineExtensionAmount>\n    <cac:AllowanceCharge>\n      <cbc:ChargeIndicator>false</cbc:ChargeIndicator>\n      <cbc:AllowanceChargeReason>Line discount</cbc:AllowanceChargeReason>\n      <cbc:Amount currencyID="EUR">5.00</cbc:Amount>\n    </cac:AllowanceCharge>\n    <cac:Item>');
+
+test('ubl: line-level AllowanceCharge Amount presence confirms when the amount is declared (draft 254)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', UBL_LINE_ALLOWANCE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Every line-level <cac:AllowanceCharge> declares <cbc:Amount>/i, { timeout: 5_000 });
+});
+
+test('ubl: line-level AllowanceCharge Amount presence flags a missing amount (draft 254)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  const withBad = UBL_LINE_ALLOWANCE.replace('<cbc:Amount currencyID="EUR">5.00</cbc:Amount>\n    ', '');
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Line #1 <cac:AllowanceCharge> is missing <cbc:Amount>/i, { timeout: 5_000 });
+});
+
+test('ubl: line-level AllowanceCharge ChargeIndicator confirms on a valid boolean (draft 255)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', UBL_LINE_ALLOWANCE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Every line-level <cac:AllowanceCharge> declares a valid xs:boolean <cbc:ChargeIndicator>/i, { timeout: 5_000 });
+});
+
+test('ubl: line-level AllowanceCharge ChargeIndicator flags a non-boolean value (draft 255)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  const withBad = UBL_LINE_ALLOWANCE.replace('<cbc:ChargeIndicator>false</cbc:ChargeIndicator>', '<cbc:ChargeIndicator>Rebate</cbc:ChargeIndicator>');
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Line #1 <cac:AllowanceCharge> ChargeIndicator is "Rebate"/i, { timeout: 5_000 });
+});
+
 test('ubl: LegalMonetaryTotal/PayableAmount presence flags a missing slot (draft 183)', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   const withBad = UBL_INVOICE.replace(/<cac:LegalMonetaryTotal>[\s\S]*?<\/cac:LegalMonetaryTotal>/g, (block) =>
