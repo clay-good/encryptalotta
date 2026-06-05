@@ -121,6 +121,35 @@ test('tls-cert: decodes a PKCS#7 / CMS SignedData (CAdES) signature (draft 284)'
   await expect(res).toContainText(/Factur-X Test Signer/);    // embedded signer cert subject
 });
 
+// PAdES (draft 285): embed the CMS blob above into a PDF signature dictionary's
+// /Contents hex string and load it through the new tls-cert PDF file input.
+function buildPadesPdf(cmsB64) {
+  const hex = Buffer.from(cmsB64, 'base64').toString('hex');
+  return Buffer.concat([
+    Buffer.from('%PDF-1.7\n', 'latin1'),
+    Buffer.from('1 0 obj\n<< /Type /Sig /Filter /Adobe.PPKLite /SubFilter /ETSI.CAdES.detached /ByteRange [0 100 200 300] /Contents <' + hex + '> >>\nendobj\n', 'latin1'),
+    Buffer.from('%%EOF\n', 'latin1'),
+  ]);
+}
+
+test('tls-cert: extracts and decodes a PAdES (signed-PDF) CMS signature (draft 285)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'tls-cert');
+  await page.setInputFiles('#tls-pdf', { name: 'signed.pdf', mimeType: 'application/pdf', buffer: buildPadesPdf(CMS_P7S_B64) });
+  await expect(page.locator('#tls-pdf-status')).toContainText(/PAdES — 1 signature\(s\) found in signed\.pdf/i, { timeout: 5_000 });
+  const res = page.locator('#tls-cert-results');
+  await expect(res).toContainText(/Signature #1/i);
+  await expect(res).toContainText('ecdsa-with-SHA256');
+  await expect(res).toContainText(/Factur-X Test Signer/);
+});
+
+test('tls-cert: reports a PDF with no PAdES signature (draft 285)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'tls-cert');
+  // /Contents 2 0 R is an indirect ref (page contents), not a hex-string signature.
+  const pdf = Buffer.from('%PDF-1.7\n1 0 obj\n<< /Type /Page /Contents 2 0 R >>\nendobj\n%%EOF\n', 'latin1');
+  await page.setInputFiles('#tls-pdf', { name: 'unsigned.pdf', mimeType: 'application/pdf', buffer: pdf });
+  await expect(page.locator('#tls-pdf-status')).toContainText(/No PAdES \/ CMS signature found in unsigned\.pdf/i, { timeout: 5_000 });
+});
+
 test('ssh-key', async ({ page }) => {
   const errs=[]; autoDismissDialogs(page, errs);
   await page.goto('/index.html'); await gotoTool(page, 'ssh-key');

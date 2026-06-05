@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <!--
   encryptalotta — single-file portable build
-  Source mtime: 2026-06-05T21:08:08.500Z
-  Source: index.html (SHA-256: af5cac715525caf2bf71caacc8e31bfbc7dd56bb18d03822a161132a51ff9711)
+  Source mtime: 2026-06-05T21:18:08.998Z
+  Source: index.html (SHA-256: 53acac5e79a493565133377a4845277fd6679bc0bfb30e0dfb4756222231402a)
   All vendored JavaScript inlined; favicons inlined as data: URIs.
   Identical functionality to the live site at https://encryptalotta.com.
   Runs from file://, USB stick, chat attachment, anywhere. No network calls.
@@ -4977,6 +4977,12 @@ var qrcode = function() {
                     <textarea id="tls-cert-input" rows="10" spellcheck="false" data-i18n-attr="placeholder:tls-cert.ph.input" placeholder="-----BEGIN CERTIFICATE-----&#10;MIID…&#10;-----END CERTIFICATE-----"></textarea>
                 </div>
 
+                <div class="form-group" style="margin-top: -10px;">
+                    <input type="file" id="tls-pdf" accept="application/pdf,.pdf" style="display: none;" data-i18n-attr="aria-label:tls-pdf.aria" aria-label="Load a PAdES-signed PDF and decode its embedded CMS signature(s)">
+                    <button type="button" id="btn-tls-pdf" class="btn btn-secondary" data-i18n="btn.tlsLoadPdf">Load a signed PDF (PAdES)</button>
+                    <div id="tls-pdf-status" style="margin-top: 8px; color: var(--text-secondary); font-size: 0.85rem; word-break: break-word;"></div>
+                </div>
+
                 <button id="btn-tls-cert-parse" class="btn" data-i18n="btn.tlsCertParse">Parse</button>
 
                 <div id="tls-cert-results" class="hidden" style="margin-top: 24px;"></div>
@@ -6263,6 +6269,11 @@ var qrcode = function() {
                 'cms.row.digestAlg': 'Digest algorithm',
                 'cms.row.signingTime': 'Signing time',
                 'cms.noSigningTime': '(no signed signing-time attribute)',
+                'btn.tlsLoadPdf': 'Load a signed PDF (PAdES)',
+                'tls-pdf.aria': 'Load a PAdES-signed PDF and decode its embedded CMS signature(s)',
+                'pades.summary': 'PAdES — {n} signature(s) found in {name}',
+                'pades.sig': 'Signature #{n}',
+                'pades.none': 'No PAdES / CMS signature found in {name} — the PDF carries no signature dictionary with a /Contents CMS blob.',
                 'tls-cert.valid': 'Currently valid',
                 'tls-cert.expired': 'EXPIRED',
                 'tls-cert.notYetValid': 'Not yet valid',
@@ -8079,6 +8090,11 @@ var qrcode = function() {
                 'cms.row.digestAlg': 'Algorithme de hachage',
                 'cms.row.signingTime': 'Date de signature',
                 'cms.noSigningTime': '(aucun attribut signé de date de signature)',
+                'btn.tlsLoadPdf': 'Charger un PDF signé (PAdES)',
+                'tls-pdf.aria': 'Charger un PDF signé PAdES et décoder sa/ses signature(s) CMS intégrée(s)',
+                'pades.summary': 'PAdES — {n} signature(s) trouvée(s) dans {name}',
+                'pades.sig': 'Signature n°{n}',
+                'pades.none': 'Aucune signature PAdES / CMS trouvée dans {name} — le PDF ne contient aucun dictionnaire de signature avec un blob CMS /Contents.',
                 'tls-cert.valid': 'Actuellement valide',
                 'tls-cert.expired': 'EXPIRÉ',
                 'tls-cert.notYetValid': 'Pas encore valide',
@@ -9692,6 +9708,11 @@ var qrcode = function() {
                 'cms.row.digestAlg': '摘要算法',
                 'cms.row.signingTime': '签名时间',
                 'cms.noSigningTime': '（无已签名的签名时间属性）',
+                'btn.tlsLoadPdf': '加载已签名的 PDF（PAdES）',
+                'tls-pdf.aria': '加载 PAdES 签名的 PDF 并解码其内嵌的 CMS 签名',
+                'pades.summary': 'PAdES——在 {name} 中找到 {n} 个签名',
+                'pades.sig': '签名 #{n}',
+                'pades.none': '在 {name} 中未找到 PAdES / CMS 签名——该 PDF 不含带有 /Contents CMS blob 的签名字典。',
                 'tls-cert.valid': '当前有效',
                 'tls-cert.expired': '已过期',
                 'tls-cert.notYetValid': '尚未生效',
@@ -11290,6 +11311,11 @@ var qrcode = function() {
                 'cms.row.digestAlg': 'Hash-Algorithmus',
                 'cms.row.signingTime': 'Signaturzeitpunkt',
                 'cms.noSigningTime': '(kein signiertes Signaturzeitpunkt-Attribut)',
+                'btn.tlsLoadPdf': 'Signiertes PDF laden (PAdES)',
+                'tls-pdf.aria': 'Ein PAdES-signiertes PDF laden und seine eingebettete(n) CMS-Signatur(en) decodieren',
+                'pades.summary': 'PAdES — {n} Signatur(en) in {name} gefunden',
+                'pades.sig': 'Signatur #{n}',
+                'pades.none': 'Keine PAdES-/CMS-Signatur in {name} gefunden — das PDF enthält kein Signaturwörterbuch mit einem /Contents-CMS-Blob.',
                 'tls-cert.valid': 'Aktuell gültig',
                 'tls-cert.expired': 'ABGELAUFEN',
                 'tls-cert.notYetValid': 'Noch nicht gültig',
@@ -12903,6 +12929,11 @@ var qrcode = function() {
                 'cms.row.digestAlg': 'डाइजेस्ट एल्गोरिद्म',
                 'cms.row.signingTime': 'हस्ताक्षर समय',
                 'cms.noSigningTime': '(कोई हस्ताक्षरित signing-time विशेषता नहीं)',
+                'btn.tlsLoadPdf': 'हस्ताक्षरित PDF लोड करें (PAdES)',
+                'tls-pdf.aria': 'एक PAdES-हस्ताक्षरित PDF लोड करें और उसकी अंतर्निहित CMS हस्ताक्षर डिकोड करें',
+                'pades.summary': 'PAdES — {name} में {n} हस्ताक्षर मिले',
+                'pades.sig': 'हस्ताक्षर #{n}',
+                'pades.none': '{name} में कोई PAdES / CMS हस्ताक्षर नहीं मिला — PDF में /Contents CMS blob वाला कोई हस्ताक्षर शब्दकोश नहीं है।',
                 'tls-cert.valid': 'अभी मान्य',
                 'tls-cert.expired': 'समाप्त',
                 'tls-cert.notYetValid': 'अभी तक मान्य नहीं',
@@ -19093,6 +19124,100 @@ var qrcode = function() {
             return { version, digestAlgs, certs, signers };
         }
 
+        // Render one CMS SignedData DER into `out` (shared by the pasted-CMS path and
+        // the PAdES PDF path). Async because each embedded cert is hashed for its
+        // fingerprints.
+        async function renderCmsInto(out, der) {
+            const cms = cmsParse(der);
+            tlsRenderRow(out, t('tls-cert.row.type'), tFormat('cms.summary', { certs: intlNumber(cms.certs.length), signers: intlNumber(cms.signers.length) }));
+            cms.signers.forEach((s, i) => {
+                tlsRenderHeading(out, tFormat('cms.signer', { n: intlNumber(i + 1) }));
+                tlsRenderRow(out, t('cms.row.digestAlg'), s.digestAlg);
+                tlsRenderRow(out, t('tls-cert.row.sigAlg'), s.sigAlg);
+                tlsRenderRow(out, t('cms.row.signingTime'), s.signingTime ? s.signingTime.toISOString() : t('cms.noSigningTime'));
+            });
+            for (let i = 0; i < cms.certs.length; i++) {
+                tlsRenderHeading(out, tFormat('cms.cert', { n: intlNumber(i + 1) }));
+                try {
+                    tlsRenderCert(out, await tlsCertParseDer(cms.certs[i]));
+                } catch (e) {
+                    tlsRenderRow(out, t('tls-cert.row.error'), e.message);
+                }
+            }
+        }
+
+        // PAdES (ETSI EN 319 142): a PDF signature is a signature dictionary
+        //   << /Type /Sig /SubFilter /ETSI.CAdES.detached /ByteRange […] /Contents <hex CMS> >>
+        // whose /Contents is the DER CMS SignedData (zero-padded). We scan for every
+        // hex-string /Contents (skipping the page /Contents N 0 R indirect refs, which
+        // are not hex strings), hex-decode it, and keep the ones that are a CMS
+        // SignedData — then hand each to the same CAdES decoder. The zero padding after
+        // the SignedData is ignored: asn1Read reads only the declared outer length.
+        // Reuses the byte-walking introduced for the draft-283 Factur-X extractor.
+        function pdfExtractSignatures(buf) {
+            const bytes = new Uint8Array(buf);
+            if (bytes.length < 5 || bytes[0] !== 0x25 || bytes[1] !== 0x50 || bytes[2] !== 0x44 || bytes[3] !== 0x46) {
+                throw new Error(t('ubl.pdf.notPdf'));
+            }
+            let latin1 = '';
+            for (let k = 0; k < bytes.length; k += 0x8000) {
+                latin1 += String.fromCharCode.apply(null, bytes.subarray(k, Math.min(bytes.length, k + 0x8000)));
+            }
+            const sigs = [];
+            let pos = 0;
+            while (true) {
+                const ci = latin1.indexOf('/Contents', pos);
+                if (ci < 0) break;
+                let p = ci + 9;
+                while (p < latin1.length && /\s/.test(latin1[p])) p++;
+                pos = ci + 9;
+                if (latin1[p] !== '<' || latin1[p + 1] === '<') continue;   // not a hex string (dict <<…>> or indirect ref)
+                const endHex = latin1.indexOf('>', p + 1);
+                if (endHex < 0) break;
+                const hex = latin1.slice(p + 1, endHex).replace(/\s+/g, '');
+                pos = endHex + 1;
+                if (hex.length < 16 || !/^[0-9a-fA-F]+$/.test(hex)) continue;
+                const n = hex.length & ~1;
+                const der = new Uint8Array(n / 2);
+                for (let i = 0; i < n; i += 2) der[i / 2] = parseInt(hex.substr(i, 2), 16);
+                if (cmsIsSignedData(der)) sigs.push(der);
+            }
+            return sigs;
+        }
+        document.getElementById('btn-tls-pdf').addEventListener('click', () => {
+            document.getElementById('tls-pdf').click();
+        });
+        document.getElementById('tls-pdf').addEventListener('change', async (e) => {
+            const status = document.getElementById('tls-pdf-status');
+            const out = document.getElementById('tls-cert-results');
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+            status.textContent = t('ubl.pdf.reading');
+            try {
+                const sigs = pdfExtractSignatures(await file.arrayBuffer());
+                while (out.firstChild) out.removeChild(out.firstChild);
+                out.classList.remove('hidden');
+                if (!sigs.length) {
+                    status.textContent = tFormat('pades.none', { name: file.name });
+                    return;
+                }
+                status.textContent = tFormat('pades.summary', { n: intlNumber(sigs.length), name: file.name });
+                tlsRenderRow(out, t('tls-cert.row.type'), tFormat('pades.summary', { n: intlNumber(sigs.length), name: file.name }));
+                for (let i = 0; i < sigs.length; i++) {
+                    tlsRenderHeading(out, tFormat('pades.sig', { n: intlNumber(i + 1) }));
+                    try {
+                        await renderCmsInto(out, sigs[i]);
+                    } catch (err) {
+                        tlsRenderRow(out, t('tls-cert.row.error'), (err && err.message) ? err.message : String(err));
+                    }
+                }
+            } catch (err) {
+                status.textContent = tFormat('ubl.pdf.error', { msg: (err && err.message) ? err.message : String(err) });
+            } finally {
+                e.target.value = '';
+            }
+        });
+
         document.getElementById('btn-tls-cert-parse').addEventListener('click', async () => {
             const out = document.getElementById('tls-cert-results');
             while (out.firstChild) out.removeChild(out.firstChild);
@@ -19100,22 +19225,7 @@ var qrcode = function() {
             try {
                 const der = new Uint8Array(pemToArrayBuffer(document.getElementById('tls-cert-input').value));
                 if (cmsIsSignedData(der)) {
-                    const cms = cmsParse(der);
-                    tlsRenderRow(out, t('tls-cert.row.type'), tFormat('cms.summary', { certs: intlNumber(cms.certs.length), signers: intlNumber(cms.signers.length) }));
-                    cms.signers.forEach((s, i) => {
-                        tlsRenderHeading(out, tFormat('cms.signer', { n: intlNumber(i + 1) }));
-                        tlsRenderRow(out, t('cms.row.digestAlg'), s.digestAlg);
-                        tlsRenderRow(out, t('tls-cert.row.sigAlg'), s.sigAlg);
-                        tlsRenderRow(out, t('cms.row.signingTime'), s.signingTime ? s.signingTime.toISOString() : t('cms.noSigningTime'));
-                    });
-                    for (let i = 0; i < cms.certs.length; i++) {
-                        tlsRenderHeading(out, tFormat('cms.cert', { n: intlNumber(i + 1) }));
-                        try {
-                            tlsRenderCert(out, await tlsCertParseDer(cms.certs[i]));
-                        } catch (e) {
-                            tlsRenderRow(out, t('tls-cert.row.error'), e.message);
-                        }
-                    }
+                    await renderCmsInto(out, der);
                     return;
                 }
                 tlsRenderCert(out, await tlsCertParseDer(der));
