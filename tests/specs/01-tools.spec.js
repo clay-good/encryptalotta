@@ -6991,6 +6991,36 @@ test('cii: line presence flags a line missing its LineTotalAmount BT-131 (draft 
   await expect(page.locator('#ubl-results')).toContainText(/CII line #1 is missing its line total amount/i, { timeout: 5_000 });
 });
 
+test('cii: invoice-currency ISO 4217 confirms on a valid code (draft 263)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', CII_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/CII invoice currency EUR is a valid ISO 4217 code/i, { timeout: 5_000 });
+});
+
+test('cii: invoice-currency ISO 4217 flags an unknown code (draft 263)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  const withBad = CII_INVOICE.replace('<ram:InvoiceCurrencyCode>EUR</ram:InvoiceCurrencyCode>', '<ram:InvoiceCurrencyCode>XYZ</ram:InvoiceCurrencyCode>');
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/CII invoice currency XYZ \(ram:InvoiceCurrencyCode, BT-5\) is not a valid active ISO 4217 code/i, { timeout: 5_000 });
+});
+
+test('cii: document-type-code UNCL 1001 confirms on 380 (draft 264)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', CII_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/CII document type code 380 is in the EN 16931 \/ PEPPOL allowed UNCL 1001 set/i, { timeout: 5_000 });
+});
+
+test('cii: document-type-code UNCL 1001 flags an out-of-set code (draft 264)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  const withBad = CII_INVOICE.replace('<ram:TypeCode>380</ram:TypeCode>', '<ram:TypeCode>999</ram:TypeCode>');
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/CII document type code 999 \(ram:TypeCode, BT-3\) is not in the EN 16931 \/ PEPPOL allowed UNCL 1001 set/i, { timeout: 5_000 });
+});
+
 test('ubl: LegalMonetaryTotal/PayableAmount presence flags a missing slot (draft 183)', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   const withBad = UBL_INVOICE.replace(/<cac:LegalMonetaryTotal>[\s\S]*?<\/cac:LegalMonetaryTotal>/g, (block) =>

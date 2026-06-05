@@ -4734,6 +4734,10 @@
                 'cii.ok.lines': 'Every CII line declares a line total amount across all {n} line(s) (EN 16931 BR-16 + BT-131 — at least one line, each with its net amount)',
                 'cii.warn.noLines': 'CII document declares no ram:IncludedSupplyChainTradeLineItem — EN 16931 BR-16 requires at least one invoice line; a Factur-X / ZUGFeRD document with no lines is rejected at the schematron gate',
                 'cii.warn.lineAmount': 'CII line #{line} is missing its line total amount (BT-131, ram:SpecifiedLineTradeSettlement/ram:SpecifiedTradeSettlementLineMonetarySummation/ram:LineTotalAmount) — EN 16931 requires every line to declare the net amount the header totals reconcile against; a line without it is rejected at the schematron gate',
+                'cii.ok.currency': 'CII invoice currency {code} is a valid ISO 4217 code (EN 16931 BT-5)',
+                'cii.warn.currency': 'CII invoice currency {code} (ram:InvoiceCurrencyCode, BT-5) is not a valid active ISO 4217 code — EN 16931 requires the document currency to be a real ISO 4217 currency; a Factur-X / ZUGFeRD document with an unknown code is rejected at the schematron gate (the CII analogue of the UBL DocumentCurrencyCode ISO 4217 check)',
+                'cii.ok.typeCode': 'CII document type code {code} is in the EN 16931 / PEPPOL allowed UNCL 1001 set (BT-3)',
+                'cii.warn.typeCode': 'CII document type code {code} (ram:TypeCode, BT-3) is not in the EN 16931 / PEPPOL allowed UNCL 1001 set ({allowed}) — the value identifies the document business purpose (380 commercial invoice, 381 credit note, 384 corrected invoice, 389 self-billed); a Factur-X / ZUGFeRD document with an out-of-set code is rejected at the schematron gate (the CII analogue of the UBL InvoiceTypeCode / CreditNoteTypeCode value check)',
                 'ubl.row.issueDate': 'Issue date',
                 'ubl.row.dueDate': 'Due date',
                 'ubl.row.currency': 'Currency',
@@ -6300,6 +6304,10 @@
                 'cii.ok.lines': 'Chaque ligne CII déclare un montant total de ligne sur l’ensemble des {n} ligne(s) (EN 16931 BR-16 + BT-131 — au moins une ligne, chacune avec son montant net)',
                 'cii.warn.noLines': 'Le document CII ne déclare aucun ram:IncludedSupplyChainTradeLineItem — EN 16931 BR-16 exige au moins une ligne de facture ; un document Factur-X / ZUGFeRD sans lignes est rejeté au contrôle schematron',
                 'cii.warn.lineAmount': 'La ligne CII n°{line} ne déclare pas son montant total de ligne (BT-131, ram:SpecifiedLineTradeSettlement/ram:SpecifiedTradeSettlementLineMonetarySummation/ram:LineTotalAmount) — EN 16931 exige que chaque ligne déclare le montant net auquel les totaux d’en-tête se réconcilient ; une ligne sans lui est rejetée au contrôle schematron',
+                'cii.ok.currency': 'La devise de facture CII {code} est un code ISO 4217 valide (EN 16931 BT-5)',
+                'cii.warn.currency': 'La devise de facture CII {code} (ram:InvoiceCurrencyCode, BT-5) n’est pas un code ISO 4217 actif valide — EN 16931 exige que la devise du document soit une vraie devise ISO 4217 ; un document Factur-X / ZUGFeRD avec un code inconnu est rejeté au contrôle schematron (l’analogue CII du contrôle ISO 4217 du DocumentCurrencyCode UBL)',
+                'cii.ok.typeCode': 'Le code de type de document CII {code} appartient à l’ensemble UNCL 1001 autorisé par EN 16931 / PEPPOL (BT-3)',
+                'cii.warn.typeCode': 'Le code de type de document CII {code} (ram:TypeCode, BT-3) n’appartient pas à l’ensemble UNCL 1001 autorisé par EN 16931 / PEPPOL ({allowed}) — la valeur identifie l’objet métier du document (380 facture commerciale, 381 avoir, 384 facture corrigée, 389 auto-facturation) ; un document Factur-X / ZUGFeRD avec un code hors ensemble est rejeté au contrôle schematron (l’analogue CII du contrôle de valeur InvoiceTypeCode / CreditNoteTypeCode UBL)',
                 'ubl.row.issueDate': 'Date d’émission',
                 'ubl.row.dueDate': 'Date d’échéance',
                 'ubl.row.currency': 'Devise',
@@ -7844,6 +7852,10 @@
                 'cii.ok.lines': '所有 {n} 个 CII 行均声明行合计金额（EN 16931 BR-16 + BT-131——至少一行，每行都有其净额）',
                 'cii.warn.noLines': 'CII 文档未声明任何 ram:IncludedSupplyChainTradeLineItem——EN 16931 BR-16 要求至少一行发票行；没有行的 Factur-X / ZUGFeRD 文档会在 schematron 关卡被拒绝',
                 'cii.warn.lineAmount': 'CII 第 {line} 行缺少其行合计金额（BT-131，ram:SpecifiedLineTradeSettlement/ram:SpecifiedTradeSettlementLineMonetarySummation/ram:LineTotalAmount）——EN 16931 要求每行声明表头总额据以核对的净额；缺少它的行会在 schematron 关卡被拒绝',
+                'cii.ok.currency': 'CII 发票币种 {code} 是有效的 ISO 4217 代码（EN 16931 BT-5）',
+                'cii.warn.currency': 'CII 发票币种 {code}（ram:InvoiceCurrencyCode，BT-5）不是有效的活跃 ISO 4217 代码——EN 16931 要求文档币种为真实的 ISO 4217 货币；带有未知代码的 Factur-X / ZUGFeRD 文档会在 schematron 关卡被拒绝（UBL DocumentCurrencyCode ISO 4217 校验的 CII 对应物）',
+                'cii.ok.typeCode': 'CII 文档类型代码 {code} 属于 EN 16931 / PEPPOL 允许的 UNCL 1001 集合（BT-3）',
+                'cii.warn.typeCode': 'CII 文档类型代码 {code}（ram:TypeCode，BT-3）不属于 EN 16931 / PEPPOL 允许的 UNCL 1001 集合（{allowed}）——该值标识文档业务目的（380 商业发票、381 贷项通知单、384 更正发票、389 自开票）；带有集合外代码的 Factur-X / ZUGFeRD 文档会在 schematron 关卡被拒绝（UBL InvoiceTypeCode / CreditNoteTypeCode 值校验的 CII 对应物）',
                 'ubl.row.issueDate': '开票日期',
                 'ubl.row.dueDate': '到期日期',
                 'ubl.row.currency': '货币',
@@ -9403,6 +9415,10 @@
                 'cii.ok.lines': 'Jede CII-Zeile deklariert einen Zeilengesamtbetrag über alle {n} Zeile(n) (EN 16931 BR-16 + BT-131 — mindestens eine Zeile, jede mit ihrem Nettobetrag)',
                 'cii.warn.noLines': 'Das CII-Dokument deklariert kein ram:IncludedSupplyChainTradeLineItem — EN 16931 BR-16 verlangt mindestens eine Rechnungszeile; ein Factur-X-/ZUGFeRD-Dokument ohne Zeilen wird am Schematron-Gate abgelehnt',
                 'cii.warn.lineAmount': 'Der CII-Zeile #{line} fehlt ihr Zeilengesamtbetrag (BT-131, ram:SpecifiedLineTradeSettlement/ram:SpecifiedTradeSettlementLineMonetarySummation/ram:LineTotalAmount) — EN 16931 verlangt, dass jede Zeile den Nettobetrag deklariert, mit dem die Kopfsummen abgeglichen werden; eine Zeile ohne ihn wird am Schematron-Gate abgelehnt',
+                'cii.ok.currency': 'Die CII-Rechnungswährung {code} ist ein gültiger ISO-4217-Code (EN 16931 BT-5)',
+                'cii.warn.currency': 'Die CII-Rechnungswährung {code} (ram:InvoiceCurrencyCode, BT-5) ist kein gültiger aktiver ISO-4217-Code — EN 16931 verlangt, dass die Dokumentwährung eine echte ISO-4217-Währung ist; ein Factur-X-/ZUGFeRD-Dokument mit unbekanntem Code wird am Schematron-Gate abgelehnt (das CII-Pendant der UBL-DocumentCurrencyCode-ISO-4217-Prüfung)',
+                'cii.ok.typeCode': 'Der CII-Dokumenttypcode {code} ist im von EN 16931 / PEPPOL zugelassenen UNCL-1001-Satz (BT-3)',
+                'cii.warn.typeCode': 'Der CII-Dokumenttypcode {code} (ram:TypeCode, BT-3) ist nicht im von EN 16931 / PEPPOL zugelassenen UNCL-1001-Satz ({allowed}) — der Wert identifiziert den Geschäftszweck des Dokuments (380 Handelsrechnung, 381 Gutschrift, 384 korrigierte Rechnung, 389 Gutschriftsverfahren); ein Factur-X-/ZUGFeRD-Dokument mit einem Code außerhalb des Satzes wird am Schematron-Gate abgelehnt (das CII-Pendant der UBL-InvoiceTypeCode-/CreditNoteTypeCode-Wertprüfung)',
                 'ubl.row.issueDate': 'Ausstellungsdatum',
                 'ubl.row.dueDate': 'Fälligkeitsdatum',
                 'ubl.row.currency': 'Währung',
@@ -10947,6 +10963,10 @@
                 'cii.ok.lines': 'सभी {n} CII पंक्तियाँ एक पंक्ति कुल राशि घोषित करती हैं (EN 16931 BR-16 + BT-131 — कम से कम एक पंक्ति, प्रत्येक अपनी शुद्ध राशि के साथ)',
                 'cii.warn.noLines': 'CII दस्तावेज़ कोई ram:IncludedSupplyChainTradeLineItem घोषित नहीं करता — EN 16931 BR-16 के लिए कम से कम एक चालान पंक्ति आवश्यक है; बिना पंक्तियों वाला Factur-X / ZUGFeRD दस्तावेज़ schematron गेट पर अस्वीकृत होता है',
                 'cii.warn.lineAmount': 'CII पंक्ति #{line} में उसकी पंक्ति कुल राशि अनुपस्थित है (BT-131, ram:SpecifiedLineTradeSettlement/ram:SpecifiedTradeSettlementLineMonetarySummation/ram:LineTotalAmount) — EN 16931 के लिए आवश्यक है कि प्रत्येक पंक्ति वह शुद्ध राशि घोषित करे जिससे हेडर कुल मेल खाते हैं; इसके बिना पंक्ति schematron गेट पर अस्वीकृत होती है',
+                'cii.ok.currency': 'CII चालान मुद्रा {code} एक मान्य ISO 4217 कोड है (EN 16931 BT-5)',
+                'cii.warn.currency': 'CII चालान मुद्रा {code} (ram:InvoiceCurrencyCode, BT-5) एक मान्य सक्रिय ISO 4217 कोड नहीं है — EN 16931 के लिए आवश्यक है कि दस्तावेज़ मुद्रा एक वास्तविक ISO 4217 मुद्रा हो; अज्ञात कोड वाला Factur-X / ZUGFeRD दस्तावेज़ schematron गेट पर अस्वीकृत होता है (UBL DocumentCurrencyCode ISO 4217 जाँच का CII समकक्ष)',
+                'cii.ok.typeCode': 'CII दस्तावेज़ प्रकार कोड {code} EN 16931 / PEPPOL द्वारा अनुमत UNCL 1001 सेट में है (BT-3)',
+                'cii.warn.typeCode': 'CII दस्तावेज़ प्रकार कोड {code} (ram:TypeCode, BT-3) EN 16931 / PEPPOL द्वारा अनुमत UNCL 1001 सेट ({allowed}) में नहीं है — मान दस्तावेज़ के व्यावसायिक उद्देश्य की पहचान करता है (380 वाणिज्यिक चालान, 381 क्रेडिट नोट, 384 सुधारित चालान, 389 स्व-बिलिंग); सेट से बाहर कोड वाला Factur-X / ZUGFeRD दस्तावेज़ schematron गेट पर अस्वीकृत होता है (UBL InvoiceTypeCode / CreditNoteTypeCode मान जाँच का CII समकक्ष)',
                 'ubl.row.issueDate': 'जारी करने की तिथि',
                 'ubl.row.dueDate': 'देय तिथि',
                 'ubl.row.currency': 'मुद्रा',
@@ -24497,6 +24517,44 @@
             }
         }
 
+        // CII invoice-currency ISO 4217 validity (draft 263). EN 16931 BT-5: the
+        // ram:InvoiceCurrencyCode must be a real active ISO 4217 code. Reuses the
+        // shared ISO_4217_ACTIVE set (the CII analogue of the UBL
+        // DocumentCurrencyCode check). No-ops when the code is absent (draft 259).
+        function ciiCheckCurrencyCode(out, detected) {
+            const r = detected.root;
+            const txn = sepaFirst(r, 'SupplyChainTradeTransaction');
+            const settlement = txn ? sepaFirst(txn, 'ApplicableHeaderTradeSettlement') : null;
+            if (!settlement) return;
+            const raw = (sepaTextOf(settlement, 'InvoiceCurrencyCode') || '').trim();
+            if (!raw) return;
+            if (ISO_4217_ACTIVE.has(raw.toUpperCase())) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + tFormat('cii.ok.currency', { code: raw }));
+            } else {
+                tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + tFormat('cii.warn.currency', { code: raw }));
+            }
+        }
+
+        // CII document-type-code UNCL 1001 validity (draft 264). EN 16931 BT-3: in
+        // CII the document purpose is conveyed entirely by ram:ExchangedDocument/
+        // ram:TypeCode (there is no Invoice / CreditNote root split as in UBL), so
+        // the allowed set is the union of the UBL invoice + credit-note type codes.
+        // The CII analogue of the UBL InvoiceTypeCode / CreditNoteTypeCode value
+        // check. No-ops when the code is absent (draft 259).
+        const CII_TYPE_CODES = ['380', '381', '384', '389', '875', '876', '877', '396', '532'];
+        function ciiCheckTypeCode(out, detected) {
+            const r = detected.root;
+            const docEl = sepaFirst(r, 'ExchangedDocument');
+            if (!docEl) return;
+            const raw = (sepaTextOf(docEl, 'TypeCode') || '').trim();
+            if (!raw) return;
+            if (CII_TYPE_CODES.includes(raw)) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + tFormat('cii.ok.typeCode', { code: raw }));
+            } else {
+                tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + tFormat('cii.warn.typeCode', { code: raw, allowed: intlList(CII_TYPE_CODES) }));
+            }
+        }
+
         // EN 16931 totals consistency check. Two invariants are independent of any
         // PrepaidAmount / PayableRoundingAmount complications and catch the
         // overwhelming majority of real-world arithmetic errors:
@@ -29710,6 +29768,8 @@
                     ciiCheckTotals(out, detected);
                     ciiCheckPartyNames(out, detected);
                     ciiCheckLines(out, detected);
+                    ciiCheckCurrencyCode(out, detected);
+                    ciiCheckTypeCode(out, detected);
                     return;
                 }
                 ublRenderHeader(out, detected);
