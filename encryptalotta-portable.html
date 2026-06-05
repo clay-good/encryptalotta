@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <!--
   encryptalotta — single-file portable build
-  Source mtime: 2026-06-05T20:52:23.064Z
-  Source: index.html (SHA-256: 25cd476361429c01b1a93f84aa04f221883c08fe7de004e9217d4d84585653b8)
+  Source mtime: 2026-06-05T21:08:08.500Z
+  Source: index.html (SHA-256: af5cac715525caf2bf71caacc8e31bfbc7dd56bb18d03822a161132a51ff9711)
   All vendored JavaScript inlined; favicons inlined as data: URIs.
   Identical functionality to the live site at https://encryptalotta.com.
   Runs from file://, USB stick, chat attachment, anywhere. No network calls.
@@ -6240,7 +6240,7 @@ var qrcode = function() {
                 'view.pem-der.h2': 'PEM ↔ DER Converter',
                 'view.cron.h2': 'Cron Decoder',
                 'view.color.h2': 'Color Converter',
-                'tls-cert.label.input': 'PEM-encoded X.509 certificate:',
+                'tls-cert.label.input': 'PEM X.509 certificate, or a PKCS#7 / CMS bundle or signature (.p7b / .p7c / CAdES):',
                 'tls-cert.ph.input': '-----BEGIN CERTIFICATE-----…',
                 'btn.tlsCertParse': 'Parse',
                 'tls-cert.row.version': 'Version',
@@ -6256,6 +6256,13 @@ var qrcode = function() {
                 'tls-cert.row.fpSha1': 'Fingerprint (SHA-1)',
                 'tls-cert.row.fpSha256': 'Fingerprint (SHA-256)',
                 'tls-cert.row.error': 'Error',
+                'tls-cert.row.type': 'Type',
+                'cms.summary': 'PKCS#7 / CMS SignedData — {certs} certificate(s), {signers} signer(s)',
+                'cms.signer': 'Signer #{n}',
+                'cms.cert': 'Certificate #{n}',
+                'cms.row.digestAlg': 'Digest algorithm',
+                'cms.row.signingTime': 'Signing time',
+                'cms.noSigningTime': '(no signed signing-time attribute)',
                 'tls-cert.valid': 'Currently valid',
                 'tls-cert.expired': 'EXPIRED',
                 'tls-cert.notYetValid': 'Not yet valid',
@@ -8049,7 +8056,7 @@ var qrcode = function() {
                 'view.pem-der.h2': 'Convertisseur PEM ↔ DER',
                 'view.cron.h2': 'Décodeur cron',
                 'view.color.h2': 'Convertisseur de couleur',
-                'tls-cert.label.input': 'Certificat X.509 encodé en PEM :',
+                'tls-cert.label.input': 'Certificat X.509 PEM, ou un lot / une signature PKCS#7 / CMS (.p7b / .p7c / CAdES) :',
                 'tls-cert.ph.input': '-----BEGIN CERTIFICATE-----…',
                 'btn.tlsCertParse': 'Analyser',
                 'tls-cert.row.version': 'Version',
@@ -8065,6 +8072,13 @@ var qrcode = function() {
                 'tls-cert.row.fpSha1': 'Empreinte (SHA-1)',
                 'tls-cert.row.fpSha256': 'Empreinte (SHA-256)',
                 'tls-cert.row.error': 'Erreur',
+                'tls-cert.row.type': 'Type',
+                'cms.summary': 'PKCS#7 / CMS SignedData — {certs} certificat(s), {signers} signataire(s)',
+                'cms.signer': 'Signataire n°{n}',
+                'cms.cert': 'Certificat n°{n}',
+                'cms.row.digestAlg': 'Algorithme de hachage',
+                'cms.row.signingTime': 'Date de signature',
+                'cms.noSigningTime': '(aucun attribut signé de date de signature)',
                 'tls-cert.valid': 'Actuellement valide',
                 'tls-cert.expired': 'EXPIRÉ',
                 'tls-cert.notYetValid': 'Pas encore valide',
@@ -9655,7 +9669,7 @@ var qrcode = function() {
                 'view.pem-der.h2': 'PEM ↔ DER 转换器',
                 'view.cron.h2': 'Cron 解码器',
                 'view.color.h2': '颜色转换器',
-                'tls-cert.label.input': 'PEM 编码的 X.509 证书:',
+                'tls-cert.label.input': 'PEM X.509 证书，或 PKCS#7 / CMS 捆绑包或签名（.p7b / .p7c / CAdES）:',
                 'tls-cert.ph.input': '-----BEGIN CERTIFICATE-----…',
                 'btn.tlsCertParse': '解析',
                 'tls-cert.row.version': '版本',
@@ -9671,6 +9685,13 @@ var qrcode = function() {
                 'tls-cert.row.fpSha1': '指纹 (SHA-1)',
                 'tls-cert.row.fpSha256': '指纹 (SHA-256)',
                 'tls-cert.row.error': '错误',
+                'tls-cert.row.type': '类型',
+                'cms.summary': 'PKCS#7 / CMS SignedData——{certs} 个证书，{signers} 个签名者',
+                'cms.signer': '签名者 #{n}',
+                'cms.cert': '证书 #{n}',
+                'cms.row.digestAlg': '摘要算法',
+                'cms.row.signingTime': '签名时间',
+                'cms.noSigningTime': '（无已签名的签名时间属性）',
                 'tls-cert.valid': '当前有效',
                 'tls-cert.expired': '已过期',
                 'tls-cert.notYetValid': '尚未生效',
@@ -11246,7 +11267,7 @@ var qrcode = function() {
                 'view.pem-der.h2': 'PEM ↔ DER-Konverter',
                 'view.cron.h2': 'Cron-Decoder',
                 'view.color.h2': 'Farbkonverter',
-                'tls-cert.label.input': 'PEM-kodiertes X.509-Zertifikat:',
+                'tls-cert.label.input': 'PEM-X.509-Zertifikat oder ein PKCS#7-/CMS-Bündel bzw. eine Signatur (.p7b / .p7c / CAdES):',
                 'tls-cert.ph.input': '-----BEGIN CERTIFICATE-----…',
                 'btn.tlsCertParse': 'Analysieren',
                 'tls-cert.row.version': 'Version',
@@ -11262,6 +11283,13 @@ var qrcode = function() {
                 'tls-cert.row.fpSha1': 'Fingerabdruck (SHA-1)',
                 'tls-cert.row.fpSha256': 'Fingerabdruck (SHA-256)',
                 'tls-cert.row.error': 'Fehler',
+                'tls-cert.row.type': 'Typ',
+                'cms.summary': 'PKCS#7-/CMS-SignedData — {certs} Zertifikat(e), {signers} Unterzeichner',
+                'cms.signer': 'Unterzeichner #{n}',
+                'cms.cert': 'Zertifikat #{n}',
+                'cms.row.digestAlg': 'Hash-Algorithmus',
+                'cms.row.signingTime': 'Signaturzeitpunkt',
+                'cms.noSigningTime': '(kein signiertes Signaturzeitpunkt-Attribut)',
                 'tls-cert.valid': 'Aktuell gültig',
                 'tls-cert.expired': 'ABGELAUFEN',
                 'tls-cert.notYetValid': 'Noch nicht gültig',
@@ -12852,7 +12880,7 @@ var qrcode = function() {
                 'view.pem-der.h2': 'PEM ↔ DER कन्वर्टर',
                 'view.cron.h2': 'Cron डिकोडर',
                 'view.color.h2': 'रंग कन्वर्टर',
-                'tls-cert.label.input': 'PEM-एनकोडेड X.509 प्रमाणपत्र:',
+                'tls-cert.label.input': 'PEM X.509 प्रमाणपत्र, या एक PKCS#7 / CMS बंडल या हस्ताक्षर (.p7b / .p7c / CAdES):',
                 'tls-cert.ph.input': '-----BEGIN CERTIFICATE-----…',
                 'btn.tlsCertParse': 'पार्स करें',
                 'tls-cert.row.version': 'संस्करण',
@@ -12868,6 +12896,13 @@ var qrcode = function() {
                 'tls-cert.row.fpSha1': 'फ़िंगरप्रिंट (SHA-1)',
                 'tls-cert.row.fpSha256': 'फ़िंगरप्रिंट (SHA-256)',
                 'tls-cert.row.error': 'त्रुटि',
+                'tls-cert.row.type': 'प्रकार',
+                'cms.summary': 'PKCS#7 / CMS SignedData — {certs} प्रमाणपत्र, {signers} हस्ताक्षरकर्ता',
+                'cms.signer': 'हस्ताक्षरकर्ता #{n}',
+                'cms.cert': 'प्रमाणपत्र #{n}',
+                'cms.row.digestAlg': 'डाइजेस्ट एल्गोरिद्म',
+                'cms.row.signingTime': 'हस्ताक्षर समय',
+                'cms.noSigningTime': '(कोई हस्ताक्षरित signing-time विशेषता नहीं)',
                 'tls-cert.valid': 'अभी मान्य',
                 'tls-cert.expired': 'समाप्त',
                 'tls-cert.notYetValid': 'अभी तक मान्य नहीं',
@@ -18829,7 +18864,20 @@ var qrcode = function() {
             '1.3.101.112': 'Ed25519',
             '1.2.840.10045.3.1.7': 'P-256',
             '1.3.132.0.34': 'P-384',
-            '1.3.132.0.35': 'P-521'
+            '1.3.132.0.35': 'P-521',
+            // PKCS#7 / CMS (RFC 5652) — for the §2.5 CAdES slice the cert parser also accepts.
+            '1.2.840.113549.1.7.1': 'data',
+            '1.2.840.113549.1.7.2': 'signedData',
+            '1.2.840.113549.1.9.3': 'contentType',
+            '1.2.840.113549.1.9.4': 'messageDigest',
+            '1.2.840.113549.1.9.5': 'signingTime',
+            '1.2.840.113549.1.9.16.2.14': 'signatureTimeStampToken',
+            '1.3.14.3.2.26': 'SHA-1',
+            '2.16.840.1.101.3.4.2.1': 'SHA-256',
+            '2.16.840.1.101.3.4.2.2': 'SHA-384',
+            '2.16.840.1.101.3.4.2.3': 'SHA-512',
+            '1.2.840.113549.1.1.5': 'sha1WithRSAEncryption',
+            '1.2.840.10045.4.3.1': 'ecdsa-with-SHA224'
         };
 
         function asn1Name(rdnSeq) {
@@ -18863,7 +18911,9 @@ var qrcode = function() {
         }
 
         async function tlsCertParse(pemText) {
-            const der = new Uint8Array(pemToArrayBuffer(pemText));
+            return tlsCertParseDer(new Uint8Array(pemToArrayBuffer(pemText)));
+        }
+        async function tlsCertParseDer(der) {
             const cert = asn1Read(der);                    // Certificate ::= SEQUENCE { tbs, sigAlg, sig }
             if (!cert.children || cert.children.length < 3) throw new Error('not an X.509 Certificate');
             const tbs = cert.children[0];
@@ -18930,30 +18980,146 @@ var qrcode = function() {
             };
         }
 
+        // Render one parsed certificate's rows — shared by the single-cert path and
+        // each embedded certificate of a PKCS#7 / CMS bundle.
+        function tlsRenderCert(out, info) {
+            tlsRenderRow(out, t('tls-cert.row.version'), 'v' + info.version);
+            tlsRenderRow(out, t('tls-cert.row.serial'), info.serial);
+            tlsRenderRow(out, t('tls-cert.row.subject'), info.subject || '(empty)');
+            tlsRenderRow(out, t('tls-cert.row.issuer'), info.issuer || '(empty)');
+            tlsRenderRow(out, t('tls-cert.row.notBefore'), info.notBefore.toISOString());
+            tlsRenderRow(out, t('tls-cert.row.notAfter'), info.notAfter.toISOString());
+            const now = new Date();
+            const validity = (now < info.notBefore) ? t('tls-cert.notYetValid')
+                            : (now > info.notAfter) ? t('tls-cert.expired')
+                            : t('tls-cert.valid');
+            tlsRenderRow(out, t('tls-cert.row.status'), validity);
+            tlsRenderRow(out, t('tls-cert.row.publicKey'), info.publicKey);
+            tlsRenderRow(out, t('tls-cert.row.sigAlg'), info.sigAlg);
+            tlsRenderRow(out, t('tls-cert.row.san'), info.sans.length ? info.sans.join(', ') : '(none)');
+            tlsRenderRow(out, t('tls-cert.row.fpSha1'), info.fpSha1);
+            tlsRenderRow(out, t('tls-cert.row.fpSha256'), info.fpSha256);
+        }
+
+        // Section sub-heading inside a multi-part result (e.g. "Certificate #1").
+        function tlsRenderHeading(out, text) {
+            const h = document.createElement('div');
+            h.style.cssText = 'margin-top: 16px; margin-bottom: 4px; font-size: 0.82rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em;';
+            h.textContent = text;
+            out.appendChild(h);
+        }
+
+        // PKCS#7 / CMS (RFC 5652) SignedData — the §2.5 CAdES slice the cert parser
+        // also accepts. ContentInfo ::= SEQUENCE { contentType OID, content [0]
+        // EXPLICIT }. When contentType is signedData we surface every embedded X.509
+        // certificate (reusing the X.509 parser) plus each SignerInfo's digest +
+        // signature algorithm and signed signing-time attribute. Certs-only bundles
+        // (.p7b / .p7c) and CAdES-BES signatures both decode here. No network, no
+        // revocation checking — the tool reports only what the blob carries.
+        const CMS_SIGNED_DATA_OID = '1.2.840.113549.1.7.2';
+        function cmsIsSignedData(der) {
+            try {
+                const ci = asn1Read(der);
+                return !!(ci.children && ci.children[0] && ci.children[0].value === CMS_SIGNED_DATA_OID);
+            } catch (e) { return false; }
+        }
+        // Slice each top-level DER element (full TLV, header included) out of a body —
+        // without mutating the shared asn1Read, by re-reading at tracked offsets.
+        function derElements(body) {
+            const els = [];
+            let p = 0;
+            while (p < body.length) {
+                const node = asn1Read(body, p);
+                els.push({ node, der: body.subarray(p, node.end) });
+                p = node.end;
+            }
+            return els;
+        }
+        function cmsAlgName(algSeq) {
+            // AlgorithmIdentifier ::= SEQUENCE { algorithm OID, parameters OPTIONAL }
+            if (!algSeq || !algSeq.children || !algSeq.children[0]) return '(unknown)';
+            const oid = algSeq.children[0].value;
+            return OID_NAMES[oid] || oid;
+        }
+        function cmsParse(der) {
+            const ci = asn1Read(der);
+            if (!ci.children || ci.children[0].value !== CMS_SIGNED_DATA_OID) throw new Error('not a CMS SignedData');
+            const content = ci.children[1];                       // content [0] EXPLICIT
+            const sd = content && content.children && content.children[0];   // SignedData SEQUENCE
+            if (!sd || !sd.children) throw new Error('malformed CMS SignedData');
+            const version = (sd.children[0] && sd.children[0].value) ? (sd.children[0].value[0] || 0) : 0;
+            const digestAlgs = [];
+            if (sd.children[1] && sd.children[1].children) {
+                for (const a of sd.children[1].children) digestAlgs.push(cmsAlgName(a));
+            }
+            // certificates [0] IMPLICIT (tag 0xa0); signerInfos = the trailing SET (0x31).
+            const certs = [];
+            let signerSet = null;
+            for (let i = 2; i < sd.children.length; i++) {
+                const c = sd.children[i];
+                if (c.tag === 0xa0) {
+                    for (const el of derElements(c.body)) {
+                        if (el.node.tag === 0x30) certs.push(el.der);   // a Certificate SEQUENCE (skip attr certs)
+                    }
+                } else if (c.tag === 0x31) {
+                    signerSet = c;
+                }
+            }
+            const signers = [];
+            if (signerSet && signerSet.children) {
+                for (const si of signerSet.children) {
+                    if (!si.children) continue;
+                    // SignerInfo ::= SEQ { version, sid, digestAlgorithm, [0] signedAttrs OPT, sigAlgorithm, signature OCTET, [1] unsignedAttrs OPT }
+                    const digestAlgNode = si.children[2];
+                    const digestAlg = (digestAlgNode && digestAlgNode.tag === 0x30) ? cmsAlgName(digestAlgNode) : '(unknown)';
+                    const sigIdx = si.children.findIndex(x => x.tag === 0x04);   // signature OCTET STRING
+                    let sigAlg = '(unknown)';
+                    if (sigIdx > 0 && si.children[sigIdx - 1] && si.children[sigIdx - 1].tag === 0x30) {
+                        sigAlg = cmsAlgName(si.children[sigIdx - 1]);
+                    }
+                    let signingTime = null;
+                    const signedAttrs = si.children.find(x => x.tag === 0xa0);
+                    if (signedAttrs && signedAttrs.children) {
+                        for (const attr of signedAttrs.children) {
+                            if (attr.children && attr.children[0] && attr.children[0].value === '1.2.840.113549.1.9.5') {
+                                const set = attr.children[1];
+                                if (set && set.children && set.children[0]) signingTime = set.children[0].value;
+                            }
+                        }
+                    }
+                    signers.push({ digestAlg, sigAlg, signingTime });
+                }
+            }
+            return { version, digestAlgs, certs, signers };
+        }
+
         document.getElementById('btn-tls-cert-parse').addEventListener('click', async () => {
             const out = document.getElementById('tls-cert-results');
             while (out.firstChild) out.removeChild(out.firstChild);
+            out.classList.remove('hidden');
             try {
-                const info = await tlsCertParse(document.getElementById('tls-cert-input').value);
-                out.classList.remove('hidden');
-                tlsRenderRow(out, t('tls-cert.row.version'), 'v' + info.version);
-                tlsRenderRow(out, t('tls-cert.row.serial'), info.serial);
-                tlsRenderRow(out, t('tls-cert.row.subject'), info.subject || '(empty)');
-                tlsRenderRow(out, t('tls-cert.row.issuer'), info.issuer || '(empty)');
-                tlsRenderRow(out, t('tls-cert.row.notBefore'), info.notBefore.toISOString());
-                tlsRenderRow(out, t('tls-cert.row.notAfter'), info.notAfter.toISOString());
-                const now = new Date();
-                const validity = (now < info.notBefore) ? t('tls-cert.notYetValid')
-                                : (now > info.notAfter) ? t('tls-cert.expired')
-                                : t('tls-cert.valid');
-                tlsRenderRow(out, t('tls-cert.row.status'), validity);
-                tlsRenderRow(out, t('tls-cert.row.publicKey'), info.publicKey);
-                tlsRenderRow(out, t('tls-cert.row.sigAlg'), info.sigAlg);
-                tlsRenderRow(out, t('tls-cert.row.san'), info.sans.length ? info.sans.join(', ') : '(none)');
-                tlsRenderRow(out, t('tls-cert.row.fpSha1'), info.fpSha1);
-                tlsRenderRow(out, t('tls-cert.row.fpSha256'), info.fpSha256);
+                const der = new Uint8Array(pemToArrayBuffer(document.getElementById('tls-cert-input').value));
+                if (cmsIsSignedData(der)) {
+                    const cms = cmsParse(der);
+                    tlsRenderRow(out, t('tls-cert.row.type'), tFormat('cms.summary', { certs: intlNumber(cms.certs.length), signers: intlNumber(cms.signers.length) }));
+                    cms.signers.forEach((s, i) => {
+                        tlsRenderHeading(out, tFormat('cms.signer', { n: intlNumber(i + 1) }));
+                        tlsRenderRow(out, t('cms.row.digestAlg'), s.digestAlg);
+                        tlsRenderRow(out, t('tls-cert.row.sigAlg'), s.sigAlg);
+                        tlsRenderRow(out, t('cms.row.signingTime'), s.signingTime ? s.signingTime.toISOString() : t('cms.noSigningTime'));
+                    });
+                    for (let i = 0; i < cms.certs.length; i++) {
+                        tlsRenderHeading(out, tFormat('cms.cert', { n: intlNumber(i + 1) }));
+                        try {
+                            tlsRenderCert(out, await tlsCertParseDer(cms.certs[i]));
+                        } catch (e) {
+                            tlsRenderRow(out, t('tls-cert.row.error'), e.message);
+                        }
+                    }
+                    return;
+                }
+                tlsRenderCert(out, await tlsCertParseDer(der));
             } catch (e) {
-                out.classList.remove('hidden');
                 tlsRenderRow(out, t('tls-cert.row.error'), e.message);
             }
         });

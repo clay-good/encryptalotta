@@ -18,7 +18,7 @@ A comprehensive single-page web app with **45 cryptographic, encoding, parsing, 
 - **Key Info** — Inspect any PGP public key: fingerprint, user IDs, algorithm, key size, creation and expiration dates.
 - **Revocation Certificate** — Generate a pre-signed certificate to retire a compromised key.
 - **QR Share** — Encode a PGP public key or encrypted message as one or more scannable QR codes (multi-QR `EAL-QR/v1/{n}/{total}/` for long inputs).
-- **TLS Certificate Parser** — Hand-rolled ASN.1 / DER decoder for X.509 certificates: subject, issuer, SAN, validity, public key algorithm, SHA-1 + SHA-256 fingerprints.
+- **TLS Certificate Parser** — Hand-rolled ASN.1 / DER decoder for X.509 certificates: subject, issuer, SAN, validity, public key algorithm, SHA-1 + SHA-256 fingerprints. Also decodes **PKCS#7 / CMS (RFC 5652) SignedData** — certs-only bundles (`.p7b` / `.p7c`) and CAdES-BES signatures: it surfaces every embedded certificate plus each signer's digest algorithm, signature algorithm, and signed signing-time (the first slice of the §2.5 eIDAS signature inspector; no network, no revocation checking).
 - **SSH Key Parser** — OpenSSH RFC 4253 wire-format parser: key type (rsa / ed25519 / ecdsa-sha2-nistp{256,384,521}), bit size, `SHA256:<base64>` fingerprint, comment.
 - **PEM ↔ DER** — Round-trip between PEM (Base64 with header/footer) and DER (raw binary as hex).
 - **BIP39 Mnemonic** — Generate cryptographically random 12 / 15 / 18 / 21 / 24-word seed phrases (BIP-0039) or validate the checksum of any existing mnemonic. Computes the BIP39 PBKDF2-HMAC-SHA512 seed locally with optional passphrase.
@@ -359,7 +359,7 @@ All 45 tools are organized into four groups. Every tool has a deep-link route.
 | **Key Info** | `#/keys/key-info` | Inspect any PGP key's fingerprint, user ID, algorithm, expiry |
 | **Revoke Key** | `#/keys/revoke` | Create a revocation certificate for a compromised key |
 | **QR Share** | `#/keys/qr` | Encode a public key or message into a QR (multi-QR for long inputs) |
-| **TLS Certificate Parser** | `#/keys/tls-cert` | Decode an X.509 cert: subject, SAN, validity, fingerprint |
+| **TLS Certificate Parser** | `#/keys/tls-cert` | Decode an X.509 cert (subject, SAN, validity, fingerprint) or a PKCS#7 / CMS bundle / CAdES signature |
 | **SSH Key Parser** | `#/keys/ssh-key` | Inspect an OpenSSH public key: type, bits, SHA-256 fingerprint |
 | **PEM ↔ DER** | `#/keys/pem-der` | Convert between PEM (Base64) and DER (binary) encodings |
 | **BIP39 Mnemonic** | `#/keys/bip39` | Generate or validate BIP-0039 mnemonic seed phrases (12 / 15 / 18 / 21 / 24 words) |
@@ -489,6 +489,7 @@ Every tool maps to a published standard so its output is checkable against an au
 | JWT / JOSE | RFC 7519, 7515, 7518; RFC 8725 (BCP) | JWT Inspector |
 | TOTP / HOTP | RFC 6238, RFC 4226 | TOTP / 2FA |
 | X.509 / ASN.1 | RFC 5280, X.690 (DER) | TLS Certificate Parser |
+| PKCS#7 / CMS | RFC 5652 (SignedData), CAdES-BES (ETSI EN 319 122) | TLS Certificate Parser |
 | SSH wire format | RFC 4253, RFC 4716 | SSH Key Parser |
 | UUID / ULID | RFC 9562 (UUID v4 / v7) | UUID / ULID |
 | Base encodings | RFC 4648 (Base64/32), Base58 (Bitcoin) | Encode |

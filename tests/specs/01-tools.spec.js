@@ -105,6 +105,22 @@ AQEAvJC4kFq4oWzAKnhc4n5HIQH8X7tNNmXJDc8M6N0XFXR3cM4zGhU3FZoF8YzL
   }, { timeout: 5_000 });
 });
 
+// Real PKCS#7 / CMS SignedData (CAdES-BES) — openssl `cms -sign` over "hello factur-x"
+// with a throwaway EC self-signed cert. Carries the signer cert + a signed
+// signingTime attribute. Tests the §2.5 CAdES slice of the X.509 parser (draft 284).
+const CMS_P7S_B64 = 'MIIDyAYJKoZIhvcNAQcCoIIDuTCCA7UCAQExDTALBglghkgBZQMEAgEwCwYJKoZIhvcNAQcBoIIB4DCCAdwwggGDoAMCAQICFASZKuGvSbYF1MszY/rQ9Vmp+Rw1MAoGCCqGSM49BAMCMEQxHTAbBgNVBAMMFEZhY3R1ci1YIFRlc3QgU2lnbmVyMRYwFAYDVQQKDA1lbmNyeXB0YWxvdHRhMQswCQYDVQQGEwJGUjAeFw0yNjA2MDUyMTAzNTVaFw0zNjA2MDIyMTAzNTVaMEQxHTAbBgNVBAMMFEZhY3R1ci1YIFRlc3QgU2lnbmVyMRYwFAYDVQQKDA1lbmNyeXB0YWxvdHRhMQswCQYDVQQGEwJGUjBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABKmj7yA2A0/5S24a4hlXyG9ZFebasqJrdOfNbUMG/YleTqXxAD/7TRtBd/XJOZsXufN+JA3VDXqRus1iwC8e1OejUzBRMB0GA1UdDgQWBBQBM9cpMN8E1e60TDJVAgx3tnVeSjAfBgNVHSMEGDAWgBQBM9cpMN8E1e60TDJVAgx3tnVeSjAPBgNVHRMBAf8EBTADAQH/MAoGCCqGSM49BAMCA0cAMEQCIFEdCr3ePeRihSRsuX4xauSaX09YQZCKEqK+Rq4aHDYfAiAk8iVA5zNxQJ9DPH7FM5E0+AFDBmbcFHVCQJF0N0R0uDGCAa4wggGqAgEBMFwwRDEdMBsGA1UEAwwURmFjdHVyLVggVGVzdCBTaWduZXIxFjAUBgNVBAoMDWVuY3J5cHRhbG90dGExCzAJBgNVBAYTAkZSAhQEmSrhr0m2BdTLM2P60PVZqfkcNTALBglghkgBZQMEAgGggeQwGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMjYwNjA1MjEwODI1WjAvBgkqhkiG9w0BCQQxIgQgIo5C6LTDrTD4dJIazRH+tcCPnH0ySZfF7KJQo7WJBKwweQYJKoZIhvcNAQkPMWwwajALBglghkgBZQMEASowCwYJYIZIAWUDBAEWMAsGCWCGSAFlAwQBAjAKBggqhkiG9w0DBzAOBggqhkiG9w0DAgICAIAwDQYIKoZIhvcNAwICAUAwBwYFKw4DAgcwDQYIKoZIhvcNAwICASgwCgYIKoZIzj0EAwIERzBFAiEApa50n2l+quBMOJ4DnWDJXy8m0LUvHnsyvqUNfAv+fGoCIHj94sSAzwClXZUGLv0xITY7M8fLelobDeAdsExK6mf7';
+
+test('tls-cert: decodes a PKCS#7 / CMS SignedData (CAdES) signature (draft 284)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'tls-cert');
+  await page.fill('#tls-cert-input', '-----BEGIN PKCS7-----\n' + CMS_P7S_B64 + '\n-----END PKCS7-----');
+  await page.click('#btn-tls-cert-parse');
+  const res = page.locator('#tls-cert-results');
+  await expect(res).toContainText(/PKCS#7 \/ CMS SignedData — 1 certificate\(s\), 1 signer\(s\)/i, { timeout: 5_000 });
+  await expect(res).toContainText('ecdsa-with-SHA256');       // signer signature algorithm
+  await expect(res).toContainText('2026-06-05');              // signed signing-time attribute
+  await expect(res).toContainText(/Factur-X Test Signer/);    // embedded signer cert subject
+});
+
 test('ssh-key', async ({ page }) => {
   const errs=[]; autoDismissDialogs(page, errs);
   await page.goto('/index.html'); await gotoTool(page, 'ssh-key');
