@@ -2,6 +2,7 @@
 import { test, expect } from '@playwright/test';
 import fs from 'node:fs';
 import nodeCrypto from 'node:crypto';
+import zlib from 'node:zlib';
 
 let FIXTURE = null;
 const PASS = 'CorrectHorseBatteryStaple-9!';
@@ -7323,6 +7324,53 @@ test('cii: seller VAT validity flags a malformed VAT id BT-31 (draft 282)', asyn
   await page.fill('#ubl-input', withBad);
   await page.click('#btn-ubl-parse');
   await expect(page.locator('#ubl-results')).toContainText(/CII seller VAT identifier FR00 .* is invalid/i, { timeout: 5_000 });
+});
+
+// Hybrid PDF/A-3 attachment extraction (draft 283). Build a minimal Factur-X-style
+// PDF carrying the CII invoice as a FlateDecode (zlib) embedded-file stream, feed it
+// through the file input, and assert the inspector extracts + parses it.
+function buildFacturXPdf(xml) {
+  const compressed = zlib.deflateSync(Buffer.from(xml, 'utf8'));
+  return Buffer.concat([
+    Buffer.from('%PDF-1.7\n%\xE2\xE3\xCF\xD3\n', 'latin1'),
+    Buffer.from('1 0 obj\n<< /Type /EmbeddedFile /Subtype /text#2Fxml /Filter /FlateDecode /Length ' + compressed.length + ' >>\nstream\n', 'latin1'),
+    compressed,
+    Buffer.from('\nendstream\nendobj\n', 'latin1'),
+    Buffer.from('2 0 obj\n<< /Type /Filespec /F (factur-x.xml) /EF << /F 1 0 R >> >>\nendobj\n', 'latin1'),
+    Buffer.from('trailer\n<< /Root 1 0 R >>\n%%EOF\n', 'latin1'),
+  ]);
+}
+
+test('ubl: extracts and parses the CII XML embedded in a Factur-X PDF (draft 283)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  const pdf = buildFacturXPdf(CII_INVOICE);
+  await page.setInputFiles('#ubl-pdf', { name: 'factur-x-invoice.pdf', mimeType: 'application/pdf', buffer: pdf });
+  await expect(page.locator('#ubl-pdf-status')).toContainText(/Extracted the embedded invoice XML/i, { timeout: 5_000 });
+  const res = page.locator('#ubl-results');
+  await expect(res).toContainText(/UN\/CEFACT CII \(Factur-X \/ ZUGFeRD\)/i, { timeout: 5_000 });
+  await expect(res).toContainText('FX-2024-7');
+  await expect(res).toContainText(/Factur-X \/ ZUGFeRD profile detected: EN 16931 \(COMFORT\)/i);
+});
+
+test('ubl: reports when a PDF carries no embedded invoice XML (draft 283)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // A PDF whose only stream is a compressed XMP metadata blob, not an invoice.
+  const xmp = '<?xml version="1.0"?><x:xmpmeta xmlns:x="adobe:ns:meta/"><rdf:RDF/></x:xmpmeta>';
+  const compressed = zlib.deflateSync(Buffer.from(xmp, 'utf8'));
+  const pdf = Buffer.concat([
+    Buffer.from('%PDF-1.7\n', 'latin1'),
+    Buffer.from('1 0 obj\n<< /Type /Metadata /Subtype /XML /Filter /FlateDecode /Length ' + compressed.length + ' >>\nstream\n', 'latin1'),
+    compressed,
+    Buffer.from('\nendstream\nendobj\n%%EOF\n', 'latin1'),
+  ]);
+  await page.setInputFiles('#ubl-pdf', { name: 'plain.pdf', mimeType: 'application/pdf', buffer: pdf });
+  await expect(page.locator('#ubl-pdf-status')).toContainText(/No embedded CII \/ UBL invoice XML found in plain\.pdf/i, { timeout: 5_000 });
+});
+
+test('ubl: rejects a non-PDF file in the PDF loader (draft 283)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.setInputFiles('#ubl-pdf', { name: 'notes.txt', mimeType: 'text/plain', buffer: Buffer.from('just some text, not a pdf', 'utf8') });
+  await expect(page.locator('#ubl-pdf-status')).toContainText(/not a PDF/i, { timeout: 5_000 });
 });
 
 test('ubl: LegalMonetaryTotal/PayableAmount presence flags a missing slot (draft 183)', async ({ page }) => {

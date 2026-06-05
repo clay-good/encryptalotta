@@ -3129,8 +3129,14 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="ubl-input" data-i18n="ubl.label.input">Paste an OASIS UBL 2.1 Invoice or CreditNote XML (PEPPOL BIS Billing 3.0, EN 16931 / Factur-X CII not yet)</label>
+                    <label for="ubl-input" data-i18n="ubl.label.input">Paste an OASIS UBL 2.1 Invoice / CreditNote or UN/CEFACT CII (Factur-X / ZUGFeRD) XML — or load a hybrid PDF below</label>
                     <textarea id="ubl-input" rows="10" spellcheck="false" data-i18n-attr="placeholder:ubl.ph.input" placeholder="&lt;Invoice xmlns=&quot;urn:oasis:names:specification:ubl:schema:xsd:Invoice-2&quot;&gt;...&lt;/Invoice&gt;" dir="ltr" style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.85rem;"></textarea>
+                </div>
+
+                <div class="form-group" style="margin-top: -10px;">
+                    <input type="file" id="ubl-pdf" accept="application/pdf,.pdf" style="display: none;" data-i18n-attr="aria-label:ubl.pdf.aria" aria-label="Load a Factur-X / ZUGFeRD PDF and extract its embedded invoice XML">
+                    <button type="button" id="btn-ubl-pdf" class="btn btn-secondary" data-i18n="btn.ublLoadPdf">Load a Factur-X / ZUGFeRD PDF</button>
+                    <div id="ubl-pdf-status" style="margin-top: 8px; color: var(--text-secondary); font-size: 0.85rem; word-break: break-word;"></div>
                 </div>
 
                 <button id="btn-ubl-parse" class="btn" data-i18n="btn.ublParse">Parse</button>
@@ -4714,9 +4720,16 @@
                 'nav.tool.ubl': 'PEPPOL Invoice',
                 'tool.ubl.desc': 'Inspect a PEPPOL / EN 16931 UBL 2.1 invoice or credit note (OASIS UBL). Header, totals, line items, tax breakdown — all offline.',
                 'view.ubl.h2': 'PEPPOL / UBL Invoice Inspector',
-                'ubl.label.input': 'Paste an OASIS UBL 2.1 Invoice or CreditNote XML (PEPPOL BIS Billing 3.0, EN 16931)',
+                'ubl.label.input': 'Paste an OASIS UBL 2.1 Invoice / CreditNote or UN/CEFACT CII (Factur-X / ZUGFeRD) XML — or load a hybrid PDF below',
                 'ubl.ph.input': 'Paste your UBL invoice XML here…',
                 'btn.ublParse': 'Parse',
+                'btn.ublLoadPdf': 'Load a Factur-X / ZUGFeRD PDF',
+                'ubl.pdf.aria': 'Load a Factur-X / ZUGFeRD PDF and extract its embedded invoice XML',
+                'ubl.pdf.reading': 'Reading PDF…',
+                'ubl.pdf.extracted': 'Extracted the embedded invoice XML from {name} — parsing…',
+                'ubl.pdf.notFound': 'No embedded CII / UBL invoice XML found in {name}. Factur-X / ZUGFeRD attach the invoice as factur-x.xml / zugferd-invoice.xml; if this is a plain PDF, paste the XML instead.',
+                'ubl.pdf.notPdf': 'That file is not a PDF (no %PDF header).',
+                'ubl.pdf.error': 'Could not read the PDF: {msg}',
                 'ubl.row.docType': 'Document type',
                 'ubl.row.customizationId': 'Customization ID',
                 'ubl.row.profile': 'Profile ID',
@@ -6320,9 +6333,16 @@
                 'nav.tool.ubl': 'Facture PEPPOL',
                 'tool.ubl.desc': 'Inspecter une facture ou note de crédit UBL 2.1 (OASIS UBL, PEPPOL BIS Billing 3.0, EN 16931). En-tête, totaux, lignes, TVA — entièrement hors ligne.',
                 'view.ubl.h2': 'Inspecteur de factures PEPPOL / UBL',
-                'ubl.label.input': 'Coller une facture ou note de crédit OASIS UBL 2.1 (PEPPOL BIS Billing 3.0, EN 16931)',
+                'ubl.label.input': 'Coller une facture / note de crédit OASIS UBL 2.1 ou une CII UN/CEFACT (Factur-X / ZUGFeRD) — ou charger un PDF hybride ci-dessous',
                 'ubl.ph.input': 'Collez votre XML UBL ici…',
                 'btn.ublParse': 'Analyser',
+                'btn.ublLoadPdf': 'Charger un PDF Factur-X / ZUGFeRD',
+                'ubl.pdf.aria': 'Charger un PDF Factur-X / ZUGFeRD et extraire la facture XML intégrée',
+                'ubl.pdf.reading': 'Lecture du PDF…',
+                'ubl.pdf.extracted': 'Facture XML intégrée extraite de {name} — analyse…',
+                'ubl.pdf.notFound': 'Aucune facture XML CII / UBL intégrée trouvée dans {name}. Factur-X / ZUGFeRD joignent la facture sous factur-x.xml / zugferd-invoice.xml ; s’il s’agit d’un PDF ordinaire, collez plutôt le XML.',
+                'ubl.pdf.notPdf': 'Ce fichier n’est pas un PDF (en-tête %PDF absent).',
+                'ubl.pdf.error': 'Impossible de lire le PDF : {msg}',
                 'ubl.row.docType': 'Type de document',
                 'ubl.row.customizationId': 'Identifiant de personnalisation',
                 'ubl.row.profile': 'Identifiant de profil',
@@ -7904,9 +7924,16 @@
                 'nav.tool.ubl': 'PEPPOL 发票',
                 'tool.ubl.desc': '检查 OASIS UBL 2.1 发票或贷项通知单（PEPPOL BIS Billing 3.0、EN 16931）。表头、合计、行项目和税额分解 — 全部离线。',
                 'view.ubl.h2': 'PEPPOL / UBL 发票检查器',
-                'ubl.label.input': '粘贴 OASIS UBL 2.1 发票或贷项通知单 XML（PEPPOL BIS Billing 3.0，EN 16931）',
+                'ubl.label.input': '粘贴 OASIS UBL 2.1 发票/贷项通知单或 UN/CEFACT CII（Factur-X / ZUGFeRD）XML——或在下方加载混合 PDF',
                 'ubl.ph.input': '在此粘贴您的 UBL 发票 XML…',
                 'btn.ublParse': '解析',
+                'btn.ublLoadPdf': '加载 Factur-X / ZUGFeRD PDF',
+                'ubl.pdf.aria': '加载 Factur-X / ZUGFeRD PDF 并提取其内嵌的发票 XML',
+                'ubl.pdf.reading': '正在读取 PDF…',
+                'ubl.pdf.extracted': '已从 {name} 提取内嵌发票 XML——正在解析…',
+                'ubl.pdf.notFound': '在 {name} 中未找到内嵌的 CII / UBL 发票 XML。Factur-X / ZUGFeRD 以 factur-x.xml / zugferd-invoice.xml 附加发票；如果这是普通 PDF，请改为粘贴 XML。',
+                'ubl.pdf.notPdf': '该文件不是 PDF（缺少 %PDF 头）。',
+                'ubl.pdf.error': '无法读取 PDF：{msg}',
                 'ubl.row.docType': '文档类型',
                 'ubl.row.customizationId': '自定义标识',
                 'ubl.row.profile': '配置文件标识',
@@ -9503,9 +9530,16 @@
                 'nav.tool.ubl': 'PEPPOL-Rechnung',
                 'tool.ubl.desc': 'OASIS UBL 2.1 Rechnung oder Gutschrift prüfen (PEPPOL BIS Billing 3.0, EN 16931). Kopfzeile, Summen, Positionen, USt.-Aufschlüsselung — alles offline.',
                 'view.ubl.h2': 'PEPPOL- / UBL-Rechnungsinspektor',
-                'ubl.label.input': 'OASIS UBL 2.1 Rechnung oder Gutschrift einfügen (PEPPOL BIS Billing 3.0, EN 16931)',
+                'ubl.label.input': 'OASIS UBL 2.1 Rechnung / Gutschrift oder UN/CEFACT CII (Factur-X / ZUGFeRD) einfügen — oder unten ein Hybrid-PDF laden',
                 'ubl.ph.input': 'UBL-Rechnungs-XML hier einfügen…',
                 'btn.ublParse': 'Prüfen',
+                'btn.ublLoadPdf': 'Factur-X-/ZUGFeRD-PDF laden',
+                'ubl.pdf.aria': 'Ein Factur-X-/ZUGFeRD-PDF laden und die eingebettete Rechnungs-XML extrahieren',
+                'ubl.pdf.reading': 'PDF wird gelesen…',
+                'ubl.pdf.extracted': 'Eingebettete Rechnungs-XML aus {name} extrahiert — wird geprüft…',
+                'ubl.pdf.notFound': 'Keine eingebettete CII-/UBL-Rechnungs-XML in {name} gefunden. Factur-X / ZUGFeRD hängen die Rechnung als factur-x.xml / zugferd-invoice.xml an; bei einem reinen PDF stattdessen die XML einfügen.',
+                'ubl.pdf.notPdf': 'Diese Datei ist kein PDF (kein %PDF-Header).',
+                'ubl.pdf.error': 'PDF konnte nicht gelesen werden: {msg}',
                 'ubl.row.docType': 'Dokumenttyp',
                 'ubl.row.customizationId': 'Anpassungs-ID',
                 'ubl.row.profile': 'Profil-ID',
@@ -11087,9 +11121,16 @@
                 'nav.tool.ubl': 'PEPPOL चालान',
                 'tool.ubl.desc': 'OASIS UBL 2.1 चालान या क्रेडिट नोट का निरीक्षण करें (PEPPOL BIS Billing 3.0, EN 16931)। हेडर, कुल योग, पंक्तियाँ और कर विवरण — सब ऑफ़लाइन।',
                 'view.ubl.h2': 'PEPPOL / UBL चालान निरीक्षक',
-                'ubl.label.input': 'OASIS UBL 2.1 Invoice या CreditNote XML चिपकाएँ (PEPPOL BIS Billing 3.0, EN 16931)',
+                'ubl.label.input': 'OASIS UBL 2.1 Invoice / CreditNote या UN/CEFACT CII (Factur-X / ZUGFeRD) XML चिपकाएँ — या नीचे एक हाइब्रिड PDF लोड करें',
                 'ubl.ph.input': 'अपना UBL चालान XML यहाँ चिपकाएँ…',
                 'btn.ublParse': 'पार्स करें',
+                'btn.ublLoadPdf': 'Factur-X / ZUGFeRD PDF लोड करें',
+                'ubl.pdf.aria': 'Factur-X / ZUGFeRD PDF लोड करें और उसकी अंतर्निहित चालान XML निकालें',
+                'ubl.pdf.reading': 'PDF पढ़ा जा रहा है…',
+                'ubl.pdf.extracted': '{name} से अंतर्निहित चालान XML निकाली गई — पार्स किया जा रहा है…',
+                'ubl.pdf.notFound': '{name} में कोई अंतर्निहित CII / UBL चालान XML नहीं मिली। Factur-X / ZUGFeRD चालान को factur-x.xml / zugferd-invoice.xml के रूप में संलग्न करते हैं; यदि यह एक सामान्य PDF है, तो इसके बजाय XML चिपकाएँ।',
+                'ubl.pdf.notPdf': 'वह फ़ाइल PDF नहीं है (%PDF हेडर अनुपस्थित)।',
+                'ubl.pdf.error': 'PDF नहीं पढ़ा जा सका: {msg}',
                 'ubl.row.docType': 'दस्तावेज़ प्रकार',
                 'ubl.row.customizationId': 'अनुकूलन आईडी',
                 'ubl.row.profile': 'प्रोफ़ाइल आईडी',
@@ -30603,6 +30644,94 @@
                 }
             }
         }
+
+        // Hybrid PDF/A-3 attachment extraction (deferred slice from draft 258).
+        // Factur-X / ZUGFeRD embed the EN 16931 invoice as an attachment inside a
+        // PDF/A-3 — conventionally named factur-x.xml / zugferd-invoice.xml /
+        // xrechnung.xml — stored as a FlateDecode (zlib) stream object. Rather than
+        // parse the full PDF object graph + cross-reference tables (which would mean
+        // vendoring a PDF library and breaking the page-weight budget), we walk every
+        // `stream … endstream` block, inflate it with the native DecompressionStream
+        // (no dependency, no network), and keep the first one that decodes to a CII
+        // (<rsm:CrossIndustryInvoice>) or UBL (Invoice-2 / CreditNote-2) document.
+        // The invoice-root signature check means the PDF's XMP metadata stream (also
+        // XML, but <x:xmpmeta>) is never mistaken for the invoice. Uncompressed
+        // streams are checked only when they begin with '<' so binary image / font
+        // streams are skipped cheaply. Entirely client-side.
+        async function pdfInflate(bytes, mode) {
+            const resp = new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream(mode)));
+            return new Uint8Array(await resp.arrayBuffer());
+        }
+        async function pdfExtractInvoiceXml(buf) {
+            const bytes = new Uint8Array(buf);
+            if (bytes.length < 5 || bytes[0] !== 0x25 || bytes[1] !== 0x50 || bytes[2] !== 0x44 || bytes[3] !== 0x46) {
+                throw new Error(t('ubl.pdf.notPdf'));
+            }
+            // Byte-preserving latin1 view so string offsets map 1:1 to byte offsets.
+            let latin1 = '';
+            for (let k = 0; k < bytes.length; k += 0x8000) {
+                latin1 += String.fromCharCode.apply(null, bytes.subarray(k, Math.min(bytes.length, k + 0x8000)));
+            }
+            const dec = new TextDecoder('utf-8', { fatal: false });
+            const isInvoice = (s) => !!s && (s.indexOf('CrossIndustryInvoice') !== -1
+                || s.indexOf('specification:ubl:schema:xsd:Invoice-2') !== -1
+                || s.indexOf('specification:ubl:schema:xsd:CreditNote-2') !== -1);
+            let pos = 0;
+            while (true) {
+                const sIdx = latin1.indexOf('stream', pos);
+                if (sIdx < 0) break;
+                if (sIdx >= 3 && latin1.substr(sIdx - 3, 3) === 'end') { pos = sIdx + 6; continue; }
+                let dataStart = sIdx + 6;
+                if (latin1[dataStart] === '\r') dataStart++;
+                if (latin1[dataStart] === '\n') dataStart++;
+                const eIdx = latin1.indexOf('endstream', dataStart);
+                if (eIdx < 0) break;
+                let dataEnd = eIdx;
+                if (latin1[dataEnd - 1] === '\n') dataEnd--;
+                if (latin1[dataEnd - 1] === '\r') dataEnd--;
+                pos = eIdx + 9;
+                if (dataEnd <= dataStart) continue;
+                const chunk = bytes.subarray(dataStart, dataEnd);
+                for (const mode of ['deflate', 'deflate-raw', 'none']) {
+                    let out = null;
+                    if (mode === 'none') {
+                        let p = dataStart;
+                        while (p < dataEnd && (bytes[p] === 0x20 || bytes[p] === 0x09 || bytes[p] === 0x0a || bytes[p] === 0x0d || bytes[p] === 0xEF || bytes[p] === 0xBB || bytes[p] === 0xBF)) p++;
+                        if (bytes[p] !== 0x3C) continue; // not '<' → not XML text
+                        out = chunk;
+                    } else {
+                        try { out = await pdfInflate(chunk, mode); } catch (e) { out = null; }
+                    }
+                    if (!out) continue;
+                    const s = dec.decode(out);
+                    if (isInvoice(s)) return s.trim();
+                }
+            }
+            return null;
+        }
+        document.getElementById('btn-ubl-pdf').addEventListener('click', () => {
+            document.getElementById('ubl-pdf').click();
+        });
+        document.getElementById('ubl-pdf').addEventListener('change', async (e) => {
+            const status = document.getElementById('ubl-pdf-status');
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+            status.textContent = t('ubl.pdf.reading');
+            try {
+                const xml = await pdfExtractInvoiceXml(await file.arrayBuffer());
+                if (!xml) {
+                    status.textContent = tFormat('ubl.pdf.notFound', { name: file.name });
+                    return;
+                }
+                document.getElementById('ubl-input').value = xml;
+                status.textContent = tFormat('ubl.pdf.extracted', { name: file.name });
+                document.getElementById('btn-ubl-parse').click();
+            } catch (err) {
+                status.textContent = tFormat('ubl.pdf.error', { msg: (err && err.message) ? err.message : String(err) });
+            } finally {
+                e.target.value = '';
+            }
+        });
 
         document.getElementById('btn-ubl-parse').addEventListener('click', () => {
             const out = document.getElementById('ubl-results');
