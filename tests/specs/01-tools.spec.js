@@ -6832,6 +6832,36 @@ test('ubl: line-level AllowanceCharge ChargeIndicator flags a non-boolean value 
   await expect(page.locator('#ubl-results')).toContainText(/Line #1 <cac:AllowanceCharge> ChargeIndicator is "Rebate"/i, { timeout: 5_000 });
 });
 
+test('ubl: line-level AllowanceCharge reason presence confirms when a reason is declared (draft 256)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', UBL_LINE_ALLOWANCE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Every line-level <cac:AllowanceCharge> declares a reason/i, { timeout: 5_000 });
+});
+
+test('ubl: line-level AllowanceCharge reason presence flags a block with no reason (draft 256)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  const withBad = UBL_LINE_ALLOWANCE.replace('<cbc:AllowanceChargeReason>Line discount</cbc:AllowanceChargeReason>\n      ', '');
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Line #1 <cac:AllowanceCharge> declares neither <cbc:AllowanceChargeReason> nor <cbc:AllowanceChargeReasonCode>/i, { timeout: 5_000 });
+});
+
+test('ubl: document-level AllowanceCharge TaxScheme presence confirms when the scheme is declared (draft 257)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', UBL_WITH_ALLOWANCE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Every document-level <cac:AllowanceCharge>\/<cac:TaxCategory> declares a <cac:TaxScheme>\/<cbc:ID>/i, { timeout: 5_000 });
+});
+
+test('ubl: document-level AllowanceCharge TaxScheme presence flags a TaxCategory with no scheme (draft 257)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  const withBad = UBL_WITH_ALLOWANCE.replace('<cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:TaxCategory>', '</cac:TaxCategory>');
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Document-level AllowanceCharge #1 has a <cac:TaxCategory> but no <cac:TaxScheme>\/<cbc:ID>/i, { timeout: 5_000 });
+});
+
 test('ubl: LegalMonetaryTotal/PayableAmount presence flags a missing slot (draft 183)', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   const withBad = UBL_INVOICE.replace(/<cac:LegalMonetaryTotal>[\s\S]*?<\/cac:LegalMonetaryTotal>/g, (block) =>
