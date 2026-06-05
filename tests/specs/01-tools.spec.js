@@ -786,6 +786,35 @@ test('format: JSON → YAML', async ({ page }) => {
   await page.waitForFunction(() => /a:\s*1/.test(document.getElementById('format-output').value), { timeout: 5_000 });
 });
 
+// CBOR decoder (RFC 8949) — Appendix A vectors, decoded via the formatter's new
+// "CBOR (hex / base64)" input format (draft 287).
+async function cborToJson(page, hex) {
+  await page.fill('#format-input', hex);
+  await page.selectOption('#format-from', 'cbor');
+  await page.selectOption('#format-to', 'json');
+  await page.selectOption('#format-mode', 'pretty');
+  await page.click('#btn-format-run');
+  await page.waitForFunction(() => document.getElementById('format-output').value.length > 0, { timeout: 5_000 });
+  return JSON.parse(await page.inputValue('#format-output'));
+}
+
+test('format: CBOR → JSON decodes RFC 8949 map/array/int vectors (draft 287)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'format');
+  expect(await cborToJson(page, '83010203')).toEqual([1, 2, 3]);                         // [1,2,3]
+  expect(await cborToJson(page, 'a26161016162820203')).toEqual({ a: 1, b: [2, 3] });    // {"a":1,"b":[2,3]}
+  expect(await cborToJson(page, '1a000f4240')).toEqual(1000000);                          // 1000000
+  expect(await cborToJson(page, '20')).toEqual(-1);                                        // -1
+  expect(await cborToJson(page, '6449455446')).toEqual('IETF');                            // "IETF"
+});
+
+test('format: CBOR → JSON handles bytes / tags / simple values (draft 287)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'format');
+  expect(await cborToJson(page, '4401020304')).toEqual({ $bytes: '01020304' });           // byte string
+  // tag 0 (standard date/time) wrapping a text string
+  expect(await cborToJson(page, 'c074323031332d30332d32315432303a30343a30305a')).toEqual({ $tag: 0, $value: '2013-03-21T20:04:00Z' });
+  expect(await cborToJson(page, '83f5f4f6')).toEqual([true, false, null]);                 // [true,false,null]
+});
+
 test('cidr: 192.168.1.0/24', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'cidr');
   await page.fill('#cidr-input', '192.168.1.0/24');

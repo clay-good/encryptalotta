@@ -2814,6 +2814,7 @@
                             <option value="json">JSON</option>
                             <option value="yaml">YAML</option>
                             <option value="xml">XML</option>
+                            <option value="cbor" data-i18n="format.opt.cbor">CBOR (hex / base64)</option>
                         </select>
                     </div>
                     <div class="form-group" style="flex: 1; min-width: 150px;">
@@ -4032,11 +4033,12 @@
                 'format.tomlTitle': 'TOML note:',
                 'format.tomlBody': 'TOML support is intentionally omitted: no small browser-ready TOML parser exists without a build step (smol-toml is ESM-only; @ltd/j-toml is 100 KB+). Use JSON or YAML for now.',
                 'format.label.input': 'Input:',
-                'format.ph.input': 'Paste JSON, YAML, or XML here…',
+                'format.ph.input': 'Paste JSON, YAML, XML, or CBOR (hex / base64) here…',
                 'format.label.from': 'Input format:',
                 'format.label.to': 'Output format:',
                 'format.label.mode': 'Mode:',
                 'format.opt.auto': 'Auto-detect',
+                'format.opt.cbor': 'CBOR (hex / base64)',
                 'format.opt.pretty': 'Pretty-print',
                 'format.opt.minify': 'Minify',
                 'format.label.output': 'Output:',
@@ -5861,11 +5863,12 @@
                 'format.tomlTitle': 'Note TOML :',
                 'format.tomlBody': 'TOML est volontairement omis : aucun analyseur TOML léger pour navigateur ne fonctionne sans étape de build (smol-toml est ESM uniquement ; @ltd/j-toml dépasse 100 Ko). Utilisez JSON ou YAML pour l’instant.',
                 'format.label.input': 'Entrée :',
-                'format.ph.input': 'Collez du JSON, YAML ou XML ici…',
+                'format.ph.input': 'Collez du JSON, YAML, XML ou CBOR (hex / base64) ici…',
                 'format.label.from': 'Format d’entrée :',
                 'format.label.to': 'Format de sortie :',
                 'format.label.mode': 'Mode :',
                 'format.opt.auto': 'Détection automatique',
+                'format.opt.cbor': 'CBOR (hex / base64)',
                 'format.opt.pretty': 'Mise en forme',
                 'format.opt.minify': 'Minifier',
                 'format.label.output': 'Sortie :',
@@ -7487,11 +7490,12 @@
                 'format.tomlTitle': 'TOML 说明：',
                 'format.tomlBody': '故意省略 TOML 支持：没有可在浏览器中直接使用的小型 TOML 解析器（smol-toml 仅 ESM；@ltd/j-toml 超过 100 KB）。目前请使用 JSON 或 YAML。',
                 'format.label.input': '输入：',
-                'format.ph.input': '在此粘贴 JSON、YAML 或 XML…',
+                'format.ph.input': '在此粘贴 JSON、YAML、XML 或 CBOR（十六进制 / base64）…',
                 'format.label.from': '输入格式：',
                 'format.label.to': '输出格式：',
                 'format.label.mode': '模式：',
                 'format.opt.auto': '自动检测',
+                'format.opt.cbor': 'CBOR（十六进制 / base64）',
                 'format.opt.pretty': '美化',
                 'format.opt.minify': '压缩',
                 'format.label.output': '输出：',
@@ -9098,11 +9102,12 @@
                 'format.tomlTitle': 'TOML-Hinweis:',
                 'format.tomlBody': 'TOML wird bewusst nicht unterstützt: es gibt keinen kleinen, browserfertigen TOML-Parser ohne Build-Schritt (smol-toml ist ESM-only; @ltd/j-toml ist über 100 KB groß). Bitte JSON oder YAML verwenden.',
                 'format.label.input': 'Eingabe:',
-                'format.ph.input': 'JSON, YAML oder XML hier einfügen…',
+                'format.ph.input': 'JSON, YAML, XML oder CBOR (Hex / base64) hier einfügen…',
                 'format.label.from': 'Eingabeformat:',
                 'format.label.to': 'Ausgabeformat:',
                 'format.label.mode': 'Modus:',
                 'format.opt.auto': 'Automatisch erkennen',
+                'format.opt.cbor': 'CBOR (Hex / base64)',
                 'format.opt.pretty': 'Formatieren',
                 'format.opt.minify': 'Minifizieren',
                 'format.label.output': 'Ausgabe:',
@@ -10724,11 +10729,12 @@
                 'format.tomlTitle': 'TOML नोट:',
                 'format.tomlBody': 'TOML समर्थन जानबूझकर शामिल नहीं है: बिना बिल्ड चरण के कोई छोटा ब्राउज़र-तैयार TOML पार्सर मौजूद नहीं है (smol-toml केवल ESM है; @ltd/j-toml 100 KB से बड़ा है)। फ़िलहाल JSON या YAML का उपयोग करें।',
                 'format.label.input': 'इनपुट:',
-                'format.ph.input': 'JSON, YAML या XML यहाँ पेस्ट करें…',
+                'format.ph.input': 'JSON, YAML, XML या CBOR (हेक्स / base64) यहाँ पेस्ट करें…',
                 'format.label.from': 'इनपुट प्रारूप:',
                 'format.label.to': 'आउटपुट प्रारूप:',
                 'format.label.mode': 'मोड:',
                 'format.opt.auto': 'स्वचालित पहचान',
+                'format.opt.cbor': 'CBOR (हेक्स / base64)',
                 'format.opt.pretty': 'सुंदर बनाएँ',
                 'format.opt.minify': 'छोटा करें',
                 'format.label.output': 'आउटपुट:',
@@ -17496,7 +17502,84 @@
             return xmlString.replace(/>\s+</g, '><').trim();
         }
 
+        // CBOR decoder (RFC 8949) — the hand-rolled decoder §2.8 names as the
+        // prerequisite for the ISO 18013-5 mdoc / EUDI-wallet credential decoder, and
+        // the natural foundation for any COSE / CWT / WebAuthn-attestation work. Decodes
+        // to plain JS values for JSON / YAML emit, with unambiguous wrappers for the
+        // CBOR-only types JSON has no equivalent of: byte strings → {$bytes:"<hex>"},
+        // tags → {$tag:n,$value:…}, unknown simple values → {$simple:n}. Integers that
+        // overflow Number.MAX_SAFE_INTEGER are emitted as decimal strings (JSON can't
+        // carry them and JSON.stringify throws on BigInt). Handles definite + indefinite
+        // lengths and the half/single/double floats. No network; pure in-tab parse.
+        function cborFloat16(u16) {
+            const sign = (u16 & 0x8000) ? -1 : 1;
+            const exp = (u16 >> 10) & 0x1f;
+            const mant = u16 & 0x3ff;
+            if (exp === 0) return sign * Math.pow(2, -14) * (mant / 1024);
+            if (exp === 31) return mant ? NaN : sign * Infinity;
+            return sign * Math.pow(2, exp - 15) * (1 + mant / 1024);
+        }
+        function cborDecode(bytes) {
+            let pos = 0;
+            const readUint = (n) => { let v = 0n; for (let i = 0; i < n; i++) { if (pos >= bytes.length) throw new Error('CBOR: truncated'); v = (v << 8n) | BigInt(bytes[pos++]); } return v; };
+            const arg = (ai) => { if (ai < 24) return BigInt(ai); if (ai === 24) return readUint(1); if (ai === 25) return readUint(2); if (ai === 26) return readUint(4); if (ai === 27) return readUint(8); throw new Error('CBOR: bad additional info ' + ai); };
+            const big = (b) => (b <= BigInt(Number.MAX_SAFE_INTEGER) && b >= BigInt(Number.MIN_SAFE_INTEGER)) ? Number(b) : b.toString();
+            const float = (n) => { if (pos + n > bytes.length) throw new Error('CBOR: truncated'); const dv = new DataView(bytes.buffer, bytes.byteOffset + pos, n); pos += n; return n === 4 ? dv.getFloat32(0, false) : dv.getFloat64(0, false); };
+            const key = (k) => (typeof k === 'string') ? k : (k && k.$bytes) ? "h'" + k.$bytes + "'" : JSON.stringify(k);
+            function item() {
+                if (pos >= bytes.length) throw new Error('CBOR: truncated');
+                const ib = bytes[pos++], mt = ib >> 5, ai = ib & 0x1f;
+                if (mt === 0) return big(arg(ai));
+                if (mt === 1) { const v = -1n - arg(ai); return big(v); }
+                if (mt === 2) {
+                    if (ai === 31) { let hex = ''; while (bytes[pos] !== 0xff) { const c = item(); hex += c.$bytes || ''; } pos++; return { $bytes: hex }; }
+                    const len = Number(arg(ai)); if (pos + len > bytes.length) throw new Error('CBOR: truncated'); const s = bytes.subarray(pos, pos + len); pos += len; return { $bytes: bytesToHex(s) };
+                }
+                if (mt === 3) {
+                    if (ai === 31) { let str = ''; while (bytes[pos] !== 0xff) str += item(); pos++; return str; }
+                    const len = Number(arg(ai)); if (pos + len > bytes.length) throw new Error('CBOR: truncated'); const s = bytes.subarray(pos, pos + len); pos += len; return new TextDecoder('utf-8', { fatal: false }).decode(s);
+                }
+                if (mt === 4) {
+                    const arr = [];
+                    if (ai === 31) { while (bytes[pos] !== 0xff) arr.push(item()); pos++; return arr; }
+                    const len = Number(arg(ai)); for (let i = 0; i < len; i++) arr.push(item()); return arr;
+                }
+                if (mt === 5) {
+                    const obj = {};
+                    if (ai === 31) { while (bytes[pos] !== 0xff) { const k = item(); obj[key(k)] = item(); } pos++; return obj; }
+                    const len = Number(arg(ai)); for (let i = 0; i < len; i++) { const k = item(); obj[key(k)] = item(); } return obj;
+                }
+                if (mt === 6) { const tag = big(arg(ai)); return { $tag: tag, $value: item() }; }
+                // mt === 7: simple values + floats
+                if (ai === 20) return false;
+                if (ai === 21) return true;
+                if (ai === 22 || ai === 23) return null;          // null / undefined → null
+                if (ai === 24) return { $simple: Number(readUint(1)) };
+                if (ai === 25) return cborFloat16(Number(readUint(2)));
+                if (ai === 26) return float(4);
+                if (ai === 27) return float(8);
+                if (ai === 31) throw new Error('CBOR: unexpected break');
+                return { $simple: ai };
+            }
+            const result = item();
+            return result;
+        }
+        function cborParse(text) {
+            const s = text.trim().replace(/\s+/g, '');
+            if (!s) throw new Error('CBOR: empty input');
+            let bytes;
+            const hex = s.replace(/^0x/i, '');
+            if (/^[0-9a-fA-F]+$/.test(hex) && hex.length % 2 === 0) {
+                bytes = new Uint8Array(hex.length / 2);
+                for (let i = 0; i < hex.length; i += 2) bytes[i / 2] = parseInt(hex.substr(i, 2), 16);
+            } else {
+                bytes = base64ToBytes(s, /[-_]/.test(s));
+            }
+            return cborDecode(bytes);
+        }
+
         function formatParse(text, fmt) {
+            if (fmt === 'cbor') return cborParse(text);
             if (fmt === 'json') return JSON.parse(text);
             if (fmt === 'yaml') {
                 if (!YAML) throw new Error(t('err.formatYamlMissing'));

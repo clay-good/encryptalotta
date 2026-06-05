@@ -4,7 +4,7 @@
 
 **Free, client-side privacy and developer toolbox — 45 tools, zero server uploads.**
 
-A comprehensive single-page web app with **45 cryptographic, encoding, parsing, and developer utilities** that run entirely in your browser. PGP key generation, key inspection, revocation certificates, QR public-key sharing, TLS / X.509 certificate parsing, OpenSSH public key parsing, PEM ↔ DER conversion, BIP39 mnemonic generation and validation, file and text encryption / decryption, password-only (symmetric) file encryption, image steganography, digital signing and verification, HMAC, JWT inspection and verification, PBKDF2 key derivation, TOTP / 2FA, password generation, ASCII armor conversion, Shamir's Secret Sharing, EXIF metadata stripping, hashing and checksums (SHA-1 / 256 / 384 / 512), Base64 / Base32 / Base58 / hex encoding, number base conversion (binary / octal / decimal / hex / any base 2–36), UUID v4 / v7 and ULID generation, Unix timestamp conversion, URL parsing, line-level diff, CSV ↔ JSON ↔ TSV conversion, regex testing, cron decoding, color conversion with WCAG contrast checking, JSON / YAML / XML formatting, and CIDR / IPv4 subnet calculation. Searchable command palette (`⌘K` / `Ctrl+K`), full keyboard navigation, five UI languages. No server uploads, no analytics, no CDN, no tracking.
+A comprehensive single-page web app with **45 cryptographic, encoding, parsing, and developer utilities** that run entirely in your browser. PGP key generation, key inspection, revocation certificates, QR public-key sharing, TLS / X.509 certificate parsing, OpenSSH public key parsing, PEM ↔ DER conversion, BIP39 mnemonic generation and validation, file and text encryption / decryption, password-only (symmetric) file encryption, image steganography, digital signing and verification, HMAC, JWT inspection and verification, PBKDF2 key derivation, TOTP / 2FA, password generation, ASCII armor conversion, Shamir's Secret Sharing, EXIF metadata stripping, hashing and checksums (SHA-1 / 256 / 384 / 512), Base64 / Base32 / Base58 / hex encoding, number base conversion (binary / octal / decimal / hex / any base 2–36), UUID v4 / v7 and ULID generation, Unix timestamp conversion, URL parsing, line-level diff, CSV ↔ JSON ↔ TSV conversion, regex testing, cron decoding, color conversion with WCAG contrast checking, JSON / YAML / XML formatting and CBOR (RFC 8949) decoding, and CIDR / IPv4 subnet calculation. Searchable command palette (`⌘K` / `Ctrl+K`), full keyboard navigation, five UI languages. No server uploads, no analytics, no CDN, no tracking.
 
 **Inspired by [Kevin Qiu](https://www.linkedin.com/in/kevinmqiu)**
 
@@ -52,7 +52,7 @@ A comprehensive single-page web app with **45 cryptographic, encoding, parsing, 
 - **Regex Tester** — Live match highlighting, numbered + named capture groups, replacement preview. Built with `createElement` / `textContent` (no `innerHTML`).
 - **Cron Decoder** — Parse 5-field cron (`*`, `*/n`, ranges, lists, named months/dows); show description and next 5 fire times in local timezone.
 - **Color Converter** — HEX ↔ RGB ↔ HSL ↔ OKLCH (hand-rolled Oklab matrices). WCAG AA / AAA contrast checker with live preview swatch.
-- **JSON / YAML / XML Formatter** — Pretty-print, minify, and cross-convert JSON ↔ YAML; pretty-print or minify XML standalone. Auto-detect input format. (TOML omitted — no small browser-ready parser exists without a build step.)
+- **JSON / YAML / XML / CBOR Formatter** — Pretty-print, minify, and cross-convert JSON ↔ YAML; pretty-print or minify XML standalone; and **decode CBOR (RFC 8949) from hex or base64 to JSON / YAML** — a hand-rolled decoder covering all eight major types, tags, and indefinite lengths (byte strings shown as `{$bytes}`, tags as `{$tag,$value}`). The CBOR path is the foundation for COSE / CWT / WebAuthn-attestation and the ISO 18013-5 mdoc decoder (EUDI wallet). Auto-detect input format. (TOML omitted — no small browser-ready parser exists without a build step.)
 - **CIDR / Subnet Calculator** — IPv4 only; pure 32-bit unsigned arithmetic. Network, broadcast, netmask (with binary view), wildcard, first/last usable host, total + usable counts, address class, RFC 1918 / loopback / link-local tags. Handles `/0`, `/31` (RFC 3021), and `/32` correctly.
 - **PBKDF2 Key Derivation** — RFC 8018 password-based key derivation via Web Crypto. Configurable iterations (1–10,000,000), salt (text or hex), key length (1–512 bytes), and PRF (SHA-1 / 256 / 384 / 512). Reports wall-clock derivation time so you can size iteration counts to a target cost.
 - **Number Base Converter** — Convert integers between binary, octal, decimal, hexadecimal, and any base 2–36 simultaneously. Auto-detects `0x` / `0b` / `0o` prefixes; uses BigInt internally so values aren't capped at 53-bit JS Number precision; preserves negatives sign-and-magnitude.
@@ -399,7 +399,7 @@ All 45 tools are organized into four groups. Every tool has a deep-link route.
 | **Regex Tester** | `#/utilities/regex` | Live match highlight + capture groups + replace |
 | **Cron Decoder** | `#/utilities/cron` | Decode cron expression + show next 5 run times |
 | **Color Converter** | `#/utilities/color` | HEX / RGB / HSL / OKLCH + WCAG contrast checker |
-| **Format / Convert** | `#/utilities/format` | Pretty / minify / convert JSON, YAML, and XML |
+| **Format / Convert** | `#/utilities/format` | Pretty / minify / convert JSON, YAML, XML; decode CBOR (hex / base64) → JSON |
 | **CIDR / Subnet** | `#/utilities/cidr` | Decode IPv4 CIDR: network, broadcast, host range, tags |
 | **PBKDF2** | `#/utilities/pbkdf2` | Derive a key from a password (configurable iterations, salt, PRF) |
 | **Number Base** | `#/utilities/base` | Convert integers between binary, octal, decimal, hex, any base 2–36 |
@@ -492,6 +492,7 @@ Every tool maps to a published standard so its output is checkable against an au
 | PKCS#7 / CMS | RFC 5652 (SignedData), CAdES-BES (ETSI EN 319 122) | TLS Certificate Parser |
 | PAdES (PDF signatures) | ETSI EN 319 142, ISO 32000 signature dictionary | TLS Certificate Parser |
 | XAdES / XML-DSig | ETSI EN 319 132, XML Signature (RFC 3275) | TLS Certificate Parser |
+| CBOR | RFC 8949 (Concise Binary Object Representation) | Format / Convert |
 | SSH wire format | RFC 4253, RFC 4716 | SSH Key Parser |
 | UUID / ULID | RFC 9562 (UUID v4 / v7) | UUID / ULID |
 | Base encodings | RFC 4648 (Base64/32), Base58 (Bitcoin) | Encode |
