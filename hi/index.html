@@ -4722,6 +4722,10 @@
                 'ubl.row.profile': 'Profile ID',
                 'ubl.row.id': 'Invoice number',
                 'ubl.row.typeCode': 'Document type code',
+                'cii.ok.headerPresence': 'Every mandatory CII header field is present (EN 16931 — BT-1 invoice number, BT-2 issue date, BT-3 type code, BT-5 currency)',
+                'cii.warn.headerPresence': 'Mandatory CII header field {field} is missing — EN 16931 requires every Cross Industry Invoice to declare it; a Factur-X / ZUGFeRD document without it is rejected by the receiving platform at the EN 16931 schematron gate (the CII analogue of the UBL BR-01 / BR-02 / BR-03 / BR-05 presence rules)',
+                'cii.ok.totals': 'CII grand total reconciles: tax-basis total + tax total = grand total (EN 16931 — the CII analogue of UBL BR-CO-15, on ram:SpecifiedTradeSettlementHeaderMonetarySummation)',
+                'cii.warn.totals': 'CII grand-total mismatch: TaxBasisTotalAmount {basis} + TaxTotalAmount {tax} = {expected} ≠ GrandTotalAmount {grand} — EN 16931 (the CII analogue of UBL BR-CO-15) requires the grand total to equal the tax-exclusive basis plus the total VAT; a Factur-X / ZUGFeRD document failing this is rejected at the schematron gate (±1 cent rounding tolerance)',
                 'ubl.row.issueDate': 'Issue date',
                 'ubl.row.dueDate': 'Due date',
                 'ubl.row.currency': 'Currency',
@@ -6279,6 +6283,10 @@
                 'ubl.row.profile': 'Identifiant de profil',
                 'ubl.row.id': 'Numéro de facture',
                 'ubl.row.typeCode': 'Code de type de document',
+                'cii.ok.headerPresence': 'Tous les champs d’en-tête CII obligatoires sont présents (EN 16931 — BT-1 numéro de facture, BT-2 date d’émission, BT-3 code de type, BT-5 devise)',
+                'cii.warn.headerPresence': 'Le champ d’en-tête CII obligatoire {field} est absent — EN 16931 exige que chaque Cross Industry Invoice le déclare ; un document Factur-X / ZUGFeRD sans lui est rejeté par la plateforme réceptrice au contrôle schematron EN 16931 (l’analogue CII des règles de présence UBL BR-01 / BR-02 / BR-03 / BR-05)',
+                'cii.ok.totals': 'Le total CII se réconcilie : total base imposable + total taxe = total général (EN 16931 — l’analogue CII d’UBL BR-CO-15, sur ram:SpecifiedTradeSettlementHeaderMonetarySummation)',
+                'cii.warn.totals': 'Incohérence du total CII : TaxBasisTotalAmount {basis} + TaxTotalAmount {tax} = {expected} ≠ GrandTotalAmount {grand} — EN 16931 (l’analogue CII d’UBL BR-CO-15) exige que le total général égale la base hors taxe plus la TVA totale ; un document Factur-X / ZUGFeRD qui échoue est rejeté au contrôle schematron (tolérance d’arrondi de ±1 centime)',
                 'ubl.row.issueDate': 'Date d’émission',
                 'ubl.row.dueDate': 'Date d’échéance',
                 'ubl.row.currency': 'Devise',
@@ -7814,6 +7822,10 @@
                 'ubl.row.profile': '配置文件标识',
                 'ubl.row.id': '发票号',
                 'ubl.row.typeCode': '文档类型代码',
+                'cii.ok.headerPresence': '所有必填的 CII 头部字段均存在（EN 16931——BT-1 发票号、BT-2 开具日期、BT-3 类型代码、BT-5 币种）',
+                'cii.warn.headerPresence': '必填的 CII 头部字段 {field} 缺失——EN 16931 要求每个 Cross Industry Invoice 都声明它；缺少它的 Factur-X / ZUGFeRD 文档会被接收平台在 EN 16931 schematron 关卡拒绝（UBL BR-01 / BR-02 / BR-03 / BR-05 存在性规则的 CII 对应物）',
+                'cii.ok.totals': 'CII 总额自洽：税基总额 + 税额总额 = 总计金额（EN 16931——UBL BR-CO-15 的 CII 对应物，位于 ram:SpecifiedTradeSettlementHeaderMonetarySummation）',
+                'cii.warn.totals': 'CII 总额不一致：TaxBasisTotalAmount {basis} + TaxTotalAmount {tax} = {expected} ≠ GrandTotalAmount {grand} — EN 16931（UBL BR-CO-15 的 CII 对应物）要求总计金额等于税前基数加上增值税总额；未通过的 Factur-X / ZUGFeRD 文档会在 schematron 关卡被拒绝（舍入容差 ±1 分）',
                 'ubl.row.issueDate': '开票日期',
                 'ubl.row.dueDate': '到期日期',
                 'ubl.row.currency': '货币',
@@ -9364,6 +9376,10 @@
                 'ubl.row.profile': 'Profil-ID',
                 'ubl.row.id': 'Rechnungsnummer',
                 'ubl.row.typeCode': 'Dokumenttyp-Code',
+                'cii.ok.headerPresence': 'Alle obligatorischen CII-Kopffelder sind vorhanden (EN 16931 — BT-1 Rechnungsnummer, BT-2 Ausstellungsdatum, BT-3 Typcode, BT-5 Währung)',
+                'cii.warn.headerPresence': 'Das obligatorische CII-Kopffeld {field} fehlt — EN 16931 verlangt, dass jede Cross Industry Invoice es deklariert; ein Factur-X-/ZUGFeRD-Dokument ohne dieses Feld wird von der empfangenden Plattform am EN-16931-Schematron-Gate abgelehnt (das CII-Pendant der UBL-Präsenzregeln BR-01 / BR-02 / BR-03 / BR-05)',
+                'cii.ok.totals': 'CII-Gesamtsumme stimmt: Steuerbasis-Gesamtbetrag + Steuer-Gesamtbetrag = Gesamtbetrag (EN 16931 — das CII-Pendant zu UBL BR-CO-15, auf ram:SpecifiedTradeSettlementHeaderMonetarySummation)',
+                'cii.warn.totals': 'CII-Gesamtsummen-Abweichung: TaxBasisTotalAmount {basis} + TaxTotalAmount {tax} = {expected} ≠ GrandTotalAmount {grand} — EN 16931 (das CII-Pendant zu UBL BR-CO-15) verlangt, dass der Gesamtbetrag der Netto-Basis plus der gesamten USt entspricht; ein Factur-X-/ZUGFeRD-Dokument, das dies verletzt, wird am Schematron-Gate abgelehnt (±1 Cent Rundungstoleranz)',
                 'ubl.row.issueDate': 'Ausstellungsdatum',
                 'ubl.row.dueDate': 'Fälligkeitsdatum',
                 'ubl.row.currency': 'Währung',
@@ -10899,6 +10915,10 @@
                 'ubl.row.profile': 'प्रोफ़ाइल आईडी',
                 'ubl.row.id': 'चालान संख्या',
                 'ubl.row.typeCode': 'दस्तावेज़ प्रकार कोड',
+                'cii.ok.headerPresence': 'सभी अनिवार्य CII हेडर फ़ील्ड मौजूद हैं (EN 16931 — BT-1 चालान संख्या, BT-2 जारी तिथि, BT-3 प्रकार कोड, BT-5 मुद्रा)',
+                'cii.warn.headerPresence': 'अनिवार्य CII हेडर फ़ील्ड {field} अनुपस्थित है — EN 16931 के लिए आवश्यक है कि प्रत्येक Cross Industry Invoice इसे घोषित करे; इसके बिना Factur-X / ZUGFeRD दस्तावेज़ को प्राप्तकर्ता प्लेटफ़ॉर्म EN 16931 schematron गेट पर अस्वीकार करता है (UBL BR-01 / BR-02 / BR-03 / BR-05 उपस्थिति नियमों का CII समकक्ष)',
+                'cii.ok.totals': 'CII कुल योग मेल खाता है: कर-आधार कुल + कर कुल = महायोग (EN 16931 — UBL BR-CO-15 का CII समकक्ष, ram:SpecifiedTradeSettlementHeaderMonetarySummation पर)',
+                'cii.warn.totals': 'CII महायोग बेमेल: TaxBasisTotalAmount {basis} + TaxTotalAmount {tax} = {expected} ≠ GrandTotalAmount {grand} — EN 16931 (UBL BR-CO-15 का CII समकक्ष) के लिए आवश्यक है कि महायोग कर-रहित आधार और कुल VAT के योग के बराबर हो; इसमें विफल Factur-X / ZUGFeRD दस्तावेज़ schematron गेट पर अस्वीकृत होता है (राउंडिंग सहनशीलता ±1 सेंट)',
                 'ubl.row.issueDate': 'जारी करने की तिथि',
                 'ubl.row.dueDate': 'देय तिथि',
                 'ubl.row.currency': 'मुद्रा',
@@ -24326,6 +24346,68 @@
             });
         }
 
+        // ── CII-native EN 16931 conformance gates ─────────────────────────────
+        // The ~118 ublCheck* gates are UBL-syntax-specific (cbc:/cac: element
+        // names) and never fire on a CII document. These ciiCheck* gates are the
+        // start of a parallel family over the rsm:/ram: vocabulary.
+
+        // CII mandatory-header presence (draft 259). EN 16931 requires every
+        // Cross Industry Invoice to declare an invoice number (BT-1,
+        // ram:ExchangedDocument/ram:ID), an issue date (BT-2, ram:IssueDateTime),
+        // a document type code (BT-3, ram:TypeCode) and an invoice currency
+        // (BT-5, ram:InvoiceCurrencyCode) — the CII analogue of the UBL
+        // BR-01 / BR-02 / BR-03 / BR-05 presence rules. A Factur-X / ZUGFeRD
+        // document missing any of them is rejected at the EN 16931 schematron gate.
+        function ciiCheckHeaderPresence(out, detected) {
+            const r = detected.root;
+            const docEl = sepaFirst(r, 'ExchangedDocument');
+            const txn = sepaFirst(r, 'SupplyChainTradeTransaction');
+            const settlement = txn ? sepaFirst(txn, 'ApplicableHeaderTradeSettlement') : null;
+            const checks = [
+                { ok: !!(docEl && (sepaTextOf(docEl, 'ID') || '').trim()),                  field: 'BT-1 (ram:ExchangedDocument/ram:ID)' },
+                { ok: !!(docEl && ublCiiDate(docEl, 'IssueDateTime')),                       field: 'BT-2 (ram:IssueDateTime)' },
+                { ok: !!(docEl && (sepaTextOf(docEl, 'TypeCode') || '').trim()),             field: 'BT-3 (ram:ExchangedDocument/ram:TypeCode)' },
+                { ok: !!(settlement && (sepaTextOf(settlement, 'InvoiceCurrencyCode') || '').trim()), field: 'BT-5 (ram:InvoiceCurrencyCode)' },
+            ];
+            const missing = checks.filter(c => !c.ok);
+            if (missing.length === 0) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + t('cii.ok.headerPresence'));
+            } else {
+                for (const m of missing) {
+                    tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + tFormat('cii.warn.headerPresence', { field: m.field }));
+                }
+            }
+        }
+
+        // CII grand-total arithmetic (draft 260). The CII analogue of UBL
+        // BR-CO-15 (ublCheckTotals): on ram:SpecifiedTradeSettlementHeader-
+        // MonetarySummation, the GrandTotalAmount (BT-112) must equal the
+        // TaxBasisTotalAmount (BT-109) plus the TaxTotalAmount (BT-110). Integer-
+        // cent comparison, ±1 cent rounding tolerance. No-ops when any of the
+        // three figures is absent or unparsable (presence is draft 259 / a future
+        // gate's territory).
+        function ciiCheckTotals(out, detected) {
+            const r = detected.root;
+            const txn = sepaFirst(r, 'SupplyChainTradeTransaction');
+            const settlement = txn ? sepaFirst(txn, 'ApplicableHeaderTradeSettlement') : null;
+            const sum = settlement ? sepaFirst(settlement, 'SpecifiedTradeSettlementHeaderMonetarySummation') : null;
+            if (!sum) return;
+            const basisEl = sepaFirst(sum, 'TaxBasisTotalAmount');
+            const taxEl   = sepaFirst(sum, 'TaxTotalAmount');
+            const grandEl = sepaFirst(sum, 'GrandTotalAmount');
+            const basis = basisEl ? ublParseCents(basisEl.textContent) : null;
+            const tax   = taxEl ? ublParseCents(taxEl.textContent) : null;
+            const grand = grandEl ? ublParseCents(grandEl.textContent) : null;
+            if (basis == null || tax == null || grand == null) return;
+            const expected = basis + tax;
+            const fmt = (c) => (c / 100).toFixed(2);
+            if (Math.abs(expected - grand) <= 1) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + t('cii.ok.totals'));
+            } else {
+                tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + tFormat('cii.warn.totals', { basis: fmt(basis), tax: fmt(tax), expected: fmt(expected), grand: fmt(grand) }));
+            }
+        }
+
         // EN 16931 totals consistency check. Two invariants are independent of any
         // PrepaidAmount / PayableRoundingAmount complications and catch the
         // overwhelming majority of real-world arithmetic errors:
@@ -29535,6 +29617,8 @@
                     // EN 16931 conformance gates below are UBL-syntax-specific; a
                     // CII-native gate set is a later slice.
                     ublRenderCII(out, detected);
+                    ciiCheckHeaderPresence(out, detected);
+                    ciiCheckTotals(out, detected);
                     return;
                 }
                 ublRenderHeader(out, detected);

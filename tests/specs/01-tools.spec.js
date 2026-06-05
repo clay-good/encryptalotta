@@ -6921,6 +6921,36 @@ test('ubl: CII renders the monetary summation, decoded date, and line item', asy
   await expect(res).toContainText('Gadget Deluxe');     // line product name
 });
 
+test('cii: mandatory-header presence confirms on a complete CII document (draft 259)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', CII_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Every mandatory CII header field is present/i, { timeout: 5_000 });
+});
+
+test('cii: mandatory-header presence flags a missing invoice number BT-1 (draft 259)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  const withBad = CII_INVOICE.replace('<ram:ID>FX-2024-7</ram:ID>', '');
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Mandatory CII header field BT-1 \(ram:ExchangedDocument\/ram:ID\) is missing/i, { timeout: 5_000 });
+});
+
+test('cii: grand-total arithmetic confirms when basis + tax = grand (draft 260)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', CII_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/CII grand total reconciles/i, { timeout: 5_000 });
+});
+
+test('cii: grand-total arithmetic flags a grand total that disagrees with basis + tax (draft 260)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  const withBad = CII_INVOICE.replace('<ram:GrandTotalAmount>142.80</ram:GrandTotalAmount>', '<ram:GrandTotalAmount>999.00</ram:GrandTotalAmount>');
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/CII grand-total mismatch: TaxBasisTotalAmount 120\.00 \+ TaxTotalAmount 22\.80 = 142\.80 ≠ GrandTotalAmount 999\.00/i, { timeout: 5_000 });
+});
+
 test('ubl: LegalMonetaryTotal/PayableAmount presence flags a missing slot (draft 183)', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   const withBad = UBL_INVOICE.replace(/<cac:LegalMonetaryTotal>[\s\S]*?<\/cac:LegalMonetaryTotal>/g, (block) =>
