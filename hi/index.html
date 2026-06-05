@@ -17516,6 +17516,16 @@
             if (exp === 31) return mant ? NaN : sign * Infinity;
             return sign * Math.pow(2, exp - 15) * (1 + mant / 1024);
         }
+        // Well-known CBOR tag numbers (IANA registry) surfaced as $tagName so a decoded
+        // COSE / CWT / mdoc structure is self-describing. COSE tags (16-18, 96-98) are
+        // what wrap the mdoc issuerAuth and any WebAuthn / FIDO attestation.
+        const CBOR_TAG_NAMES = {
+            0: 'standard date/time string', 1: 'epoch date/time', 2: 'unsigned bignum',
+            3: 'negative bignum', 4: 'decimal fraction', 5: 'bigfloat', 24: 'encoded CBOR data item',
+            32: 'URI', 33: 'base64url', 34: 'base64', 36: 'MIME message', 55799: 'CBOR self-describe',
+            16: 'COSE_Encrypt0', 17: 'COSE_Mac0', 18: 'COSE_Sign1',
+            96: 'COSE_Encrypt', 97: 'COSE_Mac', 98: 'COSE_Sign', 61: 'CWT (CBOR Web Token)', 1004: 'full-date string'
+        };
         function cborDecode(bytes) {
             let pos = 0;
             const readUint = (n) => { let v = 0n; for (let i = 0; i < n; i++) { if (pos >= bytes.length) throw new Error('CBOR: truncated'); v = (v << 8n) | BigInt(bytes[pos++]); } return v; };
@@ -17546,7 +17556,32 @@
                     if (ai === 31) { while (bytes[pos] !== 0xff) { const k = item(); obj[key(k)] = item(); } pos++; return obj; }
                     const len = Number(arg(ai)); for (let i = 0; i < len; i++) { const k = item(); obj[key(k)] = item(); } return obj;
                 }
-                if (mt === 6) { const tag = big(arg(ai)); return { $tag: tag, $value: item() }; }
+                if (mt === 6) {
+                    const tag = Number(arg(ai));
+                    // Tags 2 / 3 carry a bignum byte string → the integer it encodes (RFC 8949 §3.4.3).
+                    if (tag === 2 || tag === 3) {
+                        const bs = item();
+                        const hex = (bs && bs.$bytes) || '';
+                        let v = 0n;
+                        for (let i = 0; i < hex.length; i += 2) v = (v << 8n) | BigInt(parseInt(hex.substr(i, 2), 16));
+                        return big(tag === 3 ? (-1n - v) : v);
+                    }
+                    const value = item();
+                    // Tag 24 = "encoded CBOR data item" (RFC 8949 §3.4.5.1): the byte string is
+                    // itself CBOR (the mdoc MobileSecurityObject, COSE payloads, …) → decode it.
+                    if (tag === 24 && value && typeof value.$bytes === 'string') {
+                        try {
+                            const h = value.$bytes;
+                            const inner = new Uint8Array(h.length / 2);
+                            for (let i = 0; i < h.length; i += 2) inner[i / 2] = parseInt(h.substr(i, 2), 16);
+                            const r = { $tag: 24, $tagName: CBOR_TAG_NAMES[24], $value: cborDecode(inner) };
+                            return r;
+                        } catch (e) { /* not valid embedded CBOR — fall through to raw */ }
+                    }
+                    const out = { $tag: tag, $value: value };
+                    if (CBOR_TAG_NAMES[tag]) out.$tagName = CBOR_TAG_NAMES[tag];
+                    return out;
+                }
                 // mt === 7: simple values + floats
                 if (ai === 20) return false;
                 if (ai === 21) return true;

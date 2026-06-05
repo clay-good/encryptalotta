@@ -810,9 +810,19 @@ test('format: CBOR → JSON decodes RFC 8949 map/array/int vectors (draft 287)',
 test('format: CBOR → JSON handles bytes / tags / simple values (draft 287)', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'format');
   expect(await cborToJson(page, '4401020304')).toEqual({ $bytes: '01020304' });           // byte string
-  // tag 0 (standard date/time) wrapping a text string
-  expect(await cborToJson(page, 'c074323031332d30332d32315432303a30343a30305a')).toEqual({ $tag: 0, $value: '2013-03-21T20:04:00Z' });
+  // tag 0 (standard date/time) wrapping a text string — now annotated with $tagName
+  expect(await cborToJson(page, 'c074323031332d30332d32315432303a30343a30305a')).toEqual({ $tag: 0, $value: '2013-03-21T20:04:00Z', $tagName: 'standard date/time string' });
   expect(await cborToJson(page, '83f5f4f6')).toEqual([true, false, null]);                 // [true,false,null]
+});
+
+test('format: CBOR recursively decodes tag-24, bignums, and names COSE tags (draft 288)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'format');
+  // Tag 24 (encoded CBOR data item) wrapping the CBOR for [1,2,3] → decoded inline.
+  expect(await cborToJson(page, 'd8184483010203')).toEqual({ $tag: 24, $tagName: 'encoded CBOR data item', $value: [1, 2, 3] });
+  // Tag 2 unsigned bignum = 2^64 (exceeds Number.MAX_SAFE_INTEGER → decimal string).
+  expect(await cborToJson(page, 'c249010000000000000000')).toEqual('18446744073709551616');
+  // Tag 18 = COSE_Sign1 [protected h'', unprotected {}, payload null, signature h''].
+  expect(await cborToJson(page, 'd28440a0f640')).toEqual({ $tag: 18, $tagName: 'COSE_Sign1', $value: [{ $bytes: '' }, {}, null, { $bytes: '' }] });
 });
 
 test('cidr: 192.168.1.0/24', async ({ page }) => {
