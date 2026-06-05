@@ -4726,6 +4726,11 @@
                 'cii.warn.headerPresence': 'Mandatory CII header field {field} is missing — EN 16931 requires every Cross Industry Invoice to declare it; a Factur-X / ZUGFeRD document without it is rejected by the receiving platform at the EN 16931 schematron gate (the CII analogue of the UBL BR-01 / BR-02 / BR-03 / BR-05 presence rules)',
                 'cii.ok.totals': 'CII grand total reconciles: tax-basis total + tax total = grand total (EN 16931 — the CII analogue of UBL BR-CO-15, on ram:SpecifiedTradeSettlementHeaderMonetarySummation)',
                 'cii.warn.totals': 'CII grand-total mismatch: TaxBasisTotalAmount {basis} + TaxTotalAmount {tax} = {expected} ≠ GrandTotalAmount {grand} — EN 16931 (the CII analogue of UBL BR-CO-15) requires the grand total to equal the tax-exclusive basis plus the total VAT; a Factur-X / ZUGFeRD document failing this is rejected at the schematron gate (±1 cent rounding tolerance)',
+                'cii.ok.partyNames': 'Both CII trade parties are named (EN 16931 — BT-27 seller name, BT-44 buyer name)',
+                'cii.warn.partyNames': 'CII party name {field} is missing — EN 16931 requires every Cross Industry Invoice to name its seller and buyer; a Factur-X / ZUGFeRD document without it is rejected at the schematron gate (the CII analogue of the UBL BR-06 / BR-07 presence rules)',
+                'cii.ok.lines': 'Every CII line declares a line total amount across all {n} line(s) (EN 16931 BR-16 + BT-131 — at least one line, each with its net amount)',
+                'cii.warn.noLines': 'CII document declares no ram:IncludedSupplyChainTradeLineItem — EN 16931 BR-16 requires at least one invoice line; a Factur-X / ZUGFeRD document with no lines is rejected at the schematron gate',
+                'cii.warn.lineAmount': 'CII line #{line} is missing its line total amount (BT-131, ram:SpecifiedLineTradeSettlement/ram:SpecifiedTradeSettlementLineMonetarySummation/ram:LineTotalAmount) — EN 16931 requires every line to declare the net amount the header totals reconcile against; a line without it is rejected at the schematron gate',
                 'ubl.row.issueDate': 'Issue date',
                 'ubl.row.dueDate': 'Due date',
                 'ubl.row.currency': 'Currency',
@@ -6287,6 +6292,11 @@
                 'cii.warn.headerPresence': 'Le champ d’en-tête CII obligatoire {field} est absent — EN 16931 exige que chaque Cross Industry Invoice le déclare ; un document Factur-X / ZUGFeRD sans lui est rejeté par la plateforme réceptrice au contrôle schematron EN 16931 (l’analogue CII des règles de présence UBL BR-01 / BR-02 / BR-03 / BR-05)',
                 'cii.ok.totals': 'Le total CII se réconcilie : total base imposable + total taxe = total général (EN 16931 — l’analogue CII d’UBL BR-CO-15, sur ram:SpecifiedTradeSettlementHeaderMonetarySummation)',
                 'cii.warn.totals': 'Incohérence du total CII : TaxBasisTotalAmount {basis} + TaxTotalAmount {tax} = {expected} ≠ GrandTotalAmount {grand} — EN 16931 (l’analogue CII d’UBL BR-CO-15) exige que le total général égale la base hors taxe plus la TVA totale ; un document Factur-X / ZUGFeRD qui échoue est rejeté au contrôle schematron (tolérance d’arrondi de ±1 centime)',
+                'cii.ok.partyNames': 'Les deux parties commerciales CII sont nommées (EN 16931 — BT-27 nom du vendeur, BT-44 nom de l’acheteur)',
+                'cii.warn.partyNames': 'Le nom de partie CII {field} est absent — EN 16931 exige que chaque Cross Industry Invoice nomme son vendeur et son acheteur ; un document Factur-X / ZUGFeRD sans lui est rejeté au contrôle schematron (l’analogue CII des règles de présence UBL BR-06 / BR-07)',
+                'cii.ok.lines': 'Chaque ligne CII déclare un montant total de ligne sur l’ensemble des {n} ligne(s) (EN 16931 BR-16 + BT-131 — au moins une ligne, chacune avec son montant net)',
+                'cii.warn.noLines': 'Le document CII ne déclare aucun ram:IncludedSupplyChainTradeLineItem — EN 16931 BR-16 exige au moins une ligne de facture ; un document Factur-X / ZUGFeRD sans lignes est rejeté au contrôle schematron',
+                'cii.warn.lineAmount': 'La ligne CII n°{line} ne déclare pas son montant total de ligne (BT-131, ram:SpecifiedLineTradeSettlement/ram:SpecifiedTradeSettlementLineMonetarySummation/ram:LineTotalAmount) — EN 16931 exige que chaque ligne déclare le montant net auquel les totaux d’en-tête se réconcilient ; une ligne sans lui est rejetée au contrôle schematron',
                 'ubl.row.issueDate': 'Date d’émission',
                 'ubl.row.dueDate': 'Date d’échéance',
                 'ubl.row.currency': 'Devise',
@@ -7826,6 +7836,11 @@
                 'cii.warn.headerPresence': '必填的 CII 头部字段 {field} 缺失——EN 16931 要求每个 Cross Industry Invoice 都声明它；缺少它的 Factur-X / ZUGFeRD 文档会被接收平台在 EN 16931 schematron 关卡拒绝（UBL BR-01 / BR-02 / BR-03 / BR-05 存在性规则的 CII 对应物）',
                 'cii.ok.totals': 'CII 总额自洽：税基总额 + 税额总额 = 总计金额（EN 16931——UBL BR-CO-15 的 CII 对应物，位于 ram:SpecifiedTradeSettlementHeaderMonetarySummation）',
                 'cii.warn.totals': 'CII 总额不一致：TaxBasisTotalAmount {basis} + TaxTotalAmount {tax} = {expected} ≠ GrandTotalAmount {grand} — EN 16931（UBL BR-CO-15 的 CII 对应物）要求总计金额等于税前基数加上增值税总额；未通过的 Factur-X / ZUGFeRD 文档会在 schematron 关卡被拒绝（舍入容差 ±1 分）',
+                'cii.ok.partyNames': 'CII 双方交易方均已命名（EN 16931——BT-27 卖方名称、BT-44 买方名称）',
+                'cii.warn.partyNames': 'CII 交易方名称 {field} 缺失——EN 16931 要求每个 Cross Industry Invoice 都命名其卖方和买方；缺少它的 Factur-X / ZUGFeRD 文档会在 schematron 关卡被拒绝（UBL BR-06 / BR-07 存在性规则的 CII 对应物）',
+                'cii.ok.lines': '所有 {n} 个 CII 行均声明行合计金额（EN 16931 BR-16 + BT-131——至少一行，每行都有其净额）',
+                'cii.warn.noLines': 'CII 文档未声明任何 ram:IncludedSupplyChainTradeLineItem——EN 16931 BR-16 要求至少一行发票行；没有行的 Factur-X / ZUGFeRD 文档会在 schematron 关卡被拒绝',
+                'cii.warn.lineAmount': 'CII 第 {line} 行缺少其行合计金额（BT-131，ram:SpecifiedLineTradeSettlement/ram:SpecifiedTradeSettlementLineMonetarySummation/ram:LineTotalAmount）——EN 16931 要求每行声明表头总额据以核对的净额；缺少它的行会在 schematron 关卡被拒绝',
                 'ubl.row.issueDate': '开票日期',
                 'ubl.row.dueDate': '到期日期',
                 'ubl.row.currency': '货币',
@@ -9380,6 +9395,11 @@
                 'cii.warn.headerPresence': 'Das obligatorische CII-Kopffeld {field} fehlt — EN 16931 verlangt, dass jede Cross Industry Invoice es deklariert; ein Factur-X-/ZUGFeRD-Dokument ohne dieses Feld wird von der empfangenden Plattform am EN-16931-Schematron-Gate abgelehnt (das CII-Pendant der UBL-Präsenzregeln BR-01 / BR-02 / BR-03 / BR-05)',
                 'cii.ok.totals': 'CII-Gesamtsumme stimmt: Steuerbasis-Gesamtbetrag + Steuer-Gesamtbetrag = Gesamtbetrag (EN 16931 — das CII-Pendant zu UBL BR-CO-15, auf ram:SpecifiedTradeSettlementHeaderMonetarySummation)',
                 'cii.warn.totals': 'CII-Gesamtsummen-Abweichung: TaxBasisTotalAmount {basis} + TaxTotalAmount {tax} = {expected} ≠ GrandTotalAmount {grand} — EN 16931 (das CII-Pendant zu UBL BR-CO-15) verlangt, dass der Gesamtbetrag der Netto-Basis plus der gesamten USt entspricht; ein Factur-X-/ZUGFeRD-Dokument, das dies verletzt, wird am Schematron-Gate abgelehnt (±1 Cent Rundungstoleranz)',
+                'cii.ok.partyNames': 'Beide CII-Handelsparteien sind benannt (EN 16931 — BT-27 Verkäufername, BT-44 Käufername)',
+                'cii.warn.partyNames': 'Der CII-Parteiname {field} fehlt — EN 16931 verlangt, dass jede Cross Industry Invoice ihren Verkäufer und Käufer benennt; ein Factur-X-/ZUGFeRD-Dokument ohne diesen Namen wird am Schematron-Gate abgelehnt (das CII-Pendant der UBL-Präsenzregeln BR-06 / BR-07)',
+                'cii.ok.lines': 'Jede CII-Zeile deklariert einen Zeilengesamtbetrag über alle {n} Zeile(n) (EN 16931 BR-16 + BT-131 — mindestens eine Zeile, jede mit ihrem Nettobetrag)',
+                'cii.warn.noLines': 'Das CII-Dokument deklariert kein ram:IncludedSupplyChainTradeLineItem — EN 16931 BR-16 verlangt mindestens eine Rechnungszeile; ein Factur-X-/ZUGFeRD-Dokument ohne Zeilen wird am Schematron-Gate abgelehnt',
+                'cii.warn.lineAmount': 'Der CII-Zeile #{line} fehlt ihr Zeilengesamtbetrag (BT-131, ram:SpecifiedLineTradeSettlement/ram:SpecifiedTradeSettlementLineMonetarySummation/ram:LineTotalAmount) — EN 16931 verlangt, dass jede Zeile den Nettobetrag deklariert, mit dem die Kopfsummen abgeglichen werden; eine Zeile ohne ihn wird am Schematron-Gate abgelehnt',
                 'ubl.row.issueDate': 'Ausstellungsdatum',
                 'ubl.row.dueDate': 'Fälligkeitsdatum',
                 'ubl.row.currency': 'Währung',
@@ -10919,6 +10939,11 @@
                 'cii.warn.headerPresence': 'अनिवार्य CII हेडर फ़ील्ड {field} अनुपस्थित है — EN 16931 के लिए आवश्यक है कि प्रत्येक Cross Industry Invoice इसे घोषित करे; इसके बिना Factur-X / ZUGFeRD दस्तावेज़ को प्राप्तकर्ता प्लेटफ़ॉर्म EN 16931 schematron गेट पर अस्वीकार करता है (UBL BR-01 / BR-02 / BR-03 / BR-05 उपस्थिति नियमों का CII समकक्ष)',
                 'cii.ok.totals': 'CII कुल योग मेल खाता है: कर-आधार कुल + कर कुल = महायोग (EN 16931 — UBL BR-CO-15 का CII समकक्ष, ram:SpecifiedTradeSettlementHeaderMonetarySummation पर)',
                 'cii.warn.totals': 'CII महायोग बेमेल: TaxBasisTotalAmount {basis} + TaxTotalAmount {tax} = {expected} ≠ GrandTotalAmount {grand} — EN 16931 (UBL BR-CO-15 का CII समकक्ष) के लिए आवश्यक है कि महायोग कर-रहित आधार और कुल VAT के योग के बराबर हो; इसमें विफल Factur-X / ZUGFeRD दस्तावेज़ schematron गेट पर अस्वीकृत होता है (राउंडिंग सहनशीलता ±1 सेंट)',
+                'cii.ok.partyNames': 'दोनों CII व्यापार पक्ष नामित हैं (EN 16931 — BT-27 विक्रेता नाम, BT-44 क्रेता नाम)',
+                'cii.warn.partyNames': 'CII पक्ष नाम {field} अनुपस्थित है — EN 16931 के लिए आवश्यक है कि प्रत्येक Cross Industry Invoice अपने विक्रेता और क्रेता का नाम दे; इसके बिना Factur-X / ZUGFeRD दस्तावेज़ schematron गेट पर अस्वीकृत होता है (UBL BR-06 / BR-07 उपस्थिति नियमों का CII समकक्ष)',
+                'cii.ok.lines': 'सभी {n} CII पंक्तियाँ एक पंक्ति कुल राशि घोषित करती हैं (EN 16931 BR-16 + BT-131 — कम से कम एक पंक्ति, प्रत्येक अपनी शुद्ध राशि के साथ)',
+                'cii.warn.noLines': 'CII दस्तावेज़ कोई ram:IncludedSupplyChainTradeLineItem घोषित नहीं करता — EN 16931 BR-16 के लिए कम से कम एक चालान पंक्ति आवश्यक है; बिना पंक्तियों वाला Factur-X / ZUGFeRD दस्तावेज़ schematron गेट पर अस्वीकृत होता है',
+                'cii.warn.lineAmount': 'CII पंक्ति #{line} में उसकी पंक्ति कुल राशि अनुपस्थित है (BT-131, ram:SpecifiedLineTradeSettlement/ram:SpecifiedTradeSettlementLineMonetarySummation/ram:LineTotalAmount) — EN 16931 के लिए आवश्यक है कि प्रत्येक पंक्ति वह शुद्ध राशि घोषित करे जिससे हेडर कुल मेल खाते हैं; इसके बिना पंक्ति schematron गेट पर अस्वीकृत होती है',
                 'ubl.row.issueDate': 'जारी करने की तिथि',
                 'ubl.row.dueDate': 'देय तिथि',
                 'ubl.row.currency': 'मुद्रा',
@@ -24408,6 +24433,67 @@
             }
         }
 
+        // CII party-name presence (draft 261). EN 16931 requires every Cross
+        // Industry Invoice to name its seller (BT-27, ram:SellerTradeParty/ram:Name)
+        // and buyer (BT-44, ram:BuyerTradeParty/ram:Name) — the CII analogue of the
+        // UBL BR-06 / BR-07 presence rules. Flags each missing name by BT code and
+        // ram: path. No-ops when there is no SupplyChainTradeTransaction.
+        function ciiCheckPartyNames(out, detected) {
+            const r = detected.root;
+            const txn = sepaFirst(r, 'SupplyChainTradeTransaction');
+            if (!txn) return;
+            const agreement = sepaFirst(txn, 'ApplicableHeaderTradeAgreement');
+            const seller = agreement ? sepaFirst(agreement, 'SellerTradeParty') : null;
+            const buyer  = agreement ? sepaFirst(agreement, 'BuyerTradeParty') : null;
+            const sellerName = seller ? (sepaTextOf(seller, 'Name') || '').trim() : '';
+            const buyerName  = buyer ? (sepaTextOf(buyer, 'Name') || '').trim() : '';
+            const missing = [];
+            if (!sellerName) missing.push('BT-27 (ram:SellerTradeParty/ram:Name)');
+            if (!buyerName)  missing.push('BT-44 (ram:BuyerTradeParty/ram:Name)');
+            if (missing.length === 0) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + t('cii.ok.partyNames'));
+            } else {
+                for (const m of missing) {
+                    tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + tFormat('cii.warn.partyNames', { field: m }));
+                }
+            }
+        }
+
+        // CII line presence + per-line monetary anchor (draft 262). EN 16931 BR-16
+        // requires at least one invoice line; in CII a line is a
+        // ram:IncludedSupplyChainTradeLineItem. Each line must declare its net
+        // amount (BT-131, ram:SpecifiedLineTradeSettlement/ram:SpecifiedTrade-
+        // SettlementLineMonetarySummation/ram:LineTotalAmount) — the per-line figure
+        // the header totals reconcile against. Flags a document with no lines, then
+        // each line missing its LineTotalAmount.
+        function ciiCheckLines(out, detected) {
+            const r = detected.root;
+            const txn = sepaFirst(r, 'SupplyChainTradeTransaction');
+            if (!txn) return;
+            const lines = sepaAllLocal(txn, 'IncludedSupplyChainTradeLineItem');
+            if (lines.length === 0) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + t('cii.warn.noLines'));
+                return;
+            }
+            const bad = [];
+            lines.forEach((line, i) => {
+                const lineDoc = sepaFirst(line, 'AssociatedDocumentLineDocument');
+                const lineId = (lineDoc ? (sepaTextOf(lineDoc, 'LineID') || '').trim() : '') || String(i + 1);
+                const lineSettle = sepaFirst(line, 'SpecifiedLineTradeSettlement');
+                const lineSum = lineSettle ? sepaFirst(lineSettle, 'SpecifiedTradeSettlementLineMonetarySummation') : null;
+                const amtEl = lineSum ? sepaFirst(lineSum, 'LineTotalAmount') : null;
+                const amt = amtEl ? ublParseCents(amtEl.textContent) : null;
+                if (amt == null) bad.push(lineId);
+            });
+            if (bad.length === 0) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + tFormat('cii.ok.lines', { n: intlNumber(lines.length) }));
+            } else {
+                for (const id of bad) {
+                    tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + tFormat('cii.warn.lineAmount', { line: id }));
+                }
+            }
+        }
+
         // EN 16931 totals consistency check. Two invariants are independent of any
         // PrepaidAmount / PayableRoundingAmount complications and catch the
         // overwhelming majority of real-world arithmetic errors:
@@ -29619,6 +29705,8 @@
                     ublRenderCII(out, detected);
                     ciiCheckHeaderPresence(out, detected);
                     ciiCheckTotals(out, detected);
+                    ciiCheckPartyNames(out, detected);
+                    ciiCheckLines(out, detected);
                     return;
                 }
                 ublRenderHeader(out, detected);

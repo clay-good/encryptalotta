@@ -6951,6 +6951,46 @@ test('cii: grand-total arithmetic flags a grand total that disagrees with basis 
   await expect(page.locator('#ubl-results')).toContainText(/CII grand-total mismatch: TaxBasisTotalAmount 120\.00 \+ TaxTotalAmount 22\.80 = 142\.80 ≠ GrandTotalAmount 999\.00/i, { timeout: 5_000 });
 });
 
+test('cii: party-name presence confirms when seller and buyer are named (draft 261)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', CII_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Both CII trade parties are named/i, { timeout: 5_000 });
+});
+
+test('cii: party-name presence flags a missing seller name BT-27 (draft 261)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  const withBad = CII_INVOICE.replace('<ram:Name>Fournisseur SARL</ram:Name>', '');
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/CII party name BT-27 \(ram:SellerTradeParty\/ram:Name\) is missing/i, { timeout: 5_000 });
+});
+
+test('cii: line presence confirms when every line carries a total (draft 262)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', CII_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Every CII line declares a line total amount/i, { timeout: 5_000 });
+});
+
+test('cii: line presence flags a document with no line items (draft 262)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  const withBad = CII_INVOICE.replace(/<ram:IncludedSupplyChainTradeLineItem>[\s\S]*?<\/ram:IncludedSupplyChainTradeLineItem>/, '');
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/CII document declares no ram:IncludedSupplyChainTradeLineItem/i, { timeout: 5_000 });
+});
+
+test('cii: line presence flags a line missing its LineTotalAmount BT-131 (draft 262)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // The first <ram:LineTotalAmount> in the doc is the line-level one (the line item
+  // precedes the header summation), so this removes the line net, not the header's.
+  const withBad = CII_INVOICE.replace('<ram:LineTotalAmount>120.00</ram:LineTotalAmount>', '');
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/CII line #1 is missing its line total amount/i, { timeout: 5_000 });
+});
+
 test('ubl: LegalMonetaryTotal/PayableAmount presence flags a missing slot (draft 183)', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   const withBad = UBL_INVOICE.replace(/<cac:LegalMonetaryTotal>[\s\S]*?<\/cac:LegalMonetaryTotal>/g, (block) =>
