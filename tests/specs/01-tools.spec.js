@@ -7200,6 +7200,40 @@ test('cii: due-date ordering flags a due date that precedes the issue date (draf
   await expect(page.locator('#ubl-results')).toContainText(/CII payment due date 2024-03-15 precedes the issue date 2024-04-15/i, { timeout: 5_000 });
 });
 
+test('cii: specification identifier presence confirms when CustomizationID is present (draft 275)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', CII_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/CII specification identifier \(CustomizationID\) is present/i, { timeout: 5_000 });
+});
+
+test('cii: specification identifier presence flags a missing CustomizationID BR-01 (draft 275)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Remove the GuidelineSpecifiedDocumentContextParameter/ID (the URN value
+  // disambiguates it from the ExchangedDocument/ID and the line LineID).
+  const withBad = CII_INVOICE.replace('<ram:ID>urn:cen.eu:en16931:2017</ram:ID>', '');
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/CII specification identifier .* is missing/i, { timeout: 5_000 });
+});
+
+test('cii: tax-scheme type code confirms when every ApplicableTradeTax is VAT (draft 276)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', CII_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Every CII tax scheme is VAT/i, { timeout: 5_000 });
+});
+
+test('cii: tax-scheme type code flags a non-VAT scheme (draft 276)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // The "VAT" literal targets the ApplicableTradeTax/TypeCode, not the
+  // ExchangedDocument/TypeCode (380), so this isolates the tax-scheme gate.
+  const withBad = CII_INVOICE.replace('<ram:TypeCode>VAT</ram:TypeCode>', '<ram:TypeCode>XYZ</ram:TypeCode>');
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/CII tax scheme type code XYZ \(ram:ApplicableTradeTax\/ram:TypeCode\) is not "VAT"/i, { timeout: 5_000 });
+});
+
 test('ubl: LegalMonetaryTotal/PayableAmount presence flags a missing slot (draft 183)', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   const withBad = UBL_INVOICE.replace(/<cac:LegalMonetaryTotal>[\s\S]*?<\/cac:LegalMonetaryTotal>/g, (block) =>

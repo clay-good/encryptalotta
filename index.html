@@ -4758,6 +4758,10 @@
                 'cii.warn.lineCrossProduct': 'CII line #{idx} net cross-product mismatch: net price × billed quantity = {expected} ≠ LineTotalAmount {declared} — EN 16931 (the CII analogue of UBL BR-CO-04) requires each line net amount (BT-131) to equal its net price (BT-146) times its billed quantity (BT-129); a Factur-X / ZUGFeRD document failing this is rejected at the schematron gate (±1 cent rounding tolerance)',
                 'cii.ok.dueDate': 'CII payment due date {due} is on or after the issue date {issue} (EN 16931 BT-9 ≥ BT-2)',
                 'cii.warn.dueDate': 'CII payment due date {due} precedes the issue date {issue} — payment cannot fall due before the invoice is issued; EN 16931 implementations (PEPPOL / Factur-X) reject a backdated due date (the CII analogue of the UBL DueDate ≥ IssueDate check)',
+                'cii.ok.customizationId': 'CII specification identifier (CustomizationID) is present (EN 16931 BR-01 / BT-24, ram:GuidelineSpecifiedDocumentContextParameter/ram:ID)',
+                'cii.warn.customizationId': 'CII specification identifier (BT-24, ram:ExchangedDocumentContext/ram:GuidelineSpecifiedDocumentContextParameter/ram:ID) is missing — EN 16931 BR-01 requires every Cross Industry Invoice to declare the profile URN it validates against; a Factur-X / ZUGFeRD document without it is rejected at the schematron gate because the receiver cannot select the rule set (the CII analogue of the UBL BR-01 CustomizationID-presence rule)',
+                'cii.ok.taxTypeCode': 'Every CII tax scheme is VAT (EN 16931 — UNCL 5153, ram:ApplicableTradeTax/ram:TypeCode)',
+                'cii.warn.taxTypeCode': 'CII tax scheme type code {code} (ram:ApplicableTradeTax/ram:TypeCode) is not "VAT" — EN 16931 restricts the tax scheme to UNCL 5153 code VAT; a Factur-X / ZUGFeRD document declaring another scheme is rejected at the schematron gate and the per-category VAT rollup cannot bin it (the CII analogue of the UBL TaxScheme/ID = VAT check)',
                 'ubl.row.issueDate': 'Issue date',
                 'ubl.row.dueDate': 'Due date',
                 'ubl.row.currency': 'Currency',
@@ -6348,6 +6352,10 @@
                 'cii.warn.lineCrossProduct': 'Incohérence du produit croisé de la ligne CII n°{idx} : prix net × quantité facturée = {expected} ≠ LineTotalAmount {declared} — EN 16931 (l’analogue CII d’UBL BR-CO-04) exige que le montant net de chaque ligne (BT-131) égale son prix net (BT-146) multiplié par sa quantité facturée (BT-129) ; un document Factur-X / ZUGFeRD qui échoue est rejeté au contrôle schematron (tolérance d’arrondi de ±1 centime)',
                 'cii.ok.dueDate': 'La date d’échéance de paiement CII {due} est postérieure ou égale à la date d’émission {issue} (EN 16931 BT-9 ≥ BT-2)',
                 'cii.warn.dueDate': 'La date d’échéance de paiement CII {due} précède la date d’émission {issue} — un paiement ne peut être dû avant l’émission de la facture ; les implémentations EN 16931 (PEPPOL / Factur-X) rejettent une date d’échéance antidatée (l’analogue CII du contrôle UBL DueDate ≥ IssueDate)',
+                'cii.ok.customizationId': 'L’identifiant de spécification CII (CustomizationID) est présent (EN 16931 BR-01 / BT-24, ram:GuidelineSpecifiedDocumentContextParameter/ram:ID)',
+                'cii.warn.customizationId': 'L’identifiant de spécification CII (BT-24, ram:ExchangedDocumentContext/ram:GuidelineSpecifiedDocumentContextParameter/ram:ID) est absent — EN 16931 BR-01 exige que chaque Cross Industry Invoice déclare l’URN du profil par rapport auquel elle est validée ; un document Factur-X / ZUGFeRD sans lui est rejeté au contrôle schematron car le destinataire ne peut sélectionner le jeu de règles (l’analogue CII de la règle de présence UBL BR-01 CustomizationID)',
+                'cii.ok.taxTypeCode': 'Chaque schéma de taxe CII est TVA (EN 16931 — UNCL 5153, ram:ApplicableTradeTax/ram:TypeCode)',
+                'cii.warn.taxTypeCode': 'Le code de type de schéma de taxe CII {code} (ram:ApplicableTradeTax/ram:TypeCode) n’est pas « VAT » — EN 16931 restreint le schéma de taxe au code UNCL 5153 VAT ; un document Factur-X / ZUGFeRD déclarant un autre schéma est rejeté au contrôle schematron et la consolidation de TVA par catégorie ne peut le classer (l’analogue CII du contrôle UBL TaxScheme/ID = VAT)',
                 'ubl.row.issueDate': 'Date d’émission',
                 'ubl.row.dueDate': 'Date d’échéance',
                 'ubl.row.currency': 'Devise',
@@ -7916,6 +7924,10 @@
                 'cii.warn.lineCrossProduct': 'CII 第 {idx} 行净额交叉乘积不一致：净单价 × 计费数量 = {expected} ≠ LineTotalAmount {declared} — EN 16931（UBL BR-CO-04 的 CII 对应物）要求每行净额（BT-131）等于其净单价（BT-146）乘以其计费数量（BT-129）；未通过的 Factur-X / ZUGFeRD 文档会在 schematron 关卡被拒绝（舍入容差 ±1 分）',
                 'cii.ok.dueDate': 'CII 付款到期日 {due} 不早于开具日期 {issue}（EN 16931 BT-9 ≥ BT-2）',
                 'cii.warn.dueDate': 'CII 付款到期日 {due} 早于开具日期 {issue}——付款不能在发票开具之前到期；EN 16931 实现（PEPPOL / Factur-X）会拒绝倒填的到期日（UBL DueDate ≥ IssueDate 校验的 CII 对应物）',
+                'cii.ok.customizationId': 'CII 规范标识符（CustomizationID）存在（EN 16931 BR-01 / BT-24，ram:GuidelineSpecifiedDocumentContextParameter/ram:ID）',
+                'cii.warn.customizationId': 'CII 规范标识符（BT-24，ram:ExchangedDocumentContext/ram:GuidelineSpecifiedDocumentContextParameter/ram:ID）缺失——EN 16931 BR-01 要求每个 Cross Industry Invoice 声明其据以校验的配置文件 URN；缺少它的 Factur-X / ZUGFeRD 文档会在 schematron 关卡被拒绝，因为接收方无法选择规则集（UBL BR-01 CustomizationID 存在性规则的 CII 对应物）',
+                'cii.ok.taxTypeCode': '每个 CII 税种方案均为 VAT（EN 16931——UNCL 5153，ram:ApplicableTradeTax/ram:TypeCode）',
+                'cii.warn.taxTypeCode': 'CII 税种方案类型代码 {code}（ram:ApplicableTradeTax/ram:TypeCode）不是 “VAT”——EN 16931 将税种方案限制为 UNCL 5153 代码 VAT；声明其他方案的 Factur-X / ZUGFeRD 文档会在 schematron 关卡被拒绝，且按类别的增值税汇总无法将其归类（UBL TaxScheme/ID = VAT 校验的 CII 对应物）',
                 'ubl.row.issueDate': '开票日期',
                 'ubl.row.dueDate': '到期日期',
                 'ubl.row.currency': '货币',
@@ -9499,6 +9511,10 @@
                 'cii.warn.lineCrossProduct': 'CII-Zeile #{idx} Kreuzprodukt-Abweichung: Nettopreis × berechnete Menge = {expected} ≠ LineTotalAmount {declared} — EN 16931 (das CII-Pendant zu UBL BR-CO-04) verlangt, dass der Nettobetrag jeder Zeile (BT-131) dem Produkt aus ihrem Nettopreis (BT-146) und ihrer berechneten Menge (BT-129) entspricht; ein Factur-X-/ZUGFeRD-Dokument, das dies nicht erfüllt, wird am Schematron-Gate abgelehnt (±1 Cent Rundungstoleranz)',
                 'cii.ok.dueDate': 'Das CII-Zahlungsfälligkeitsdatum {due} liegt am oder nach dem Ausstellungsdatum {issue} (EN 16931 BT-9 ≥ BT-2)',
                 'cii.warn.dueDate': 'Das CII-Zahlungsfälligkeitsdatum {due} liegt vor dem Ausstellungsdatum {issue} — eine Zahlung kann nicht vor Rechnungsausstellung fällig werden; EN-16931-Implementierungen (PEPPOL / Factur-X) lehnen ein rückdatiertes Fälligkeitsdatum ab (das CII-Pendant zur UBL-Prüfung DueDate ≥ IssueDate)',
+                'cii.ok.customizationId': 'Der CII-Spezifikationsbezeichner (CustomizationID) ist vorhanden (EN 16931 BR-01 / BT-24, ram:GuidelineSpecifiedDocumentContextParameter/ram:ID)',
+                'cii.warn.customizationId': 'Der CII-Spezifikationsbezeichner (BT-24, ram:ExchangedDocumentContext/ram:GuidelineSpecifiedDocumentContextParameter/ram:ID) fehlt — EN 16931 BR-01 verlangt, dass jede Cross Industry Invoice die Profil-URN deklariert, gegen die sie validiert wird; ein Factur-X-/ZUGFeRD-Dokument ohne sie wird am Schematron-Gate abgelehnt, da der Empfänger das Regelwerk nicht auswählen kann (das CII-Pendant zur UBL-Präsenzregel BR-01 CustomizationID)',
+                'cii.ok.taxTypeCode': 'Jedes CII-Steuerschema ist USt (EN 16931 — UNCL 5153, ram:ApplicableTradeTax/ram:TypeCode)',
+                'cii.warn.taxTypeCode': 'Der CII-Steuerschema-Typcode {code} (ram:ApplicableTradeTax/ram:TypeCode) ist nicht „VAT“ — EN 16931 beschränkt das Steuerschema auf den UNCL-5153-Code VAT; ein Factur-X-/ZUGFeRD-Dokument, das ein anderes Schema deklariert, wird am Schematron-Gate abgelehnt, und die USt-Aufschlüsselung je Kategorie kann es nicht einordnen (das CII-Pendant zur UBL-Prüfung TaxScheme/ID = VAT)',
                 'ubl.row.issueDate': 'Ausstellungsdatum',
                 'ubl.row.dueDate': 'Fälligkeitsdatum',
                 'ubl.row.currency': 'Währung',
@@ -11067,6 +11083,10 @@
                 'cii.warn.lineCrossProduct': 'CII पंक्ति #{idx} शुद्ध क्रॉस-उत्पाद बेमेल: शुद्ध मूल्य × बिल की गई मात्रा = {expected} ≠ LineTotalAmount {declared} — EN 16931 (UBL BR-CO-04 का CII समकक्ष) के लिए प्रत्येक पंक्ति के शुद्ध मान (BT-131) का उसके शुद्ध मूल्य (BT-146) गुणा उसकी बिल की गई मात्रा (BT-129) के बराबर होना आवश्यक है; इसमें विफल Factur-X / ZUGFeRD दस्तावेज़ schematron गेट पर अस्वीकृत होता है (±1 सेंट पूर्णांकन सहनशीलता)',
                 'cii.ok.dueDate': 'CII भुगतान देय तिथि {due} जारी तिथि {issue} पर या उसके बाद है (EN 16931 BT-9 ≥ BT-2)',
                 'cii.warn.dueDate': 'CII भुगतान देय तिथि {due} जारी तिथि {issue} से पहले है — भुगतान चालान जारी होने से पहले देय नहीं हो सकता; EN 16931 कार्यान्वयन (PEPPOL / Factur-X) पूर्वदिनांकित देय तिथि को अस्वीकार करते हैं (UBL DueDate ≥ IssueDate जाँच का CII समकक्ष)',
+                'cii.ok.customizationId': 'CII विनिर्देश पहचानकर्ता (CustomizationID) मौजूद है (EN 16931 BR-01 / BT-24, ram:GuidelineSpecifiedDocumentContextParameter/ram:ID)',
+                'cii.warn.customizationId': 'CII विनिर्देश पहचानकर्ता (BT-24, ram:ExchangedDocumentContext/ram:GuidelineSpecifiedDocumentContextParameter/ram:ID) अनुपस्थित है — EN 16931 BR-01 के लिए प्रत्येक Cross Industry Invoice का उस प्रोफ़ाइल URN को घोषित करना आवश्यक है जिसके विरुद्ध वह सत्यापित होती है; इसके बिना Factur-X / ZUGFeRD दस्तावेज़ schematron गेट पर अस्वीकृत होता है क्योंकि प्राप्तकर्ता नियम-सेट का चयन नहीं कर सकता (UBL BR-01 CustomizationID उपस्थिति नियम का CII समकक्ष)',
+                'cii.ok.taxTypeCode': 'प्रत्येक CII कर योजना VAT है (EN 16931 — UNCL 5153, ram:ApplicableTradeTax/ram:TypeCode)',
+                'cii.warn.taxTypeCode': 'CII कर योजना प्रकार कोड {code} (ram:ApplicableTradeTax/ram:TypeCode) "VAT" नहीं है — EN 16931 कर योजना को UNCL 5153 कोड VAT तक सीमित करता है; अन्य योजना घोषित करने वाला Factur-X / ZUGFeRD दस्तावेज़ schematron गेट पर अस्वीकृत होता है और प्रति-श्रेणी VAT रोलअप उसे वर्गीकृत नहीं कर सकता (UBL TaxScheme/ID = VAT जाँच का CII समकक्ष)',
                 'ubl.row.issueDate': 'जारी करने की तिथि',
                 'ubl.row.dueDate': 'देय तिथि',
                 'ubl.row.currency': 'मुद्रा',
@@ -25047,6 +25067,64 @@
             }
         }
 
+        // CII specification-identifier (CustomizationID) presence (draft 275).
+        // EN 16931 BR-01 requires every invoice to declare a Specification
+        // identifier (BT-24) — in CII the ram:GuidelineSpecifiedDocumentContext-
+        // Parameter/ram:ID under ram:ExchangedDocumentContext (≈ the UBL
+        // cbc:CustomizationID), the URN naming the EN 16931 / Factur-X profile the
+        // receiver validates against. A document without it is rejected at the
+        // schematron gate because the routing layer cannot select the rule set. The
+        // CII analogue of ublCheckCustomizationIdPresence; BR-01 is unconditional so
+        // this always emits a row (a missing context block flags, never silently
+        // skips), guarding only against a null root.
+        function ciiCheckCustomizationId(out, detected) {
+            const r = detected.root;
+            if (!r) return;
+            const ctx = sepaFirst(r, 'ExchangedDocumentContext');
+            const guide = ctx ? sepaFirst(ctx, 'GuidelineSpecifiedDocumentContextParameter') : null;
+            const raw = guide ? (sepaTextOf(guide, 'ID') || '').trim() : '';
+            if (raw) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + t('cii.ok.customizationId'));
+            } else {
+                tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + t('cii.warn.customizationId'));
+            }
+        }
+
+        // CII tax-scheme type-code validity (draft 276). EN 16931 restricts the tax
+        // scheme to UNCL 5153 code "VAT" — in CII each ram:ApplicableTradeTax
+        // declares its scheme in ram:TypeCode (the analogue of the UBL
+        // cac:TaxScheme/cbc:ID). PEPPOL / Factur-X reject a tax block whose TypeCode
+        // is anything other than "VAT" at the schematron gate, and the per-category
+        // VAT rollup cannot bin a non-VAT scheme. The CII analogue of
+        // ublCheckTaxScheme. Reads ram:TypeCode as a direct child so it never picks
+        // up the document-level ram:ExchangedDocument/ram:TypeCode (BT-3, owned by
+        // draft 264). Walks every ram:ApplicableTradeTax (header + line); no-ops
+        // when none declares a TypeCode.
+        function ciiCheckTaxTypeCode(out, detected) {
+            const r = detected.root;
+            const txn = sepaFirst(r, 'SupplyChainTradeTransaction');
+            if (!txn) return;
+            const taxes = sepaAllLocal(txn, 'ApplicableTradeTax');
+            if (!taxes.length) return;
+            const seen = new Set();
+            const bad = new Set();
+            for (const tax of taxes) {
+                const el = sepaFirstChildLocal(tax, 'TypeCode');
+                const raw = el ? (el.textContent || '').trim().toUpperCase() : '';
+                if (!raw) continue;
+                seen.add(raw);
+                if (raw !== 'VAT') bad.add(raw);
+            }
+            if (!seen.size) return;
+            if (bad.size === 0) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + t('cii.ok.taxTypeCode'));
+            } else {
+                for (const code of bad) {
+                    tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + tFormat('cii.warn.taxTypeCode', { code }));
+                }
+            }
+        }
+
         // EN 16931 totals consistency check. Two invariants are independent of any
         // PrepaidAmount / PayableRoundingAmount complications and catch the
         // overwhelming majority of real-world arithmetic errors:
@@ -30272,6 +30350,8 @@
                     ciiCheckCountryCodes(out, detected);
                     ciiCheckLineAmount(out, detected);
                     ciiCheckDueDate(out, detected);
+                    ciiCheckCustomizationId(out, detected);
+                    ciiCheckTaxTypeCode(out, detected);
                     return;
                 }
                 ublRenderHeader(out, detected);
