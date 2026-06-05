@@ -7021,6 +7021,43 @@ test('cii: document-type-code UNCL 1001 flags an out-of-set code (draft 264)', a
   await expect(page.locator('#ubl-results')).toContainText(/CII document type code 999 \(ram:TypeCode, BT-3\) is not in the EN 16931 \/ PEPPOL allowed UNCL 1001 set/i, { timeout: 5_000 });
 });
 
+test('cii: line-sum reconciliation confirms when Σ line totals = header line total (draft 265)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', CII_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/CII line totals sum to the header figure/i, { timeout: 5_000 });
+});
+
+test('cii: line-sum reconciliation flags a per-line net that disagrees with the header (draft 265)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // The first <ram:LineTotalAmount> is the line-level one (BT-131); shrinking it to
+  // 99.00 leaves the header LineTotalAmount (BT-106) at 120.00, so Σ line ≠ header.
+  const withBad = CII_INVOICE.replace('<ram:LineTotalAmount>120.00</ram:LineTotalAmount>', '<ram:LineTotalAmount>99.00</ram:LineTotalAmount>');
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/CII line-sum mismatch: the per-line net amounts total 99\.00 but the header LineTotalAmount \(BT-106\) declares 120\.00/i, { timeout: 5_000 });
+});
+
+test('cii: tax-basis arithmetic confirms when line − allowance + charge = tax-basis (draft 266)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', CII_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/CII tax-exclusive basis reconciles/i, { timeout: 5_000 });
+});
+
+test('cii: tax-basis arithmetic flags an allowance the basis does not account for (draft 266)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // Inject a €10 document-level allowance total without adjusting the tax-basis:
+  // 120.00 − 10.00 + 0.00 = 110.00 ≠ TaxBasisTotalAmount 120.00. This isolates the
+  // tax-basis gate — the grand-total (basis + tax) and line-sum invariants stay clean.
+  const withBad = CII_INVOICE.replace(
+    '<ram:TaxBasisTotalAmount>120.00</ram:TaxBasisTotalAmount>',
+    '<ram:AllowanceTotalAmount>10.00</ram:AllowanceTotalAmount><ram:TaxBasisTotalAmount>120.00</ram:TaxBasisTotalAmount>');
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/CII tax-basis mismatch: LineTotalAmount 120\.00 − AllowanceTotalAmount 10\.00 \+ ChargeTotalAmount 0\.00 = 110\.00 ≠ TaxBasisTotalAmount 120\.00/i, { timeout: 5_000 });
+});
+
 test('ubl: LegalMonetaryTotal/PayableAmount presence flags a missing slot (draft 183)', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   const withBad = UBL_INVOICE.replace(/<cac:LegalMonetaryTotal>[\s\S]*?<\/cac:LegalMonetaryTotal>/g, (block) =>

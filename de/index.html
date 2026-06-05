@@ -4735,6 +4735,10 @@
                 'cii.warn.currency': 'CII invoice currency {code} (ram:InvoiceCurrencyCode, BT-5) is not a valid active ISO 4217 code — EN 16931 requires the document currency to be a real ISO 4217 currency; a Factur-X / ZUGFeRD document with an unknown code is rejected at the schematron gate (the CII analogue of the UBL DocumentCurrencyCode ISO 4217 check)',
                 'cii.ok.typeCode': 'CII document type code {code} is in the EN 16931 / PEPPOL allowed UNCL 1001 set (BT-3)',
                 'cii.warn.typeCode': 'CII document type code {code} (ram:TypeCode, BT-3) is not in the EN 16931 / PEPPOL allowed UNCL 1001 set ({allowed}) — the value identifies the document business purpose (380 commercial invoice, 381 credit note, 384 corrected invoice, 389 self-billed); a Factur-X / ZUGFeRD document with an out-of-set code is rejected at the schematron gate (the CII analogue of the UBL InvoiceTypeCode / CreditNoteTypeCode value check)',
+                'cii.ok.lineSum': 'CII line totals sum to the header figure: Σ per-line net amount = header LineTotalAmount (EN 16931 — the CII analogue of UBL BR-CO-10, Σ BT-131 = BT-106 on ram:SpecifiedTradeSettlementHeaderMonetarySummation)',
+                'cii.warn.lineSum': 'CII line-sum mismatch: the per-line net amounts total {sum} but the header LineTotalAmount (BT-106) declares {head} — EN 16931 (the CII analogue of UBL BR-CO-10) requires the sum of every line BT-131 to equal the header sum-of-lines figure; a Factur-X / ZUGFeRD document failing this is rejected at the schematron gate (±1 cent rounding tolerance)',
+                'cii.ok.taxBasis': 'CII tax-exclusive basis reconciles: line total − allowance total + charge total = tax-basis total (EN 16931 — the CII analogue of UBL BR-CO-13, on ram:SpecifiedTradeSettlementHeaderMonetarySummation)',
+                'cii.warn.taxBasis': 'CII tax-basis mismatch: LineTotalAmount {line} − AllowanceTotalAmount {allow} + ChargeTotalAmount {charge} = {expected} ≠ TaxBasisTotalAmount {basis} — EN 16931 (the CII analogue of UBL BR-CO-13) requires the tax-exclusive basis to equal the line total net of document-level allowances and charges; a Factur-X / ZUGFeRD document failing this is rejected at the schematron gate (±1 cent rounding tolerance)',
                 'ubl.row.issueDate': 'Issue date',
                 'ubl.row.dueDate': 'Due date',
                 'ubl.row.currency': 'Currency',
@@ -6305,6 +6309,10 @@
                 'cii.warn.currency': 'La devise de facture CII {code} (ram:InvoiceCurrencyCode, BT-5) n’est pas un code ISO 4217 actif valide — EN 16931 exige que la devise du document soit une vraie devise ISO 4217 ; un document Factur-X / ZUGFeRD avec un code inconnu est rejeté au contrôle schematron (l’analogue CII du contrôle ISO 4217 du DocumentCurrencyCode UBL)',
                 'cii.ok.typeCode': 'Le code de type de document CII {code} appartient à l’ensemble UNCL 1001 autorisé par EN 16931 / PEPPOL (BT-3)',
                 'cii.warn.typeCode': 'Le code de type de document CII {code} (ram:TypeCode, BT-3) n’appartient pas à l’ensemble UNCL 1001 autorisé par EN 16931 / PEPPOL ({allowed}) — la valeur identifie l’objet métier du document (380 facture commerciale, 381 avoir, 384 facture corrigée, 389 auto-facturation) ; un document Factur-X / ZUGFeRD avec un code hors ensemble est rejeté au contrôle schematron (l’analogue CII du contrôle de valeur InvoiceTypeCode / CreditNoteTypeCode UBL)',
+                'cii.ok.lineSum': 'Les totaux de ligne CII s’additionnent au total d’en-tête : Σ montant net par ligne = LineTotalAmount d’en-tête (EN 16931 — l’analogue CII d’UBL BR-CO-10, Σ BT-131 = BT-106 sur ram:SpecifiedTradeSettlementHeaderMonetarySummation)',
+                'cii.warn.lineSum': 'Incohérence de la somme des lignes CII : les montants nets par ligne totalisent {sum} mais le LineTotalAmount d’en-tête (BT-106) déclare {head} — EN 16931 (l’analogue CII d’UBL BR-CO-10) exige que la somme de chaque BT-131 de ligne égale le total des lignes d’en-tête ; un document Factur-X / ZUGFeRD qui échoue est rejeté au contrôle schematron (tolérance d’arrondi de ±1 centime)',
+                'cii.ok.taxBasis': 'La base hors taxe CII se réconcilie : total des lignes − total des remises + total des frais = total de la base imposable (EN 16931 — l’analogue CII d’UBL BR-CO-13, sur ram:SpecifiedTradeSettlementHeaderMonetarySummation)',
+                'cii.warn.taxBasis': 'Incohérence de la base imposable CII : LineTotalAmount {line} − AllowanceTotalAmount {allow} + ChargeTotalAmount {charge} = {expected} ≠ TaxBasisTotalAmount {basis} — EN 16931 (l’analogue CII d’UBL BR-CO-13) exige que la base hors taxe égale le total des lignes net des remises et frais au niveau document ; un document Factur-X / ZUGFeRD qui échoue est rejeté au contrôle schematron (tolérance d’arrondi de ±1 centime)',
                 'ubl.row.issueDate': 'Date d’émission',
                 'ubl.row.dueDate': 'Date d’échéance',
                 'ubl.row.currency': 'Devise',
@@ -7853,6 +7861,10 @@
                 'cii.warn.currency': 'CII 发票币种 {code}（ram:InvoiceCurrencyCode，BT-5）不是有效的活跃 ISO 4217 代码——EN 16931 要求文档币种为真实的 ISO 4217 货币；带有未知代码的 Factur-X / ZUGFeRD 文档会在 schematron 关卡被拒绝（UBL DocumentCurrencyCode ISO 4217 校验的 CII 对应物）',
                 'cii.ok.typeCode': 'CII 文档类型代码 {code} 属于 EN 16931 / PEPPOL 允许的 UNCL 1001 集合（BT-3）',
                 'cii.warn.typeCode': 'CII 文档类型代码 {code}（ram:TypeCode，BT-3）不属于 EN 16931 / PEPPOL 允许的 UNCL 1001 集合（{allowed}）——该值标识文档业务目的（380 商业发票、381 贷项通知单、384 更正发票、389 自开票）；带有集合外代码的 Factur-X / ZUGFeRD 文档会在 schematron 关卡被拒绝（UBL InvoiceTypeCode / CreditNoteTypeCode 值校验的 CII 对应物）',
+                'cii.ok.lineSum': 'CII 各行合计累加到表头金额：Σ 每行净额 = 表头 LineTotalAmount（EN 16931——UBL BR-CO-10 的 CII 对应物，Σ BT-131 = BT-106，位于 ram:SpecifiedTradeSettlementHeaderMonetarySummation）',
+                'cii.warn.lineSum': 'CII 行合计不一致：各行净额合计为 {sum}，但表头 LineTotalAmount（BT-106）声明为 {head} — EN 16931（UBL BR-CO-10 的 CII 对应物）要求每行 BT-131 之和等于表头行合计金额；未通过的 Factur-X / ZUGFeRD 文档会在 schematron 关卡被拒绝（舍入容差 ±1 分）',
+                'cii.ok.taxBasis': 'CII 税前基数自洽：行合计 − 折扣合计 + 费用合计 = 税基合计（EN 16931——UBL BR-CO-13 的 CII 对应物，位于 ram:SpecifiedTradeSettlementHeaderMonetarySummation）',
+                'cii.warn.taxBasis': 'CII 税基不一致：LineTotalAmount {line} − AllowanceTotalAmount {allow} + ChargeTotalAmount {charge} = {expected} ≠ TaxBasisTotalAmount {basis} — EN 16931（UBL BR-CO-13 的 CII 对应物）要求税前基数等于行合计扣除文档级折扣和费用后的净额；未通过的 Factur-X / ZUGFeRD 文档会在 schematron 关卡被拒绝（舍入容差 ±1 分）',
                 'ubl.row.issueDate': '开票日期',
                 'ubl.row.dueDate': '到期日期',
                 'ubl.row.currency': '货币',
@@ -9416,6 +9428,10 @@
                 'cii.warn.currency': 'Die CII-Rechnungswährung {code} (ram:InvoiceCurrencyCode, BT-5) ist kein gültiger aktiver ISO-4217-Code — EN 16931 verlangt, dass die Dokumentwährung eine echte ISO-4217-Währung ist; ein Factur-X-/ZUGFeRD-Dokument mit unbekanntem Code wird am Schematron-Gate abgelehnt (das CII-Pendant der UBL-DocumentCurrencyCode-ISO-4217-Prüfung)',
                 'cii.ok.typeCode': 'Der CII-Dokumenttypcode {code} ist im von EN 16931 / PEPPOL zugelassenen UNCL-1001-Satz (BT-3)',
                 'cii.warn.typeCode': 'Der CII-Dokumenttypcode {code} (ram:TypeCode, BT-3) ist nicht im von EN 16931 / PEPPOL zugelassenen UNCL-1001-Satz ({allowed}) — der Wert identifiziert den Geschäftszweck des Dokuments (380 Handelsrechnung, 381 Gutschrift, 384 korrigierte Rechnung, 389 Gutschriftsverfahren); ein Factur-X-/ZUGFeRD-Dokument mit einem Code außerhalb des Satzes wird am Schematron-Gate abgelehnt (das CII-Pendant der UBL-InvoiceTypeCode-/CreditNoteTypeCode-Wertprüfung)',
+                'cii.ok.lineSum': 'Die CII-Zeilensummen ergeben den Kopfbetrag: Σ Netto-Zeilenbetrag = Kopf-LineTotalAmount (EN 16931 — das CII-Pendant zu UBL BR-CO-10, Σ BT-131 = BT-106 auf ram:SpecifiedTradeSettlementHeaderMonetarySummation)',
+                'cii.warn.lineSum': 'CII-Zeilensummen-Abweichung: die Netto-Zeilenbeträge summieren sich auf {sum}, aber der Kopf-LineTotalAmount (BT-106) deklariert {head} — EN 16931 (das CII-Pendant zu UBL BR-CO-10) verlangt, dass die Summe jedes Zeilen-BT-131 dem Kopf-Zeilensummenbetrag entspricht; ein Factur-X-/ZUGFeRD-Dokument, das dies nicht erfüllt, wird am Schematron-Gate abgelehnt (±1 Cent Rundungstoleranz)',
+                'cii.ok.taxBasis': 'Die CII-Nettobemessungsgrundlage stimmt: Zeilensumme − Nachlasssumme + Zuschlagssumme = Steuerbemessungsgrundlage (EN 16931 — das CII-Pendant zu UBL BR-CO-13, auf ram:SpecifiedTradeSettlementHeaderMonetarySummation)',
+                'cii.warn.taxBasis': 'CII-Bemessungsgrundlagen-Abweichung: LineTotalAmount {line} − AllowanceTotalAmount {allow} + ChargeTotalAmount {charge} = {expected} ≠ TaxBasisTotalAmount {basis} — EN 16931 (das CII-Pendant zu UBL BR-CO-13) verlangt, dass die Nettobemessungsgrundlage der Zeilensumme abzüglich der Nachlässe und Zuschläge auf Dokumentebene entspricht; ein Factur-X-/ZUGFeRD-Dokument, das dies nicht erfüllt, wird am Schematron-Gate abgelehnt (±1 Cent Rundungstoleranz)',
                 'ubl.row.issueDate': 'Ausstellungsdatum',
                 'ubl.row.dueDate': 'Fälligkeitsdatum',
                 'ubl.row.currency': 'Währung',
@@ -10964,6 +10980,10 @@
                 'cii.warn.currency': 'CII चालान मुद्रा {code} (ram:InvoiceCurrencyCode, BT-5) एक मान्य सक्रिय ISO 4217 कोड नहीं है — EN 16931 के लिए आवश्यक है कि दस्तावेज़ मुद्रा एक वास्तविक ISO 4217 मुद्रा हो; अज्ञात कोड वाला Factur-X / ZUGFeRD दस्तावेज़ schematron गेट पर अस्वीकृत होता है (UBL DocumentCurrencyCode ISO 4217 जाँच का CII समकक्ष)',
                 'cii.ok.typeCode': 'CII दस्तावेज़ प्रकार कोड {code} EN 16931 / PEPPOL द्वारा अनुमत UNCL 1001 सेट में है (BT-3)',
                 'cii.warn.typeCode': 'CII दस्तावेज़ प्रकार कोड {code} (ram:TypeCode, BT-3) EN 16931 / PEPPOL द्वारा अनुमत UNCL 1001 सेट ({allowed}) में नहीं है — मान दस्तावेज़ के व्यावसायिक उद्देश्य की पहचान करता है (380 वाणिज्यिक चालान, 381 क्रेडिट नोट, 384 सुधारित चालान, 389 स्व-बिलिंग); सेट से बाहर कोड वाला Factur-X / ZUGFeRD दस्तावेज़ schematron गेट पर अस्वीकृत होता है (UBL InvoiceTypeCode / CreditNoteTypeCode मान जाँच का CII समकक्ष)',
+                'cii.ok.lineSum': 'CII पंक्ति योग शीर्ष आँकड़े तक जुड़ते हैं: Σ प्रति-पंक्ति शुद्ध राशि = शीर्ष LineTotalAmount (EN 16931 — UBL BR-CO-10 का CII समकक्ष, Σ BT-131 = BT-106, ram:SpecifiedTradeSettlementHeaderMonetarySummation पर)',
+                'cii.warn.lineSum': 'CII पंक्ति-योग बेमेल: प्रति-पंक्ति शुद्ध राशियाँ कुल {sum} हैं लेकिन शीर्ष LineTotalAmount (BT-106) {head} घोषित करता है — EN 16931 (UBL BR-CO-10 का CII समकक्ष) के लिए प्रत्येक पंक्ति BT-131 का योग शीर्ष पंक्ति-योग आँकड़े के बराबर होना आवश्यक है; इसमें विफल Factur-X / ZUGFeRD दस्तावेज़ schematron गेट पर अस्वीकृत होता है (±1 सेंट पूर्णांकन सहनशीलता)',
+                'cii.ok.taxBasis': 'CII कर-रहित आधार मिलान करता है: पंक्ति योग − छूट योग + प्रभार योग = कर-आधार योग (EN 16931 — UBL BR-CO-13 का CII समकक्ष, ram:SpecifiedTradeSettlementHeaderMonetarySummation पर)',
+                'cii.warn.taxBasis': 'CII कर-आधार बेमेल: LineTotalAmount {line} − AllowanceTotalAmount {allow} + ChargeTotalAmount {charge} = {expected} ≠ TaxBasisTotalAmount {basis} — EN 16931 (UBL BR-CO-13 का CII समकक्ष) के लिए कर-रहित आधार का दस्तावेज़-स्तर की छूट और प्रभार घटाने के बाद पंक्ति योग के बराबर होना आवश्यक है; इसमें विफल Factur-X / ZUGFeRD दस्तावेज़ schematron गेट पर अस्वीकृत होता है (±1 सेंट पूर्णांकन सहनशीलता)',
                 'ubl.row.issueDate': 'जारी करने की तिथि',
                 'ubl.row.dueDate': 'देय तिथि',
                 'ubl.row.currency': 'मुद्रा',
@@ -24552,6 +24572,79 @@
             }
         }
 
+        // CII line-sum reconciliation (draft 265). The CII analogue of UBL BR-CO-10
+        // (ublCheckTotals invariant 1): the sum of every per-line net amount (BT-131,
+        // ram:SpecifiedLineTradeSettlement/…/ram:LineTotalAmount) must equal the
+        // header LineTotalAmount (BT-106, ram:SpecifiedTradeSettlementHeaderMonetary-
+        // Summation/ram:LineTotalAmount) — the line-grid footer the header sum-of-
+        // lines figure stands in for. Integer-cent comparison, ±1 cent tolerance.
+        // No-ops when the header BT-106 is absent, when a line BT-131 is unparsable
+        // (draft 262 owns the per-line missing-amount defect), or when there are no
+        // lines (draft 262 owns the no-line defect) — this gate only fires when the
+        // figures are all present and parseable but disagree.
+        function ciiCheckLineSum(out, detected) {
+            const r = detected.root;
+            const txn = sepaFirst(r, 'SupplyChainTradeTransaction');
+            if (!txn) return;
+            const settlement = sepaFirst(txn, 'ApplicableHeaderTradeSettlement');
+            const sum = settlement ? sepaFirst(settlement, 'SpecifiedTradeSettlementHeaderMonetarySummation') : null;
+            if (!sum) return;
+            const headEl = sepaFirst(sum, 'LineTotalAmount');
+            const head = headEl ? ublParseCents(headEl.textContent) : null;
+            if (head == null) return;
+            const lines = sepaAllLocal(txn, 'IncludedSupplyChainTradeLineItem');
+            if (lines.length === 0) return;
+            let sumCents = 0;
+            for (const line of lines) {
+                const lineSettle = sepaFirst(line, 'SpecifiedLineTradeSettlement');
+                const lineSum = lineSettle ? sepaFirst(lineSettle, 'SpecifiedTradeSettlementLineMonetarySummation') : null;
+                const amtEl = lineSum ? sepaFirst(lineSum, 'LineTotalAmount') : null;
+                const cents = amtEl ? ublParseCents(amtEl.textContent) : null;
+                if (cents == null) return;
+                sumCents += cents;
+            }
+            const fmt = (c) => (c / 100).toFixed(2);
+            if (Math.abs(sumCents - head) <= 1) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + t('cii.ok.lineSum'));
+            } else {
+                tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + tFormat('cii.warn.lineSum', { sum: fmt(sumCents), head: fmt(head) }));
+            }
+        }
+
+        // CII tax-basis arithmetic (draft 266). The CII analogue of UBL BR-CO-13:
+        // on ram:SpecifiedTradeSettlementHeaderMonetarySummation, the TaxBasisTotal-
+        // Amount (BT-109) must equal the LineTotalAmount (BT-106) minus the
+        // AllowanceTotalAmount (BT-107) plus the ChargeTotalAmount (BT-108) — the
+        // document-level allowance/charge net that the tax-exclusive basis carries
+        // into BR-CO-15 (draft 260's grand-total invariant). EN 16931 types BT-107 /
+        // BT-108 as optional, so an absent allowance or charge total defaults to
+        // zero. Integer-cent comparison, ±1 cent tolerance. No-ops when BT-106 or
+        // BT-109 is absent, or when a present BT-107 / BT-108 is unparsable.
+        function ciiCheckTaxBasis(out, detected) {
+            const r = detected.root;
+            const txn = sepaFirst(r, 'SupplyChainTradeTransaction');
+            const settlement = txn ? sepaFirst(txn, 'ApplicableHeaderTradeSettlement') : null;
+            const sum = settlement ? sepaFirst(settlement, 'SpecifiedTradeSettlementHeaderMonetarySummation') : null;
+            if (!sum) return;
+            const lineEl = sepaFirst(sum, 'LineTotalAmount');
+            const basisEl = sepaFirst(sum, 'TaxBasisTotalAmount');
+            const line = lineEl ? ublParseCents(lineEl.textContent) : null;
+            const basis = basisEl ? ublParseCents(basisEl.textContent) : null;
+            if (line == null || basis == null) return;
+            const allowEl = sepaFirst(sum, 'AllowanceTotalAmount');
+            const chargeEl = sepaFirst(sum, 'ChargeTotalAmount');
+            const allow = allowEl ? ublParseCents(allowEl.textContent) : 0;
+            const charge = chargeEl ? ublParseCents(chargeEl.textContent) : 0;
+            if (allow == null || charge == null) return;
+            const expected = line - allow + charge;
+            const fmt = (c) => (c / 100).toFixed(2);
+            if (Math.abs(expected - basis) <= 1) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + t('cii.ok.taxBasis'));
+            } else {
+                tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + tFormat('cii.warn.taxBasis', { line: fmt(line), allow: fmt(allow), charge: fmt(charge), expected: fmt(expected), basis: fmt(basis) }));
+            }
+        }
+
         // EN 16931 totals consistency check. Two invariants are independent of any
         // PrepaidAmount / PayableRoundingAmount complications and catch the
         // overwhelming majority of real-world arithmetic errors:
@@ -29767,6 +29860,8 @@
                     ciiCheckLines(out, detected);
                     ciiCheckCurrencyCode(out, detected);
                     ciiCheckTypeCode(out, detected);
+                    ciiCheckLineSum(out, detected);
+                    ciiCheckTaxBasis(out, detected);
                     return;
                 }
                 ublRenderHeader(out, detected);
