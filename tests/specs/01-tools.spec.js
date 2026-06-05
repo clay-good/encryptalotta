@@ -6729,10 +6729,11 @@ test('ubl: BR-CO-17 cross-product flags a tax amount inconsistent with base × r
   await expect(page.locator('#ubl-results')).toContainText(/VAT breakdown #1 declares <cbc:TaxAmount> 19\.00 EUR but 100\.00 EUR × 25% = 25\.00 EUR/i, { timeout: 5_000 });
 });
 
-// A complete document-level allowance (ChargeIndicator + Amount), injected as a
-// direct child of <Invoice> for the AllowanceCharge gates (drafts 250 / 251).
+// A complete document-level allowance (ChargeIndicator + reason + Amount + VAT
+// category), injected as a direct child of <Invoice> for the AllowanceCharge
+// gates (drafts 250 / 251 / 252 / 253).
 const UBL_WITH_ALLOWANCE = UBL_INVOICE.replace('</cac:AccountingCustomerParty>',
-  '</cac:AccountingCustomerParty>\n  <cac:AllowanceCharge>\n    <cbc:ChargeIndicator>false</cbc:ChargeIndicator>\n    <cbc:AllowanceChargeReason>Volume discount</cbc:AllowanceChargeReason>\n    <cbc:Amount currencyID="EUR">10.00</cbc:Amount>\n  </cac:AllowanceCharge>');
+  '</cac:AccountingCustomerParty>\n  <cac:AllowanceCharge>\n    <cbc:ChargeIndicator>false</cbc:ChargeIndicator>\n    <cbc:AllowanceChargeReason>Volume discount</cbc:AllowanceChargeReason>\n    <cbc:Amount currencyID="EUR">10.00</cbc:Amount>\n    <cac:TaxCategory><cbc:ID>S</cbc:ID><cbc:Percent>19</cbc:Percent><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:TaxCategory>\n  </cac:AllowanceCharge>');
 
 test('ubl: document-level AllowanceCharge Amount presence confirms when the amount is declared (draft 250)', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
@@ -6743,7 +6744,7 @@ test('ubl: document-level AllowanceCharge Amount presence confirms when the amou
 
 test('ubl: document-level AllowanceCharge Amount presence flags a missing amount (draft 250)', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
-  const withBad = UBL_WITH_ALLOWANCE.replace('<cbc:Amount currencyID="EUR">10.00</cbc:Amount>\n  ', '');
+  const withBad = UBL_WITH_ALLOWANCE.replace('<cbc:Amount currencyID="EUR">10.00</cbc:Amount>\n    ', '');
   await page.fill('#ubl-input', withBad);
   await page.click('#btn-ubl-parse');
   await expect(page.locator('#ubl-results')).toContainText(/Document-level AllowanceCharge #1 is missing <cbc:Amount>/i, { timeout: 5_000 });
@@ -6762,6 +6763,36 @@ test('ubl: document-level AllowanceCharge ChargeIndicator flags a non-boolean va
   await page.fill('#ubl-input', withBad);
   await page.click('#btn-ubl-parse');
   await expect(page.locator('#ubl-results')).toContainText(/Document-level AllowanceCharge #1 ChargeIndicator is "Discount"/i, { timeout: 5_000 });
+});
+
+test('ubl: document-level AllowanceCharge reason presence confirms when a reason is declared (draft 252)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', UBL_WITH_ALLOWANCE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Every document-level <cac:AllowanceCharge> declares a reason/i, { timeout: 5_000 });
+});
+
+test('ubl: document-level AllowanceCharge reason presence flags a block with no reason (draft 252)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  const withBad = UBL_WITH_ALLOWANCE.replace('<cbc:AllowanceChargeReason>Volume discount</cbc:AllowanceChargeReason>\n    ', '');
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Document-level AllowanceCharge #1 declares neither <cbc:AllowanceChargeReason> nor <cbc:AllowanceChargeReasonCode>/i, { timeout: 5_000 });
+});
+
+test('ubl: document-level AllowanceCharge VAT category confirms when TaxCategory/ID is present (draft 253)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', UBL_WITH_ALLOWANCE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Every document-level <cac:AllowanceCharge> declares a <cac:TaxCategory>\/<cbc:ID>/i, { timeout: 5_000 });
+});
+
+test('ubl: document-level AllowanceCharge VAT category flags a missing TaxCategory (draft 253)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  const withBad = UBL_WITH_ALLOWANCE.replace('\n    <cac:TaxCategory><cbc:ID>S</cbc:ID><cbc:Percent>19</cbc:Percent><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:TaxCategory>', '');
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/Document-level AllowanceCharge #1 is missing <cac:TaxCategory>\/<cbc:ID>/i, { timeout: 5_000 });
 });
 
 test('ubl: LegalMonetaryTotal/PayableAmount presence flags a missing slot (draft 183)', async ({ page }) => {

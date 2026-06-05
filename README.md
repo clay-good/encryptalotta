@@ -530,17 +530,17 @@ The SEPA and UBL inspectors share one idea: **schema-valid is not rail-valid.** 
   ✓ / ✗ rows  (no network — verdicts computed entirely in-tab)
 ```
 
-| Family | SEPA (ISO 20022 / EPC, 111 gates) | UBL (EN 16931 / PEPPOL, 112 gates) |
+| Family | SEPA (ISO 20022 / EPC, 111 gates) | UBL (EN 16931 / PEPPOL, 114 gates) |
 |---|---|---|
 | Structural / checksum | IBAN MOD-97 + per-country BBAN structure; BIC ISO 9362; IBAN↔BIC country parity | IBAN MOD-97 on Payee/Payer account |
 | Character-set & length | EPC restricted charset on every free-text field; AdrLine 70 / TwnNm 35 / PstCd 16 / party Nm 70 caps | — (UTF-8 per EN 16931) |
-| Presence (wrapper → leaf) | `<PmtInf>` → `<Dbtr>`/`<Cdtr>` → `<DbtrAgt>`/`<CdtrAgt>` → `<FinInstnId>` routing-id content; account `<Id>` → IBAN content | BR-* root, line, and party mandatory-field presence down to `PayeeFinancialAccount`/`PaymentMandate`/`EndpointID@schemeID`; document-level `AllowanceCharge` Amount (BR-31/36) + ChargeIndicator |
+| Presence (wrapper → leaf) | `<PmtInf>` → `<Dbtr>`/`<Cdtr>` → `<DbtrAgt>`/`<CdtrAgt>` → `<FinInstnId>` routing-id content; account `<Id>` → IBAN content | BR-* root, line, and party mandatory-field presence down to `PayeeFinancialAccount`/`PaymentMandate`/`EndpointID@schemeID`; document-level `AllowanceCharge` Amount (BR-31/36) + ChargeIndicator + reason (BR-33/38) + VAT category (BR-32/37) |
 | Code-list membership | EUR-only `<Ccy>`; `LclInstrm/Cd` CORE/B2B/COR1; `SeqTp`; `CtryOfRes` ISO 3166 | UNCL 1001 type, UNCL 4461 means, UNCL 5305/5153 VAT codes; ISO 4217 currency; PEPPOL EAS schemeID |
 | Arithmetic | `NbOfTxs`/`CtrlSum` non-empty + 2-decimal cap; per-tx 2-decimal precision; strictly-positive amounts; amount cap €999,999,999.99 | BR-CO-10 line totals, BR-CO-13/15 tax consistency, BR-CO-14 breakdown sum, BR-CO-17 per-rate cross-product, BR-CO-16 payable; BR-DEC 2-decimal caps |
 | Cardinality / forbidden | single `<Strd>` per `<RmtInf>`; `IntrmyAgt` / `ChrgsAcct` / `SvcLvl·Prtry` forbidden | at-least-one `<InvoiceLine>`; conditional gates scoped by payment-means code |
 | Uniqueness | `EndToEndId` across the file | — |
 
-Each gate ships as a four-part unit — **spec entry (`SPEC-INTERNATIONAL.md` §2.4 / §2.7) + implementation + i18n strings × 5 locales + a Playwright confirm/flag pair** — so the catalogue grows without regressions. The full per-draft history (drafts 16 → 251) lives in the spec.
+Each gate ships as a four-part unit — **spec entry (`SPEC-INTERNATIONAL.md` §2.4 / §2.7) + implementation + i18n strings × 5 locales + a Playwright confirm/flag pair** — so the catalogue grows without regressions. The full per-draft history (drafts 16 → 253) lives in the spec.
 
 ## Design decisions
 
@@ -551,7 +551,7 @@ The non-obvious engineering choices, and why they were made:
 - **Hand-rolled parsers over vendoring** for ASN.1/DER, the SSH wire format, Base32/Base58, OKLCH matrices, the cron parser, CIDR arithmetic, the LCS diff, and the RFC 4180 CSV parser. Each is small, auditable, and keeps the page under the 2 MB gzipped budget — vendoring a library for each would multiply the supply-chain surface for a few hundred lines of logic.
 - **`textContent` / `createElement` only — never `innerHTML`.** A grep-verifiable invariant (zero `innerHTML =` assignments) removes the most common XSS sink even for fully developer-controlled content.
 - **SHA-384 pinning instead of SRI.** Same-origin scripts gain nothing from SRI's CORS requirements, so the integrity claim lives as a hash recorded in three places (HTML comment, README manifest, on-disk bytes) and is cross-checked on every commit — a forger has to defeat all three.
-- **Conformance gates as an incremental, test-backed methodology.** The SEPA and UBL inspectors are not one-shot parsers — they are growing libraries of narrow, independent validation gates (223+ and counting — 111 SEPA, 112 UBL as of this writing), each one shipped as a *spec entry + implementation + i18n strings × 5 locales + Playwright confirm/flag pair*. The thesis: a document that passes XSD validation can still be rejected by a clearing system or PEPPOL access point for a Rulebook reason the schema does not encode (a name-only `FinInstnId` with no routable BIC, a VAT breakdown whose subtotals don't sum to the header, an amount over the scheme cap). Each gate catches one such real-world reject, no-ops cleanly on documents it doesn't apply to, and is pinned by a green test before it lands. The full catalogue lives in [SPEC-INTERNATIONAL.md](SPEC-INTERNATIONAL.md) §2.4 (SEPA) and §2.7 (UBL).
+- **Conformance gates as an incremental, test-backed methodology.** The SEPA and UBL inspectors are not one-shot parsers — they are growing libraries of narrow, independent validation gates (225+ and counting — 111 SEPA, 114 UBL as of this writing), each one shipped as a *spec entry + implementation + i18n strings × 5 locales + Playwright confirm/flag pair*. The thesis: a document that passes XSD validation can still be rejected by a clearing system or PEPPOL access point for a Rulebook reason the schema does not encode (a name-only `FinInstnId` with no routable BIC, a VAT breakdown whose subtotals don't sum to the header, an amount over the scheme cap). Each gate catches one such real-world reject, no-ops cleanly on documents it doesn't apply to, and is pinned by a green test before it lands. The full catalogue lives in [SPEC-INTERNATIONAL.md](SPEC-INTERNATIONAL.md) §2.4 (SEPA) and §2.7 (UBL).
 
 ## Key Generation Options
 
