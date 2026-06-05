@@ -4724,6 +4724,7 @@
                 'ubl.row.customizationId': 'Customization ID',
                 'ubl.row.profile': 'Profile ID',
                 'ubl.row.id': 'Invoice number',
+                'ubl.row.typeCode': 'Document type code',
                 'ubl.row.issueDate': 'Issue date',
                 'ubl.row.dueDate': 'Due date',
                 'ubl.row.currency': 'Currency',
@@ -4981,7 +4982,7 @@
                 'ubl.warn.ccyInvalid': 'Currency code not active per ISO 4217: {code}',
                 'err.ublEmpty': 'XML input is empty.',
                 'err.ublParse': 'XML parse error: {detail}',
-                'err.ublNoRoot': 'No <Invoice> or <CreditNote> root element found — is this an OASIS UBL 2.1 XML file?',
+                'err.ublNoRoot': 'No <Invoice>, <CreditNote>, or <CrossIndustryInvoice> root element found — is this an OASIS UBL 2.1 or UN/CEFACT CII (Factur-X / ZUGFeRD) XML file?',
                 'tool.ubl.title': 'PEPPOL / UBL Invoice Inspector — Online (OASIS UBL 2.1, EN 16931, PEPPOL BIS Billing 3.0)',
                 'tool.ubl.metaDescription': 'Free, browser-based PEPPOL / UBL invoice inspector. Paste an OASIS UBL 2.1 Invoice or CreditNote (PEPPOL BIS Billing 3.0, EN 16931) and see the parsed header, supplier and customer, totals, line items, and VAT breakdown. No upload. No tracking.',
                 'tool.ubl.about.what': 'Decodes OASIS UBL 2.1 e-invoice XML — the wire format used by PEPPOL BIS Billing 3.0 and by every EN 16931-compliant e-invoice on the European stack — and renders the header, supplier and customer, document totals (line / tax-exclusive / tax-inclusive / payable), per-line items (quantity / unit price / amount), and the per-rate VAT breakdown.',
@@ -6280,6 +6281,7 @@
                 'ubl.row.customizationId': 'Identifiant de personnalisation',
                 'ubl.row.profile': 'Identifiant de profil',
                 'ubl.row.id': 'Numéro de facture',
+                'ubl.row.typeCode': 'Code de type de document',
                 'ubl.row.issueDate': 'Date d’émission',
                 'ubl.row.dueDate': 'Date d’échéance',
                 'ubl.row.currency': 'Devise',
@@ -6545,7 +6547,7 @@
                 'ubl.warn.ccyInvalid': 'Code monétaire non actif selon ISO 4217 : {code}',
                 'err.ublEmpty': 'Le XML d’entrée est vide.',
                 'err.ublParse': 'Erreur d’analyse XML : {detail}',
-                'err.ublNoRoot': 'Aucun élément racine <Invoice> ou <CreditNote> trouvé — s’agit-il d’un fichier OASIS UBL 2.1 ?',
+                'err.ublNoRoot': 'Aucun élément racine <Invoice>, <CreditNote> ou <CrossIndustryInvoice> trouvé — s’agit-il d’un fichier OASIS UBL 2.1 ou UN/CEFACT CII (Factur-X / ZUGFeRD) ?',
                 // -------- Phase 12: Ed25519 + X25519 (French) --------
                 'nav.tool.ed25519': 'Ed25519',
                 'tool.ed25519.desc': 'Générer des paires de clés Ed25519 et signer ou vérifier (RFC 8032 via Web Crypto).',
@@ -7814,6 +7816,7 @@
                 'ubl.row.customizationId': '自定义标识',
                 'ubl.row.profile': '配置文件标识',
                 'ubl.row.id': '发票号',
+                'ubl.row.typeCode': '文档类型代码',
                 'ubl.row.issueDate': '开票日期',
                 'ubl.row.dueDate': '到期日期',
                 'ubl.row.currency': '货币',
@@ -8079,7 +8082,7 @@
                 'ubl.warn.ccyInvalid': '币种代码不在 ISO 4217 现行清单中：{code}',
                 'err.ublEmpty': 'XML 输入为空。',
                 'err.ublParse': 'XML 解析错误：{detail}',
-                'err.ublNoRoot': '未找到 <Invoice> 或 <CreditNote> 根元素 — 这是 OASIS UBL 2.1 XML 文件吗？',
+                'err.ublNoRoot': '未找到 <Invoice>、<CreditNote> 或 <CrossIndustryInvoice> 根元素 — 这是 OASIS UBL 2.1 或 UN/CEFACT CII（Factur-X / ZUGFeRD）XML 文件吗？',
                 // -------- Phase 12: Ed25519 + X25519 (Simplified Chinese — machine-quality) --------
                 'nav.tool.ed25519': 'Ed25519',
                 'tool.ed25519.desc': '生成 Ed25519 密钥对，并签名或验证（RFC 8032，基于 Web Crypto）。',
@@ -9363,6 +9366,7 @@
                 'ubl.row.customizationId': 'Anpassungs-ID',
                 'ubl.row.profile': 'Profil-ID',
                 'ubl.row.id': 'Rechnungsnummer',
+                'ubl.row.typeCode': 'Dokumenttyp-Code',
                 'ubl.row.issueDate': 'Ausstellungsdatum',
                 'ubl.row.dueDate': 'Fälligkeitsdatum',
                 'ubl.row.currency': 'Währung',
@@ -9628,7 +9632,7 @@
                 'ubl.warn.ccyInvalid': 'Währungscode nicht aktiv nach ISO 4217: {code}',
                 'err.ublEmpty': 'XML-Eingabe ist leer.',
                 'err.ublParse': 'XML-Analysefehler: {detail}',
-                'err.ublNoRoot': 'Kein <Invoice>- oder <CreditNote>-Wurzelelement gefunden — handelt es sich wirklich um ein OASIS-UBL-2.1-XML?',
+                'err.ublNoRoot': 'Kein <Invoice>-, <CreditNote>- oder <CrossIndustryInvoice>-Wurzelelement gefunden — handelt es sich um ein OASIS-UBL-2.1- oder UN/CEFACT-CII-(Factur-X / ZUGFeRD)-XML?',
                 // -------- Phase 12: Ed25519 + X25519 (German) --------
                 'nav.tool.ed25519': 'Ed25519',
                 'tool.ed25519.desc': 'Ed25519-Schlüsselpaare erzeugen und signieren bzw. verifizieren (RFC 8032 via Web Crypto).',
@@ -10897,6 +10901,7 @@
                 'ubl.row.customizationId': 'अनुकूलन आईडी',
                 'ubl.row.profile': 'प्रोफ़ाइल आईडी',
                 'ubl.row.id': 'चालान संख्या',
+                'ubl.row.typeCode': 'दस्तावेज़ प्रकार कोड',
                 'ubl.row.issueDate': 'जारी करने की तिथि',
                 'ubl.row.dueDate': 'देय तिथि',
                 'ubl.row.currency': 'मुद्रा',
@@ -11162,7 +11167,7 @@
                 'ubl.warn.ccyInvalid': 'मुद्रा कोड ISO 4217 में सक्रिय नहीं: {code}',
                 'err.ublEmpty': 'XML इनपुट खाली है।',
                 'err.ublParse': 'XML पार्स त्रुटि: {detail}',
-                'err.ublNoRoot': 'कोई <Invoice> या <CreditNote> रूट तत्व नहीं मिला — क्या यह OASIS UBL 2.1 XML फ़ाइल है?',
+                'err.ublNoRoot': 'कोई <Invoice>, <CreditNote> या <CrossIndustryInvoice> रूट तत्व नहीं मिला — क्या यह OASIS UBL 2.1 या UN/CEFACT CII (Factur-X / ZUGFeRD) XML फ़ाइल है?',
                 // -------- Phase 12: Ed25519 + X25519 (Hindi — machine-quality) --------
                 'nav.tool.ed25519': 'Ed25519',
                 'tool.ed25519.desc': 'Ed25519 कुंजी युग्म बनाएँ और हस्ताक्षर करें या सत्यापित करें (RFC 8032, Web Crypto के ज़रिए)।',
@@ -24064,6 +24069,11 @@
             const ln = root.localName;
             if (ln === 'Invoice')    return { type: 'Invoice',    root, label: 'UBL 2.1 Invoice' };
             if (ln === 'CreditNote') return { type: 'CreditNote', root, label: 'UBL 2.1 CreditNote' };
+            // UN/CEFACT Cross Industry Invoice — the XML syntax inside Factur-X /
+            // ZUGFeRD hybrid PDFs (and Order-X). Different element vocabulary
+            // (rsm:/ram:) but the same EN 16931 semantic model; rendered by a
+            // sister walker. Hybrid PDF/A-3 extraction is a later slice (§2.5).
+            if (ln === 'CrossIndustryInvoice') return { type: 'CII', root, label: 'UN/CEFACT CII (Factur-X / ZUGFeRD)' };
             return null;
         }
 
@@ -24215,6 +24225,107 @@
                 } catch (e) {
                     csvBtn.textContent = t('ubl.lines.copyFail');
                 }
+            });
+        }
+
+        // CII dates are <ram:IssueDateTime><udt:DateTimeString format="102">YYYYMMDD
+        // </udt:DateTimeString></ram:IssueDateTime>. Decode format-102 (CCYYMMDD)
+        // into ISO YYYY-MM-DD; pass anything else through verbatim.
+        function ublCiiDate(parent, localName) {
+            const wrap = sepaFirst(parent, localName);
+            if (!wrap) return '';
+            const dts = sepaFirst(wrap, 'DateTimeString');
+            const raw = ((dts ? dts.textContent : wrap.textContent) || '').trim();
+            if (/^\d{8}$/.test(raw)) return raw.slice(0, 4) + '-' + raw.slice(4, 6) + '-' + raw.slice(6, 8);
+            return raw;
+        }
+
+        // Render a UN/CEFACT Cross Industry Invoice (Factur-X / ZUGFeRD XML). Same
+        // six row groupings as the UBL renderer — context, header, parties,
+        // currency, monetary totals, lines — walked over the rsm:/ram: vocabulary
+        // by localName (the existing namespace-blind helpers ignore the prefix).
+        // The EN 16931 conformance gates are UBL-syntax-specific and do not run on
+        // CII (a CII-native gate set is a later slice); this slice is render-only.
+        function ublRenderCII(out, detected) {
+            const r = detected.root;
+            tlsRenderRow(out, t('ubl.row.docType'), detected.label);
+            const ctx = sepaFirst(r, 'ExchangedDocumentContext');
+            if (ctx) {
+                const guide = sepaFirst(ctx, 'GuidelineSpecifiedDocumentContextParameter');
+                const guideId = guide ? sepaTextOf(guide, 'ID') : '';
+                const proc = sepaFirst(ctx, 'BusinessProcessSpecifiedDocumentContextParameter');
+                const procId = proc ? sepaTextOf(proc, 'ID') : '';
+                if (guideId) tlsRenderRow(out, t('ubl.row.customizationId'), guideId);
+                if (procId)  tlsRenderRow(out, t('ubl.row.profile'), procId);
+            }
+            const docEl = sepaFirst(r, 'ExchangedDocument');
+            if (docEl) {
+                const id = sepaTextOf(docEl, 'ID');
+                const typeCode = sepaTextOf(docEl, 'TypeCode');
+                const issue = ublCiiDate(docEl, 'IssueDateTime');
+                if (id)       tlsRenderRow(out, t('ubl.row.id'), id);
+                if (typeCode) tlsRenderRow(out, t('ubl.row.typeCode'), typeCode);
+                if (issue)    tlsRenderRow(out, t('ubl.row.issueDate'), issue);
+            }
+            const txn = sepaFirst(r, 'SupplyChainTradeTransaction');
+            if (!txn) return;
+            const agreement = sepaFirst(txn, 'ApplicableHeaderTradeAgreement');
+            if (agreement) {
+                const seller = sepaFirst(agreement, 'SellerTradeParty');
+                const buyer  = sepaFirst(agreement, 'BuyerTradeParty');
+                const sellerName = seller ? sepaTextOf(seller, 'Name') : '';
+                const buyerName  = buyer ? sepaTextOf(buyer, 'Name') : '';
+                if (sellerName) tlsRenderRow(out, t('ubl.row.supplier'), sellerName);
+                if (buyerName)  tlsRenderRow(out, t('ubl.row.customer'), buyerName);
+            }
+            const settlement = sepaFirst(txn, 'ApplicableHeaderTradeSettlement');
+            if (settlement) {
+                const ccy = sepaTextOf(settlement, 'InvoiceCurrencyCode');
+                if (ccy) tlsRenderRow(out, t('ubl.row.currency'), ccy);
+                const sum = sepaFirst(settlement, 'SpecifiedTradeSettlementHeaderMonetarySummation');
+                if (sum) {
+                    const lineTot  = ublAmt(sepaFirst(sum, 'LineTotalAmount'));
+                    const taxBasis = ublAmt(sepaFirst(sum, 'TaxBasisTotalAmount'));
+                    const taxTot   = ublAmt(sepaFirst(sum, 'TaxTotalAmount'));
+                    const grand    = ublAmt(sepaFirst(sum, 'GrandTotalAmount'));
+                    const due      = ublAmt(sepaFirst(sum, 'DuePayableAmount'));
+                    if (lineTot)  tlsRenderRow(out, t('ubl.row.lineTotal'),     lineTot);
+                    if (taxBasis) tlsRenderRow(out, t('ubl.row.taxExclusive'),  taxBasis);
+                    if (taxTot)   tlsRenderRow(out, t('ubl.tax.amount'),        taxTot);
+                    if (grand)    tlsRenderRow(out, t('ubl.row.taxInclusive'),  grand);
+                    if (due)      tlsRenderRow(out, t('ubl.row.payableAmount'), due);
+                }
+            }
+            const lines = sepaAllLocal(txn, 'IncludedSupplyChainTradeLineItem');
+            if (!lines.length) return;
+            const heading = document.createElement('div');
+            heading.style.cssText = 'margin: 16px 0 6px; font-weight: 700;';
+            heading.textContent = t('ubl.lines.heading');
+            out.appendChild(heading);
+            lines.forEach((line, i) => {
+                const lineDoc = sepaFirst(line, 'AssociatedDocumentLineDocument');
+                const lineId = (lineDoc ? sepaTextOf(lineDoc, 'LineID') : '') || String(i + 1);
+                const sep = document.createElement('div');
+                sep.style.cssText = 'margin-top: 12px; font-size: 0.82rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em;';
+                sep.textContent = '#' + lineId;
+                out.appendChild(sep);
+                const product = sepaFirst(line, 'SpecifiedTradeProduct');
+                const name = product ? sepaTextOf(product, 'Name') : '';
+                const lineAgr = sepaFirst(line, 'SpecifiedLineTradeAgreement');
+                const priceEl = lineAgr ? sepaFirst(sepaFirst(lineAgr, 'NetPriceProductTradePrice') || lineAgr, 'ChargeAmount') : null;
+                const price = ublAmt(priceEl);
+                const delivery = sepaFirst(line, 'SpecifiedLineTradeDelivery');
+                const qtyEl = delivery ? sepaFirst(delivery, 'BilledQuantity') : null;
+                const qtyRaw = qtyEl ? (qtyEl.textContent || '').trim() : '';
+                const unitCode = qtyEl ? (qtyEl.getAttribute('unitCode') || '') : '';
+                const qty = (qtyRaw + (unitCode ? ' ' + unitCode : '')).trim();
+                const lineSettle = sepaFirst(line, 'SpecifiedLineTradeSettlement');
+                const lineSum = lineSettle ? sepaFirst(lineSettle, 'SpecifiedTradeSettlementLineMonetarySummation') : null;
+                const lineAmt = lineSum ? ublAmt(sepaFirst(lineSum, 'LineTotalAmount')) : '';
+                if (name)    tlsRenderRow(out, t('ubl.line.name'),   name);
+                if (qty)     tlsRenderRow(out, t('ubl.line.qty'),    qty);
+                if (price)   tlsRenderRow(out, t('ubl.line.price'),  price);
+                if (lineAmt) tlsRenderRow(out, t('ubl.line.amount'), lineAmt);
             });
         }
 
@@ -29422,6 +29533,13 @@
             out.classList.remove('hidden');
             try {
                 const { doc, detected } = ublParse(document.getElementById('ubl-input').value);
+                if (detected.type === 'CII') {
+                    // Render-only slice for UN/CEFACT CII (Factur-X / ZUGFeRD). The
+                    // EN 16931 conformance gates below are UBL-syntax-specific; a
+                    // CII-native gate set is a later slice.
+                    ublRenderCII(out, detected);
+                    return;
+                }
                 ublRenderHeader(out, detected);
                 ublRenderTotals(out, detected);
                 ublRenderLines(out, detected);

@@ -79,6 +79,15 @@ const UBL_XML = `<?xml version="1.0" encoding="UTF-8"?>
 <cac:LegalMonetaryTotal><cbc:LineExtensionAmount currencyID="EUR">100.00</cbc:LineExtensionAmount><cbc:TaxExclusiveAmount currencyID="EUR">100.00</cbc:TaxExclusiveAmount><cbc:TaxInclusiveAmount currencyID="EUR">119.00</cbc:TaxInclusiveAmount><cbc:PayableAmount currencyID="EUR">119.00</cbc:PayableAmount></cac:LegalMonetaryTotal>
 <cac:InvoiceLine><cbc:ID>1</cbc:ID><cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity><cbc:LineExtensionAmount currencyID="EUR">100.00</cbc:LineExtensionAmount><cac:Item><cbc:Name>Widget</cbc:Name><cac:ClassifiedTaxCategory><cbc:ID>S</cbc:ID><cbc:Percent>19</cbc:Percent><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:ClassifiedTaxCategory></cac:Item><cac:Price><cbc:PriceAmount currencyID="EUR">100.00</cbc:PriceAmount></cac:Price></cac:InvoiceLine></Invoice>`;
 
+const CII_XML = `<?xml version="1.0" encoding="UTF-8"?>
+<rsm:CrossIndustryInvoice xmlns:rsm="urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100" xmlns:ram="urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100" xmlns:udt="urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100">
+<rsm:ExchangedDocument><ram:ID>FX-1</ram:ID><ram:TypeCode>380</ram:TypeCode><ram:IssueDateTime><udt:DateTimeString format="102">20240415</udt:DateTimeString></ram:IssueDateTime></rsm:ExchangedDocument>
+<rsm:SupplyChainTradeTransaction>
+<ram:IncludedSupplyChainTradeLineItem><ram:AssociatedDocumentLineDocument><ram:LineID>1</ram:LineID></ram:AssociatedDocumentLineDocument><ram:SpecifiedTradeProduct><ram:Name>Gadget</ram:Name></ram:SpecifiedTradeProduct><ram:SpecifiedLineTradeAgreement><ram:NetPriceProductTradePrice><ram:ChargeAmount>40.00</ram:ChargeAmount></ram:NetPriceProductTradePrice></ram:SpecifiedLineTradeAgreement><ram:SpecifiedLineTradeDelivery><ram:BilledQuantity unitCode="C62">3</ram:BilledQuantity></ram:SpecifiedLineTradeDelivery><ram:SpecifiedLineTradeSettlement><ram:SpecifiedTradeSettlementLineMonetarySummation><ram:LineTotalAmount>120.00</ram:LineTotalAmount></ram:SpecifiedTradeSettlementLineMonetarySummation></ram:SpecifiedLineTradeSettlement></ram:IncludedSupplyChainTradeLineItem>
+<ram:ApplicableHeaderTradeAgreement><ram:SellerTradeParty><ram:Name>Fournisseur SARL</ram:Name></ram:SellerTradeParty><ram:BuyerTradeParty><ram:Name>Kaeufer GmbH</ram:Name></ram:BuyerTradeParty></ram:ApplicableHeaderTradeAgreement>
+<ram:ApplicableHeaderTradeSettlement><ram:InvoiceCurrencyCode>EUR</ram:InvoiceCurrencyCode><ram:SpecifiedTradeSettlementHeaderMonetarySummation><ram:LineTotalAmount>120.00</ram:LineTotalAmount><ram:TaxBasisTotalAmount>120.00</ram:TaxBasisTotalAmount><ram:TaxTotalAmount currencyID="EUR">22.80</ram:TaxTotalAmount><ram:GrandTotalAmount>142.80</ram:GrandTotalAmount><ram:DuePayableAmount>142.80</ram:DuePayableAmount></ram:SpecifiedTradeSettlementHeaderMonetarySummation></ram:ApplicableHeaderTradeSettlement>
+</rsm:SupplyChainTradeTransaction></rsm:CrossIndustryInvoice>`;
+
 for (const w of WIDTHS) {
   const ctx = await browser.newContext({ viewport: { width: w, height: 780 } });
   const page = await ctx.newPage();
@@ -91,6 +100,7 @@ for (const w of WIDTHS) {
   for (const [name, route, input, btn, xml] of [
     ['sepa+doc', '#/utilities/sepa', '#sepa-input', '#btn-sepa-parse', SEPA_XML],
     ['ubl+doc', '#/utilities/ubl', '#ubl-input', '#btn-ubl-parse', UBL_XML],
+    ['cii+doc', '#/utilities/ubl', '#ubl-input', '#btn-ubl-parse', CII_XML],
   ]) {
     await page.goto(ORIGIN + '/index.html' + route, { waitUntil: 'load' });
     await page.waitForTimeout(150);

@@ -6862,6 +6862,65 @@ test('ubl: document-level AllowanceCharge TaxScheme presence flags a TaxCategory
   await expect(page.locator('#ubl-results')).toContainText(/Document-level AllowanceCharge #1 has a <cac:TaxCategory> but no <cac:TaxScheme>\/<cbc:ID>/i, { timeout: 5_000 });
 });
 
+// UN/CEFACT Cross Industry Invoice (the XML inside a Factur-X / ZUGFeRD hybrid PDF,
+// pasted directly). EN 16931 profile, one line, full monetary summation.
+const CII_INVOICE = `<?xml version="1.0" encoding="UTF-8"?>
+<rsm:CrossIndustryInvoice xmlns:rsm="urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100" xmlns:ram="urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100" xmlns:udt="urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100">
+  <rsm:ExchangedDocumentContext>
+    <ram:GuidelineSpecifiedDocumentContextParameter><ram:ID>urn:cen.eu:en16931:2017</ram:ID></ram:GuidelineSpecifiedDocumentContextParameter>
+  </rsm:ExchangedDocumentContext>
+  <rsm:ExchangedDocument>
+    <ram:ID>FX-2024-7</ram:ID>
+    <ram:TypeCode>380</ram:TypeCode>
+    <ram:IssueDateTime><udt:DateTimeString format="102">20240415</udt:DateTimeString></ram:IssueDateTime>
+  </rsm:ExchangedDocument>
+  <rsm:SupplyChainTradeTransaction>
+    <ram:IncludedSupplyChainTradeLineItem>
+      <ram:AssociatedDocumentLineDocument><ram:LineID>1</ram:LineID></ram:AssociatedDocumentLineDocument>
+      <ram:SpecifiedTradeProduct><ram:Name>Gadget Deluxe</ram:Name></ram:SpecifiedTradeProduct>
+      <ram:SpecifiedLineTradeAgreement><ram:NetPriceProductTradePrice><ram:ChargeAmount>40.00</ram:ChargeAmount></ram:NetPriceProductTradePrice></ram:SpecifiedLineTradeAgreement>
+      <ram:SpecifiedLineTradeDelivery><ram:BilledQuantity unitCode="C62">3</ram:BilledQuantity></ram:SpecifiedLineTradeDelivery>
+      <ram:SpecifiedLineTradeSettlement><ram:SpecifiedTradeSettlementLineMonetarySummation><ram:LineTotalAmount>120.00</ram:LineTotalAmount></ram:SpecifiedTradeSettlementLineMonetarySummation></ram:SpecifiedLineTradeSettlement>
+    </ram:IncludedSupplyChainTradeLineItem>
+    <ram:ApplicableHeaderTradeAgreement>
+      <ram:SellerTradeParty><ram:Name>Fournisseur SARL</ram:Name></ram:SellerTradeParty>
+      <ram:BuyerTradeParty><ram:Name>Kaeufer GmbH</ram:Name></ram:BuyerTradeParty>
+    </ram:ApplicableHeaderTradeAgreement>
+    <ram:ApplicableHeaderTradeSettlement>
+      <ram:InvoiceCurrencyCode>EUR</ram:InvoiceCurrencyCode>
+      <ram:SpecifiedTradeSettlementHeaderMonetarySummation>
+        <ram:LineTotalAmount>120.00</ram:LineTotalAmount>
+        <ram:TaxBasisTotalAmount>120.00</ram:TaxBasisTotalAmount>
+        <ram:TaxTotalAmount currencyID="EUR">22.80</ram:TaxTotalAmount>
+        <ram:GrandTotalAmount>142.80</ram:GrandTotalAmount>
+        <ram:DuePayableAmount>142.80</ram:DuePayableAmount>
+      </ram:SpecifiedTradeSettlementHeaderMonetarySummation>
+    </ram:ApplicableHeaderTradeSettlement>
+  </rsm:SupplyChainTradeTransaction>
+</rsm:CrossIndustryInvoice>`;
+
+test('ubl: detects and renders a UN/CEFACT CII (Factur-X / ZUGFeRD) document', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', CII_INVOICE);
+  await page.click('#btn-ubl-parse');
+  const res = page.locator('#ubl-results');
+  await expect(res).toContainText(/UN\/CEFACT CII \(Factur-X \/ ZUGFeRD\)/i, { timeout: 5_000 });
+  await expect(res).toContainText('FX-2024-7');
+  await expect(res).toContainText('Fournisseur SARL');
+  await expect(res).toContainText('Kaeufer GmbH');
+});
+
+test('ubl: CII renders the monetary summation, decoded date, and line item', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', CII_INVOICE);
+  await page.click('#btn-ubl-parse');
+  const res = page.locator('#ubl-results');
+  await expect(res).toContainText('2024-04-15');        // udt format-102 20240415 decoded
+  await expect(res).toContainText('22.80 EUR');         // TaxTotalAmount with currencyID
+  await expect(res).toContainText('142.80');            // GrandTotal / DuePayable
+  await expect(res).toContainText('Gadget Deluxe');     // line product name
+});
+
 test('ubl: LegalMonetaryTotal/PayableAmount presence flags a missing slot (draft 183)', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   const withBad = UBL_INVOICE.replace(/<cac:LegalMonetaryTotal>[\s\S]*?<\/cac:LegalMonetaryTotal>/g, (block) =>
@@ -6960,7 +7019,7 @@ test('ubl: rejects non-UBL XML', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'ubl');
   await page.fill('#ubl-input', '<?xml version="1.0"?><Document/>');
   await page.click('#btn-ubl-parse');
-  await expect(page.locator('#ubl-results')).toContainText(/<Invoice> or <CreditNote>/i, { timeout: 5_000 });
+  await expect(page.locator('#ubl-results')).toContainText(/<Invoice>, <CreditNote>, or <CrossIndustryInvoice>/i, { timeout: 5_000 });
 });
 
 // =============== Command palette (SPEC §1.6) ===============
