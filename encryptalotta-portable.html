@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <!--
   encryptalotta — single-file portable build
-  Source mtime: 2026-06-05T19:01:39.398Z
-  Source: index.html (SHA-256: 5e3f762de07af579079e96f042d9a46f0884470125731cc0ffa01f3f37bcf034)
+  Source mtime: 2026-06-05T19:13:32.105Z
+  Source: index.html (SHA-256: b3706a9ffac7b4b853fd5fc95cfa98000cc1e4323760af90ccdad31cdbf5893d)
   All vendored JavaScript inlined; favicons inlined as data: URIs.
   Identical functionality to the live site at https://encryptalotta.com.
   Runs from file://, USB stick, chat attachment, anywhere. No network calls.
@@ -7050,6 +7050,10 @@ var qrcode = function() {
                 'cii.warn.lineSum': 'CII line-sum mismatch: the per-line net amounts total {sum} but the header LineTotalAmount (BT-106) declares {head} — EN 16931 (the CII analogue of UBL BR-CO-10) requires the sum of every line BT-131 to equal the header sum-of-lines figure; a Factur-X / ZUGFeRD document failing this is rejected at the schematron gate (±1 cent rounding tolerance)',
                 'cii.ok.taxBasis': 'CII tax-exclusive basis reconciles: line total − allowance total + charge total = tax-basis total (EN 16931 — the CII analogue of UBL BR-CO-13, on ram:SpecifiedTradeSettlementHeaderMonetarySummation)',
                 'cii.warn.taxBasis': 'CII tax-basis mismatch: LineTotalAmount {line} − AllowanceTotalAmount {allow} + ChargeTotalAmount {charge} = {expected} ≠ TaxBasisTotalAmount {basis} — EN 16931 (the CII analogue of UBL BR-CO-13) requires the tax-exclusive basis to equal the line total net of document-level allowances and charges; a Factur-X / ZUGFeRD document failing this is rejected at the schematron gate (±1 cent rounding tolerance)',
+                'cii.ok.payable': 'CII amount due for payment reconciles: grand total − prepaid amount + rounding amount = due payable amount (EN 16931 — the CII analogue of UBL BR-CO-16, on ram:SpecifiedTradeSettlementHeaderMonetarySummation)',
+                'cii.warn.payable': 'CII payable mismatch: GrandTotalAmount {grand} − TotalPrepaidAmount {prepaid} + RoundingAmount {rounding} = {expected} ≠ DuePayableAmount {due} — EN 16931 (the CII analogue of UBL BR-CO-16) requires the amount due for payment to equal the tax-inclusive grand total net of any prepayment and cash rounding; a Factur-X / ZUGFeRD document failing this is rejected at the schematron gate (±1 cent rounding tolerance)',
+                'cii.ok.vatBreakdown': 'CII VAT breakdown sums to the header tax total: Σ per-category CalculatedAmount = header TaxTotalAmount (EN 16931 — the CII analogue of UBL BR-CO-14, Σ BT-117 = BT-110 across each ram:ApplicableTradeTax)',
+                'cii.warn.vatBreakdown': 'CII VAT-breakdown mismatch: the per-category VAT amounts total {sum} but the header TaxTotalAmount (BT-110) declares {head} — EN 16931 (the CII analogue of UBL BR-CO-14) requires the sum of every ram:ApplicableTradeTax/ram:CalculatedAmount (BT-117) to equal the rolled-up header tax total; a Factur-X / ZUGFeRD document failing this is rejected at the schematron gate (±1 cent rounding tolerance)',
                 'ubl.row.issueDate': 'Issue date',
                 'ubl.row.dueDate': 'Due date',
                 'ubl.row.currency': 'Currency',
@@ -8624,6 +8628,10 @@ var qrcode = function() {
                 'cii.warn.lineSum': 'Incohérence de la somme des lignes CII : les montants nets par ligne totalisent {sum} mais le LineTotalAmount d’en-tête (BT-106) déclare {head} — EN 16931 (l’analogue CII d’UBL BR-CO-10) exige que la somme de chaque BT-131 de ligne égale le total des lignes d’en-tête ; un document Factur-X / ZUGFeRD qui échoue est rejeté au contrôle schematron (tolérance d’arrondi de ±1 centime)',
                 'cii.ok.taxBasis': 'La base hors taxe CII se réconcilie : total des lignes − total des remises + total des frais = total de la base imposable (EN 16931 — l’analogue CII d’UBL BR-CO-13, sur ram:SpecifiedTradeSettlementHeaderMonetarySummation)',
                 'cii.warn.taxBasis': 'Incohérence de la base imposable CII : LineTotalAmount {line} − AllowanceTotalAmount {allow} + ChargeTotalAmount {charge} = {expected} ≠ TaxBasisTotalAmount {basis} — EN 16931 (l’analogue CII d’UBL BR-CO-13) exige que la base hors taxe égale le total des lignes net des remises et frais au niveau document ; un document Factur-X / ZUGFeRD qui échoue est rejeté au contrôle schematron (tolérance d’arrondi de ±1 centime)',
+                'cii.ok.payable': 'Le montant CII dû au paiement se réconcilie : total général − montant prépayé + montant d’arrondi = montant net à payer (EN 16931 — l’analogue CII d’UBL BR-CO-16, sur ram:SpecifiedTradeSettlementHeaderMonetarySummation)',
+                'cii.warn.payable': 'Incohérence du montant à payer CII : GrandTotalAmount {grand} − TotalPrepaidAmount {prepaid} + RoundingAmount {rounding} = {expected} ≠ DuePayableAmount {due} — EN 16931 (l’analogue CII d’UBL BR-CO-16) exige que le montant dû au paiement égale le total général TTC net de tout acompte et arrondi ; un document Factur-X / ZUGFeRD qui échoue est rejeté au contrôle schematron (tolérance d’arrondi de ±1 centime)',
+                'cii.ok.vatBreakdown': 'La ventilation de TVA CII s’additionne au total de taxe d’en-tête : Σ CalculatedAmount par catégorie = TaxTotalAmount d’en-tête (EN 16931 — l’analogue CII d’UBL BR-CO-14, Σ BT-117 = BT-110 sur chaque ram:ApplicableTradeTax)',
+                'cii.warn.vatBreakdown': 'Incohérence de la ventilation de TVA CII : les montants de TVA par catégorie totalisent {sum} mais le TaxTotalAmount d’en-tête (BT-110) déclare {head} — EN 16931 (l’analogue CII d’UBL BR-CO-14) exige que la somme de chaque ram:ApplicableTradeTax/ram:CalculatedAmount (BT-117) égale le total de taxe d’en-tête consolidé ; un document Factur-X / ZUGFeRD qui échoue est rejeté au contrôle schematron (tolérance d’arrondi de ±1 centime)',
                 'ubl.row.issueDate': 'Date d’émission',
                 'ubl.row.dueDate': 'Date d’échéance',
                 'ubl.row.currency': 'Devise',
@@ -10176,6 +10184,10 @@ var qrcode = function() {
                 'cii.warn.lineSum': 'CII 行合计不一致：各行净额合计为 {sum}，但表头 LineTotalAmount（BT-106）声明为 {head} — EN 16931（UBL BR-CO-10 的 CII 对应物）要求每行 BT-131 之和等于表头行合计金额；未通过的 Factur-X / ZUGFeRD 文档会在 schematron 关卡被拒绝（舍入容差 ±1 分）',
                 'cii.ok.taxBasis': 'CII 税前基数自洽：行合计 − 折扣合计 + 费用合计 = 税基合计（EN 16931——UBL BR-CO-13 的 CII 对应物，位于 ram:SpecifiedTradeSettlementHeaderMonetarySummation）',
                 'cii.warn.taxBasis': 'CII 税基不一致：LineTotalAmount {line} − AllowanceTotalAmount {allow} + ChargeTotalAmount {charge} = {expected} ≠ TaxBasisTotalAmount {basis} — EN 16931（UBL BR-CO-13 的 CII 对应物）要求税前基数等于行合计扣除文档级折扣和费用后的净额；未通过的 Factur-X / ZUGFeRD 文档会在 schematron 关卡被拒绝（舍入容差 ±1 分）',
+                'cii.ok.payable': 'CII 应付金额自洽：总计金额 − 预付金额 + 舍入金额 = 应付净额（EN 16931——UBL BR-CO-16 的 CII 对应物，位于 ram:SpecifiedTradeSettlementHeaderMonetarySummation）',
+                'cii.warn.payable': 'CII 应付金额不一致：GrandTotalAmount {grand} − TotalPrepaidAmount {prepaid} + RoundingAmount {rounding} = {expected} ≠ DuePayableAmount {due} — EN 16931（UBL BR-CO-16 的 CII 对应物）要求应付金额等于含税总计扣除任何预付款和现金舍入后的净额；未通过的 Factur-X / ZUGFeRD 文档会在 schematron 关卡被拒绝（舍入容差 ±1 分）',
+                'cii.ok.vatBreakdown': 'CII 增值税明细累加到表头税额总额：Σ 每类别 CalculatedAmount = 表头 TaxTotalAmount（EN 16931——UBL BR-CO-14 的 CII 对应物，Σ BT-117 = BT-110，遍及每个 ram:ApplicableTradeTax）',
+                'cii.warn.vatBreakdown': 'CII 增值税明细不一致：各类别增值税额合计为 {sum}，但表头 TaxTotalAmount（BT-110）声明为 {head} — EN 16931（UBL BR-CO-14 的 CII 对应物）要求每个 ram:ApplicableTradeTax/ram:CalculatedAmount（BT-117）之和等于汇总的表头税额总额；未通过的 Factur-X / ZUGFeRD 文档会在 schematron 关卡被拒绝（舍入容差 ±1 分）',
                 'ubl.row.issueDate': '开票日期',
                 'ubl.row.dueDate': '到期日期',
                 'ubl.row.currency': '货币',
@@ -11743,6 +11755,10 @@ var qrcode = function() {
                 'cii.warn.lineSum': 'CII-Zeilensummen-Abweichung: die Netto-Zeilenbeträge summieren sich auf {sum}, aber der Kopf-LineTotalAmount (BT-106) deklariert {head} — EN 16931 (das CII-Pendant zu UBL BR-CO-10) verlangt, dass die Summe jedes Zeilen-BT-131 dem Kopf-Zeilensummenbetrag entspricht; ein Factur-X-/ZUGFeRD-Dokument, das dies nicht erfüllt, wird am Schematron-Gate abgelehnt (±1 Cent Rundungstoleranz)',
                 'cii.ok.taxBasis': 'Die CII-Nettobemessungsgrundlage stimmt: Zeilensumme − Nachlasssumme + Zuschlagssumme = Steuerbemessungsgrundlage (EN 16931 — das CII-Pendant zu UBL BR-CO-13, auf ram:SpecifiedTradeSettlementHeaderMonetarySummation)',
                 'cii.warn.taxBasis': 'CII-Bemessungsgrundlagen-Abweichung: LineTotalAmount {line} − AllowanceTotalAmount {allow} + ChargeTotalAmount {charge} = {expected} ≠ TaxBasisTotalAmount {basis} — EN 16931 (das CII-Pendant zu UBL BR-CO-13) verlangt, dass die Nettobemessungsgrundlage der Zeilensumme abzüglich der Nachlässe und Zuschläge auf Dokumentebene entspricht; ein Factur-X-/ZUGFeRD-Dokument, das dies nicht erfüllt, wird am Schematron-Gate abgelehnt (±1 Cent Rundungstoleranz)',
+                'cii.ok.payable': 'Der CII-Zahlbetrag stimmt: Gesamtbetrag − Vorauszahlungsbetrag + Rundungsbetrag = fälliger Zahlbetrag (EN 16931 — das CII-Pendant zu UBL BR-CO-16, auf ram:SpecifiedTradeSettlementHeaderMonetarySummation)',
+                'cii.warn.payable': 'CII-Zahlbetrags-Abweichung: GrandTotalAmount {grand} − TotalPrepaidAmount {prepaid} + RoundingAmount {rounding} = {expected} ≠ DuePayableAmount {due} — EN 16931 (das CII-Pendant zu UBL BR-CO-16) verlangt, dass der fällige Zahlbetrag dem Brutto-Gesamtbetrag abzüglich etwaiger Vorauszahlung und Rundung entspricht; ein Factur-X-/ZUGFeRD-Dokument, das dies nicht erfüllt, wird am Schematron-Gate abgelehnt (±1 Cent Rundungstoleranz)',
+                'cii.ok.vatBreakdown': 'Die CII-USt-Aufschlüsselung summiert sich zum USt-Gesamtbetrag im Kopf: Σ CalculatedAmount je Kategorie = TaxTotalAmount im Kopf (EN 16931 — das CII-Pendant zu UBL BR-CO-14, Σ BT-117 = BT-110 über jede ram:ApplicableTradeTax)',
+                'cii.warn.vatBreakdown': 'CII-USt-Aufschlüsselungs-Abweichung: die USt-Beträge je Kategorie ergeben in Summe {sum}, aber der TaxTotalAmount im Kopf (BT-110) deklariert {head} — EN 16931 (das CII-Pendant zu UBL BR-CO-14) verlangt, dass die Summe jeder ram:ApplicableTradeTax/ram:CalculatedAmount (BT-117) dem aggregierten USt-Gesamtbetrag im Kopf entspricht; ein Factur-X-/ZUGFeRD-Dokument, das dies nicht erfüllt, wird am Schematron-Gate abgelehnt (±1 Cent Rundungstoleranz)',
                 'ubl.row.issueDate': 'Ausstellungsdatum',
                 'ubl.row.dueDate': 'Fälligkeitsdatum',
                 'ubl.row.currency': 'Währung',
@@ -13295,6 +13311,10 @@ var qrcode = function() {
                 'cii.warn.lineSum': 'CII पंक्ति-योग बेमेल: प्रति-पंक्ति शुद्ध राशियाँ कुल {sum} हैं लेकिन शीर्ष LineTotalAmount (BT-106) {head} घोषित करता है — EN 16931 (UBL BR-CO-10 का CII समकक्ष) के लिए प्रत्येक पंक्ति BT-131 का योग शीर्ष पंक्ति-योग आँकड़े के बराबर होना आवश्यक है; इसमें विफल Factur-X / ZUGFeRD दस्तावेज़ schematron गेट पर अस्वीकृत होता है (±1 सेंट पूर्णांकन सहनशीलता)',
                 'cii.ok.taxBasis': 'CII कर-रहित आधार मिलान करता है: पंक्ति योग − छूट योग + प्रभार योग = कर-आधार योग (EN 16931 — UBL BR-CO-13 का CII समकक्ष, ram:SpecifiedTradeSettlementHeaderMonetarySummation पर)',
                 'cii.warn.taxBasis': 'CII कर-आधार बेमेल: LineTotalAmount {line} − AllowanceTotalAmount {allow} + ChargeTotalAmount {charge} = {expected} ≠ TaxBasisTotalAmount {basis} — EN 16931 (UBL BR-CO-13 का CII समकक्ष) के लिए कर-रहित आधार का दस्तावेज़-स्तर की छूट और प्रभार घटाने के बाद पंक्ति योग के बराबर होना आवश्यक है; इसमें विफल Factur-X / ZUGFeRD दस्तावेज़ schematron गेट पर अस्वीकृत होता है (±1 सेंट पूर्णांकन सहनशीलता)',
+                'cii.ok.payable': 'CII देय राशि सुसंगत है: कुल योग − पूर्वभुगतान राशि + पूर्णांकन राशि = देय शुद्ध राशि (EN 16931 — UBL BR-CO-16 का CII समकक्ष, ram:SpecifiedTradeSettlementHeaderMonetarySummation पर)',
+                'cii.warn.payable': 'CII देय राशि बेमेल: GrandTotalAmount {grand} − TotalPrepaidAmount {prepaid} + RoundingAmount {rounding} = {expected} ≠ DuePayableAmount {due} — EN 16931 (UBL BR-CO-16 का CII समकक्ष) के लिए देय राशि का कर-सहित कुल योग में से किसी भी पूर्वभुगतान और पूर्णांकन घटाने के बाद के बराबर होना आवश्यक है; इसमें विफल Factur-X / ZUGFeRD दस्तावेज़ schematron गेट पर अस्वीकृत होता है (±1 सेंट पूर्णांकन सहनशीलता)',
+                'cii.ok.vatBreakdown': 'CII VAT विवरण शीर्ष कर योग में जुड़ता है: Σ प्रति-श्रेणी CalculatedAmount = शीर्ष TaxTotalAmount (EN 16931 — UBL BR-CO-14 का CII समकक्ष, प्रत्येक ram:ApplicableTradeTax पर Σ BT-117 = BT-110)',
+                'cii.warn.vatBreakdown': 'CII VAT-विवरण बेमेल: प्रति-श्रेणी VAT राशियाँ कुल {sum} होती हैं परन्तु शीर्ष TaxTotalAmount (BT-110) {head} घोषित करता है — EN 16931 (UBL BR-CO-14 का CII समकक्ष) के लिए प्रत्येक ram:ApplicableTradeTax/ram:CalculatedAmount (BT-117) के योग का समेकित शीर्ष कर योग के बराबर होना आवश्यक है; इसमें विफल Factur-X / ZUGFeRD दस्तावेज़ schematron गेट पर अस्वीकृत होता है (±1 सेंट पूर्णांकन सहनशीलता)',
                 'ubl.row.issueDate': 'जारी करने की तिथि',
                 'ubl.row.dueDate': 'देय तिथि',
                 'ubl.row.currency': 'मुद्रा',
@@ -26956,6 +26976,84 @@ var qrcode = function() {
             }
         }
 
+        // CII payable-amount reconciliation (draft 267). The CII analogue of UBL
+        // BR-CO-16 (ublCheckPayable): on ram:SpecifiedTradeSettlementHeaderMonetary-
+        // Summation, the DuePayableAmount (BT-115) must equal the GrandTotalAmount
+        // (BT-112) minus the TotalPrepaidAmount (BT-113) plus the RoundingAmount
+        // (BT-114) — the figure the buyer actually remits once any prepayment and
+        // cash-rounding adjustment are applied to the tax-inclusive grand total.
+        // EN 16931 types BT-113 / BT-114 as optional, so an absent prepaid or
+        // rounding figure defaults to zero. Integer-cent comparison, ±1 cent
+        // tolerance. No-ops when BT-112 or BT-115 is absent, or when a present
+        // BT-113 / BT-114 is unparsable. This closes the CII header monetary chain
+        // end to end: Σ lines (265) → line total → tax-basis (266) → grand total
+        // (260) → due payable (267).
+        function ciiCheckPayable(out, detected) {
+            const r = detected.root;
+            const txn = sepaFirst(r, 'SupplyChainTradeTransaction');
+            const settlement = txn ? sepaFirst(txn, 'ApplicableHeaderTradeSettlement') : null;
+            const sum = settlement ? sepaFirst(settlement, 'SpecifiedTradeSettlementHeaderMonetarySummation') : null;
+            if (!sum) return;
+            const grandEl = sepaFirst(sum, 'GrandTotalAmount');
+            const dueEl = sepaFirst(sum, 'DuePayableAmount');
+            const grand = grandEl ? ublParseCents(grandEl.textContent) : null;
+            const due = dueEl ? ublParseCents(dueEl.textContent) : null;
+            if (grand == null || due == null) return;
+            const prepaidEl = sepaFirst(sum, 'TotalPrepaidAmount');
+            const roundEl = sepaFirst(sum, 'RoundingAmount');
+            const prepaid = prepaidEl ? ublParseCents(prepaidEl.textContent) : 0;
+            const rounding = roundEl ? ublParseCents(roundEl.textContent) : 0;
+            if (prepaid == null || rounding == null) return;
+            const expected = grand - prepaid + rounding;
+            const fmt = (c) => (c / 100).toFixed(2);
+            if (Math.abs(expected - due) <= 1) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + t('cii.ok.payable'));
+            } else {
+                tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + tFormat('cii.warn.payable', { grand: fmt(grand), prepaid: fmt(prepaid), rounding: fmt(rounding), expected: fmt(expected), due: fmt(due) }));
+            }
+        }
+
+        // CII VAT-breakdown sum (draft 268). The CII analogue of UBL BR-CO-14
+        // (ublCheckTaxTotalBreakdownSum): the header TaxTotalAmount (BT-110, on
+        // ram:SpecifiedTradeSettlementHeaderMonetarySummation) must equal the sum of
+        // every per-category VAT-breakdown amount (BT-117, ram:CalculatedAmount on
+        // each header-level ram:ApplicableTradeTax block). A breakdown can reconcile
+        // against the grand total (draft 260) while the per-rate amounts fail to add
+        // up to the rolled-up header tax — PEPPOL rejects at the BR-CO-14 schematron
+        // gate. Scoped to *direct children* of ram:ApplicableHeaderTradeSettlement so
+        // it never picks up a per-line ram:ApplicableTradeTax (which lives under
+        // ram:SpecifiedLineTradeSettlement). Integer-cent comparison, ±1 cent
+        // tolerance. No-ops when the header TaxTotalAmount is absent, when there are
+        // no ApplicableTradeTax blocks, or when a CalculatedAmount is unparsable.
+        function ciiCheckVatBreakdown(out, detected) {
+            const r = detected.root;
+            const txn = sepaFirst(r, 'SupplyChainTradeTransaction');
+            const settlement = txn ? sepaFirst(txn, 'ApplicableHeaderTradeSettlement') : null;
+            if (!settlement) return;
+            const sum = sepaFirst(settlement, 'SpecifiedTradeSettlementHeaderMonetarySummation');
+            const headEl = sum ? sepaFirst(sum, 'TaxTotalAmount') : null;
+            const head = headEl ? ublParseCents(headEl.textContent) : null;
+            if (head == null) return;
+            const taxes = [];
+            for (const c of settlement.children) {
+                if (c.localName === 'ApplicableTradeTax') taxes.push(c);
+            }
+            if (taxes.length === 0) return;
+            let sumCents = 0;
+            for (const tax of taxes) {
+                const amtEl = sepaFirstChildLocal(tax, 'CalculatedAmount');
+                const cents = amtEl ? ublParseCents(amtEl.textContent) : null;
+                if (cents == null) return;
+                sumCents += cents;
+            }
+            const fmt = (c) => (c / 100).toFixed(2);
+            if (Math.abs(sumCents - head) <= 1) {
+                tlsRenderRow(out, t('ubl.row.warning'), '✓ ' + t('cii.ok.vatBreakdown'));
+            } else {
+                tlsRenderRow(out, t('ubl.row.warning'), '✗ ' + tFormat('cii.warn.vatBreakdown', { sum: fmt(sumCents), head: fmt(head) }));
+            }
+        }
+
         // EN 16931 totals consistency check. Two invariants are independent of any
         // PrepaidAmount / PayableRoundingAmount complications and catch the
         // overwhelming majority of real-world arithmetic errors:
@@ -32173,6 +32271,8 @@ var qrcode = function() {
                     ciiCheckTypeCode(out, detected);
                     ciiCheckLineSum(out, detected);
                     ciiCheckTaxBasis(out, detected);
+                    ciiCheckPayable(out, detected);
+                    ciiCheckVatBreakdown(out, detected);
                     return;
                 }
                 ublRenderHeader(out, detected);

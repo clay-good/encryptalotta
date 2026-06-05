@@ -6888,6 +6888,13 @@ const CII_INVOICE = `<?xml version="1.0" encoding="UTF-8"?>
     </ram:ApplicableHeaderTradeAgreement>
     <ram:ApplicableHeaderTradeSettlement>
       <ram:InvoiceCurrencyCode>EUR</ram:InvoiceCurrencyCode>
+      <ram:ApplicableTradeTax>
+        <ram:CalculatedAmount>22.80</ram:CalculatedAmount>
+        <ram:TypeCode>VAT</ram:TypeCode>
+        <ram:BasisAmount>120.00</ram:BasisAmount>
+        <ram:CategoryCode>S</ram:CategoryCode>
+        <ram:RateApplicablePercent>19.00</ram:RateApplicablePercent>
+      </ram:ApplicableTradeTax>
       <ram:SpecifiedTradeSettlementHeaderMonetarySummation>
         <ram:LineTotalAmount>120.00</ram:LineTotalAmount>
         <ram:TaxBasisTotalAmount>120.00</ram:TaxBasisTotalAmount>
@@ -7056,6 +7063,41 @@ test('cii: tax-basis arithmetic flags an allowance the basis does not account fo
   await page.fill('#ubl-input', withBad);
   await page.click('#btn-ubl-parse');
   await expect(page.locator('#ubl-results')).toContainText(/CII tax-basis mismatch: LineTotalAmount 120\.00 − AllowanceTotalAmount 10\.00 \+ ChargeTotalAmount 0\.00 = 110\.00 ≠ TaxBasisTotalAmount 120\.00/i, { timeout: 5_000 });
+});
+
+test('cii: payable reconciliation confirms when grand − prepaid + rounding = due (draft 267)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', CII_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/CII amount due for payment reconciles/i, { timeout: 5_000 });
+});
+
+test('cii: payable reconciliation flags a due amount that disagrees with the grand total (draft 267)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // No prepaid/rounding in the fixture, so DuePayable should equal GrandTotal (142.80).
+  // Force a 999.00 due to trip the gate: 142.80 − 0.00 + 0.00 = 142.80 ≠ 999.00.
+  const withBad = CII_INVOICE.replace('<ram:DuePayableAmount>142.80</ram:DuePayableAmount>', '<ram:DuePayableAmount>999.00</ram:DuePayableAmount>');
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/CII payable mismatch: GrandTotalAmount 142\.80 − TotalPrepaidAmount 0\.00 \+ RoundingAmount 0\.00 = 142\.80 ≠ DuePayableAmount 999\.00/i, { timeout: 5_000 });
+});
+
+test('cii: VAT-breakdown sum confirms when Σ per-category amounts = header tax total (draft 268)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  await page.fill('#ubl-input', CII_INVOICE);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/CII VAT breakdown sums to the header tax total/i, { timeout: 5_000 });
+});
+
+test('cii: VAT-breakdown sum flags a per-category amount that disagrees with the header (draft 268)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'ubl');
+  // The fixture's single ApplicableTradeTax/CalculatedAmount is 22.80, matching the
+  // header TaxTotalAmount. Shrinking it to 19.00 leaves the header at 22.80, so the
+  // per-category sum (19.00) no longer reconciles with the rolled-up header tax.
+  const withBad = CII_INVOICE.replace('<ram:CalculatedAmount>22.80</ram:CalculatedAmount>', '<ram:CalculatedAmount>19.00</ram:CalculatedAmount>');
+  await page.fill('#ubl-input', withBad);
+  await page.click('#btn-ubl-parse');
+  await expect(page.locator('#ubl-results')).toContainText(/CII VAT-breakdown mismatch: the per-category VAT amounts total 19\.00 but the header TaxTotalAmount \(BT-110\) declares 22\.80/i, { timeout: 5_000 });
 });
 
 test('ubl: LegalMonetaryTotal/PayableAmount presence flags a missing slot (draft 183)', async ({ page }) => {
