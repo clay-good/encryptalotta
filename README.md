@@ -139,13 +139,17 @@ The only time the network is touched is the initial GET that loads the page and 
 index.html
 ├─ <meta CSP>            connect-src 'none'; frame-ancestors 'none'; …
 ├─ inline <style>        CSS logical properties (RTL-ready), no external sheet
-├─ STRINGS {}            1,873 keys × 5 locales — i18n table, vendored inline
+├─ STRINGS {}            2,124 keys × 5 locales — i18n table, vendored inline
 ├─ tool registry         53 tools → {id, group, route, render()}
-│    ├─ Keys (8)         OpenPGP.js · hand-rolled ASN.1/DER · SSH wire format
-│    ├─ Encrypt (5)      OpenPGP.js · LSB stego (Web Crypto keystream)
-│    ├─ Sign (4)         OpenPGP.js · Web Crypto HMAC / JWT verify
-│    └─ Utilities (29)   Web Crypto · BigInt · hand-rolled codecs/parsers
-│                        + IBAN/BIC/VAT/GS1, SEPA & UBL conformance engines
+│    ├─ Keys (12)        OpenPGP.js · hand-rolled ASN.1/DER reader · CSR (PKCS#10)
+│    │                   self-sig verify · JWK↔PEM · QR encode + hand-rolled
+│    │                   QR decode (Reed-Solomon/GF256) · SSH wire format
+│    ├─ Encrypt (6)      OpenPGP.js · age (X25519/scrypt) · LSB stego
+│    ├─ Sign (4)         OpenPGP.js · Web Crypto HMAC / JWT (JWKS + EdDSA) verify
+│    └─ Utilities (31)   Web Crypto · BigInt · hand-rolled codecs/parsers
+│                        (BLAKE2b/3, SHA-3/Keccak, Argon2, scrypt) · offline
+│                        passphrase-strength + file-type magic-number aids
+│                        + IBAN/BIC/VAT/GS1, SEPA & UBL/CII conformance engines
 ├─ router               hashchange → render(route); deep-linkable #/group/tool
 └─ clearSensitiveFields()  beforeunload → wipe every secret-bearing field
    vendored: openpgp.min.js · qrcode.js · secrets.min.js · js-yaml.min.js
@@ -437,6 +441,29 @@ All 53 tools are organized into four groups. Every tool has a deep-link route.
 - Pure client-side QR rendering via vendored [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator). The canvas is drawn locally; the only blob URL produced is for the download anchor (not visible to `img-src`), so CSP is unchanged.
 - For inputs over 1,200 bytes, the input is chunked into multi-QR sequences with the prefix `EAL-QR/v1/{n}/{total}/`. Capacity is enforced as 1,200 bytes × 16 chunks = 19,200 bytes maximum.
 - Chunking uses UTF-8 byte length (`TextEncoder`) and split-codepoint-safe decoding (`TextDecoder({stream: true})`).
+
+### QR Decoder
+The inverse of QR Share, and the one deferred new-tool the project chose to **hand-roll rather than vendor** — keeping the dependency count at four. The decode pipeline (ISO/IEC 18004), all in the page's own JS heap, no upload:
+
+```
+ uploaded image (PNG/JPEG/WebP)
+        │  <canvas> getImageData  (img-src 'self' data: blob: already allows this)
+        ▼
+ grayscale → Otsu threshold → 1-bit module grid
+        │  finder-pattern run (1:1:3:1:1) gives module size → sample N×N matrix
+        ▼
+ format info (15 bits, BCH-corrected)  →  EC level + data mask
+        │  unmask · zig-zag codeword walk · de-interleave RS blocks
+        ▼
+ Reed-Solomon decode over GF(256)   ←  corrects damaged modules
+        │  (Berlekamp-Massey locator · Chien search · Forney magnitudes)
+        ▼
+ segment decode (byte / numeric / alphanumeric)  →  text payload
+```
+
+- Scoped to flat, axis-aligned images (screenshots, generated codes, flat scans); no rotation/perspective correction — a skewed photo gets a clear "image may be rotated or skewed" message rather than a wrong guess.
+- Versions 1–40, all four EC levels, all eight masks. Verified offline against the page's own generator (versions 1–18, every level/mask, multiple scales, injected single-module errors) before shipping; regression-locked in [tests/specs/18-newtools-vectors.spec.js](tests/specs/18-newtools-vectors.spec.js).
+- Decoding an image that encodes a private key or address keeps that image on your device — unlike a phone camera app or a website scanner.
 
 ### Steganography
 - **Threat model: casual concealment, not nation-state adversaries.** Sophisticated steganalysis (chi-squared LSB tests, RS-analysis) can detect LSB modification with high confidence. This tool is for situations where the *existence* of the data should not be obvious to a casual observer.
