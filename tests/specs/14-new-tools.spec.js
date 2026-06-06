@@ -151,11 +151,21 @@ test('NEW age: generate keypair, encrypt to the recipient, decrypt with its iden
 // Pairs naturally with the existing generator (and the "scan a paper
 // key back in" workflow). view: #qr-decode-view  input: #qr-decode-file
 // ===================================================================
-test.fixme('NEW qr-decode: recovers the payload from an uploaded QR image', async ({ page }) => {
+test('NEW qr-decode: recovers the payload from an uploaded QR image', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'qr-decode');
-  // A fixtured PNG of a QR encoding "encryptalotta" would be set on #qr-decode-file.
-  // Acceptance: the decoded text appears in #qr-decode-output.
-  await expect(page.locator('#qr-decode-output')).toHaveValue('encryptalotta');
+  // Generate a real QR PNG for "encryptalotta" in-page via the vendored qrcode-generator,
+  // then feed it to the file input — the inverse round-trip the tool exists for.
+  const dataUrl = await page.evaluate(() => {
+    const qr = qrcode(0, 'M'); qr.addData('encryptalotta'); qr.make();
+    const n = qr.getModuleCount(), scale = 6, quiet = 4, W = (n + 2 * quiet) * scale;
+    const cv = document.createElement('canvas'); cv.width = cv.height = W;
+    const ctx = cv.getContext('2d');
+    ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, W); ctx.fillStyle = '#000';
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (qr.isDark(r, c)) ctx.fillRect((c + quiet) * scale, (r + quiet) * scale, scale, scale);
+    return cv.toDataURL('image/png');
+  });
+  await page.setInputFiles('#qr-decode-file', { name: 'qr.png', mimeType: 'image/png', buffer: Buffer.from(dataUrl.split(',')[1], 'base64') });
+  await expect(page.locator('#qr-decode-output')).toHaveValue('encryptalotta', { timeout: 5000 });
 });
 
 // ===================================================================

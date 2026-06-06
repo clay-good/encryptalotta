@@ -44,7 +44,7 @@ test.describe('citation formatting', () => {
     expect(bad).toEqual([]);
   });
 
-  test.fixme('BSI TR-02102 always carries its part suffix "-1"', () => {
+  test('BSI TR-02102 always carries its part suffix "-1"', () => {
     // FIX: index.html:115 (meta description) reads "BSI TR-02102" — the only
     // bare occurrence among 24 correct "BSI TR-02102-1". Append "-1" there.
     const bareReadme = (README.match(/TR-02102(?!-)/g) || []).length;
@@ -52,7 +52,7 @@ test.describe('citation formatting', () => {
     expect(bareReadme + bareIndex, 'found bare "TR-02102" without the "-1" part suffix').toBe(0);
   });
 
-  test.fixme('BIP-0039 is the canonical spelling in prose (not the colloquial "BIP39")', () => {
+  test('BIP-0039 is the canonical spelling in prose (not the colloquial "BIP39")', () => {
     // FIX: README + index.html mix "BIP39" (62×) and "BIP-0039" (13×). The formal
     // BIP name is "BIP-0039"; normalize prose/help-text to it (UI element ids and
     // i18n keys may keep "bip39"). This is a consistency normalization, not a bug.
@@ -135,7 +135,7 @@ test.describe('vector-suite citations', () => {
 });
 
 // ---------- Improvement marker: linkable sources ----------
-test.fixme('regulator-preset help text should carry a verifiable reference (URL or §)', () => {
+test('regulator-preset help text should carry a verifiable reference (URL or §)', () => {
   // FIX: preset notes (e.g. 'preset.note.bsi') say "Verify against the BSI document"
   // but provide no link or document section. Add a URL or a precise section ref so a
   // user can trace the iteration-count / curve claim. See the citation punch-list.

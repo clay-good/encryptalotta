@@ -1,30 +1,31 @@
 # encryptalotta
 
-![encryptalotta — 52 client-side privacy and developer tools, zero server uploads](encryptalotta.png)
+![encryptalotta — 53 client-side privacy and developer tools, zero server uploads](encryptalotta.png)
 
-**Free, client-side privacy and developer toolbox — 52 tools, zero server uploads.**
+**Free, client-side privacy and developer toolbox — 53 tools, zero server uploads.**
 
-A comprehensive single-page web app with **52 cryptographic, encoding, parsing, and developer utilities** that run entirely in your browser. PGP key generation, key inspection, revocation certificates, QR public-key sharing, TLS / X.509 certificate parsing, OpenSSH public key parsing, PEM ↔ DER conversion, generic ASN.1 / DER (X.690) decoding, CSR (PKCS#10) decoding with self-signature verification, JWK ↔ PEM key conversion, BIP39 mnemonic generation and validation, file and text encryption / decryption, password-only (symmetric) file encryption, image steganography, age file encryption (X25519 recipients or scrypt passphrase, interoperable with the age CLI), digital signing and verification, HMAC (hex + Base64), JWT inspection and verification (HS / RS / ES / EdDSA, PEM / JWK / JWKS), password-based key derivation (PBKDF2 / scrypt / Argon2id — RFC 8018 / 7914 / 9106), TOTP / HOTP 2FA (RFC 6238 / 4226), password generation, offline passphrase-strength estimation, file-type magic-byte identification, ASCII armor conversion, Shamir's Secret Sharing, EXIF metadata stripping, hashing and checksums (SHA-1 / 256 / 384 / 512, SHA3-256 / 512, SHAKE128 / 256, BLAKE2b, BLAKE3), Base64 / Base32 / Base58 / Base58Check / hex encoding, number base conversion (binary / octal / decimal / hex / any base 2–36), UUID v4 / v5 / v7 and ULID generation, Unix timestamp conversion (epoch ↔ ISO ↔ IANA timezone ↔ ISO week / day-of-year), URL parsing, line-level and unified diff, CSV ↔ JSON ↔ TSV conversion, regex testing, cron decoding, color conversion (HEX / RGB / HSL / OKLCH / CMYK + CSS named colors) with WCAG contrast checking, JSON / YAML / XML formatting and CBOR (RFC 8949) decoding, and CIDR / IPv4 + IPv6 subnet calculation. Searchable command palette (`⌘K` / `Ctrl+K`), full keyboard navigation, five UI languages. No server uploads, no analytics, no CDN, no tracking.
+A comprehensive single-page web app with **53 cryptographic, encoding, parsing, and developer utilities** that run entirely in your browser. PGP key generation, key inspection, revocation certificates, QR public-key sharing, QR image decoding (hand-rolled, Reed-Solomon corrected), TLS / X.509 certificate parsing, OpenSSH public key parsing, PEM ↔ DER conversion, generic ASN.1 / DER (X.690) decoding, CSR (PKCS#10) decoding with self-signature verification, JWK ↔ PEM key conversion, BIP-0039 mnemonic generation and validation, file and text encryption / decryption, password-only (symmetric) file encryption, image steganography, age file encryption (X25519 recipients or scrypt passphrase, interoperable with the age CLI), digital signing and verification, HMAC (hex + Base64), JWT inspection and verification (HS / RS / ES / EdDSA, PEM / JWK / JWKS), password-based key derivation (PBKDF2 / scrypt / Argon2id — RFC 8018 / 7914 / 9106), TOTP / HOTP 2FA (RFC 6238 / 4226), password generation, offline passphrase-strength estimation, file-type magic-byte identification, ASCII armor conversion, Shamir's Secret Sharing, EXIF metadata stripping, hashing and checksums (SHA-1 / 256 / 384 / 512, SHA3-256 / 512, SHAKE128 / 256, BLAKE2b, BLAKE3), Base64 / Base32 / Base58 / Base58Check / hex encoding, number base conversion (binary / octal / decimal / hex / any base 2–36), UUID v4 / v5 / v7 and ULID generation, Unix timestamp conversion (epoch ↔ ISO ↔ IANA timezone ↔ ISO week / day-of-year), URL parsing, line-level and unified diff, CSV ↔ JSON ↔ TSV conversion, regex testing, cron decoding, color conversion (HEX / RGB / HSL / OKLCH / CMYK + CSS named colors) with WCAG contrast checking, JSON / YAML / XML formatting and CBOR (RFC 8949) decoding, and CIDR / IPv4 + IPv6 subnet calculation. Searchable command palette (`⌘K` / `Ctrl+K`), full keyboard navigation, five UI languages. No server uploads, no analytics, no CDN, no tracking.
 
 **Inspired by [Kevin Qiu](https://www.linkedin.com/in/kevinmqiu)**
 
 
 ---
 
-## Features (52 tools)
+## Features (53 tools)
 
-### Keys (11 tools)
+### Keys (12 tools)
 - **Generate PGP Keys** — Create ECC (Curve25519) or RSA 3072 / 4096 key pairs with customizable expiry. Optional **regulator presets** (BSI TR-02102-1, ANSSI RGS B1, NIST SP 800-57, CNSA 2.0, Privacy Guides) auto-fill the algorithm + key size from each regulator's published recommendation and link out to the source document.
 - **Key Info** — Inspect any PGP public key: fingerprint, user IDs, algorithm, key size, creation and expiration dates.
 - **Revocation Certificate** — Generate a pre-signed certificate to retire a compromised key.
 - **QR Share** — Encode a PGP public key or encrypted message as one or more scannable QR codes (multi-QR `EAL-QR/v1/{n}/{total}/` for long inputs).
+- **QR Decoder** — The inverse: recover the text payload from a QR *image* (PNG / JPEG / WebP), entirely in-browser — never uploaded. A **hand-rolled decoder** (no new vendored dependency): Otsu binarisation → finder-based module-grid sampling → BCH-corrected format info → zig-zag codeword walk → block de-interleaving → **Reed-Solomon error correction over GF(256)**, so a code with some damaged modules still decodes. Byte (UTF-8), numeric, and alphanumeric modes; QR versions 1–40; all four EC levels; all eight masks. Scoped to flat, axis-aligned images (screenshots, generated codes, flat scans); reports a clear message when an image is too skewed. Verified offline against the page's own generator across versions 1–18, every EC level and mask, and injected-error cases.
 - **TLS Certificate Parser** — Hand-rolled ASN.1 / DER decoder for X.509 certificates: subject, issuer, SAN, validity, public key algorithm, SHA-1 + SHA-256 fingerprints. Also decodes **PKCS#7 / CMS (RFC 5652) SignedData** — certs-only bundles (`.p7b` / `.p7c`) and CAdES-BES signatures: it surfaces every embedded certificate plus each signer's digest algorithm, signature algorithm, and signed signing-time. It ingests a **PAdES-signed PDF** directly (load the file): it pulls each signature dictionary's `/Contents` CMS blob out of the PDF in-tab and decodes it the same way. And it decodes a pasted **XAdES / XML-DSig** signature: XAdES level (B-B / B-T / B-LT / B-LTA), signature + canonicalization methods, reference digests, signing time, and embedded certificates. (This is the **§2.5 eIDAS signature inspector — CAdES + PAdES + XAdES, the three eIDAS signature families**. No network, no cryptographic-verification or revocation checking — it reports structure + signer identity, not a validity verdict.)
 - **SSH Key Parser** — OpenSSH RFC 4253 wire-format parser: key type (rsa / ed25519 / ecdsa-sha2-nistp{256,384,521}), bit size, `SHA256:<base64>` fingerprint, comment.
 - **PEM ↔ DER** — Round-trip between PEM (Base64 with header/footer) and DER (raw binary as hex).
 - **ASN.1 / DER Decoder** — A generic ITU-T X.690 tag-length-value tree viewer for *any* DER blob (hex / Base64 / PEM): SEQUENCE, SET, INTEGER, OBJECT IDENTIFIER, the string types, and context-specific tags decode into an indented, typed tree, with OIDs and small integers rendered in full. Complements the specialized X.509 / CMS / CBOR parsers with a raw view for anything they don't cover — a private-key file, an OCSP response, a timestamp token — without an online decoder. Long-form lengths, multi-byte tags, and nesting are handled; malformed input is reported, never thrown.
 - **CSR (PKCS#10) Decoder** — Decode a Certificate Signing Request (PEM or DER, RFC 2986): subject distinguished name, public-key algorithm, requested Subject Alternative Names, and **a real self-signature verification**. Reuses the hand-rolled X.509 ASN.1 reader; the signed data is the exact DER of `CertificationRequestInfo` sliced from the original bytes (never re-encoded), so the hash matches byte-for-byte. RSA, ECDSA (with DER → raw `r‖s` conversion), and Ed25519 signatures verify via Web Crypto. Completes the certificate lifecycle alongside the cert parser.
 - **JWK ↔ PEM Converter** — Convert a public JSON Web Key to SPKI PEM and back (RFC 7517 / 7518 / 8037). **OKP (Ed25519 / X25519) is hand-rolled both directions** — the SPKI wrapper is a fixed 12-byte prefix plus the 32-byte key, so it needs no Web Crypto and works regardless of browser Ed25519 support — while **EC (P-256/384/521) and RSA** go through Web Crypto import/export. PEM → JWK reads the algorithm OID from the SPKI structure to pick the key type. Bridges the JOSE world (which the JWT verifier speaks) to PEM-consuming TLS / OpenSSL tooling, fully offline.
-- **BIP39 Mnemonic** — Generate cryptographically random 12 / 15 / 18 / 21 / 24-word seed phrases (BIP-0039) or validate the checksum of any existing mnemonic. Computes the BIP39 PBKDF2-HMAC-SHA512 seed locally with optional passphrase.
+- **BIP-0039 Mnemonic** — Generate cryptographically random 12 / 15 / 18 / 21 / 24-word seed phrases (BIP-0039) or validate the checksum of any existing mnemonic. Computes the BIP-0039 PBKDF2-HMAC-SHA512 seed locally with optional passphrase.
 
 ### Encrypt / Decrypt (6 tools)
 - **Encrypt Files** — Encrypt files with one or more PGP public keys.
@@ -139,7 +140,7 @@ index.html
 ├─ <meta CSP>            connect-src 'none'; frame-ancestors 'none'; …
 ├─ inline <style>        CSS logical properties (RTL-ready), no external sheet
 ├─ STRINGS {}            1,873 keys × 5 locales — i18n table, vendored inline
-├─ tool registry         52 tools → {id, group, route, render()}
+├─ tool registry         53 tools → {id, group, route, render()}
 │    ├─ Keys (8)         OpenPGP.js · hand-rolled ASN.1/DER · SSH wire format
 │    ├─ Encrypt (5)      OpenPGP.js · LSB stego (Web Crypto keystream)
 │    ├─ Sign (4)         OpenPGP.js · Web Crypto HMAC / JWT verify
@@ -250,7 +251,7 @@ This eliminates entire categories of supply chain attacks that have affected oth
 Sensitive data is cleared from memory after use:
 
 - **Automatic passphrase clearing** — Passphrase fields are wiped after decryption operations.
-- **Page unload protection** — On `beforeunload`, `clearSensitiveFields()` wipes every passphrase, private-key, shared-secret, BIP39 mnemonic, and PBKDF2 password input across all 52 tools, plus the readonly output panes that render decrypted plaintext, derived keys, BIP39 seeds, Shamir secrets, and steganographic payloads. Public keys, signed messages, and signature-verification statuses are left alone (they aren't secrets and clearing them would erase audit context).
+- **Page unload protection** — On `beforeunload`, `clearSensitiveFields()` wipes every passphrase, private-key, shared-secret, BIP-0039 mnemonic, and PBKDF2 password input across all 53 tools, plus the readonly output panes that render decrypted plaintext, derived keys, BIP-0039 seeds, Shamir secrets, and steganographic payloads. Public keys, signed messages, and signature-verification statuses are left alone (they aren't secrets and clearing them would erase audit context).
 - **JavaScript variable clearing** — Sensitive `Uint8Array` buffers (PBKDF2 password bytes, generated PGP private keys) are zeroized via `.fill(0)` / `secureWipe()` after use. (Note: this is best-effort — JS engines may have already retained internal copies for GC, and `String` values are immutable so we cannot overwrite them in place.)
 
 ### Strict Content Security Policy
@@ -357,22 +358,23 @@ The interface is a **home grid + command palette**, designed to stay minimal on 
 
 ## All Features at Your Fingertips
 
-All 52 tools are organized into four groups. Every tool has a deep-link route.
+All 53 tools are organized into four groups. Every tool has a deep-link route.
 
-### Keys (11)
+### Keys (12)
 | Tool | Route | What it does |
 |---|---|---|
 | **Generate Keys** | `#/keys/generate` | Create new PGP key pairs (ECC Curve25519 or RSA 3072 / 4096) |
 | **Key Info** | `#/keys/key-info` | Inspect any PGP key's fingerprint, user ID, algorithm, expiry |
 | **Revoke Key** | `#/keys/revoke` | Create a revocation certificate for a compromised key |
 | **QR Share** | `#/keys/qr` | Encode a public key or message into a QR (multi-QR for long inputs) |
+| **QR Decoder** | `#/keys/qr-decode` | Decode a QR *image* back to text (hand-rolled, Reed-Solomon corrected, offline) |
 | **TLS Certificate Parser** | `#/keys/tls-cert` | Decode an X.509 cert, a PKCS#7 / CMS / CAdES signature, a PAdES-signed PDF, or a XAdES / XML-DSig signature (the eIDAS signature inspector) |
 | **SSH Key Parser** | `#/keys/ssh-key` | Inspect an OpenSSH public key: type, bits, SHA-256 fingerprint |
 | **PEM ↔ DER** | `#/keys/pem-der` | Convert between PEM (Base64) and DER (binary) encodings |
 | **ASN.1 / DER Decoder** | `#/keys/asn1` | Decode any DER blob (hex / Base64 / PEM) into a typed TLV tree (ITU-T X.690) |
 | **CSR Decoder** | `#/keys/csr` | Decode a PKCS#10 CSR (RFC 2986): subject, key algorithm, SANs, self-signature check |
 | **JWK ↔ PEM** | `#/keys/jwk` | Convert a public JWK ↔ SPKI PEM (RFC 7517 / 8037 — OKP / EC / RSA) |
-| **BIP39 Mnemonic** | `#/keys/bip39` | Generate or validate BIP-0039 mnemonic seed phrases (12 / 15 / 18 / 21 / 24 words) |
+| **BIP-0039 Mnemonic** | `#/keys/bip39` | Generate or validate BIP-0039 mnemonic seed phrases (12 / 15 / 18 / 21 / 24 words) |
 
 ### Encrypt / Decrypt (6)
 | Tool | Route | What it does |
@@ -492,10 +494,10 @@ age-encryption.org/v1                          ← intro line
 - Pre-strip detection (informational only) parses JPEG APP1 segments for IFD0 + GPS-IFD tag counts, and PNG `tEXt`/`iTXt`/`zTXt`/`eXIf` chunks. The strip happens regardless of the detection result.
 - **Re-encoding recompresses the image.** For a JPEG with sensitive metadata that you want removed *without* recompression, use a desktop tool. Default quality is 92, adjustable 50–100.
 
-### BIP39 Mnemonic
-- **A BIP39 mnemonic is a wallet master key.** Anyone holding the words can derive every private key in every account derived from it, on every chain. Treat the words like cash, not like an email password.
+### BIP-0039 Mnemonic
+- **A BIP-0039 mnemonic is a wallet master key.** Anyone holding the words can derive every private key in every account derived from it, on every chain. Treat the words like cash, not like an email password.
 - Entropy is generated locally via `crypto.getRandomValues` (the browser's Web Crypto CSPRNG). The official BIP-0039 English wordlist (2048 words) is vendored inline; no network fetch.
-- The seed is computed via `PBKDF2-HMAC-SHA512(mnemonic, "mnemonic" + passphrase, 2048 iterations, 64 bytes)` per the BIP39 spec, using Web Crypto.
+- The seed is computed via `PBKDF2-HMAC-SHA512(mnemonic, "mnemonic" + passphrase, 2048 iterations, 64 bytes)` per the BIP-0039 spec, using Web Crypto.
 - The mnemonic textarea and passphrase field are both included in `clearSensitiveFields()` and wiped on page unload — but a tab snapshot, browser extension, or screen-recording could capture them in the meantime. **For high-value wallets, generate the mnemonic on an air-gapped machine.**
 - Validation is offline-only (checksum + seed derivation). It does not check whether the mnemonic controls funds on any chain.
 
@@ -533,7 +535,7 @@ Every tool maps to a published standard so its output is checkable against an au
 | Domain | Standard / RFC | Tool(s) |
 |---|---|---|
 | PGP / OpenPGP | RFC 9580 (formerly 4880) | Generate, Key Info, Revoke, Encrypt, Decrypt, Text, Sign, Verify, Armor |
-| Symmetric KDF | RFC 8018 (PBKDF2), RFC 7914 (scrypt), RFC 9106 (Argon2id), BIP-0039 | PBKDF2 / scrypt / Argon2id, BIP39 |
+| Symmetric KDF | RFC 8018 (PBKDF2), RFC 7914 (scrypt), RFC 9106 (Argon2id), BIP-0039 | PBKDF2 / scrypt / Argon2id, BIP-0039 |
 | Password hashing | RFC 9106 (Argon2id/i/d); vectors RFC 9106 §5 | Argon2 |
 | Signatures (EdDSA) | RFC 8032 (Ed25519) | Ed25519 |
 | Key agreement (ECDH) | RFC 7748 (X25519), RFC 5869 (HKDF) | X25519 |
@@ -556,6 +558,7 @@ Every tool maps to a published standard so its output is checkable against an au
 | SSH wire format | RFC 4253, RFC 4716 | SSH Key Parser |
 | UUID / ULID | RFC 9562 (UUID v4 / v5 §5.5 / v7) | UUID / ULID |
 | Base encodings | RFC 4648 (Base64/32), Base58 + Base58Check (Bitcoin, SHA-256d checksum) | Encode |
+| QR codes | ISO/IEC 18004 (generate + decode, Reed-Solomon over GF(256)) | QR Share, QR Decoder |
 | CSV | RFC 4180 | CSV ↔ JSON ↔ TSV |
 | CIDR / subnetting | RFC 4632, RFC 3021 (/31), RFC 1918 (IPv4); RFC 4291 / RFC 5952 (IPv6) | CIDR / Subnet |
 | Color | WCAG 2.1 contrast, OKLCH (Oklab), CSS Color Module Level 4 named colors, CMYK | Color Converter |
@@ -759,7 +762,7 @@ node scripts/build-i18n-variants.js
 node scripts/audit-release.js
 ```
 
-The audit checks: zero `innerHTML =` assignments, STRINGS parity across all 5 locales, every `data-i18n` key resolves, vendored SHA-384 hashes match across HTML comments + the README manifest + on-disk bytes, CSP `connect-src 'none'` on both meta and `_headers`, no outbound network call sites, page weight under 2 MB gzipped, locale variants (`/fr/`, `/zh/`, `/de/`, `/hi/`) in sync with source, `robots.txt` + `sitemap.xml` + JSON-LD presence, Phase-7 SEO prose key coverage for all 52 tools, and (if present) `sbom.json` hash consistency and `encryptalotta-portable.html` having no `<script src=>` references.
+The audit checks: zero `innerHTML =` assignments, STRINGS parity across all 5 locales, every `data-i18n` key resolves, vendored SHA-384 hashes match across HTML comments + the README manifest + on-disk bytes, CSP `connect-src 'none'` on both meta and `_headers`, no outbound network call sites, page weight under 2 MB gzipped, locale variants (`/fr/`, `/zh/`, `/de/`, `/hi/`) in sync with source, `robots.txt` + `sitemap.xml` + JSON-LD presence, Phase-7 SEO prose key coverage for all 53 tools, and (if present) `sbom.json` hash consistency and `encryptalotta-portable.html` having no `<script src=>` references.
 
 ### Build artifacts (for distribution / audit, optional)
 
@@ -885,7 +888,7 @@ This site is optimized for Cloudflare Pages deployment with automatic security h
 
 This application is open source specifically so security researchers can audit it. Key areas to review:
 
-- `index.html` - All application logic (CSP meta tags, JavaScript cryptographic calls, memory clearing, i18n, all 52 tools)
+- `index.html` - All application logic (CSP meta tags, JavaScript cryptographic calls, memory clearing, i18n, all 53 tools)
 - `_headers` - HTTP security headers
 - `openpgp.min.js` - Compare against official OpenPGP.js v6.3.0 release
 - `qrcode.js` - Compare against official qrcode-generator v2.0.4 release
