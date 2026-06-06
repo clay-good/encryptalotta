@@ -4,7 +4,7 @@
 
 **Free, client-side privacy and developer toolbox — 47 tools, zero server uploads.**
 
-A comprehensive single-page web app with **47 cryptographic, encoding, parsing, and developer utilities** that run entirely in your browser. PGP key generation, key inspection, revocation certificates, QR public-key sharing, TLS / X.509 certificate parsing, OpenSSH public key parsing, PEM ↔ DER conversion, BIP39 mnemonic generation and validation, file and text encryption / decryption, password-only (symmetric) file encryption, image steganography, age file encryption (X25519 recipients or scrypt passphrase, interoperable with the age CLI), digital signing and verification, HMAC, JWT inspection and verification, PBKDF2 and Argon2 (RFC 9106) key derivation, TOTP / 2FA, password generation, ASCII armor conversion, Shamir's Secret Sharing, EXIF metadata stripping, hashing and checksums (SHA-1 / 256 / 384 / 512, SHA3-256 / 512, SHAKE128 / 256, BLAKE2b, BLAKE3), Base64 / Base32 / Base58 / hex encoding, number base conversion (binary / octal / decimal / hex / any base 2–36), UUID v4 / v7 and ULID generation, Unix timestamp conversion, URL parsing, line-level diff, CSV ↔ JSON ↔ TSV conversion, regex testing, cron decoding, color conversion with WCAG contrast checking, JSON / YAML / XML formatting and CBOR (RFC 8949) decoding, and CIDR / IPv4 subnet calculation. Searchable command palette (`⌘K` / `Ctrl+K`), full keyboard navigation, five UI languages. No server uploads, no analytics, no CDN, no tracking.
+A comprehensive single-page web app with **47 cryptographic, encoding, parsing, and developer utilities** that run entirely in your browser. PGP key generation, key inspection, revocation certificates, QR public-key sharing, TLS / X.509 certificate parsing, OpenSSH public key parsing, PEM ↔ DER conversion, BIP39 mnemonic generation and validation, file and text encryption / decryption, password-only (symmetric) file encryption, image steganography, age file encryption (X25519 recipients or scrypt passphrase, interoperable with the age CLI), digital signing and verification, HMAC (hex + Base64), JWT inspection and verification, PBKDF2 and Argon2 (RFC 9106) key derivation, TOTP / HOTP 2FA (RFC 6238 / 4226), password generation, ASCII armor conversion, Shamir's Secret Sharing, EXIF metadata stripping, hashing and checksums (SHA-1 / 256 / 384 / 512, SHA3-256 / 512, SHAKE128 / 256, BLAKE2b, BLAKE3), Base64 / Base32 / Base58 / hex encoding, number base conversion (binary / octal / decimal / hex / any base 2–36), UUID v4 / v5 / v7 and ULID generation, Unix timestamp conversion (epoch ↔ ISO ↔ IANA timezone ↔ ISO week / day-of-year), URL parsing, line-level diff, CSV ↔ JSON ↔ TSV conversion, regex testing, cron decoding, color conversion (HEX / RGB / HSL / OKLCH / CMYK + CSS named colors) with WCAG contrast checking, JSON / YAML / XML formatting and CBOR (RFC 8949) decoding, and CIDR / IPv4 subnet calculation. Searchable command palette (`⌘K` / `Ctrl+K`), full keyboard navigation, five UI languages. No server uploads, no analytics, no CDN, no tracking.
 
 **Inspired by [Kevin Qiu](https://www.linkedin.com/in/kevinmqiu)**
 
@@ -34,7 +34,7 @@ A comprehensive single-page web app with **47 cryptographic, encoding, parsing, 
 ### Sign / Verify (4 tools)
 - **Sign** — Produce detached, attached, or cleartext PGP signatures for files or text using your private key.
 - **Verify** — Verify any PGP signature against a public key.
-- **HMAC** — Sign and verify with HMAC-SHA-1 / 256 / 384 / 512. Constant-time comparison on verify; key buffer zeroized after use.
+- **HMAC** — Sign and verify with HMAC-SHA-1 / 256 / 384 / 512; MAC rendered in both **hex and Base64** (RFC 2104). Constant-time comparison on verify; key buffer zeroized after use.
 - **JWT / credential Inspector** — Decode the three Base64-URL parts; verify HS256/384/512 (shared secret), RS256/384/512 (PEM SPKI public key), or ES256/384/512 (PEM SPKI ECDSA key). Expiry indicator from the `exp` claim. Doubles as the **EUDI-wallet credential decoder**: it decodes **SD-JWT** (selective-disclosure JWT — disclosures, `_sd` digest matching, KB-JWT verification, `sd_hash` / `aud` / `nonce` checks) and **ISO 18013-5 mdoc** (paste the CBOR as hex / base64url — surfaces docType, per-namespace data elements, and the COSE_Sign1 MSO: digest algorithm, validity window, value-digest count, device key, and the x5chain issuer certificate). Decode-only; no issuer-trust verification.
 
 ### Utilities (29 tools)
@@ -44,15 +44,15 @@ A comprehensive single-page web app with **47 cryptographic, encoding, parsing, 
 - **EXIF Eraser** — Strip GPS, camera serial numbers, timestamps from JPEG / PNG / WebP via canvas re-encode.
 - **Hash & Checksum** — SHA-1 / 256 / 384 / 512 (Web Crypto), SHA3-256 / SHA3-512 (FIPS 202, hand-rolled Keccak), BLAKE2b-512 (RFC 7693, hand-rolled), and BLAKE3-256 (hand-rolled, full Merkle-tree mode) over text or files, with constant-time hash comparison. None of SHA-3 or the BLAKE digests are in Web Crypto, so all are hand-rolled inline with no vendored dependency; each is verified against its official test vectors and cross-checked byte-for-byte against the audited `@noble/hashes` build (and Node's native SHA-3) across every rate / chunk / block boundary. An **Advanced** panel surfaces the full extendable surface: BLAKE2b with 1–64-byte output and an optional key (keyed MAC, RFC 7693 §3.2); BLAKE3 in **XOF** (arbitrary 1–1024-byte output), **keyed** (32-byte key), or **derive-key** (KDF with a context string) mode; and **SHAKE128 / SHAKE256** (FIPS 202 XOFs) with variable output length.
 - **Base64 / 32 / 58 / Hex Encoder** — Cross-convert text ↔ hex ↔ Base64 (standard + URL-safe) ↔ Base32 ↔ Base58 (Bitcoin alphabet).
-- **UUID / ULID Generator** — UUID v4 (random), UUID v7 (RFC 9562 time-ordered), ULID. Bulk generate up to 1000 per click.
-- **Unix Timestamp Converter** — Auto-detect epoch seconds / milliseconds / ISO 8601; render in UTC, local, and relative ("5 minutes ago").
+- **UUID / ULID Generator** — UUID v4 (random), UUID v7 (RFC 9562 time-ordered), UUID v5 (RFC 9562 §5.5 deterministic namespace + name, SHA-1), ULID. Bulk generate up to 1000 per click (v5 is deterministic → single value). Verified against the canonical `v5(NS_DNS, "example.com")` vector.
+- **Unix Timestamp Converter** — Auto-detect epoch seconds / milliseconds / ISO 8601; render in UTC, local, relative ("5 minutes ago"), an explicit **IANA timezone** (`Intl.DateTimeFormat`, Local + UTC + eight common zones), **ISO 8601 week** (`YYYY-Www`), and **day-of-year**.
 - **URL Parser** — Parse via the built-in `URL` API; surface protocol/host/port/path/search/hash/origin and a query-parameter table. Percent-encode and decode utilities.
-- **TOTP / 2FA** — RFC 6238 generator; accepts `otpauth://totp/...` URIs or bare Base32 secrets. SHA-1/256/512, configurable digits (6–10) and period (15–120). Secret zeroed on Stop.
+- **TOTP / 2FA** — RFC 6238 time-based generator **and RFC 4226 HOTP** counter-based mode (Appendix D vector: counter 0 → `755224`); accepts `otpauth://totp/...` URIs or bare Base32 secrets. SHA-1/256/512, configurable digits (6–10) and period (15–120). Secret zeroed on Stop.
 - **Diff** — Line-level LCS comparison with optional ignore-whitespace and ignore-case toggles.
 - **CSV ↔ JSON ↔ TSV** — RFC 4180-style parser (quoted fields, escaped `""`, CRLF/LF). Auto-detect delimiter, "first row is header" toggle.
 - **Regex Tester** — Live match highlighting, numbered + named capture groups, replacement preview. Built with `createElement` / `textContent` (no `innerHTML`).
 - **Cron Decoder** — Parse 5-field cron (`*`, `*/n`, ranges, lists, named months/dows); show description and next 5 fire times in local timezone.
-- **Color Converter** — HEX ↔ RGB ↔ HSL ↔ OKLCH (hand-rolled Oklab matrices). WCAG AA / AAA contrast checker with live preview swatch.
+- **Color Converter** — HEX ↔ RGB ↔ HSL ↔ OKLCH (hand-rolled Oklab matrices) ↔ **CMYK**, and accepts the **148 CSS Color Module Level 4 named colors** (`rebeccapurple → #663399`). WCAG AA / AAA contrast checker with live preview swatch.
 - **JSON / YAML / XML / CBOR Formatter** — Pretty-print, minify, and cross-convert JSON ↔ YAML; pretty-print or minify XML standalone; and **decode CBOR (RFC 8949) from hex or base64 to JSON / YAML** — a hand-rolled decoder covering all eight major types, indefinite lengths, bignums, and semantic tags. It is **credential-aware**: tag 24 (encoded CBOR data item) is decoded recursively, and well-known tags are named (`$tagName`) — so a pasted **COSE_Sign1 / CWT / ISO 18013-5 mdoc** (EUDI wallet) decodes to a fully readable, self-labelled tree, with the embedded MobileSecurityObject expanded inline. Byte strings show as `{$bytes}`, tags as `{$tag, $tagName, $value}`. Auto-detect input format. (TOML omitted — no small browser-ready parser exists without a build step.)
 - **CIDR / Subnet Calculator** — IPv4 only; pure 32-bit unsigned arithmetic. Network, broadcast, netmask (with binary view), wildcard, first/last usable host, total + usable counts, address class, RFC 1918 / loopback / link-local tags. Handles `/0`, `/31` (RFC 3021), and `/32` correctly.
 - **PBKDF2 Key Derivation** — RFC 8018 password-based key derivation via Web Crypto. Configurable iterations (1–10,000,000), salt (text or hex), key length (1–512 bytes), and PRF (SHA-1 / 256 / 384 / 512). Reports wall-clock derivation time so you can size iteration counts to a target cost.
@@ -393,15 +393,15 @@ All 47 tools are organized into four groups. Every tool has a deep-link route.
 | **EXIF Eraser** | `#/utilities/exif` | Strip GPS / metadata from JPEG, PNG, WebP images |
 | **Hash & Checksum** | `#/utilities/hash` | SHA-1/256/384/512 + SHA3-256/512 + BLAKE2b-512 + BLAKE3-256; advanced: keyed MAC, variable length, BLAKE3 XOF / keyed / derive-key, SHAKE128/256 |
 | **Encode** | `#/utilities/encode` | Cross-convert Base64 / Base32 / Base58 / Hex / text |
-| **UUID / ULID** | `#/utilities/uuid` | Bulk-generate UUID v4, UUID v7, or ULID |
-| **Unix Timestamp** | `#/utilities/timestamp` | Convert epoch ↔ ISO 8601 ↔ UTC ↔ local ↔ relative |
+| **UUID / ULID** | `#/utilities/uuid` | Bulk-generate UUID v4, UUID v7, deterministic v5 (namespace), or ULID |
+| **Unix Timestamp** | `#/utilities/timestamp` | Convert epoch ↔ ISO 8601 ↔ UTC ↔ local ↔ relative ↔ IANA timezone ↔ ISO week / day-of-year |
 | **URL Parser** | `#/utilities/url` | Parse + percent-encode / decode URLs and queries |
-| **TOTP / 2FA** | `#/utilities/totp` | RFC 6238 code generator (otpauth:// URI or bare secret) |
+| **TOTP / 2FA** | `#/utilities/totp` | RFC 6238 TOTP + RFC 4226 HOTP code generator (otpauth:// URI or bare secret) |
 | **Diff** | `#/utilities/diff` | Line-level LCS diff with whitespace / case toggles |
 | **CSV / JSON / TSV** | `#/utilities/csv` | Convert tabular data with RFC 4180 quoting |
 | **Regex Tester** | `#/utilities/regex` | Live match highlight + capture groups + replace |
 | **Cron Decoder** | `#/utilities/cron` | Decode cron expression + show next 5 run times |
-| **Color Converter** | `#/utilities/color` | HEX / RGB / HSL / OKLCH + WCAG contrast checker |
+| **Color Converter** | `#/utilities/color` | HEX / RGB / HSL / OKLCH / CMYK + CSS named colors + WCAG contrast checker |
 | **Format / Convert** | `#/utilities/format` | Pretty / minify / convert JSON, YAML, XML; decode CBOR (hex / base64) → JSON |
 | **CIDR / Subnet** | `#/utilities/cidr` | Decode IPv4 CIDR: network, broadcast, host range, tags |
 | **PBKDF2** | `#/utilities/pbkdf2` | Derive a key from a password (configurable iterations, salt, PRF) |
@@ -539,11 +539,11 @@ Every tool maps to a published standard so its output is checkable against an au
 | CBOR | RFC 8949 (Concise Binary Object Representation) | Format / Convert |
 | COSE / CWT / mdoc | RFC 9052 (COSE), RFC 8392 (CWT), ISO 18013-5 (mdoc) — tag-aware CBOR decode | Format / Convert |
 | SSH wire format | RFC 4253, RFC 4716 | SSH Key Parser |
-| UUID / ULID | RFC 9562 (UUID v4 / v7) | UUID / ULID |
+| UUID / ULID | RFC 9562 (UUID v4 / v5 §5.5 / v7) | UUID / ULID |
 | Base encodings | RFC 4648 (Base64/32), Base58 (Bitcoin) | Encode |
 | CSV | RFC 4180 | CSV ↔ JSON ↔ TSV |
 | CIDR / subnetting | RFC 4632, RFC 3021 (/31), RFC 1918 | CIDR / Subnet |
-| Color | WCAG 2.1 contrast, OKLCH (Oklab) | Color Converter |
+| Color | WCAG 2.1 contrast, OKLCH (Oklab), CSS Color Module Level 4 named colors, CMYK | Color Converter |
 | IBAN | ISO 13616, MOD-97-10 (ISO 7064) | IBAN |
 | BIC | ISO 9362 | BIC / SWIFT |
 | GS1 barcodes | GS1 General Specs (mod-10) | GS1 / EAN / GTIN |

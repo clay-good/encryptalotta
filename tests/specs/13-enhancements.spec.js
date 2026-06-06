@@ -58,7 +58,7 @@ test.fixme('cidr: decodes IPv6 prefixes (RFC 4291)', async ({ page }) => {
 // New: a "v5" option + #uuid-namespace + #uuid-name inputs.
 // Known vector: v5(NS_DNS, "example.com").
 // ---------------------------------------------------------------
-test.fixme('uuid: generates deterministic v5 from namespace + name (RFC 9562 §5.5)', async ({ page }) => {
+test('uuid: generates deterministic v5 from namespace + name (RFC 9562 §5.5)', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'uuid');
   await page.selectOption('#uuid-format', 'v5');
   await page.fill('#uuid-namespace', '6ba7b810-9dad-11d1-80b4-00c04fd430c8'); // NS_DNS
@@ -109,7 +109,7 @@ test.fixme('jwt: verifies using a pasted JWKS document + EdDSA (RFC 8037)', asyn
 // HMAC truncation; exposing a counter input covers event-based OTP.
 // New: a mode toggle + #hotp-counter. RFC 4226 Appendix D: counter 0 → 755224.
 // ---------------------------------------------------------------
-test.fixme('totp: adds HOTP counter mode (RFC 4226 Appendix D)', async ({ page }) => {
+test('totp: adds HOTP counter mode (RFC 4226 Appendix D)', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'totp');
   await page.check('#totp-mode-hotp');
   await page.fill('#totp-input', 'GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ'); // "12345678901234567890" base32
@@ -122,7 +122,7 @@ test.fixme('totp: adds HOTP counter mode (RFC 4226 Appendix D)', async ({ page }
 // color — accept CSS named colors and emit CMYK. "rebeccapurple" and the
 // 147 named colors are common designer input; CMYK is needed for print.
 // ---------------------------------------------------------------
-test.fixme('color: accepts CSS named colors and outputs CMYK', async ({ page }) => {
+test('color: accepts CSS named colors and outputs CMYK', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'color');
   await page.fill('#color-input', 'rebeccapurple');
   await page.click('#btn-color-convert');
@@ -167,7 +167,7 @@ test.fixme('encode: supports Base58Check decode with checksum validation', async
 // timestamp — show an explicit-timezone view + ISO week and day-of-year.
 // New: #ts-timezone selector; output includes "Week" and "Day of year".
 // ---------------------------------------------------------------
-test.fixme('timestamp: explicit timezone + ISO week / day-of-year', async ({ page }) => {
+test('timestamp: explicit timezone + ISO week / day-of-year', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'timestamp');
   await page.fill('#ts-input', '1700000000');
   await page.selectOption('#ts-timezone', 'UTC');
@@ -196,7 +196,7 @@ test.fixme('shamir: validates each share and flags a corrupted one before combin
 // how MACs travel in HTTP signatures / webhooks.
 // New: #hmac-out-base64 (a second output line, not replacing hex).
 // ---------------------------------------------------------------
-test.fixme('hmac: shows the MAC in Base64 alongside hex', async ({ page }) => {
+test('hmac: shows the MAC in Base64 alongside hex', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'hmac');
   await page.selectOption('#hmac-algo', 'SHA-256');
   await page.fill('#hmac-key', 'key');

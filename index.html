@@ -2374,6 +2374,11 @@
                     <textarea id="hmac-result" rows="3" readonly></textarea>
                 </div>
 
+                <div class="form-group">
+                    <label for="hmac-out-base64" data-i18n="hmac.label.resultB64">HMAC (Base64):</label>
+                    <textarea id="hmac-out-base64" rows="2" readonly spellcheck="false"></textarea>
+                </div>
+
                 <hr style="margin: 30px 0; border: none; border-top: 1px solid var(--border);">
 
                 <h3 style="margin-bottom: 12px;" data-i18n="hmac.verifyHeading">Verify a known HMAC</h3>
@@ -2444,11 +2449,19 @@
                     <select id="uuid-format">
                         <option value="v4" data-i18n="uuid.fmt.v4">UUID v4 (random)</option>
                         <option value="v7" data-i18n="uuid.fmt.v7">UUID v7 (time-ordered)</option>
+                        <option value="v5" data-i18n="uuid.fmt.v5">UUID v5 (namespace, SHA-1)</option>
                         <option value="ulid" data-i18n="uuid.fmt.ulid">ULID (time-ordered, base32)</option>
                     </select>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group" id="uuid-v5-fields" style="display: none;">
+                    <label for="uuid-namespace" data-i18n="uuid.label.namespace">Namespace UUID:</label>
+                    <input type="text" id="uuid-namespace" autocomplete="off" spellcheck="false" placeholder="6ba7b810-9dad-11d1-80b4-00c04fd430c8 (DNS)">
+                    <label for="uuid-name" data-i18n="uuid.label.name" style="margin-top: 10px;">Name:</label>
+                    <input type="text" id="uuid-name" autocomplete="off" spellcheck="false" data-i18n-attr="placeholder:uuid.ph.name" placeholder="e.g. example.com">
+                </div>
+
+                <div class="form-group" id="uuid-count-field">
                     <label for="uuid-count" data-i18n="uuid.label.count">How many:</label>
                     <input type="number" id="uuid-count" min="1" max="1000" value="1">
                 </div>
@@ -2472,6 +2485,22 @@
                 <div class="form-group">
                     <label for="ts-input" data-i18n="timestamp.label.input">Input (Unix seconds, milliseconds, or ISO 8601):</label>
                     <input type="text" id="ts-input" autocomplete="off" spellcheck="false" data-i18n-attr="placeholder:timestamp.ph.input" placeholder="e.g. 1700000000 or 2023-11-14T22:13:20Z">
+                </div>
+
+                <div class="form-group">
+                    <label for="ts-timezone" data-i18n="timestamp.label.timezone">Display timezone:</label>
+                    <select id="ts-timezone">
+                        <option value="local" data-i18n="timestamp.tz.local">Local (this device)</option>
+                        <option value="UTC">UTC</option>
+                        <option value="America/Los_Angeles">America/Los_Angeles</option>
+                        <option value="America/New_York">America/New_York</option>
+                        <option value="Europe/London">Europe/London</option>
+                        <option value="Europe/Paris">Europe/Paris</option>
+                        <option value="Europe/Berlin">Europe/Berlin</option>
+                        <option value="Asia/Kolkata">Asia/Kolkata</option>
+                        <option value="Asia/Shanghai">Asia/Shanghai</option>
+                        <option value="Asia/Tokyo">Asia/Tokyo</option>
+                    </select>
                 </div>
 
                 <button id="btn-ts-now" class="btn btn-secondary" data-i18n="btn.tsNow">Use current time</button>
@@ -2579,6 +2608,16 @@
                     <input type="text" id="totp-input" autocomplete="off" spellcheck="false" data-i18n-attr="placeholder:totp.ph.input" placeholder="JBSWY3DPEHPK3PXP   or   otpauth://totp/Acme:alice?secret=…">
                 </div>
 
+                <div class="form-group">
+                    <label data-i18n="totp.label.mode">Mode:</label>
+                    <label style="display:inline-flex;align-items:center;gap:6px;font-weight:400;margin-inline-end:18px;">
+                        <input type="radio" name="totp-mode" id="totp-mode-totp" value="totp" checked> <span data-i18n="totp.mode.totp">TOTP (time-based, RFC 6238)</span>
+                    </label>
+                    <label style="display:inline-flex;align-items:center;gap:6px;font-weight:400;">
+                        <input type="radio" name="totp-mode" id="totp-mode-hotp" value="hotp"> <span data-i18n="totp.mode.hotp">HOTP (counter-based, RFC 4226)</span>
+                    </label>
+                </div>
+
                 <div style="display: flex; gap: 16px; flex-wrap: wrap;">
                     <div class="form-group" style="flex: 1; min-width: 130px;">
                         <label for="totp-algo" data-i18n="totp.label.algo">Algorithm:</label>
@@ -2592,9 +2631,13 @@
                         <label for="totp-digits" data-i18n="totp.label.digits">Digits:</label>
                         <input type="number" id="totp-digits" min="6" max="10" value="6">
                     </div>
-                    <div class="form-group" style="flex: 1; min-width: 110px;">
+                    <div class="form-group" id="totp-period-field" style="flex: 1; min-width: 110px;">
                         <label for="totp-period" data-i18n="totp.label.period">Period (sec):</label>
                         <input type="number" id="totp-period" min="15" max="120" value="30">
+                    </div>
+                    <div class="form-group" id="hotp-counter-field" style="flex: 1; min-width: 110px; display: none;">
+                        <label for="hotp-counter" data-i18n="totp.label.counter">Counter:</label>
+                        <input type="number" id="hotp-counter" min="0" value="0">
                     </div>
                 </div>
 
@@ -3724,6 +3767,7 @@
                 'hmac.label.keyHex': 'Key is hex-encoded',
                 'hmac.label.msg': 'Message:',
                 'hmac.label.result': 'HMAC (hex):',
+                'hmac.label.resultB64': 'HMAC (Base64):',
                 'hmac.label.expected': 'Expected HMAC (hex):',
                 'hmac.ph.key': 'Shared secret',
                 'hmac.ph.msg': 'Message to sign…',
@@ -3756,7 +3800,13 @@
                 'uuid.label.output': 'Output:',
                 'uuid.fmt.v4': 'UUID v4 (random)',
                 'uuid.fmt.v7': 'UUID v7 (time-ordered)',
+                'uuid.fmt.v5': 'UUID v5 (namespace, SHA-1)',
                 'uuid.fmt.ulid': 'ULID (time-ordered, base32)',
+                'uuid.label.namespace': 'Namespace UUID:',
+                'uuid.label.name': 'Name:',
+                'uuid.ph.name': 'e.g. example.com',
+                'err.uuidNamespace': 'Namespace must be a 32-hex-digit UUID.',
+                'err.uuidGenerate': 'Could not generate UUID',
                 'btn.uuidGenerate': 'Generate',
                 'timestamp.label.input': 'Input (Unix seconds, milliseconds, or ISO 8601):',
                 'timestamp.ph.input': 'e.g. 1700000000 or 2023-11-14T22:13:20Z',
@@ -3768,6 +3818,11 @@
                 'timestamp.row.utc': 'UTC string',
                 'timestamp.row.local': 'Local time',
                 'timestamp.row.relative': 'Relative',
+                'timestamp.label.timezone': 'Display timezone:',
+                'timestamp.tz.local': 'Local (this device)',
+                'timestamp.row.inTz': 'In timezone',
+                'timestamp.row.week': 'ISO week',
+                'timestamp.row.doy': 'Day of year',
                 'timestamp.rel.future': 'in {n} {unit}',
                 'timestamp.rel.past': '{n} {unit} ago',
                 'err.tsInvalid': 'Could not parse the input as a timestamp',
@@ -3890,6 +3945,11 @@
                 'totp.warnBody': "Whoever has the TOTP secret can generate the same codes you do. Don't paste it into untrusted tools, screenshot it, or send it through unencrypted channels.",
                 'totp.label.input': 'Secret or otpauth:// URI:',
                 'totp.ph.input': 'JBSWY3DPEHPK3PXP   or   otpauth://totp/Acme:alice?secret=…',
+                'totp.label.mode': 'Mode:',
+                'totp.mode.totp': 'TOTP (time-based, RFC 6238)',
+                'totp.mode.hotp': 'HOTP (counter-based, RFC 4226)',
+                'totp.label.counter': 'Counter:',
+                'totp.hotpCounter': 'HOTP counter {counter}',
                 'totp.label.algo': 'Algorithm:',
                 'totp.label.digits': 'Digits:',
                 'totp.label.period': 'Period (sec):',
@@ -5703,6 +5763,7 @@
                 'hmac.label.keyHex': 'Clé en hexadécimal',
                 'hmac.label.msg': 'Message :',
                 'hmac.label.result': 'HMAC (hex) :',
+                'hmac.label.resultB64': 'HMAC (Base64) :',
                 'hmac.label.expected': 'HMAC attendu (hex) :',
                 'hmac.ph.key': 'Secret partagé',
                 'hmac.ph.msg': 'Message à signer…',
@@ -5735,7 +5796,13 @@
                 'uuid.label.output': 'Sortie :',
                 'uuid.fmt.v4': 'UUID v4 (aléatoire)',
                 'uuid.fmt.v7': 'UUID v7 (ordonné dans le temps)',
+                'uuid.fmt.v5': 'UUID v5 (espace de noms, SHA-1)',
                 'uuid.fmt.ulid': 'ULID (ordonné, base32)',
+                'uuid.label.namespace': 'UUID d’espace de noms :',
+                'uuid.label.name': 'Nom :',
+                'uuid.ph.name': 'ex. example.com',
+                'err.uuidNamespace': 'L’espace de noms doit être un UUID de 32 chiffres hexadécimaux.',
+                'err.uuidGenerate': 'Impossible de générer l’UUID',
                 'btn.uuidGenerate': 'Générer',
                 'timestamp.label.input': 'Entrée (Unix secondes, millisecondes ou ISO 8601) :',
                 'timestamp.ph.input': 'p.ex. 1700000000 ou 2023-11-14T22:13:20Z',
@@ -5747,6 +5814,11 @@
                 'timestamp.row.utc': 'Chaîne UTC',
                 'timestamp.row.local': 'Heure locale',
                 'timestamp.row.relative': 'Relatif',
+                'timestamp.label.timezone': 'Fuseau horaire d’affichage :',
+                'timestamp.tz.local': 'Local (cet appareil)',
+                'timestamp.row.inTz': 'Dans le fuseau',
+                'timestamp.row.week': 'Semaine ISO',
+                'timestamp.row.doy': 'Jour de l’année',
                 'timestamp.rel.future': 'dans {n} {unit}',
                 'timestamp.rel.past': 'il y a {n} {unit}',
                 'err.tsInvalid': 'Impossible d’analyser comme horodatage',
@@ -5869,6 +5941,11 @@
                 'totp.warnBody': 'Quiconque possède le secret TOTP peut générer les mêmes codes que vous. Ne le collez pas dans des outils non fiables, ne le capturez pas en image et ne l’envoyez pas en clair.',
                 'totp.label.input': 'Secret ou URI otpauth:// :',
                 'totp.ph.input': 'JBSWY3DPEHPK3PXP   ou   otpauth://totp/Acme:alice?secret=…',
+                'totp.label.mode': 'Mode :',
+                'totp.mode.totp': 'TOTP (basé sur le temps, RFC 6238)',
+                'totp.mode.hotp': 'HOTP (basé sur un compteur, RFC 4226)',
+                'totp.label.counter': 'Compteur :',
+                'totp.hotpCounter': 'Compteur HOTP {counter}',
                 'totp.label.algo': 'Algorithme :',
                 'totp.label.digits': 'Chiffres :',
                 'totp.label.period': 'Période (s) :',
@@ -7447,6 +7524,7 @@
                 'hmac.label.keyHex': '密钥为十六进制',
                 'hmac.label.msg': '消息：',
                 'hmac.label.result': 'HMAC（十六进制）：',
+                'hmac.label.resultB64': 'HMAC（Base64）：',
                 'hmac.label.expected': '预期 HMAC（十六进制）：',
                 'hmac.ph.key': '共享密钥',
                 'hmac.ph.msg': '要签名的消息…',
@@ -7479,7 +7557,13 @@
                 'uuid.label.output': '输出：',
                 'uuid.fmt.v4': 'UUID v4（随机）',
                 'uuid.fmt.v7': 'UUID v7（按时间排序）',
+                'uuid.fmt.v5': 'UUID v5（命名空间，SHA-1）',
                 'uuid.fmt.ulid': 'ULID（按时间排序，base32）',
+                'uuid.label.namespace': '命名空间 UUID：',
+                'uuid.label.name': '名称：',
+                'uuid.ph.name': '例如 example.com',
+                'err.uuidNamespace': '命名空间必须是 32 位十六进制的 UUID。',
+                'err.uuidGenerate': '无法生成 UUID',
                 'btn.uuidGenerate': '生成',
                 'timestamp.label.input': '输入（Unix 秒、毫秒或 ISO 8601）：',
                 'timestamp.ph.input': '例如 1700000000 或 2023-11-14T22:13:20Z',
@@ -7491,6 +7575,11 @@
                 'timestamp.row.utc': 'UTC 字符串',
                 'timestamp.row.local': '本地时间',
                 'timestamp.row.relative': '相对',
+                'timestamp.label.timezone': '显示时区：',
+                'timestamp.tz.local': '本地（此设备）',
+                'timestamp.row.inTz': '所在时区',
+                'timestamp.row.week': 'ISO 周',
+                'timestamp.row.doy': '一年中的第几天',
                 'timestamp.rel.future': '{n} {unit}后',
                 'timestamp.rel.past': '{n} {unit}前',
                 'err.tsInvalid': '无法解析为时间戳',
@@ -7613,6 +7702,11 @@
                 'totp.warnBody': '拥有 TOTP 密钥的任何人都能生成与您相同的验证码。不要粘贴到不可信的工具，不要截图，不要通过未加密的渠道发送。',
                 'totp.label.input': '密钥或 otpauth:// URI：',
                 'totp.ph.input': 'JBSWY3DPEHPK3PXP   或   otpauth://totp/Acme:alice?secret=…',
+                'totp.label.mode': '模式：',
+                'totp.mode.totp': 'TOTP（基于时间，RFC 6238）',
+                'totp.mode.hotp': 'HOTP（基于计数器，RFC 4226）',
+                'totp.label.counter': '计数器：',
+                'totp.hotpCounter': 'HOTP 计数器 {counter}',
                 'totp.label.algo': '算法：',
                 'totp.label.digits': '位数：',
                 'totp.label.period': '周期（秒）：',
@@ -9176,6 +9270,7 @@
                 'hmac.label.keyHex': 'Schlüssel ist hex-kodiert',
                 'hmac.label.msg': 'Nachricht:',
                 'hmac.label.result': 'HMAC (hex):',
+                'hmac.label.resultB64': 'HMAC (Base64):',
                 'hmac.label.expected': 'Erwartetes HMAC (hex):',
                 'hmac.ph.key': 'Gemeinsames Geheimnis',
                 'hmac.ph.msg': 'Zu signierende Nachricht…',
@@ -9208,7 +9303,13 @@
                 'uuid.label.output': 'Ausgabe:',
                 'uuid.fmt.v4': 'UUID v4 (zufällig)',
                 'uuid.fmt.v7': 'UUID v7 (zeitsortiert)',
+                'uuid.fmt.v5': 'UUID v5 (Namensraum, SHA-1)',
                 'uuid.fmt.ulid': 'ULID (zeitsortiert, base32)',
+                'uuid.label.namespace': 'Namensraum-UUID:',
+                'uuid.label.name': 'Name:',
+                'uuid.ph.name': 'z. B. example.com',
+                'err.uuidNamespace': 'Der Namensraum muss eine UUID aus 32 Hex-Ziffern sein.',
+                'err.uuidGenerate': 'UUID konnte nicht erzeugt werden',
                 'btn.uuidGenerate': 'Generieren',
                 'timestamp.label.input': 'Eingabe (Unix-Sekunden, Millisekunden oder ISO 8601):',
                 'timestamp.ph.input': 'z. B. 1700000000 oder 2023-11-14T22:13:20Z',
@@ -9220,6 +9321,11 @@
                 'timestamp.row.utc': 'UTC-String',
                 'timestamp.row.local': 'Lokale Zeit',
                 'timestamp.row.relative': 'Relativ',
+                'timestamp.label.timezone': 'Anzeige-Zeitzone:',
+                'timestamp.tz.local': 'Lokal (dieses Gerät)',
+                'timestamp.row.inTz': 'In Zeitzone',
+                'timestamp.row.week': 'ISO-Woche',
+                'timestamp.row.doy': 'Tag des Jahres',
                 'timestamp.rel.future': 'in {n} {unit}',
                 'timestamp.rel.past': 'vor {n} {unit}',
                 'err.tsInvalid': 'Eingabe konnte nicht als Zeitstempel erkannt werden',
@@ -9342,6 +9448,11 @@
                 'totp.warnBody': 'Wer das TOTP-Geheimnis kennt, kann dieselben Codes erzeugen wie du. Nicht in unsichere Tools einfügen, nicht abfotografieren, nicht über unverschlüsselte Kanäle senden.',
                 'totp.label.input': 'Secret oder otpauth://-URI:',
                 'totp.ph.input': 'JBSWY3DPEHPK3PXP   oder   otpauth://totp/Acme:alice?secret=…',
+                'totp.label.mode': 'Modus:',
+                'totp.mode.totp': 'TOTP (zeitbasiert, RFC 6238)',
+                'totp.mode.hotp': 'HOTP (zählerbasiert, RFC 4226)',
+                'totp.label.counter': 'Zähler:',
+                'totp.hotpCounter': 'HOTP-Zähler {counter}',
                 'totp.label.algo': 'Algorithmus:',
                 'totp.label.digits': 'Stellen:',
                 'totp.label.period': 'Periode (s):',
@@ -10920,6 +11031,7 @@
                 'hmac.label.keyHex': 'कुंजी हेक्स में है',
                 'hmac.label.msg': 'संदेश:',
                 'hmac.label.result': 'HMAC (हेक्स):',
+                'hmac.label.resultB64': 'HMAC (Base64):',
                 'hmac.label.expected': 'अपेक्षित HMAC (हेक्स):',
                 'hmac.ph.key': 'साझा रहस्य',
                 'hmac.ph.msg': 'हस्ताक्षर के लिए संदेश…',
@@ -10952,7 +11064,13 @@
                 'uuid.label.output': 'आउटपुट:',
                 'uuid.fmt.v4': 'UUID v4 (यादृच्छिक)',
                 'uuid.fmt.v7': 'UUID v7 (समय-क्रमित)',
+                'uuid.fmt.v5': 'UUID v5 (नेमस्पेस, SHA-1)',
                 'uuid.fmt.ulid': 'ULID (समय-क्रमित, base32)',
+                'uuid.label.namespace': 'नेमस्पेस UUID:',
+                'uuid.label.name': 'नाम:',
+                'uuid.ph.name': 'जैसे example.com',
+                'err.uuidNamespace': 'नेमस्पेस 32 हेक्स-अंकों वाला UUID होना चाहिए।',
+                'err.uuidGenerate': 'UUID उत्पन्न नहीं किया जा सका',
                 'btn.uuidGenerate': 'उत्पन्न करें',
                 'timestamp.label.input': 'इनपुट (Unix सेकंड, मिलीसेकंड, या ISO 8601):',
                 'timestamp.ph.input': 'जैसे 1700000000 या 2023-11-14T22:13:20Z',
@@ -10964,6 +11082,11 @@
                 'timestamp.row.utc': 'UTC स्ट्रिंग',
                 'timestamp.row.local': 'स्थानीय समय',
                 'timestamp.row.relative': 'सापेक्ष',
+                'timestamp.label.timezone': 'प्रदर्शन समय-क्षेत्र:',
+                'timestamp.tz.local': 'स्थानीय (यह डिवाइस)',
+                'timestamp.row.inTz': 'समय-क्षेत्र में',
+                'timestamp.row.week': 'ISO सप्ताह',
+                'timestamp.row.doy': 'वर्ष का दिन',
                 'timestamp.rel.future': '{n} {unit} में',
                 'timestamp.rel.past': '{n} {unit} पहले',
                 'err.tsInvalid': 'इनपुट को टाइमस्टैम्प के रूप में पार्स नहीं किया जा सका',
@@ -11086,6 +11209,11 @@
                 'totp.warnBody': 'जिसके पास TOTP सीक्रेट है, वह आपके जैसे ही कोड बना सकता है। अविश्वसनीय उपकरणों में पेस्ट न करें, स्क्रीनशॉट न लें, और अनएन्क्रिप्टेड चैनलों से न भेजें।',
                 'totp.label.input': 'सीक्रेट या otpauth:// URI:',
                 'totp.ph.input': 'JBSWY3DPEHPK3PXP   या   otpauth://totp/Acme:alice?secret=…',
+                'totp.label.mode': 'मोड:',
+                'totp.mode.totp': 'TOTP (समय-आधारित, RFC 6238)',
+                'totp.mode.hotp': 'HOTP (काउंटर-आधारित, RFC 4226)',
+                'totp.label.counter': 'काउंटर:',
+                'totp.hotpCounter': 'HOTP काउंटर {counter}',
                 'totp.label.algo': 'एल्गोरिदम:',
                 'totp.label.digits': 'अंक:',
                 'totp.label.period': 'अवधि (सेकंड):',
@@ -16736,6 +16864,7 @@
                 const msgBytes = new TextEncoder().encode(msg);
                 const hex = await hmacCompute(algo, keyBytes, msgBytes);
                 document.getElementById('hmac-result').value = hex;
+                document.getElementById('hmac-out-base64').value = bytesToBase64(hexToBytes(hex), false);
                 keyBytes.fill(0);
             } catch (e) {
                 alert(t('err.hmacSign') + ': ' + e.message);
@@ -16854,17 +16983,55 @@
             return out.slice(-26);
         }
 
-        document.getElementById('btn-uuid-generate').addEventListener('click', () => {
+        function uuidToBytes(u) {
+            const hex = String(u).replace(/[^0-9a-fA-F]/g, '');
+            if (hex.length !== 32) throw new Error(t('err.uuidNamespace'));
+            const b = new Uint8Array(16);
+            for (let i = 0; i < 16; i++) b[i] = parseInt(hex.substr(i * 2, 2), 16);
+            return b;
+        }
+        async function uuidV5(namespace, name) {
+            // RFC 9562 §5.5: SHA-1 over (namespace bytes ‖ name), first 16 octets,
+            // version nibble → 5, variant bits → 10xx. Deterministic.
+            const ns = uuidToBytes(namespace);
+            const nameBytes = new TextEncoder().encode(name);
+            const data = new Uint8Array(ns.length + nameBytes.length);
+            data.set(ns, 0); data.set(nameBytes, ns.length);
+            const digest = new Uint8Array(await crypto.subtle.digest('SHA-1', data));
+            const b = digest.slice(0, 16);
+            b[6] = (b[6] & 0x0f) | 0x50; // version 5
+            b[8] = (b[8] & 0x3f) | 0x80; // RFC 4122 variant
+            return bytesToUuid(b);
+        }
+
+        // Show the namespace/name inputs only for v5 (deterministic, no count).
+        document.getElementById('uuid-format').addEventListener('change', (e) => {
+            const isV5 = e.target.value === 'v5';
+            document.getElementById('uuid-v5-fields').style.display = isV5 ? '' : 'none';
+            document.getElementById('uuid-count-field').style.display = isV5 ? 'none' : '';
+        });
+
+        document.getElementById('btn-uuid-generate').addEventListener('click', async () => {
             const fmt = document.getElementById('uuid-format').value;
-            let count = parseInt(document.getElementById('uuid-count').value, 10) || 1;
-            count = Math.max(1, Math.min(1000, count));
-            const lines = [];
-            for (let i = 0; i < count; i++) {
-                if (fmt === 'v4') lines.push(uuidV4());
-                else if (fmt === 'v7') lines.push(uuidV7());
-                else lines.push(ulid());
+            try {
+                if (fmt === 'v5') {
+                    const ns = document.getElementById('uuid-namespace').value.trim();
+                    const name = document.getElementById('uuid-name').value;
+                    document.getElementById('uuid-output').value = await uuidV5(ns, name);
+                    return;
+                }
+                let count = parseInt(document.getElementById('uuid-count').value, 10) || 1;
+                count = Math.max(1, Math.min(1000, count));
+                const lines = [];
+                for (let i = 0; i < count; i++) {
+                    if (fmt === 'v4') lines.push(uuidV4());
+                    else if (fmt === 'v7') lines.push(uuidV7());
+                    else lines.push(ulid());
+                }
+                document.getElementById('uuid-output').value = lines.join('\n');
+            } catch (err) {
+                alert(t('err.uuidGenerate') + ': ' + err.message);
             }
-            document.getElementById('uuid-output').value = lines.join('\n');
         });
 
         // ==================== Phase 6 Batch A: Unix Timestamp ====================
@@ -16885,16 +17052,52 @@
             return intlRelativeFromNow(d);
         }
 
+        function isoWeek(d) {
+            // ISO 8601 week number + week-year, computed in UTC. Moves to the
+            // Thursday of the current week (whose calendar year is, by definition,
+            // the ISO week-year), then counts weeks from that year's first Thursday.
+            const t = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+            const dayNum = (t.getUTCDay() + 6) % 7;          // Mon=0 … Sun=6
+            t.setUTCDate(t.getUTCDate() - dayNum + 3);        // nearest Thursday
+            const weekYear = t.getUTCFullYear();
+            const firstThu = new Date(Date.UTC(weekYear, 0, 4)); // Jan 4 is always in week 1
+            const firstDayNum = (firstThu.getUTCDay() + 6) % 7;
+            firstThu.setUTCDate(firstThu.getUTCDate() - firstDayNum + 3);
+            const week = 1 + Math.round((t - firstThu) / (7 * 86400000));
+            return { week, year: weekYear };
+        }
+        function dayOfYear(d) {
+            const start = Date.UTC(d.getUTCFullYear(), 0, 0);
+            const today = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+            return Math.round((today - start) / 86400000);
+        }
+        function tsInTimezone(d, tz) {
+            // Wall-clock rendering in an explicit IANA zone via Intl.DateTimeFormat.
+            try {
+                const opts = { dateStyle: 'full', timeStyle: 'long' };
+                if (tz && tz !== 'local') opts.timeZone = tz;
+                return new Intl.DateTimeFormat(intlLang(), opts).format(d);
+            } catch (e) {
+                return d.toString();
+            }
+        }
+
         function tsRender(d) {
             const resultsEl = document.getElementById('ts-results');
             while (resultsEl.firstChild) resultsEl.removeChild(resultsEl.firstChild);
             resultsEl.classList.remove('hidden');
+            const tz = (document.getElementById('ts-timezone') || {}).value || 'local';
+            const tzLabel = tz === 'local' ? t('timestamp.tz.local') : tz;
+            const iw = isoWeek(d);
             const rows = [
                 ['timestamp.row.unixSec', String(Math.floor(d.getTime() / 1000))],
                 ['timestamp.row.unixMs',  String(d.getTime())],
                 ['timestamp.row.iso',     d.toISOString()],
                 ['timestamp.row.utc',     d.toUTCString()],
                 ['timestamp.row.local',   d.toString()],
+                ['timestamp.row.inTz',    tsInTimezone(d, tz) + '  (' + tzLabel + ')'],
+                ['timestamp.row.week',    iw.year + '-W' + String(iw.week).padStart(2, '0')],
+                ['timestamp.row.doy',     String(dayOfYear(d))],
                 ['timestamp.row.relative', tsRelative(d)]
             ];
             for (const [labelKey, val] of rows) {
@@ -16922,6 +17125,12 @@
             const d = tsParse(document.getElementById('ts-input').value);
             if (!d) { alert(t('err.tsInvalid')); return; }
             tsRender(d);
+        });
+        document.getElementById('ts-timezone').addEventListener('change', () => {
+            // Re-render in the newly-selected zone if a timestamp is already shown.
+            if (document.getElementById('ts-results').classList.contains('hidden')) return;
+            const d = tsParse(document.getElementById('ts-input').value);
+            if (d) tsRender(d);
         });
 
         // ==================== Phase 6 Batch A: URL Parser ====================
@@ -17674,7 +17883,18 @@
             document.getElementById('totp-countdown').textContent = tFormat('totp.countdown', { sec: Math.ceil(remaining) });
         }
 
+        // HOTP (RFC 4226) is counter-based, not time-based: swap the period control
+        // for a counter input and disable the live ticker.
+        function totpSyncMode() {
+            const isHotp = document.getElementById('totp-mode-hotp').checked;
+            document.getElementById('totp-period-field').style.display = isHotp ? 'none' : '';
+            document.getElementById('hotp-counter-field').style.display = isHotp ? '' : 'none';
+        }
+        document.getElementById('totp-mode-totp').addEventListener('change', totpSyncMode);
+        document.getElementById('totp-mode-hotp').addEventListener('change', totpSyncMode);
+
         document.getElementById('btn-totp-start').addEventListener('click', async () => {
+            const isHotp = document.getElementById('totp-mode-hotp').checked;
             try {
                 const cfg = parseOtpAuth(document.getElementById('totp-input').value);
                 // Allow form to override URI defaults if user typed a bare secret.
@@ -17687,6 +17907,21 @@
                     cfg.period = periodSel || 30;
                 }
                 const secretBytes = base32ToBytes(cfg.secret);
+
+                if (isHotp) {
+                    // Single, event-based code for the given counter. No timer.
+                    const counter = Math.max(0, parseInt(document.getElementById('hotp-counter').value, 10) || 0);
+                    const code = await totpCode(secretBytes, counter, cfg.algo, cfg.digits);
+                    secretBytes.fill(0);
+                    document.getElementById('totp-display').classList.remove('hidden');
+                    document.getElementById('totp-issuer').textContent = cfg.issuer || cfg.label || '';
+                    document.getElementById('totp-code').textContent = code; // no mid-space: it is a final value, not a live counter
+                    document.getElementById('totp-bar-wrap').style.display = 'none';
+                    document.getElementById('totp-countdown').textContent = tFormat('totp.hotpCounter', { counter });
+                    return;
+                }
+
+                document.getElementById('totp-bar-wrap').style.display = '';
                 totpState = { config: cfg, secretBytes };
                 document.getElementById('totp-display').classList.remove('hidden');
                 document.getElementById('totp-issuer').textContent = cfg.issuer || cfg.label || '';
@@ -18840,9 +19075,57 @@
         // Hand-rolled HEX/RGB/HSL/OKLCH conversions + WCAG contrast check.
         // OKLCH uses the Oklab linear-RGB matrix from Björn Ottosson's reference.
 
+        // The 148 CSS Color Module Level 4 named colors (incl. rebeccapurple).
+        // Designer-facing input; values are the canonical sRGB hex per the spec.
+        const NAMED_COLORS = {
+            aliceblue:'#f0f8ff', antiquewhite:'#faebd7', aqua:'#00ffff', aquamarine:'#7fffd4', azure:'#f0ffff',
+            beige:'#f5f5dc', bisque:'#ffe4c4', black:'#000000', blanchedalmond:'#ffebcd', blue:'#0000ff',
+            blueviolet:'#8a2be2', brown:'#a52a2a', burlywood:'#deb887', cadetblue:'#5f9ea0', chartreuse:'#7fff00',
+            chocolate:'#d2691e', coral:'#ff7f50', cornflowerblue:'#6495ed', cornsilk:'#fff8dc', crimson:'#dc143c',
+            cyan:'#00ffff', darkblue:'#00008b', darkcyan:'#008b8b', darkgoldenrod:'#b8860b', darkgray:'#a9a9a9',
+            darkgreen:'#006400', darkgrey:'#a9a9a9', darkkhaki:'#bdb76b', darkmagenta:'#8b008b', darkolivegreen:'#556b2f',
+            darkorange:'#ff8c00', darkorchid:'#9932cc', darkred:'#8b0000', darksalmon:'#e9967a', darkseagreen:'#8fbc8f',
+            darkslateblue:'#483d8b', darkslategray:'#2f4f4f', darkslategrey:'#2f4f4f', darkturquoise:'#00ced1', darkviolet:'#9400d3',
+            deeppink:'#ff1493', deepskyblue:'#00bfff', dimgray:'#696969', dimgrey:'#696969', dodgerblue:'#1e90ff',
+            firebrick:'#b22222', floralwhite:'#fffaf0', forestgreen:'#228b22', fuchsia:'#ff00ff', gainsboro:'#dcdcdc',
+            ghostwhite:'#f8f8ff', gold:'#ffd700', goldenrod:'#daa520', gray:'#808080', green:'#008000',
+            greenyellow:'#adff2f', grey:'#808080', honeydew:'#f0fff0', hotpink:'#ff69b4', indianred:'#cd5c5c',
+            indigo:'#4b0082', ivory:'#fffff0', khaki:'#f0e68c', lavender:'#e6e6fa', lavenderblush:'#fff0f5',
+            lawngreen:'#7cfc00', lemonchiffon:'#fffacd', lightblue:'#add8e6', lightcoral:'#f08080', lightcyan:'#e0ffff',
+            lightgoldenrodyellow:'#fafad2', lightgray:'#d3d3d3', lightgreen:'#90ee90', lightgrey:'#d3d3d3', lightpink:'#ffb6c1',
+            lightsalmon:'#ffa07a', lightseagreen:'#20b2aa', lightskyblue:'#87cefa', lightslategray:'#778899', lightslategrey:'#778899',
+            lightsteelblue:'#b0c4de', lightyellow:'#ffffe0', lime:'#00ff00', limegreen:'#32cd32', linen:'#faf0e6',
+            magenta:'#ff00ff', maroon:'#800000', mediumaquamarine:'#66cdaa', mediumblue:'#0000cd', mediumorchid:'#ba55d3',
+            mediumpurple:'#9370db', mediumseagreen:'#3cb371', mediumslateblue:'#7b68ee', mediumspringgreen:'#00fa9a', mediumturquoise:'#48d1cc',
+            mediumvioletred:'#c71585', midnightblue:'#191970', mintcream:'#f5fffa', mistyrose:'#ffe4e1', moccasin:'#ffe4b5',
+            navajowhite:'#ffdead', navy:'#000080', oldlace:'#fdf5e6', olive:'#808000', olivedrab:'#6b8e23',
+            orange:'#ffa500', orangered:'#ff4500', orchid:'#da70d6', palegoldenrod:'#eee8aa', palegreen:'#98fb98',
+            paleturquoise:'#afeeee', palevioletred:'#db7093', papayawhip:'#ffefd5', peachpuff:'#ffdab9', peru:'#cd853f',
+            pink:'#ffc0cb', plum:'#dda0dd', powderblue:'#b0e0e6', purple:'#800080', rebeccapurple:'#663399',
+            red:'#ff0000', rosybrown:'#bc8f8f', royalblue:'#4169e1', saddlebrown:'#8b4513', salmon:'#fa8072',
+            sandybrown:'#f4a460', seagreen:'#2e8b57', seashell:'#fff5ee', sienna:'#a0522d', silver:'#c0c0c0',
+            skyblue:'#87ceeb', slateblue:'#6a5acd', slategray:'#708090', slategrey:'#708090', snow:'#fffafa',
+            springgreen:'#00ff7f', steelblue:'#4682b4', tan:'#d2b48c', teal:'#008080', thistle:'#d8bfd8',
+            tomato:'#ff6347', turquoise:'#40e0d0', violet:'#ee82ee', wheat:'#f5deb3', white:'#ffffff',
+            whitesmoke:'#f5f5f5', yellow:'#ffff00', yellowgreen:'#9acd32'
+        };
+
+        function colorRgbToCmyk(r, g, b) {
+            const rn = r / 255, gn = g / 255, bn = b / 255;
+            const k = 1 - Math.max(rn, gn, bn);
+            if (k >= 1) return { c: 0, m: 0, y: 0, k: 100 }; // pure black
+            const c = (1 - rn - k) / (1 - k);
+            const m = (1 - gn - k) / (1 - k);
+            const y = (1 - bn - k) / (1 - k);
+            return { c: Math.round(c * 100), m: Math.round(m * 100), y: Math.round(y * 100), k: Math.round(k * 100) };
+        }
+
         function colorParseInput(s) {
             const str = s.trim();
             if (!str) throw new Error(t('err.colorEmpty'));
+            // CSS named color (case-insensitive) → resolve to its canonical hex.
+            const named = NAMED_COLORS[str.toLowerCase()];
+            if (named) return colorParseInput(named);
             // HEX (#rgb / #rrggbb / #rrggbbaa)
             let m = str.match(/^#?([0-9a-fA-F]{3,8})$/);
             if (m) {
@@ -18975,6 +19258,8 @@
                 colorRenderRow(out, 'RGB', 'rgb(' + c.r + ', ' + c.g + ', ' + c.b + (c.a < 1 ? ' / ' + c.a.toFixed(3) : '') + ')');
                 colorRenderRow(out, 'HSL', 'hsl(' + hsl.h.toFixed(1) + ' ' + (hsl.s * 100).toFixed(1) + '% ' + (hsl.l * 100).toFixed(1) + '%)');
                 colorRenderRow(out, 'OKLCH', 'oklch(' + (oklch.L * 100).toFixed(2) + '% ' + oklch.C.toFixed(4) + ' ' + oklch.H.toFixed(2) + ')');
+                const cmyk = colorRgbToCmyk(c.r, c.g, c.b);
+                colorRenderRow(out, 'CMYK', 'cmyk(' + cmyk.c + '%, ' + cmyk.m + '%, ' + cmyk.y + '%, ' + cmyk.k + '%)');
                 // Sync the picker.
                 if (c.a >= 1) document.getElementById('color-picker').value = hex.slice(0, 7);
             } catch (e) {
