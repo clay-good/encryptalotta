@@ -95,7 +95,7 @@ test('pbkdf2: adds scrypt + Argon2id KDF options (RFC 7914 / RFC 9106)', async (
 // support EdDSA (RFC 8037). Today verification takes a single PEM/secret.
 // New: paste a JWKS JSON into #jwt-verify-key and match by `kid`.
 // ---------------------------------------------------------------
-test.fixme('jwt: verifies using a pasted JWKS document + EdDSA (RFC 8037)', async ({ page }) => {
+test('jwt: verifies using a pasted JWKS document + EdDSA (RFC 8037)', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'jwt');
   // A real JWT + the JWKS that signed it would be fixtured here; the acceptance
   // criterion is that a JWKS (object with a "keys" array) is accepted and the
@@ -185,12 +185,12 @@ test('timestamp: explicit timezone + ISO week / day-of-year', async ({ page }) =
 // share is named instead of silently producing a wrong secret.
 // New: #btn-shamir-verify reporting per-share validity.
 // ---------------------------------------------------------------
-test.fixme('shamir: validates each share and flags a corrupted one before combine', async ({ page }) => {
+test('shamir: validates each share and flags a corrupted one before combine', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'shamir');
   await page.click('#shamir-mode-combine');
   await page.fill('#shamir-combine-input', 'EAL-SSS/v1/2-of-3/801xxxxCORRUPT\nEAL-SSS/v1/2-of-3/802validshare');
   await page.click('#btn-shamir-verify');
-  await expect(page.locator('#shamir-shares-result, #shamir-verify-result')).toContainText(/corrupt|invalid|share 1/i);
+  await expect(page.locator('#shamir-verify-result')).toContainText(/corrupt|invalid|share 1/i);
 });
 
 // ---------------------------------------------------------------

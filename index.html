@@ -2189,7 +2189,10 @@
                         <textarea id="shamir-combine-input" placeholder="Paste each share on its own line..." data-i18n-attr="placeholder:shamir.ph.combineInput" style="min-height: 150px;"></textarea>
                     </div>
 
-                    <button id="btn-shamir-combine" class="btn" data-i18n="btn.shamirCombine">Combine Shares</button>
+                    <button id="btn-shamir-verify" class="btn btn-secondary" data-i18n="btn.shamirVerify">Verify shares</button>
+                    <button id="btn-shamir-combine" class="btn" data-i18n="btn.shamirCombine" style="margin-inline-start: 8px;">Combine Shares</button>
+
+                    <div id="shamir-verify-result" class="hidden" style="margin-top: 18px;"></div>
 
                     <div class="form-group" style="margin-top: 20px;">
                         <label for="shamir-output" data-i18n="shamir.label.recovered">Recovered secret</label>
@@ -3949,8 +3952,12 @@
                 'jwt.verifyHeading': 'Verify the signature',
                 'jwt.verifyBody': 'Pick the algorithm matching the JWT header, then provide the matching key. RS256/ES256 use a PEM-formatted public key; HS256/384/512 use a shared secret.',
                 'jwt.label.key': 'Public key (PEM) or shared secret:',
-                'jwt.ph.key': '-----BEGIN PUBLIC KEY-----…  or  shared-secret-string',
+                'jwt.ph.key': '-----BEGIN PUBLIC KEY-----…   or   shared-secret   or   JWKS / JWK JSON',
                 'jwt.verify.match': 'Signature verified — token is authentic',
+                'jwt.jwks.matched': 'Matched JWKS key: kid={kid} · {alg} · {kty}',
+                'jwt.verify.keyError': 'key error',
+                'err.jwtJwksNoKey': 'No key in the JWKS matches the token’s kid.',
+                'err.jwtJwkKty': 'Unsupported JWK key type',
                 'jwt.verify.mismatch': 'Signature does not verify',
                 'jwt.sdjwt.heading': 'Selective-disclosure (SD-JWT) disclosures',
                 'jwt.sdjwt.colName': 'Claim name',
@@ -4234,6 +4241,18 @@
                 'shamir.share.label': 'Share {n} of {total}',
                 'btn.shamirSplit': 'Split Secret',
                 'btn.shamirCombine': 'Combine Shares',
+                'btn.shamirVerify': 'Verify shares',
+                'shamir.verify.heading': 'Share validation',
+                'shamir.verify.share': 'Share {n}',
+                'shamir.verify.ok': 'valid format',
+                'shamir.verify.invalid': 'invalid / corrupted',
+                'shamir.verify.badBody': 'raw share is not valid hexadecimal',
+                'shamir.verify.consistency': 'K-of-N consistency',
+                'shamir.verify.mixed': 'shares declare different K-of-N thresholds — they are from different splits',
+                'shamir.verify.summary': 'Summary',
+                'shamir.verify.count': '{valid} of {total} shares have a valid format',
+                'shamir.verify.needMore': 'need at least {k} valid shares to combine',
+                'shamir.verify.sufficient': 'enough valid shares to attempt reconstruction',
                 'btn.shamirCopy': 'Copy',
                 'btn.shamirCopied': 'Copied!',
                 'btn.shamirDownload': 'Download',
@@ -5967,8 +5986,12 @@
                 'jwt.verifyHeading': 'Vérifier la signature',
                 'jwt.verifyBody': 'Choisissez l’algorithme indiqué dans l’en-tête, puis fournissez la clé correspondante. RS256/ES256 utilisent une clé publique PEM ; HS256/384/512 un secret partagé.',
                 'jwt.label.key': 'Clé publique (PEM) ou secret partagé :',
-                'jwt.ph.key': '-----BEGIN PUBLIC KEY-----…  ou  secret-partagé',
+                'jwt.ph.key': '-----BEGIN PUBLIC KEY-----…   ou   secret-partagé   ou   JSON JWKS / JWK',
                 'jwt.verify.match': 'Signature vérifiée — token authentique',
+                'jwt.jwks.matched': 'Clé JWKS correspondante : kid={kid} · {alg} · {kty}',
+                'jwt.verify.keyError': 'erreur de clé',
+                'err.jwtJwksNoKey': 'Aucune clé du JWKS ne correspond au kid du token.',
+                'err.jwtJwkKty': 'Type de clé JWK non pris en charge',
                 'jwt.verify.mismatch': 'Signature non vérifiée',
                 'jwt.sdjwt.heading': 'Divulgations sélectives (SD-JWT)',
                 'jwt.sdjwt.colName': 'Nom du claim',
@@ -6235,6 +6258,18 @@
                 'shamir.share.label': 'Part {n} sur {total}',
                 'btn.shamirSplit': 'Diviser le secret',
                 'btn.shamirCombine': 'Combiner les parts',
+                'btn.shamirVerify': 'Vérifier les parts',
+                'shamir.verify.heading': 'Validation des parts',
+                'shamir.verify.share': 'Part {n}',
+                'shamir.verify.ok': 'format valide',
+                'shamir.verify.invalid': 'invalide / corrompue',
+                'shamir.verify.badBody': 'la part brute n’est pas un hexadécimal valide',
+                'shamir.verify.consistency': 'Cohérence K-sur-N',
+                'shamir.verify.mixed': 'les parts déclarent des seuils K-sur-N différents — elles proviennent de partages distincts',
+                'shamir.verify.summary': 'Résumé',
+                'shamir.verify.count': '{valid} parts sur {total} ont un format valide',
+                'shamir.verify.needMore': 'au moins {k} parts valides sont nécessaires pour combiner',
+                'shamir.verify.sufficient': 'assez de parts valides pour tenter la reconstruction',
                 'btn.shamirCopy': 'Copier',
                 'btn.shamirCopied': 'Copié !',
                 'btn.shamirDownload': 'Télécharger',
@@ -7750,8 +7785,12 @@
                 'jwt.verifyHeading': '验证签名',
                 'jwt.verifyBody': '选择与 JWT 头部对应的算法，然后提供相应密钥。RS256/ES256 使用 PEM 格式的公钥；HS256/384/512 使用共享密钥。',
                 'jwt.label.key': '公钥（PEM）或共享密钥：',
-                'jwt.ph.key': '-----BEGIN PUBLIC KEY-----…  或  shared-secret',
+                'jwt.ph.key': '-----BEGIN PUBLIC KEY-----…   或   shared-secret   或   JWKS / JWK JSON',
                 'jwt.verify.match': '签名已验证 — token 真实',
+                'jwt.jwks.matched': '匹配的 JWKS 密钥：kid={kid} · {alg} · {kty}',
+                'jwt.verify.keyError': '密钥错误',
+                'err.jwtJwksNoKey': 'JWKS 中没有与 token 的 kid 匹配的密钥。',
+                'err.jwtJwkKty': '不支持的 JWK 密钥类型',
                 'jwt.verify.mismatch': '签名未通过验证',
                 'jwt.sdjwt.heading': '选择性披露 (SD-JWT)',
                 'jwt.sdjwt.colName': '声明名称',
@@ -8018,6 +8057,18 @@
                 'shamir.share.label': '第 {n} 份，共 {total} 份',
                 'btn.shamirSplit': '分割秘密',
                 'btn.shamirCombine': '合并份',
+                'btn.shamirVerify': '验证份额',
+                'shamir.verify.heading': '份额校验',
+                'shamir.verify.share': '份额 {n}',
+                'shamir.verify.ok': '格式有效',
+                'shamir.verify.invalid': '无效 / 已损坏',
+                'shamir.verify.badBody': '原始份额不是有效的十六进制',
+                'shamir.verify.consistency': 'K-of-N 一致性',
+                'shamir.verify.mixed': '各份额声明的 K-of-N 阈值不同 — 它们来自不同的拆分',
+                'shamir.verify.summary': '摘要',
+                'shamir.verify.count': '{total} 个份额中有 {valid} 个格式有效',
+                'shamir.verify.needMore': '至少需要 {k} 个有效份额才能合并',
+                'shamir.verify.sufficient': '有足够的有效份额可尝试重建',
                 'btn.shamirCopy': '复制',
                 'btn.shamirCopied': '已复制！',
                 'btn.shamirDownload': '下载',
@@ -9518,8 +9569,12 @@
                 'jwt.verifyHeading': 'Signatur verifizieren',
                 'jwt.verifyBody': 'Wähle den im JWT-Header genannten Algorithmus und stelle den passenden Schlüssel bereit. RS256/ES256 nutzen einen PEM-Public-Key; HS256/384/512 ein gemeinsames Geheimnis.',
                 'jwt.label.key': 'Public Key (PEM) oder gemeinsames Geheimnis:',
-                'jwt.ph.key': '-----BEGIN PUBLIC KEY-----…  oder  geteiltes-Geheimnis',
+                'jwt.ph.key': '-----BEGIN PUBLIC KEY-----…   oder   geteiltes-Geheimnis   oder   JWKS- / JWK-JSON',
                 'jwt.verify.match': 'Signatur verifiziert — Token authentisch',
+                'jwt.jwks.matched': 'Passender JWKS-Schlüssel: kid={kid} · {alg} · {kty}',
+                'jwt.verify.keyError': 'Schlüsselfehler',
+                'err.jwtJwksNoKey': 'Kein Schlüssel im JWKS passt zur kid des Tokens.',
+                'err.jwtJwkKty': 'Nicht unterstützter JWK-Schlüsseltyp',
                 'jwt.verify.mismatch': 'Signatur konnte nicht verifiziert werden',
                 'jwt.sdjwt.heading': 'Selektive Offenlegung (SD-JWT)',
                 'jwt.sdjwt.colName': 'Claim-Name',
@@ -9786,6 +9841,18 @@
                 'shamir.share.label': 'Anteil {n} von {total}',
                 'btn.shamirSplit': 'Geheimnis aufteilen',
                 'btn.shamirCombine': 'Anteile zusammenführen',
+                'btn.shamirVerify': 'Anteile prüfen',
+                'shamir.verify.heading': 'Anteils-Validierung',
+                'shamir.verify.share': 'Anteil {n}',
+                'shamir.verify.ok': 'gültiges Format',
+                'shamir.verify.invalid': 'ungültig / beschädigt',
+                'shamir.verify.badBody': 'der Roh-Anteil ist kein gültiges Hexadezimal',
+                'shamir.verify.consistency': 'K-von-N-Konsistenz',
+                'shamir.verify.mixed': 'die Anteile deklarieren unterschiedliche K-von-N-Schwellen — sie stammen aus verschiedenen Aufteilungen',
+                'shamir.verify.summary': 'Zusammenfassung',
+                'shamir.verify.count': '{valid} von {total} Anteilen haben ein gültiges Format',
+                'shamir.verify.needMore': 'mindestens {k} gültige Anteile zum Zusammenführen erforderlich',
+                'shamir.verify.sufficient': 'genug gültige Anteile für einen Rekonstruktionsversuch',
                 'btn.shamirCopy': 'Kopieren',
                 'btn.shamirCopied': 'Kopiert!',
                 'btn.shamirDownload': 'Herunterladen',
@@ -11301,8 +11368,12 @@
                 'jwt.verifyHeading': 'हस्ताक्षर सत्यापित करें',
                 'jwt.verifyBody': 'JWT हेडर के अनुरूप एल्गोरिदम चुनें, फिर मेल खाती कुंजी प्रदान करें। RS256/ES256 PEM सार्वजनिक कुंजी का उपयोग करते हैं; HS256/384/512 साझा रहस्य।',
                 'jwt.label.key': 'सार्वजनिक कुंजी (PEM) या साझा रहस्य:',
-                'jwt.ph.key': '-----BEGIN PUBLIC KEY-----…  या  shared-secret',
+                'jwt.ph.key': '-----BEGIN PUBLIC KEY-----…   या   shared-secret   या   JWKS / JWK JSON',
                 'jwt.verify.match': 'हस्ताक्षर सत्यापित — टोकन प्रामाणिक',
+                'jwt.jwks.matched': 'मिलान वाली JWKS कुंजी: kid={kid} · {alg} · {kty}',
+                'jwt.verify.keyError': 'कुंजी त्रुटि',
+                'err.jwtJwksNoKey': 'JWKS में कोई कुंजी टोकन के kid से मेल नहीं खाती।',
+                'err.jwtJwkKty': 'असमर्थित JWK कुंजी प्रकार',
                 'jwt.verify.mismatch': 'हस्ताक्षर सत्यापित नहीं हुआ',
                 'jwt.sdjwt.heading': 'चयनात्मक प्रकटीकरण (SD-JWT)',
                 'jwt.sdjwt.colName': 'क्लेम नाम',
@@ -11569,6 +11640,18 @@
                 'shamir.share.label': '{total} में से {n}',
                 'btn.shamirSplit': 'रहस्य विभाजित करें',
                 'btn.shamirCombine': 'भाग मिलाएँ',
+                'btn.shamirVerify': 'भाग सत्यापित करें',
+                'shamir.verify.heading': 'भाग सत्यापन',
+                'shamir.verify.share': 'भाग {n}',
+                'shamir.verify.ok': 'मान्य प्रारूप',
+                'shamir.verify.invalid': 'अमान्य / दूषित',
+                'shamir.verify.badBody': 'कच्चा भाग मान्य हेक्साडेसिमल नहीं है',
+                'shamir.verify.consistency': 'K-of-N संगति',
+                'shamir.verify.mixed': 'भाग अलग-अलग K-of-N सीमाएँ घोषित करते हैं — ये अलग-अलग विभाजनों से हैं',
+                'shamir.verify.summary': 'सारांश',
+                'shamir.verify.count': '{total} में से {valid} भागों का प्रारूप मान्य है',
+                'shamir.verify.needMore': 'मिलाने के लिए कम से कम {k} मान्य भाग आवश्यक हैं',
+                'shamir.verify.sufficient': 'पुनर्निर्माण के प्रयास हेतु पर्याप्त मान्य भाग',
                 'btn.shamirCopy': 'कॉपी',
                 'btn.shamirCopied': 'कॉपी हो गया!',
                 'btn.shamirDownload': 'डाउनलोड',
@@ -16034,6 +16117,54 @@
             }
         });
 
+        // Validate each pasted share BEFORE combining, so a single mistyped or
+        // truncated share is named rather than silently producing a wrong secret
+        // (Shamir reconstruction over GF(256) gives no error on a bad share — it
+        // just yields a different polynomial). Each share is checked for the
+        // EAL-SSS wrapper, hex-only raw body, and (when the library exposes it)
+        // secrets.js's own component parse; declared K-of-N consistency is also
+        // cross-checked across the set.
+        document.getElementById('btn-shamir-verify').addEventListener('click', () => {
+            const raw = document.getElementById('shamir-combine-input').value;
+            const lines = raw.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+            const resEl = document.getElementById('shamir-verify-result');
+            while (resEl.firstChild) resEl.removeChild(resEl.firstChild);
+            resEl.classList.remove('hidden');
+            if (lines.length === 0) { tlsRenderRow(resEl, t('shamir.verify.heading'), t('err.shamirNoShares')); return; }
+
+            const kSet = new Set(), nSet = new Set();
+            let validCount = 0, threshold = null;
+            const rows = lines.map((line, i) => {
+                const m = line.match(SHAMIR_PREFIX_RE);
+                if (m) { kSet.add(m[1]); nSet.add(m[2]); threshold = parseInt(m[1], 10); }
+                const rawShare = m ? m[3] : line;
+                let valid = /^[0-9a-fA-F]+$/.test(rawShare) && rawShare.length >= 3;
+                let detail = valid ? '' : t('shamir.verify.badBody');
+                if (valid && typeof secrets !== 'undefined' && typeof secrets.extractShareComponents === 'function') {
+                    try { secrets.extractShareComponents(rawShare); }
+                    catch (e) { valid = false; detail = (e && e.message) ? e.message : t('shamir.verify.badBody'); }
+                }
+                if (valid) validCount++;
+                return { n: i + 1, valid, detail };
+            });
+
+            tlsRenderHeading(resEl, t('shamir.verify.heading'));
+            for (const r of rows) {
+                const label = tFormat('shamir.verify.share', { n: r.n });
+                tlsRenderRow(resEl, label, r.valid
+                    ? '✓ ' + t('shamir.verify.ok')
+                    : '✗ ' + t('shamir.verify.invalid') + (r.detail ? ' — ' + r.detail : ''));
+            }
+            // Cross-share consistency + sufficiency summary.
+            if (kSet.size > 1 || nSet.size > 1) {
+                tlsRenderRow(resEl, t('shamir.verify.consistency'), '✗ ' + t('shamir.verify.mixed'));
+            }
+            const enough = threshold == null ? null : validCount >= threshold;
+            tlsRenderRow(resEl, t('shamir.verify.summary'),
+                tFormat('shamir.verify.count', { valid: validCount, total: rows.length })
+                + (enough === false ? ' — ✗ ' + tFormat('shamir.verify.needMore', { k: threshold }) : (enough ? ' — ✓ ' + t('shamir.verify.sufficient') : '')));
+        });
+
         // ==================== EXIF ERASER (Phase 3d) ====================
         // Strips all metadata via canvas re-encode. Pre-strip detection of JPEG APP1 and
         // PNG text chunks is informational only — the strip happens regardless.
@@ -17963,6 +18094,31 @@
         // raw signature bytes — also what Web Crypto wants. So no DER/concat fixup
         // beyond what Web Crypto already handles.
 
+        // Verify a JOSE signature from a JWK (RFC 7517 / 7518 / 8037). Covers the
+        // four key types JOSE defines — OKP/Ed25519 (EdDSA, RFC 8037), RSA, EC, and
+        // the symmetric `oct` (HMAC) — by importing the JWK directly via Web Crypto.
+        async function jwkVerify(jwk, alg, sigBytes, data) {
+            if (alg === 'EdDSA' || (jwk.kty === 'OKP' && jwk.crv === 'Ed25519')) {
+                const key = await crypto.subtle.importKey('jwk', jwk, { name: 'Ed25519' }, false, ['verify']);
+                return crypto.subtle.verify({ name: 'Ed25519' }, key, sigBytes, data);
+            }
+            const hash = HASH_FOR_ALG[alg];
+            if (jwk.kty === 'RSA') {
+                const key = await crypto.subtle.importKey('jwk', jwk, { name: 'RSASSA-PKCS1-v1_5', hash }, false, ['verify']);
+                return crypto.subtle.verify('RSASSA-PKCS1-v1_5', key, sigBytes, data);
+            }
+            if (jwk.kty === 'EC') {
+                const namedCurve = alg === 'ES256' ? 'P-256' : alg === 'ES384' ? 'P-384' : 'P-521';
+                const key = await crypto.subtle.importKey('jwk', jwk, { name: 'ECDSA', namedCurve }, false, ['verify']);
+                return crypto.subtle.verify({ name: 'ECDSA', hash }, key, sigBytes, data);
+            }
+            if (jwk.kty === 'oct') {
+                const key = await crypto.subtle.importKey('jwk', jwk, { name: 'HMAC', hash }, false, ['verify']);
+                return crypto.subtle.verify('HMAC', key, sigBytes, data);
+            }
+            throw new Error(t('err.jwtJwkKty') + ': ' + jwk.kty);
+        }
+
         document.getElementById('btn-jwt-verify').addEventListener('click', async () => {
             const out = document.getElementById('jwt-verify-result');
             const token = document.getElementById('jwt-input').value.trim();
@@ -17972,10 +18128,56 @@
                 if (!keyText) throw new Error(t('err.jwtKeyEmpty'));
                 const decoded = jwtRender(token);
                 const alg = decoded.header && decoded.header.alg;
+                const data = new TextEncoder().encode(decoded.signingInput);
+
+                // JWKS / JWK path (RFC 7517): the key field holds a JSON Web Key Set
+                // ({"keys":[…]}) or a bare JWK ({"kty":…}). For a JWKS, the matching key
+                // is selected by the token's `kid` header (RFC 7515 §4.1.4); the matched
+                // key is always surfaced, then a Web Crypto verify is attempted.
+                let parsedKey = null;
+                try { parsedKey = JSON.parse(keyText); } catch (_) { /* not JSON → PEM/secret path */ }
+                const isJwks = parsedKey && Array.isArray(parsedKey.keys);
+                const isJwk = parsedKey && typeof parsedKey === 'object' && typeof parsedKey.kty === 'string';
+                if (isJwks || isJwk) {
+                    let jwk;
+                    if (isJwks) {
+                        const kid = decoded.header && decoded.header.kid != null ? String(decoded.header.kid) : null;
+                        const keys = parsedKey.keys;
+                        jwk = (kid != null ? keys.find(k => String(k.kid) === kid) : null)
+                            || (keys.length === 1 ? keys[0] : null)
+                            || keys.find(k => !k.alg || k.alg === alg);
+                        if (!jwk) throw new Error(t('err.jwtJwksNoKey'));
+                    } else {
+                        jwk = parsedKey;
+                    }
+                    const kty = String(jwk.kty) + (jwk.crv ? '/' + jwk.crv : '');
+                    const matched = tFormat('jwt.jwks.matched', { kid: jwk.kid != null ? String(jwk.kid) : '—', alg: String(alg || '?'), kty });
+                    let ok = false, verr = null;
+                    try { ok = await jwkVerify(jwk, alg, decoded.sigBytes, data); }
+                    catch (e) { verr = e; }
+                    if (verr) {
+                        out.textContent = matched + ' — ' + t('jwt.verify.keyError') + ': ' + (verr.message || verr);
+                        out.style.color = 'var(--danger)';
+                    } else {
+                        out.textContent = (ok ? '✓ ' : '✗ ') + matched + ' — ' + t(ok ? 'jwt.verify.match' : 'jwt.verify.mismatch');
+                        out.style.color = ok ? 'var(--success)' : 'var(--danger)';
+                    }
+                    return;
+                }
+
+                // EdDSA with a PEM SPKI public key (no JWK).
+                if (alg === 'EdDSA') {
+                    const keyBuf = pemToArrayBuffer(keyText);
+                    const key = await crypto.subtle.importKey('spki', keyBuf, { name: 'Ed25519' }, false, ['verify']);
+                    const ok = await crypto.subtle.verify({ name: 'Ed25519' }, key, decoded.sigBytes, data);
+                    out.textContent = (ok ? '✓ ' : '✗ ') + t(ok ? 'jwt.verify.match' : 'jwt.verify.mismatch');
+                    out.style.color = ok ? 'var(--success)' : 'var(--danger)';
+                    return;
+                }
+
                 const hash = HASH_FOR_ALG[alg];
                 if (!hash) throw new Error(tFormat('err.jwtAlg', { alg: String(alg || '?') }));
 
-                const data = new TextEncoder().encode(decoded.signingInput);
                 let ok = false;
                 if (alg.startsWith('HS')) {
                     const keyBytes = new TextEncoder().encode(keyText);
