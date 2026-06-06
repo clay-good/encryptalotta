@@ -43,7 +43,7 @@ test('hash: offers SHA3-256 / SHA3-512 (FIPS 202)', async ({ page }) => {
 // is the more common modern ask. New: accept "2001:db8::/32" and report
 // the compressed/expanded network and address count.
 // ---------------------------------------------------------------
-test.fixme('cidr: decodes IPv6 prefixes (RFC 4291)', async ({ page }) => {
+test('cidr: decodes IPv6 prefixes (RFC 4291)', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'cidr');
   await page.fill('#cidr-input', '2001:db8::/32');
   await page.click('#btn-cidr-decode');
@@ -74,7 +74,7 @@ test('uuid: generates deterministic v5 from namespace + name (RFC 9562 §5.5)', 
 // of the three against GPU attack. New: #pbkdf2-kdf selector.
 // scrypt RFC 7914 §12 test vector (N=16384,r=8,p=1) for "pleaseletmein"/"SodiumChloride".
 // ---------------------------------------------------------------
-test.fixme('pbkdf2: adds scrypt + Argon2id KDF options (RFC 7914 / RFC 9106)', async ({ page }) => {
+test('pbkdf2: adds scrypt + Argon2id KDF options (RFC 7914 / RFC 9106)', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'pbkdf2');
   await page.selectOption('#pbkdf2-kdf', 'scrypt');
   await page.fill('#pbkdf2-password', 'pleaseletmein');
@@ -84,8 +84,10 @@ test.fixme('pbkdf2: adds scrypt + Argon2id KDF options (RFC 7914 / RFC 9106)', a
   await page.fill('#scrypt-p', '1');
   await page.fill('#pbkdf2-keylen', '64');
   await page.click('#btn-pbkdf2-derive');
-  const out = (await readResult(page, '#pbkdf2-results')).toLowerCase().replace(/\s/g, '');
-  expect(out).toContain('7023bdcb3afd7348461c06cd81fd38ebfda8fbba904f8e3ea9b543f6545da1f2');
+  // Pure-JS scrypt at N=16384 runs for ~1–2 s, so poll for the result rather than
+  // reading once (page.click does not await the async derive handler).
+  await expect(page.locator('#pbkdf2-results')).toContainText(
+    '7023bdcb3afd7348461c06cd81fd38ebfda8fbba904f8e3ea9b543f6545da1f2', { timeout: 20_000 });
 });
 
 // ---------------------------------------------------------------
@@ -135,7 +137,7 @@ test('color: accepts CSS named colors and outputs CMYK', async ({ page }) => {
 // diff — emit a unified diff (the format every patch tool consumes).
 // New: #btn-diff-unified writing a `--- / +++ / @@` hunk to #diff-unified.
 // ---------------------------------------------------------------
-test.fixme('diff: exports a unified diff (@@ hunks)', async ({ page }) => {
+test('diff: exports a unified diff (@@ hunks)', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'diff');
   await page.fill('#diff-left', 'alpha\nbeta\ngamma');
   await page.fill('#diff-right', 'alpha\nBETA\ngamma');
@@ -152,7 +154,7 @@ test.fixme('diff: exports a unified diff (@@ hunks)', async ({ page }) => {
 // encode — add Base58Check (the address/key format with a 4-byte SHA-256d
 // checksum) so a pasted WIF / address can be decoded and verified.
 // ---------------------------------------------------------------
-test.fixme('encode: supports Base58Check decode with checksum validation', async ({ page }) => {
+test('encode: supports Base58Check decode with checksum validation', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'encode');
   await page.selectOption('#encode-input-format', 'base58check');
   await page.selectOption('#encode-output-format', 'hex');

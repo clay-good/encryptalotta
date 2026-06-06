@@ -2403,6 +2403,7 @@
                         <option value="base64url" data-i18n="encode.fmt.base64url">Base64 (URL-safe)</option>
                         <option value="base32" data-i18n="encode.fmt.base32">Base32</option>
                         <option value="base58" data-i18n="encode.fmt.base58">Base58 (Bitcoin alphabet)</option>
+                        <option value="base58check" data-i18n="encode.fmt.base58check">Base58Check (SHA-256d checksum)</option>
                     </select>
                 </div>
 
@@ -2420,6 +2421,7 @@
                         <option value="base64url" data-i18n="encode.fmt.base64url">Base64 (URL-safe)</option>
                         <option value="base32" data-i18n="encode.fmt.base32">Base32</option>
                         <option value="base58" data-i18n="encode.fmt.base58">Base58 (Bitcoin alphabet)</option>
+                        <option value="base58check" data-i18n="encode.fmt.base58check">Base58Check (SHA-256d checksum)</option>
                     </select>
                 </div>
 
@@ -2679,10 +2681,16 @@
                 </div>
 
                 <button id="btn-diff-compute" class="btn" data-i18n="btn.diffCompute">Compare</button>
+                <button id="btn-diff-unified" class="btn btn-secondary" data-i18n="btn.diffUnified" style="margin-inline-start: 8px;">Unified diff</button>
                 <button id="btn-diff-swap" class="btn btn-secondary" data-i18n="btn.diffSwap" style="margin-inline-start: 8px;">Swap A ↔ B</button>
 
                 <div id="diff-summary" style="margin-top: 18px; font-size: 0.9rem; color: var(--text-secondary);"></div>
                 <div id="diff-results" class="hidden" style="margin-top: 12px; background: var(--bg-tertiary); padding: 14px; border-radius: 8px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.85rem; white-space: pre-wrap; overflow-x: auto;"></div>
+
+                <div class="form-group" id="diff-unified-wrap" style="margin-top: 18px; display: none;">
+                    <label for="diff-unified" data-i18n="diff.label.unified">Unified diff (--- / +++ / @@ hunks, 3 lines of context):</label>
+                    <textarea id="diff-unified" rows="10" readonly spellcheck="false" style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.85rem;"></textarea>
+                </div>
             </div>
 
             <!-- ==================== Phase 6 Batch C: CSV / JSON / TSV ==================== -->
@@ -2973,8 +2981,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="cidr-input" data-i18n="cidr.label.input">CIDR (IPv4):</label>
-                    <input type="text" id="cidr-input" autocomplete="off" spellcheck="false" data-i18n-attr="placeholder:cidr.ph.input" placeholder="10.0.0.0/24   or   192.168.1.5/26" value="10.0.0.0/24">
+                    <label for="cidr-input" data-i18n="cidr.label.input">CIDR (IPv4 / IPv6):</label>
+                    <input type="text" id="cidr-input" autocomplete="off" spellcheck="false" data-i18n-attr="placeholder:cidr.ph.input" placeholder="10.0.0.0/24   or   2001:db8::/32" value="10.0.0.0/24">
                 </div>
 
                 <button id="btn-cidr-decode" class="btn" data-i18n="btn.cidrDecode">Decode</button>
@@ -2995,6 +3003,15 @@
                     <input type="password" id="pbkdf2-password" autocomplete="off" spellcheck="false">
                 </div>
 
+                <div class="form-group">
+                    <label for="pbkdf2-kdf" data-i18n="pbkdf2.label.kdf">Key derivation function</label>
+                    <select id="pbkdf2-kdf">
+                        <option value="pbkdf2" data-i18n="pbkdf2.kdf.pbkdf2">PBKDF2 (RFC 8018)</option>
+                        <option value="scrypt" data-i18n="pbkdf2.kdf.scrypt">scrypt (RFC 7914)</option>
+                        <option value="argon2id" data-i18n="pbkdf2.kdf.argon2id">Argon2id (RFC 9106)</option>
+                    </select>
+                </div>
+
                 <div class="grid-2">
                     <div class="form-group">
                         <label for="pbkdf2-salt" data-i18n="pbkdf2.label.salt">Salt (text or hex)</label>
@@ -3009,7 +3026,7 @@
                     </div>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group" id="pbkdf2-preset-wrap">
                     <label for="pbkdf2-regulator-preset" data-i18n="pbkdf2.label.regulatorPreset">Regulator Preset</label>
                     <select id="pbkdf2-regulator-preset" aria-describedby="pbkdf2-regulator-preset-help">
                         <option value="custom" selected data-i18n="pbkdf2.opt.preset.custom">Custom (set iterations and PRF below)</option>
@@ -3022,7 +3039,7 @@
                 </div>
 
                 <div class="grid-2">
-                    <div class="form-group">
+                    <div class="form-group" id="pbkdf2-iter-wrap">
                         <label for="pbkdf2-iterations" data-i18n="pbkdf2.label.iterations">Iterations</label>
                         <input type="number" id="pbkdf2-iterations" value="100000" min="1" max="10000000" step="1000">
                     </div>
@@ -3032,7 +3049,37 @@
                     </div>
                 </div>
 
-                <div class="form-group">
+                <div class="grid-2" id="pbkdf2-scrypt-params" style="display: none;">
+                    <div class="form-group">
+                        <label for="scrypt-n" data-i18n="pbkdf2.label.scryptN">scrypt N (CPU/memory cost, power of 2)</label>
+                        <input type="number" id="scrypt-n" value="16384" min="2" step="2">
+                    </div>
+                    <div class="form-group">
+                        <label for="scrypt-r" data-i18n="pbkdf2.label.scryptR">scrypt r (block size)</label>
+                        <input type="number" id="scrypt-r" value="8" min="1" max="64" step="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="scrypt-p" data-i18n="pbkdf2.label.scryptP">scrypt p (parallelism)</label>
+                        <input type="number" id="scrypt-p" value="1" min="1" max="16" step="1">
+                    </div>
+                </div>
+
+                <div class="grid-2" id="pbkdf2-argon-params" style="display: none;">
+                    <div class="form-group">
+                        <label for="pbkdf2-argon-mem" data-i18n="pbkdf2.label.argonMem">Argon2 memory (KiB)</label>
+                        <input type="number" id="pbkdf2-argon-mem" value="19456" min="8" max="1048576" step="1024">
+                    </div>
+                    <div class="form-group">
+                        <label for="pbkdf2-argon-time" data-i18n="pbkdf2.label.argonTime">Argon2 time (iterations)</label>
+                        <input type="number" id="pbkdf2-argon-time" value="2" min="1" max="100" step="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="pbkdf2-argon-par" data-i18n="pbkdf2.label.argonPar">Argon2 parallelism (lanes)</label>
+                        <input type="number" id="pbkdf2-argon-par" value="1" min="1" max="64" step="1">
+                    </div>
+                </div>
+
+                <div class="form-group" id="pbkdf2-prf-wrap">
                     <label for="pbkdf2-prf" data-i18n="pbkdf2.label.prf">PRF (hash)</label>
                     <select id="pbkdf2-prf">
                         <option value="SHA-256">SHA-256</option>
@@ -3788,6 +3835,9 @@
                 'encode.fmt.base64url': 'Base64 (URL-safe)',
                 'encode.fmt.base32': 'Base32',
                 'encode.fmt.base58': 'Base58 (Bitcoin alphabet)',
+                'encode.fmt.base58check': 'Base58Check (SHA-256d checksum)',
+                'err.b58cShort': 'Base58Check input is too short to contain a 4-byte checksum.',
+                'err.b58cChecksum': 'Base58Check checksum does not match (corrupted or mistyped input).',
                 'btn.encodeConvert': 'Convert',
                 'btn.encodeSwap': 'Swap From ↔ To',
                 'err.encodeConvert': 'Could not convert',
@@ -4277,6 +4327,8 @@
                 'diff.opt.ignoreCase': 'Ignore case',
                 'btn.diffCompute': 'Compare',
                 'btn.diffSwap': 'Swap A ↔ B',
+                'btn.diffUnified': 'Unified diff',
+                'diff.label.unified': 'Unified diff (--- / +++ / @@ hunks, 3 lines of context):',
                 'diff.summary': '{added} added · {removed} removed · {unchanged} unchanged',
                 'diff.same': 'The two inputs are identical.',
                 'err.diffEmpty': 'Provide at least one input to compare.',
@@ -4449,8 +4501,8 @@
                 'nav.tool.cidr': 'CIDR / Subnet Calculator',
                 'tool.cidr.desc': 'Decode IPv4 CIDR notation: network, broadcast, host range, total addresses.',
                 'view.cidr.h2': 'CIDR / Subnet Calculator',
-                'cidr.label.input': 'CIDR (IPv4):',
-                'cidr.ph.input': '10.0.0.0/24 or 192.168.1.5/26',
+                'cidr.label.input': 'CIDR (IPv4 / IPv6):',
+                'cidr.ph.input': '10.0.0.0/24   or   2001:db8::/32',
                 'btn.cidrDecode': 'Decode',
                 'cidr.row.input': 'Normalized',
                 'cidr.row.network': 'Network',
@@ -4463,6 +4515,10 @@
                 'cidr.row.usable': 'Usable hosts',
                 'cidr.row.class': 'Address class',
                 'cidr.row.tags': 'Tags',
+                'cidr.row.lastAddr': 'Last address',
+                'cidr.row.expanded': 'Network (expanded)',
+                'err.cidr6': 'Invalid IPv6 address.',
+                'err.cidrPrefix6': 'IPv6 prefix length must be 0–128.',
                 'cidr.row.error': 'Error',
                 'err.cidrFormat': 'Expected an IPv4 address with optional /prefix (e.g. 10.0.0.0/24).',
                 'ubl.ok.payerFinancialAccountIdPresence': 'Every direct-debit <cac:PaymentMeans> (UNCL 4461 code 49 / 59) declares <cac:PaymentMandate>/<cac:PayerFinancialAccount>/<cbc:ID> across all {n} direct-debit block(s) (EN 16931 BG-19 / BT-91 — Debited account identifier)',
@@ -4486,6 +4542,19 @@
                 'pbkdf2.opt.hex': 'Hex',
                 'pbkdf2.label.iterations': 'Iterations',
                 'pbkdf2.label.keyLen': 'Key length (bytes)',
+                'pbkdf2.label.kdf': 'Key derivation function',
+                'pbkdf2.kdf.pbkdf2': 'PBKDF2 (RFC 8018)',
+                'pbkdf2.kdf.scrypt': 'scrypt (RFC 7914)',
+                'pbkdf2.kdf.argon2id': 'Argon2id (RFC 9106)',
+                'pbkdf2.label.scryptN': 'scrypt N (CPU/memory cost, power of 2)',
+                'pbkdf2.label.scryptR': 'scrypt r (block size)',
+                'pbkdf2.label.scryptP': 'scrypt p (parallelism)',
+                'pbkdf2.label.argonMem': 'Argon2 memory (KiB)',
+                'pbkdf2.label.argonTime': 'Argon2 time (iterations)',
+                'pbkdf2.label.argonPar': 'Argon2 parallelism (lanes)',
+                'err.scryptN': 'scrypt N must be a power of two greater than 1.',
+                'err.scryptRp': 'scrypt r and p must be positive integers.',
+                'err.argonParams': 'Argon2 memory (≥ 8 KiB), time (≥ 1), and parallelism (≥ 1) must be valid.',
                 'pbkdf2.label.prf': 'PRF (hash)',
                 'btn.pbkdf2Derive': 'Derive',
                 'btn.pbkdf2Computing': 'Computing…',
@@ -5784,6 +5853,9 @@
                 'encode.fmt.base64url': 'Base64 (compatible URL)',
                 'encode.fmt.base32': 'Base32',
                 'encode.fmt.base58': 'Base58 (alphabet Bitcoin)',
+                'encode.fmt.base58check': 'Base58Check (somme de contrôle SHA-256d)',
+                'err.b58cShort': 'L’entrée Base58Check est trop courte pour contenir une somme de contrôle de 4 octets.',
+                'err.b58cChecksum': 'La somme de contrôle Base58Check ne correspond pas (entrée corrompue ou mal saisie).',
                 'btn.encodeConvert': 'Convertir',
                 'btn.encodeSwap': 'Inverser De ↔ Vers',
                 'err.encodeConvert': 'Conversion impossible',
@@ -6252,6 +6324,8 @@
                 'diff.opt.ignoreCase': 'Ignorer la casse',
                 'btn.diffCompute': 'Comparer',
                 'btn.diffSwap': 'Échanger A ↔ B',
+                'btn.diffUnified': 'Diff unifié',
+                'diff.label.unified': 'Diff unifié (en-têtes --- / +++ / @@, 3 lignes de contexte) :',
                 'diff.summary': '{added} ajout(s) · {removed} suppression(s) · {unchanged} inchangé(s)',
                 'diff.same': 'Les deux entrées sont identiques.',
                 'err.diffEmpty': 'Fournissez au moins une entrée à comparer.',
@@ -6419,8 +6493,8 @@
                 'nav.tool.cidr': 'Calculatrice CIDR / sous-réseau',
                 'tool.cidr.desc': 'Décoder une notation CIDR IPv4 : réseau, diffusion, plage d’hôtes, total d’adresses.',
                 'view.cidr.h2': 'Calculatrice CIDR / sous-réseau',
-                'cidr.label.input': 'CIDR (IPv4) :',
-                'cidr.ph.input': '10.0.0.0/24 ou 192.168.1.5/26',
+                'cidr.label.input': 'CIDR (IPv4 / IPv6) :',
+                'cidr.ph.input': '10.0.0.0/24   ou   2001:db8::/32',
                 'btn.cidrDecode': 'Décoder',
                 'cidr.row.input': 'Normalisé',
                 'cidr.row.network': 'Réseau',
@@ -6433,6 +6507,10 @@
                 'cidr.row.usable': 'Hôtes utilisables',
                 'cidr.row.class': 'Classe d’adresse',
                 'cidr.row.tags': 'Étiquettes',
+                'cidr.row.lastAddr': 'Dernière adresse',
+                'cidr.row.expanded': 'Réseau (étendu)',
+                'err.cidr6': 'Adresse IPv6 invalide.',
+                'err.cidrPrefix6': 'La longueur du préfixe IPv6 doit être comprise entre 0 et 128.',
                 'cidr.row.error': 'Erreur',
                 'err.cidrFormat': 'Adresse IPv4 attendue avec préfixe /facultatif (par ex. 10.0.0.0/24).',
                 'err.cidrIp': 'Chaque octet doit être entre 0 et 255.',
@@ -6448,6 +6526,19 @@
                 'pbkdf2.opt.hex': 'Hex',
                 'pbkdf2.label.iterations': 'Itérations',
                 'pbkdf2.label.keyLen': 'Longueur de clé (octets)',
+                'pbkdf2.label.kdf': 'Fonction de dérivation de clé',
+                'pbkdf2.kdf.pbkdf2': 'PBKDF2 (RFC 8018)',
+                'pbkdf2.kdf.scrypt': 'scrypt (RFC 7914)',
+                'pbkdf2.kdf.argon2id': 'Argon2id (RFC 9106)',
+                'pbkdf2.label.scryptN': 'scrypt N (coût CPU/mémoire, puissance de 2)',
+                'pbkdf2.label.scryptR': 'scrypt r (taille de bloc)',
+                'pbkdf2.label.scryptP': 'scrypt p (parallélisme)',
+                'pbkdf2.label.argonMem': 'Mémoire Argon2 (Kio)',
+                'pbkdf2.label.argonTime': 'Temps Argon2 (itérations)',
+                'pbkdf2.label.argonPar': 'Parallélisme Argon2 (voies)',
+                'err.scryptN': 'Le N de scrypt doit être une puissance de deux supérieure à 1.',
+                'err.scryptRp': 'Les paramètres r et p de scrypt doivent être des entiers positifs.',
+                'err.argonParams': 'La mémoire Argon2 (≥ 8 Kio), le temps (≥ 1) et le parallélisme (≥ 1) doivent être valides.',
                 'pbkdf2.label.prf': 'PRF (hachage)',
                 'btn.pbkdf2Derive': 'Dériver',
                 'btn.pbkdf2Computing': 'Calcul en cours…',
@@ -7545,6 +7636,9 @@
                 'encode.fmt.base64url': 'Base64（URL 安全）',
                 'encode.fmt.base32': 'Base32',
                 'encode.fmt.base58': 'Base58（比特币字母表）',
+                'encode.fmt.base58check': 'Base58Check（SHA-256d 校验和）',
+                'err.b58cShort': 'Base58Check 输入太短，无法包含 4 字节校验和。',
+                'err.b58cChecksum': 'Base58Check 校验和不匹配（输入已损坏或输入有误）。',
                 'btn.encodeConvert': '转换',
                 'btn.encodeSwap': '交换 从 ↔ 到',
                 'err.encodeConvert': '转换失败',
@@ -8013,6 +8107,8 @@
                 'diff.opt.ignoreCase': '忽略大小写',
                 'btn.diffCompute': '比较',
                 'btn.diffSwap': '交换 A ↔ B',
+                'btn.diffUnified': '统一 diff',
+                'diff.label.unified': '统一 diff（--- / +++ / @@ 块，3 行上下文）：',
                 'diff.summary': '新增 {added} · 删除 {removed} · 未变 {unchanged}',
                 'diff.same': '两段输入完全相同。',
                 'err.diffEmpty': '至少提供一段内容以进行比较。',
@@ -8180,8 +8276,8 @@
                 'nav.tool.cidr': 'CIDR / 子网计算器',
                 'tool.cidr.desc': '解码 IPv4 CIDR：网络、广播、主机范围、总地址数。',
                 'view.cidr.h2': 'CIDR / 子网计算器',
-                'cidr.label.input': 'CIDR (IPv4)：',
-                'cidr.ph.input': '10.0.0.0/24 或 192.168.1.5/26',
+                'cidr.label.input': 'CIDR (IPv4 / IPv6)：',
+                'cidr.ph.input': '10.0.0.0/24   或   2001:db8::/32',
                 'btn.cidrDecode': '解码',
                 'cidr.row.input': '规范化',
                 'cidr.row.network': '网络',
@@ -8194,6 +8290,10 @@
                 'cidr.row.usable': '可用主机',
                 'cidr.row.class': '地址类别',
                 'cidr.row.tags': '标记',
+                'cidr.row.lastAddr': '最后地址',
+                'cidr.row.expanded': '网络（展开）',
+                'err.cidr6': 'IPv6 地址无效。',
+                'err.cidrPrefix6': 'IPv6 前缀长度必须为 0–128。',
                 'cidr.row.error': '错误',
                 'err.cidrFormat': '期望 IPv4 地址，可选 /前缀（例如 10.0.0.0/24）。',
                 'err.cidrIp': '每个八位组必须在 0 到 255 之间。',
@@ -8209,6 +8309,19 @@
                 'pbkdf2.opt.hex': '十六进制',
                 'pbkdf2.label.iterations': '迭代次数',
                 'pbkdf2.label.keyLen': '密钥长度（字节）',
+                'pbkdf2.label.kdf': '密钥派生函数',
+                'pbkdf2.kdf.pbkdf2': 'PBKDF2（RFC 8018）',
+                'pbkdf2.kdf.scrypt': 'scrypt（RFC 7914）',
+                'pbkdf2.kdf.argon2id': 'Argon2id（RFC 9106）',
+                'pbkdf2.label.scryptN': 'scrypt N（CPU/内存成本，2 的幂）',
+                'pbkdf2.label.scryptR': 'scrypt r（块大小）',
+                'pbkdf2.label.scryptP': 'scrypt p（并行度）',
+                'pbkdf2.label.argonMem': 'Argon2 内存（KiB）',
+                'pbkdf2.label.argonTime': 'Argon2 时间（迭代次数）',
+                'pbkdf2.label.argonPar': 'Argon2 并行度（通道）',
+                'err.scryptN': 'scrypt N 必须是大于 1 的 2 的幂。',
+                'err.scryptRp': 'scrypt r 和 p 必须是正整数。',
+                'err.argonParams': 'Argon2 内存（≥ 8 KiB）、时间（≥ 1）和并行度（≥ 1）必须有效。',
                 'pbkdf2.label.prf': 'PRF（哈希）',
                 'btn.pbkdf2Derive': '派生',
                 'btn.pbkdf2Computing': '计算中…',
@@ -9291,6 +9404,9 @@
                 'encode.fmt.base64url': 'Base64 (URL-sicher)',
                 'encode.fmt.base32': 'Base32',
                 'encode.fmt.base58': 'Base58 (Bitcoin-Alphabet)',
+                'encode.fmt.base58check': 'Base58Check (SHA-256d-Prüfsumme)',
+                'err.b58cShort': 'Die Base58Check-Eingabe ist zu kurz für eine 4-Byte-Prüfsumme.',
+                'err.b58cChecksum': 'Die Base58Check-Prüfsumme stimmt nicht überein (beschädigte oder falsch eingegebene Eingabe).',
                 'btn.encodeConvert': 'Umwandeln',
                 'btn.encodeSwap': 'Tauschen Von ↔ Nach',
                 'err.encodeConvert': 'Umwandlung fehlgeschlagen',
@@ -9759,6 +9875,8 @@
                 'diff.opt.ignoreCase': 'Groß-/Kleinschreibung ignorieren',
                 'btn.diffCompute': 'Vergleichen',
                 'btn.diffSwap': 'A ↔ B tauschen',
+                'btn.diffUnified': 'Unified-Diff',
+                'diff.label.unified': 'Unified-Diff (--- / +++ / @@-Blöcke, 3 Kontextzeilen):',
                 'diff.summary': '{added} hinzugefügt · {removed} entfernt · {unchanged} unverändert',
                 'diff.same': 'Beide Eingaben sind identisch.',
                 'err.diffEmpty': 'Geben Sie mindestens eine Eingabe zum Vergleichen ein.',
@@ -9926,8 +10044,8 @@
                 'nav.tool.cidr': 'CIDR / Subnetz-Rechner',
                 'tool.cidr.desc': 'IPv4-CIDR dekodieren: Netzwerk, Broadcast, Hostbereich, Gesamtzahl.',
                 'view.cidr.h2': 'CIDR / Subnetz-Rechner',
-                'cidr.label.input': 'CIDR (IPv4):',
-                'cidr.ph.input': '10.0.0.0/24 oder 192.168.1.5/26',
+                'cidr.label.input': 'CIDR (IPv4 / IPv6):',
+                'cidr.ph.input': '10.0.0.0/24   oder   2001:db8::/32',
                 'btn.cidrDecode': 'Dekodieren',
                 'cidr.row.input': 'Normalisiert',
                 'cidr.row.network': 'Netzwerk',
@@ -9940,6 +10058,10 @@
                 'cidr.row.usable': 'Nutzbare Hosts',
                 'cidr.row.class': 'Adressklasse',
                 'cidr.row.tags': 'Tags',
+                'cidr.row.lastAddr': 'Letzte Adresse',
+                'cidr.row.expanded': 'Netz (ausgeschrieben)',
+                'err.cidr6': 'Ungültige IPv6-Adresse.',
+                'err.cidrPrefix6': 'Die IPv6-Präfixlänge muss zwischen 0 und 128 liegen.',
                 'cidr.row.error': 'Fehler',
                 'err.cidrFormat': 'Erwartet: IPv4-Adresse mit optionalem /Präfix (z. B. 10.0.0.0/24).',
                 'err.cidrIp': 'Jedes Oktett muss 0–255 sein.',
@@ -9955,6 +10077,19 @@
                 'pbkdf2.opt.hex': 'Hex',
                 'pbkdf2.label.iterations': 'Iterationen',
                 'pbkdf2.label.keyLen': 'Schlüssellänge (Byte)',
+                'pbkdf2.label.kdf': 'Schlüsselableitungsfunktion',
+                'pbkdf2.kdf.pbkdf2': 'PBKDF2 (RFC 8018)',
+                'pbkdf2.kdf.scrypt': 'scrypt (RFC 7914)',
+                'pbkdf2.kdf.argon2id': 'Argon2id (RFC 9106)',
+                'pbkdf2.label.scryptN': 'scrypt N (CPU-/Speicherkosten, Zweierpotenz)',
+                'pbkdf2.label.scryptR': 'scrypt r (Blockgröße)',
+                'pbkdf2.label.scryptP': 'scrypt p (Parallelität)',
+                'pbkdf2.label.argonMem': 'Argon2-Speicher (KiB)',
+                'pbkdf2.label.argonTime': 'Argon2-Zeit (Iterationen)',
+                'pbkdf2.label.argonPar': 'Argon2-Parallelität (Lanes)',
+                'err.scryptN': 'scrypt N muss eine Zweierpotenz größer als 1 sein.',
+                'err.scryptRp': 'scrypt r und p müssen positive ganze Zahlen sein.',
+                'err.argonParams': 'Argon2-Speicher (≥ 8 KiB), Zeit (≥ 1) und Parallelität (≥ 1) müssen gültig sein.',
                 'pbkdf2.label.prf': 'PRF (Hash)',
                 'btn.pbkdf2Derive': 'Ableiten',
                 'btn.pbkdf2Computing': 'Wird berechnet…',
@@ -11052,6 +11187,9 @@
                 'encode.fmt.base64url': 'Base64 (URL-सुरक्षित)',
                 'encode.fmt.base32': 'Base32',
                 'encode.fmt.base58': 'Base58 (Bitcoin वर्णमाला)',
+                'encode.fmt.base58check': 'Base58Check (SHA-256d चेकसम)',
+                'err.b58cShort': 'Base58Check इनपुट 4-बाइट चेकसम रखने के लिए बहुत छोटा है।',
+                'err.b58cChecksum': 'Base58Check चेकसम मेल नहीं खाता (दूषित या गलत टाइप किया गया इनपुट)।',
                 'btn.encodeConvert': 'परिवर्तित करें',
                 'btn.encodeSwap': 'से ↔ तक स्वैप',
                 'err.encodeConvert': 'परिवर्तन विफल',
@@ -11520,6 +11658,8 @@
                 'diff.opt.ignoreCase': 'केस अनदेखा करें',
                 'btn.diffCompute': 'तुलना करें',
                 'btn.diffSwap': 'A ↔ B बदलें',
+                'btn.diffUnified': 'यूनिफ़ाइड diff',
+                'diff.label.unified': 'यूनिफ़ाइड diff (--- / +++ / @@ हंक, 3 संदर्भ पंक्तियाँ):',
                 'diff.summary': '{added} जोड़े · {removed} हटाए · {unchanged} अपरिवर्तित',
                 'diff.same': 'दोनों इनपुट समान हैं।',
                 'err.diffEmpty': 'तुलना के लिए कम से कम एक इनपुट दें।',
@@ -11687,8 +11827,8 @@
                 'nav.tool.cidr': 'CIDR / सबनेट कैलकुलेटर',
                 'tool.cidr.desc': 'IPv4 CIDR डिकोड करें: नेटवर्क, ब्रॉडकास्ट, होस्ट रेंज, कुल पते।',
                 'view.cidr.h2': 'CIDR / सबनेट कैलकुलेटर',
-                'cidr.label.input': 'CIDR (IPv4):',
-                'cidr.ph.input': '10.0.0.0/24 या 192.168.1.5/26',
+                'cidr.label.input': 'CIDR (IPv4 / IPv6):',
+                'cidr.ph.input': '10.0.0.0/24   या   2001:db8::/32',
                 'btn.cidrDecode': 'डिकोड करें',
                 'cidr.row.input': 'सामान्यीकृत',
                 'cidr.row.network': 'नेटवर्क',
@@ -11701,6 +11841,10 @@
                 'cidr.row.usable': 'उपयोग योग्य होस्ट',
                 'cidr.row.class': 'पता वर्ग',
                 'cidr.row.tags': 'टैग',
+                'cidr.row.lastAddr': 'अंतिम पता',
+                'cidr.row.expanded': 'नेटवर्क (विस्तृत)',
+                'err.cidr6': 'अमान्य IPv6 पता।',
+                'err.cidrPrefix6': 'IPv6 प्रीफ़िक्स लंबाई 0–128 होनी चाहिए।',
                 'cidr.row.error': 'त्रुटि',
                 'err.cidrFormat': 'IPv4 पता वैकल्पिक /प्रीफ़िक्स के साथ अपेक्षित (उदा. 10.0.0.0/24)।',
                 'err.cidrIp': 'प्रत्येक ऑक्टेट 0–255 होना चाहिए।',
@@ -11716,6 +11860,19 @@
                 'pbkdf2.opt.hex': 'हेक्स',
                 'pbkdf2.label.iterations': 'पुनरावृत्तियाँ',
                 'pbkdf2.label.keyLen': 'कुंजी लंबाई (बाइट्स)',
+                'pbkdf2.label.kdf': 'कुंजी व्युत्पत्ति फ़ंक्शन',
+                'pbkdf2.kdf.pbkdf2': 'PBKDF2 (RFC 8018)',
+                'pbkdf2.kdf.scrypt': 'scrypt (RFC 7914)',
+                'pbkdf2.kdf.argon2id': 'Argon2id (RFC 9106)',
+                'pbkdf2.label.scryptN': 'scrypt N (CPU/मेमोरी लागत, 2 की घात)',
+                'pbkdf2.label.scryptR': 'scrypt r (ब्लॉक आकार)',
+                'pbkdf2.label.scryptP': 'scrypt p (समानांतरता)',
+                'pbkdf2.label.argonMem': 'Argon2 मेमोरी (KiB)',
+                'pbkdf2.label.argonTime': 'Argon2 समय (पुनरावृत्तियाँ)',
+                'pbkdf2.label.argonPar': 'Argon2 समानांतरता (लेन)',
+                'err.scryptN': 'scrypt N, 1 से बड़ी 2 की घात होनी चाहिए।',
+                'err.scryptRp': 'scrypt r और p धनात्मक पूर्णांक होने चाहिए।',
+                'err.argonParams': 'Argon2 मेमोरी (≥ 8 KiB), समय (≥ 1) और समानांतरता (≥ 1) मान्य होने चाहिए।',
                 'pbkdf2.label.prf': 'PRF (हैश)',
                 'btn.pbkdf2Derive': 'व्युत्पन्न करें',
                 'btn.pbkdf2Computing': 'गणना हो रही है…',
@@ -16891,14 +17048,43 @@
         });
 
         // ==================== Phase 6 Batch A: Encode/Decode ====================
-        document.getElementById('btn-encode-convert').addEventListener('click', () => {
+        // Base58Check (the version+payload+4-byte SHA-256d-checksum format used by
+        // Bitcoin addresses / WIF keys). Decode verifies the trailing checksum and
+        // returns the version+payload (checksum stripped); encode appends a fresh one.
+        async function sha256d(bytes) {
+            const d1 = new Uint8Array(await crypto.subtle.digest('SHA-256', bytes));
+            return new Uint8Array(await crypto.subtle.digest('SHA-256', d1));
+        }
+        async function base58checkDecodeToBytes(str) {
+            const all = base58ToBytes(str.trim());
+            if (all.length < 5) throw new Error(t('err.b58cShort'));
+            const payload = all.slice(0, all.length - 4);
+            const checksum = all.slice(all.length - 4);
+            const expect = (await sha256d(payload)).slice(0, 4);
+            for (let i = 0; i < 4; i++) {
+                if (checksum[i] !== expect[i]) throw new Error(t('err.b58cChecksum'));
+            }
+            return payload;
+        }
+        async function base58checkEncodeFromBytes(bytes) {
+            const checksum = (await sha256d(bytes)).slice(0, 4);
+            const full = new Uint8Array(bytes.length + 4);
+            full.set(bytes, 0); full.set(checksum, bytes.length);
+            return bytesToBase58(full);
+        }
+
+        document.getElementById('btn-encode-convert').addEventListener('click', async () => {
             const fromFmt = document.getElementById('encode-input-format').value;
             const toFmt = document.getElementById('encode-output-format').value;
             const input = document.getElementById('encode-input').value;
             const out = document.getElementById('encode-output');
             try {
-                const bytes = decodeToBytes(input, fromFmt);
-                out.value = encodeFromBytes(bytes, toFmt);
+                const bytes = fromFmt === 'base58check'
+                    ? await base58checkDecodeToBytes(input)
+                    : decodeToBytes(input, fromFmt);
+                out.value = toFmt === 'base58check'
+                    ? await base58checkEncodeFromBytes(bytes)
+                    : encodeFromBytes(bytes, toFmt);
             } catch (e) {
                 out.value = '';
                 alert(t('err.encodeConvert') + ': ' + e.message);
@@ -18021,19 +18207,75 @@
             }
         }
 
-        document.getElementById('btn-diff-compute').addEventListener('click', () => {
+        function diffUnified(aLines, bLines, ops, context) {
+            // Format an LCS op list as a standard unified diff: `--- / +++` headers
+            // and `@@ -l,s +l,s @@` hunks, each padded with up to `context` lines of
+            // unchanged context and merged when their context windows touch.
+            context = context == null ? 3 : context;
+            const entries = ops.map(op =>
+                op.type === 'eq'  ? { tag: ' ', text: aLines[op.a], a: op.a, b: op.b } :
+                op.type === 'del' ? { tag: '-', text: aLines[op.a], a: op.a, b: null } :
+                                    { tag: '+', text: bLines[op.b], a: null, b: op.b });
+            const changed = [];
+            entries.forEach((e, i) => { if (e.tag !== ' ') changed.push(i); });
+            if (changed.length === 0) return ''; // inputs are identical
+            const ranges = [];
+            for (const idx of changed) {
+                const lo = Math.max(0, idx - context);
+                const hi = Math.min(entries.length - 1, idx + context);
+                const last = ranges[ranges.length - 1];
+                if (last && lo <= last[1] + 1) last[1] = Math.max(last[1], hi);
+                else ranges.push([lo, hi]);
+            }
+            const lines = ['--- A', '+++ B'];
+            for (const [lo, hi] of ranges) {
+                let aStart = null, bStart = null, aCount = 0, bCount = 0;
+                for (let i = lo; i <= hi; i++) {
+                    const e = entries[i];
+                    if (e.tag !== '+') { if (aStart === null) aStart = e.a; aCount++; }
+                    if (e.tag !== '-') { if (bStart === null) bStart = e.b; bCount++; }
+                }
+                const aS = aCount === 0 ? (aStart === null ? 0 : aStart) : aStart + 1;
+                const bS = bCount === 0 ? (bStart === null ? 0 : bStart) : bStart + 1;
+                lines.push(`@@ -${aS},${aCount} +${bS},${bCount} @@`);
+                for (let i = lo; i <= hi; i++) lines.push(entries[i].tag + entries[i].text);
+            }
+            return lines.join('\n') + '\n';
+        }
+
+        function diffReadInputs() {
             const left = document.getElementById('diff-left').value;
             const right = document.getElementById('diff-right').value;
-            if (!left && !right) { alert(t('err.diffEmpty')); return; }
             const ignoreWs = document.getElementById('diff-ignore-ws').checked;
             const ignoreCase = document.getElementById('diff-ignore-case').checked;
             const aLines = left.split('\n');
             const bLines = right.split('\n');
             const aKey = aLines.map(l => diffNormalize(l, ignoreWs, ignoreCase));
             const bKey = bLines.map(l => diffNormalize(l, ignoreWs, ignoreCase));
+            return { left, right, aLines, bLines, ops: diffLcs(aKey, bKey) };
+        }
+
+        document.getElementById('btn-diff-compute').addEventListener('click', () => {
+            const left = document.getElementById('diff-left').value;
+            const right = document.getElementById('diff-right').value;
+            if (!left && !right) { alert(t('err.diffEmpty')); return; }
             try {
-                const ops = diffLcs(aKey, bKey);
+                const { aLines, bLines, ops } = diffReadInputs();
                 diffRender(ops, aLines, bLines);
+            } catch (e) {
+                alert(e.message);
+            }
+        });
+        document.getElementById('btn-diff-unified').addEventListener('click', () => {
+            const left = document.getElementById('diff-left').value;
+            const right = document.getElementById('diff-right').value;
+            if (!left && !right) { alert(t('err.diffEmpty')); return; }
+            try {
+                const { aLines, bLines, ops } = diffReadInputs();
+                const out = document.getElementById('diff-unified');
+                const text = diffUnified(aLines, bLines, ops, 3);
+                out.value = text || t('diff.same');
+                document.getElementById('diff-unified-wrap').style.display = '';
             } catch (e) {
                 alert(e.message);
             }
@@ -19517,6 +19759,91 @@
             return [(n >>> 24) & 0xff, (n >>> 16) & 0xff, (n >>> 8) & 0xff, n & 0xff].join('.');
         }
 
+        // ---- IPv6 (RFC 4291 / RFC 5952). 128-bit values held as BigInt. ----
+        function ipv6Parse(s) {
+            let str = String(s).trim().split('%')[0]; // drop any zone id
+            if (str === '') throw new Error(t('err.cidr6'));
+            // Dotted-quad IPv4 suffix (e.g. ::ffff:192.0.2.1) → two hextets.
+            const v4 = str.match(/^(.*:)(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+            if (v4) {
+                const o = [v4[2], v4[3], v4[4], v4[5]].map(x => parseInt(x, 10));
+                if (o.some(x => x > 255)) throw new Error(t('err.cidr6'));
+                str = v4[1] + ((o[0] << 8) | o[1]).toString(16) + ':' + ((o[2] << 8) | o[3]).toString(16);
+            }
+            const halves = str.split('::');
+            if (halves.length > 2) throw new Error(t('err.cidr6'));
+            const head = halves[0] ? halves[0].split(':') : [];
+            let groups;
+            if (halves.length === 1) {
+                groups = head;
+            } else {
+                const tail = halves[1] ? halves[1].split(':') : [];
+                const missing = 8 - (head.length + tail.length);
+                if (missing < 1) throw new Error(t('err.cidr6'));
+                groups = head.concat(Array(missing).fill('0'), tail);
+            }
+            if (groups.length !== 8) throw new Error(t('err.cidr6'));
+            let v = 0n;
+            for (const g of groups) {
+                if (!/^[0-9a-fA-F]{1,4}$/.test(g)) throw new Error(t('err.cidr6'));
+                v = (v << 16n) | BigInt(parseInt(g, 16));
+            }
+            return v;
+        }
+        function ipv6Groups(v) {
+            const g = new Array(8);
+            for (let i = 7; i >= 0; i--) { g[i] = Number(v & 0xffffn); v >>= 16n; }
+            return g;
+        }
+        function ipv6Expand(v) {
+            return ipv6Groups(v).map(x => x.toString(16).padStart(4, '0')).join(':');
+        }
+        function ipv6Format(v) {
+            // RFC 5952: lowercase, drop leading zeros, collapse the longest ≥2 zero run to "::".
+            const g = ipv6Groups(v);
+            let bestStart = -1, bestLen = 0, curStart = -1, curLen = 0;
+            for (let i = 0; i < 8; i++) {
+                if (g[i] === 0) { if (curStart < 0) { curStart = i; curLen = 1; } else curLen++; if (curLen > bestLen) { bestLen = curLen; bestStart = curStart; } }
+                else { curStart = -1; curLen = 0; }
+            }
+            const hex = g.map(x => x.toString(16));
+            if (bestLen < 2) return hex.join(':');
+            const before = hex.slice(0, bestStart).join(':');
+            const after = hex.slice(bestStart + bestLen).join(':');
+            return before + '::' + after;
+        }
+        function cidrDecodeIpv6(input) {
+            const s = input.trim();
+            const slash = s.lastIndexOf('/');
+            const addrStr = slash >= 0 ? s.slice(0, slash) : s;
+            const prefix = slash >= 0 ? parseInt(s.slice(slash + 1), 10) : 128;
+            if (!(Number.isInteger(prefix) && prefix >= 0 && prefix <= 128)) throw new Error(t('err.cidrPrefix6'));
+            const v = ipv6Parse(addrStr);
+            const ALL = (1n << 128n) - 1n;
+            const mask = prefix === 0 ? 0n : (ALL ^ ((1n << (128n - BigInt(prefix))) - 1n));
+            const network = v & mask;
+            const last = network | (ALL ^ mask);
+            const hostBits = 128 - prefix;
+            const total = 1n << BigInt(hostBits);
+            const top16 = Number(v >> 112n);
+            const tags = [];
+            if (v === 0n && prefix === 128) tags.push('unspecified (::)');
+            else if (v === 1n && prefix === 128) tags.push('loopback (::1)');
+            if ((top16 & 0xffc0) === 0xfe80) tags.push('link-local (fe80::/10)');
+            else if ((top16 & 0xfe00) === 0xfc00) tags.push('unique-local (fc00::/7)');
+            else if ((top16 & 0xff00) === 0xff00) tags.push('multicast (ff00::/8)');
+            else if ((v >> 96n) === 0x20010db8n) tags.push('documentation (2001:db8::/32)');
+            else if ((top16 & 0xe000) === 0x2000) tags.push('global unicast (2000::/3)');
+            return {
+                v6: true,
+                input: ipv6Format(v) + '/' + prefix,
+                network: ipv6Format(network) + '/' + prefix,
+                lastAddr: ipv6Format(last),
+                expanded: ipv6Expand(network),
+                hostBits, total, tags
+            };
+        }
+
         function cidrDecode(input) {
             const m = input.trim().match(/^(\d{1,3}(?:\.\d{1,3}){3})(?:\/(\d{1,2}))?$/);
             if (!m) throw new Error(t('err.cidrFormat'));
@@ -19562,8 +19889,26 @@
         document.getElementById('btn-cidr-decode').addEventListener('click', () => {
             const out = document.getElementById('cidr-results');
             while (out.firstChild) out.removeChild(out.firstChild);
+            const raw = document.getElementById('cidr-input').value;
+            // IPv6 if the address part contains a colon; otherwise IPv4.
+            if (raw.split('/')[0].includes(':')) {
+                try {
+                    const r = cidrDecodeIpv6(raw);
+                    out.classList.remove('hidden');
+                    tlsRenderRow(out, t('cidr.row.input'), r.input);
+                    tlsRenderRow(out, t('cidr.row.network'), r.network);
+                    tlsRenderRow(out, t('cidr.row.lastAddr'), r.lastAddr);
+                    tlsRenderRow(out, t('cidr.row.expanded'), r.expanded);
+                    tlsRenderRow(out, t('cidr.row.total'), '2^' + r.hostBits + '  (' + r.total.toString() + ')');
+                    if (r.tags.length) tlsRenderRow(out, t('cidr.row.tags'), r.tags.join(', '));
+                } catch (e) {
+                    out.classList.remove('hidden');
+                    tlsRenderRow(out, t('cidr.row.error'), e.message);
+                }
+                return;
+            }
             try {
-                const r = cidrDecode(document.getElementById('cidr-input').value);
+                const r = cidrDecode(raw);
                 out.classList.remove('hidden');
                 // Reuse the row helper from TLS / SSH / Cron tools — same look & feel.
                 tlsRenderRow(out, t('cidr.row.input'), r.input);
@@ -19628,6 +19973,20 @@
             return out;
         }
 
+        // Swap the visible parameter set when the KDF changes. PBKDF2 keeps the
+        // regulator presets + iteration count + PRF; scrypt and Argon2id each
+        // expose their own cost parameters and hide the PBKDF2-only controls.
+        function pbkdf2SyncKdf() {
+            const kdf = document.getElementById('pbkdf2-kdf').value;
+            const show = (id, on) => { document.getElementById(id).style.display = on ? '' : 'none'; };
+            show('pbkdf2-preset-wrap', kdf === 'pbkdf2');
+            show('pbkdf2-iter-wrap', kdf === 'pbkdf2');
+            show('pbkdf2-prf-wrap', kdf === 'pbkdf2');
+            show('pbkdf2-scrypt-params', kdf === 'scrypt');
+            show('pbkdf2-argon-params', kdf === 'argon2id');
+        }
+        document.getElementById('pbkdf2-kdf').addEventListener('change', pbkdf2SyncKdf);
+
         document.getElementById('btn-pbkdf2-derive').addEventListener('click', async () => {
             const out = document.getElementById('pbkdf2-results');
             const btn = document.getElementById('btn-pbkdf2-derive');
@@ -19643,25 +20002,48 @@
             try {
                 const password = document.getElementById('pbkdf2-password').value;
                 if (!password) throw new Error(t('err.pbkdf2Empty'));
+                const kdf = document.getElementById('pbkdf2-kdf').value;
                 const saltText = document.getElementById('pbkdf2-salt').value;
                 const saltType = document.getElementById('pbkdf2-salt-type').value;
-                const iterations = parseInt(document.getElementById('pbkdf2-iterations').value, 10);
                 const keyLen = parseInt(document.getElementById('pbkdf2-keylen').value, 10);
-                const prf = document.getElementById('pbkdf2-prf').value;
-                if (!Number.isFinite(iterations) || iterations < 1 || iterations > 10000000) throw new Error(t('err.pbkdf2Iterations'));
                 if (!Number.isFinite(keyLen) || keyLen < 1 || keyLen > 512) throw new Error(t('err.pbkdf2KeyLen'));
                 const enc = new TextEncoder();
                 const passBytes = enc.encode(password);
                 const saltBytes = saltType === 'hex' ? pbkdf2HexParse(saltText) : enc.encode(saltText);
-                const key = await crypto.subtle.importKey('raw', passBytes, 'PBKDF2', false, ['deriveBits']);
-                const t0 = performance.now();
-                const bits = await crypto.subtle.deriveBits(
-                    { name: 'PBKDF2', salt: saltBytes, iterations, hash: prf },
-                    key,
-                    keyLen * 8
-                );
-                const elapsed = performance.now() - t0;
-                const derived = new Uint8Array(bits);
+
+                let derived, elapsed;
+                if (kdf === 'scrypt') {
+                    const N = parseInt(document.getElementById('scrypt-n').value, 10);
+                    const r = parseInt(document.getElementById('scrypt-r').value, 10);
+                    const p = parseInt(document.getElementById('scrypt-p').value, 10);
+                    // N must be a power of two > 1 (RFC 7914 §2).
+                    if (!Number.isFinite(N) || N < 2 || (N & (N - 1)) !== 0) throw new Error(t('err.scryptN'));
+                    if (!Number.isFinite(r) || r < 1 || !Number.isFinite(p) || p < 1) throw new Error(t('err.scryptRp'));
+                    const t0 = performance.now();
+                    derived = await ageScrypt(passBytes, saltBytes, N, r, p, keyLen);
+                    elapsed = performance.now() - t0;
+                } else if (kdf === 'argon2id') {
+                    const m = parseInt(document.getElementById('pbkdf2-argon-mem').value, 10);
+                    const time = parseInt(document.getElementById('pbkdf2-argon-time').value, 10);
+                    const par = parseInt(document.getElementById('pbkdf2-argon-par').value, 10);
+                    if (!Number.isFinite(m) || m < 8 || !Number.isFinite(time) || time < 1 || !Number.isFinite(par) || par < 1) throw new Error(t('err.argonParams'));
+                    const t0 = performance.now();
+                    derived = argon2(2, passBytes, saltBytes, { t: time, m, p: par, tagLen: keyLen });
+                    elapsed = performance.now() - t0;
+                } else {
+                    const iterations = parseInt(document.getElementById('pbkdf2-iterations').value, 10);
+                    const prf = document.getElementById('pbkdf2-prf').value;
+                    if (!Number.isFinite(iterations) || iterations < 1 || iterations > 10000000) throw new Error(t('err.pbkdf2Iterations'));
+                    const key = await crypto.subtle.importKey('raw', passBytes, 'PBKDF2', false, ['deriveBits']);
+                    const t0 = performance.now();
+                    const bits = await crypto.subtle.deriveBits(
+                        { name: 'PBKDF2', salt: saltBytes, iterations, hash: prf },
+                        key,
+                        keyLen * 8
+                    );
+                    elapsed = performance.now() - t0;
+                    derived = new Uint8Array(bits);
+                }
                 out.classList.remove('hidden');
                 tlsRenderRow(out, t('pbkdf2.row.hex'), bytesToHex(derived));
                 tlsRenderRow(out, t('pbkdf2.row.b64'), bytesToBase64(derived));
