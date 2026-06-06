@@ -28,13 +28,14 @@ async function readResult(page, sel) {
 // New: SHA3-256 / SHA3-512 rows in #hash-results.
 // FIPS 202 §A.1 known-answer: SHA3-256("abc").
 // ---------------------------------------------------------------
-test.fixme('hash: offers SHA3-256 / SHA3-512 (FIPS 202)', async ({ page }) => {
+test('hash: offers SHA3-256 / SHA3-512 (FIPS 202)', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'hash');
   await page.fill('#hash-text', 'abc');
   await page.click('#btn-hash-compute');
   const out = (await readResult(page, '#hash-results')).toLowerCase();
-  // FIPS 202 §A.1 worked example for SHA3-256("abc"):
-  expect(out).toContain('3a985da74fe225b2045c172d6bd390bd855f086e3e9d525b46bfe24511431532');
+  // FIPS 202 §A.1 worked examples for "abc":
+  expect(out).toContain('3a985da74fe225b2045c172d6bd390bd855f086e3e9d525b46bfe24511431532'); // SHA3-256
+  expect(out).toContain('b751850b1a57168a5693cd924b6b096e08f621827444f70d884f5d0240d2712e10e116e9192af3c91a7ec57647e3934057340b4cf408d5a56592f8274eec53f0'); // SHA3-512
 });
 
 // ---------------------------------------------------------------

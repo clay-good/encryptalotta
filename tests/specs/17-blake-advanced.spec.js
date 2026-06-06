@@ -104,3 +104,30 @@ test('default BLAKE3-256 row is unchanged by the new generalization (regression)
   await expect(page.locator('#hash-results')).toContainText(
     '6437b3ac38465133ffb63b75273a8db548c558465d79db03fd359c6cd5bd9d85');
 });
+
+// --- SHAKE128 / SHAKE256 (FIPS 202 XOF) in the advanced panel ---
+
+test('SHAKE128 XOF: 16-byte output of "" matches the FIPS 202 vector', async ({ page }) => {
+  await openAdvanced(page);
+  await page.fill('#hash-text', '');
+  await page.selectOption('#hash-shake-fn', '128');
+  await page.fill('#hash-shake-outlen', '16');
+  await page.click('#btn-hash-advanced');
+  await expect(page.locator('#hash-advanced-results')).toContainText('7f9c2ba4e88f827d616045507605853e');
+});
+
+test('SHAKE128 / SHAKE256 XOF of "abc"', async ({ page }) => {
+  await openAdvanced(page);
+  await page.fill('#hash-text', 'abc');
+  await page.selectOption('#hash-shake-fn', '128');
+  await page.fill('#hash-shake-outlen', '32');
+  await page.click('#btn-hash-advanced');
+  await expect(page.locator('#hash-advanced-results')).toContainText(
+    '5881092dd818bf5cf8a3ddb793fbcba74097d5c526a6d35f97b83351940f2cc8');
+
+  await page.selectOption('#hash-shake-fn', '256');
+  await page.fill('#hash-shake-outlen', '64');
+  await page.click('#btn-hash-advanced');
+  await expect(page.locator('#hash-advanced-results')).toContainText(
+    '483366601360a8771c6863080cc4114d8db44530f8f1e1ee4f94ea37e78b5739d5a15bef186a5386c75744c0527e1faa9f8726e462a12a4feb06bd8801e751e4');
+});
