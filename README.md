@@ -42,7 +42,7 @@ A comprehensive single-page web app with **47 cryptographic, encoding, parsing, 
 - **ASCII Armor Converter** — Round-trip between PGP binary and ASCII-armored encodings.
 - **Shamir Secret Sharing** — Split a secret into N shares where any K reconstruct it; share format `EAL-SSS/v1/{K}-of-{N}/{rawShare}`.
 - **EXIF Eraser** — Strip GPS, camera serial numbers, timestamps from JPEG / PNG / WebP via canvas re-encode.
-- **Hash & Checksum** — SHA-1 / 256 / 384 / 512 (Web Crypto), BLAKE2b-512 (RFC 7693, hand-rolled), and BLAKE3-256 (hand-rolled, full Merkle-tree mode) over text or files, with constant-time hash comparison. Neither BLAKE digest is in Web Crypto, so both are hand-rolled inline with no vendored dependency; BLAKE3 is verified against the official test vectors and cross-checked byte-for-byte against the audited `@noble/hashes` build across every chunk/block boundary.
+- **Hash & Checksum** — SHA-1 / 256 / 384 / 512 (Web Crypto), BLAKE2b-512 (RFC 7693, hand-rolled), and BLAKE3-256 (hand-rolled, full Merkle-tree mode) over text or files, with constant-time hash comparison. Neither BLAKE digest is in Web Crypto, so both are hand-rolled inline with no vendored dependency; BLAKE3 is verified against the official test vectors and cross-checked byte-for-byte against the audited `@noble/hashes` build across every chunk/block boundary. An **Advanced** panel surfaces the full BLAKE surface: BLAKE2b with 1–64-byte output and an optional key (keyed MAC, RFC 7693 §3.2), and BLAKE3 in **XOF** (arbitrary 1–1024-byte output), **keyed** (32-byte key), or **derive-key** (KDF with a context string) mode — all validated against `@noble/hashes` and the official BLAKE2 / BLAKE3 keyed and derive-key vectors.
 - **Base64 / 32 / 58 / Hex Encoder** — Cross-convert text ↔ hex ↔ Base64 (standard + URL-safe) ↔ Base32 ↔ Base58 (Bitcoin alphabet).
 - **UUID / ULID Generator** — UUID v4 (random), UUID v7 (RFC 9562 time-ordered), ULID. Bulk generate up to 1000 per click.
 - **Unix Timestamp Converter** — Auto-detect epoch seconds / milliseconds / ISO 8601; render in UTC, local, and relative ("5 minutes ago").
@@ -391,7 +391,7 @@ All 47 tools are organized into four groups. Every tool has a deep-link route.
 | **Armor** | `#/utilities/armor` | Convert between PGP binary and ASCII-armored encodings |
 | **Shamir Split** | `#/utilities/shamir` | Split a secret into N shares; any K reconstruct |
 | **EXIF Eraser** | `#/utilities/exif` | Strip GPS / metadata from JPEG, PNG, WebP images |
-| **Hash & Checksum** | `#/utilities/hash` | SHA-1/256/384/512 + BLAKE2b-512 + BLAKE3-256, constant-time compare |
+| **Hash & Checksum** | `#/utilities/hash` | SHA-1/256/384/512 + BLAKE2b-512 + BLAKE3-256; advanced: keyed MAC, variable length, BLAKE3 XOF / keyed / derive-key |
 | **Encode** | `#/utilities/encode` | Cross-convert Base64 / Base32 / Base58 / Hex / text |
 | **UUID / ULID** | `#/utilities/uuid` | Bulk-generate UUID v4, UUID v7, or ULID |
 | **Unix Timestamp** | `#/utilities/timestamp` | Convert epoch ↔ ISO 8601 ↔ UTC ↔ local ↔ relative |

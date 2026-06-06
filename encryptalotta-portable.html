@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <!--
   encryptalotta — single-file portable build
-  Source mtime: 2026-06-06T12:37:44.912Z
-  Source: index.html (SHA-256: 2ca80939b937a61edc11b0430f3219b33395885291346f5f2f26148fb7ba66e3)
+  Source mtime: 2026-06-06T13:01:35.279Z
+  Source: index.html (SHA-256: be952c89beef455d21eeff60f65cc57fc4f920c182378874025b1114a2072465)
   All vendored JavaScript inlined; favicons inlined as data: URIs.
   Identical functionality to the live site at https://encryptalotta.com.
   Runs from file://, USB stick, chat attachment, anywhere. No network calls.
@@ -113,7 +113,7 @@
             "ASCII armor converter (PGP binary ↔ armored)",
             "Shamir's Secret Sharing (K-of-N split and reconstruct)",
             "EXIF metadata stripper for JPEG, PNG, and WebP images",
-            "Hash and checksum calculator (SHA-1 / SHA-256 / SHA-384 / SHA-512 / BLAKE2b-512 / BLAKE3-256)",
+            "Hash and checksum calculator (SHA-1 / SHA-256 / SHA-384 / SHA-512 / BLAKE2b-512 / BLAKE3-256), with keyed-MAC, variable-length, and BLAKE3 XOF / keyed / derive-key advanced modes",
             "Encoder / decoder for Base64, Base64-URL, Base32, Base58 (Bitcoin), and hex",
             "UUID v4, UUID v7 (RFC 9562), and ULID generator (bulk)",
             "Unix timestamp converter (epoch seconds, milliseconds, ISO 8601, relative time)",
@@ -4578,6 +4578,55 @@ var qrcode = function() {
                     <input type="text" id="hash-b" autocomplete="off" spellcheck="false" data-i18n-attr="placeholder:hash.ph.compare" placeholder="Paste a hash…">
                 </div>
                 <div id="hash-compare-result" style="font-weight: 600;"></div>
+
+                <hr style="margin: 30px 0; border: none; border-top: 1px solid var(--border);">
+
+                <details id="hash-advanced-details">
+                    <summary style="cursor: pointer; font-weight: 700; font-size: 1rem; color: var(--text-primary);" data-i18n="hash.adv.summary">Advanced: keyed &amp; variable-length (BLAKE2b / BLAKE3)</summary>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 12px 0 18px;" data-i18n="hash.adv.help">Hashes the text or file above. BLAKE2b supports a keyed MAC (RFC 7693) and 1–64-byte output; BLAKE3 supports arbitrary output length (XOF), a 32-byte keyed mode, and key derivation.</p>
+
+                    <h4 style="margin: 0 0 10px;">BLAKE2b</h4>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label for="hash-b2b-outlen" data-i18n="hash.adv.b2bOutLen">Output length (1–64 bytes)</label>
+                            <input type="number" id="hash-b2b-outlen" value="64" min="1" max="64" step="1">
+                        </div>
+                        <div class="form-group">
+                            <label for="hash-b2b-key" data-i18n="hash.adv.b2bKey">Key — optional, MAC (≤ 64 bytes)</label>
+                            <input type="text" id="hash-b2b-key" autocomplete="off" spellcheck="false">
+                            <label style="display:inline-flex;align-items:center;gap:6px;margin-top:8px;font-weight:400;font-size:0.9rem;">
+                                <input type="checkbox" id="hash-b2b-key-hex"> <span data-i18n="hmac.label.keyHex">Key is hex-encoded</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <h4 style="margin: 22px 0 10px;">BLAKE3</h4>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label for="hash-b3-mode" data-i18n="hash.adv.b3Mode">Mode</label>
+                            <select id="hash-b3-mode">
+                                <option value="hash" data-i18n="hash.adv.b3ModeHash">Hash (XOF)</option>
+                                <option value="keyed" data-i18n="hash.adv.b3ModeKeyed">Keyed (32-byte key)</option>
+                                <option value="derive" data-i18n="hash.adv.b3ModeDerive">Derive key (KDF)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="hash-b3-outlen" data-i18n="hash.adv.b3OutLen">Output length (1–1024 bytes)</label>
+                            <input type="number" id="hash-b3-outlen" value="32" min="1" max="1024" step="1">
+                        </div>
+                    </div>
+                    <div class="form-group hidden" id="hash-b3-key-group">
+                        <label for="hash-b3-key" data-i18n="hash.adv.b3Key">Key (32 bytes, hex)</label>
+                        <input type="text" id="hash-b3-key" autocomplete="off" spellcheck="false" dir="ltr" style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace;">
+                    </div>
+                    <div class="form-group hidden" id="hash-b3-context-group">
+                        <label for="hash-b3-context" data-i18n="hash.adv.b3Context">Context string (KDF domain separator)</label>
+                        <input type="text" id="hash-b3-context" autocomplete="off" spellcheck="false">
+                    </div>
+
+                    <button id="btn-hash-advanced" class="btn" data-i18n="btn.hashAdvanced">Compute</button>
+                    <div id="hash-advanced-results" class="hidden" style="margin-top: 16px;"></div>
+                </details>
             </div>
 
             <!-- HMAC -->
@@ -5937,6 +5986,25 @@ var qrcode = function() {
                 'hash.compare.match': 'Hashes match',
                 'hash.compare.mismatch': 'Hashes do not match',
                 'btn.hashCompute': 'Compute Hashes',
+                // BLAKE2b / BLAKE3 advanced modes (spec §2.12)
+                'hash.adv.summary': 'Advanced: keyed & variable-length (BLAKE2b / BLAKE3)',
+                'hash.adv.help': 'Hashes the text or file above. BLAKE2b supports a keyed MAC (RFC 7693) and 1–64-byte output; BLAKE3 supports arbitrary output length (XOF), a 32-byte keyed mode, and key derivation.',
+                'hash.adv.b2bOutLen': 'Output length (1–64 bytes)',
+                'hash.adv.b2bKey': 'Key — optional, MAC (≤ 64 bytes)',
+                'hash.adv.b3Mode': 'Mode',
+                'hash.adv.b3ModeHash': 'Hash (XOF)',
+                'hash.adv.b3ModeKeyed': 'Keyed (32-byte key)',
+                'hash.adv.b3ModeDerive': 'Derive key (KDF)',
+                'hash.adv.b3OutLen': 'Output length (1–1024 bytes)',
+                'hash.adv.b3Key': 'Key (32 bytes, hex)',
+                'hash.adv.b3Context': 'Context string (KDF domain separator)',
+                'hash.adv.keyedTag': 'keyed (MAC)',
+                'btn.hashAdvanced': 'Compute',
+                'err.b2bOutLen': 'BLAKE2b output length must be between 1 and 64 bytes.',
+                'err.b2bKeyLen': 'BLAKE2b key must be at most 64 bytes.',
+                'err.b3OutLen': 'BLAKE3 output length must be between 1 and 1024 bytes.',
+                'err.b3Key32': 'BLAKE3 keyed mode needs a 32-byte key (64 hex characters).',
+                'err.b3Context': 'Derive-key mode needs a context string.',
                 'err.hashEmpty': 'Provide text or pick a file to hash',
                 'err.hashRead': 'Could not read input',
                 'hmac.label.algo': 'Algorithm:',
@@ -7892,6 +7960,25 @@ var qrcode = function() {
                 'hash.compare.match': 'Les hachages correspondent',
                 'hash.compare.mismatch': 'Les hachages ne correspondent pas',
                 'btn.hashCompute': 'Calculer',
+                // BLAKE2b / BLAKE3 advanced modes (spec §2.12)
+                'hash.adv.summary': 'Avancé : à clé & longueur variable (BLAKE2b / BLAKE3)',
+                'hash.adv.help': 'Hache le texte ou le fichier ci-dessus. BLAKE2b prend en charge un MAC à clé (RFC 7693) et une sortie de 1 à 64 octets ; BLAKE3 prend en charge une longueur de sortie arbitraire (XOF), un mode à clé de 32 octets et la dérivation de clé.',
+                'hash.adv.b2bOutLen': 'Longueur de sortie (1 à 64 octets)',
+                'hash.adv.b2bKey': 'Clé — facultative, MAC (≤ 64 octets)',
+                'hash.adv.b3Mode': 'Mode',
+                'hash.adv.b3ModeHash': 'Hachage (XOF)',
+                'hash.adv.b3ModeKeyed': 'À clé (clé de 32 octets)',
+                'hash.adv.b3ModeDerive': 'Dérivation de clé (KDF)',
+                'hash.adv.b3OutLen': 'Longueur de sortie (1 à 1024 octets)',
+                'hash.adv.b3Key': 'Clé (32 octets, hex)',
+                'hash.adv.b3Context': 'Chaîne de contexte (séparateur de domaine KDF)',
+                'hash.adv.keyedTag': 'à clé (MAC)',
+                'btn.hashAdvanced': 'Calculer',
+                'err.b2bOutLen': 'La longueur de sortie BLAKE2b doit être comprise entre 1 et 64 octets.',
+                'err.b2bKeyLen': 'La clé BLAKE2b doit faire au plus 64 octets.',
+                'err.b3OutLen': 'La longueur de sortie BLAKE3 doit être comprise entre 1 et 1024 octets.',
+                'err.b3Key32': 'Le mode à clé BLAKE3 nécessite une clé de 32 octets (64 caractères hex).',
+                'err.b3Context': 'Le mode de dérivation de clé nécessite une chaîne de contexte.',
                 'err.hashEmpty': 'Fournissez un texte ou un fichier',
                 'err.hashRead': 'Lecture impossible',
                 'hmac.label.algo': 'Algorithme :',
@@ -9612,6 +9699,25 @@ var qrcode = function() {
                 'hash.compare.match': '哈希匹配',
                 'hash.compare.mismatch': '哈希不匹配',
                 'btn.hashCompute': '计算哈希',
+                // BLAKE2b / BLAKE3 advanced modes (spec §2.12)
+                'hash.adv.summary': '高级：带密钥与可变长度（BLAKE2b / BLAKE3）',
+                'hash.adv.help': '对上方的文本或文件进行哈希。BLAKE2b 支持带密钥的 MAC（RFC 7693）和 1–64 字节输出；BLAKE3 支持任意输出长度（XOF）、32 字节带密钥模式以及密钥派生。',
+                'hash.adv.b2bOutLen': '输出长度（1–64 字节）',
+                'hash.adv.b2bKey': '密钥 — 可选，MAC（≤ 64 字节）',
+                'hash.adv.b3Mode': '模式',
+                'hash.adv.b3ModeHash': '哈希（XOF）',
+                'hash.adv.b3ModeKeyed': '带密钥（32 字节密钥）',
+                'hash.adv.b3ModeDerive': '派生密钥（KDF）',
+                'hash.adv.b3OutLen': '输出长度（1–1024 字节）',
+                'hash.adv.b3Key': '密钥（32 字节，十六进制）',
+                'hash.adv.b3Context': '上下文字符串（KDF 域分隔符）',
+                'hash.adv.keyedTag': '带密钥（MAC）',
+                'btn.hashAdvanced': '计算',
+                'err.b2bOutLen': 'BLAKE2b 输出长度必须在 1 到 64 字节之间。',
+                'err.b2bKeyLen': 'BLAKE2b 密钥最多为 64 字节。',
+                'err.b3OutLen': 'BLAKE3 输出长度必须在 1 到 1024 字节之间。',
+                'err.b3Key32': 'BLAKE3 带密钥模式需要 32 字节密钥（64 个十六进制字符）。',
+                'err.b3Context': '派生密钥模式需要上下文字符串。',
                 'err.hashEmpty': '请提供文本或选择文件',
                 'err.hashRead': '无法读取输入',
                 'hmac.label.algo': '算法：',
@@ -11317,6 +11423,25 @@ var qrcode = function() {
                 'hash.compare.match': 'Hashes stimmen überein',
                 'hash.compare.mismatch': 'Hashes stimmen nicht überein',
                 'btn.hashCompute': 'Hashes berechnen',
+                // BLAKE2b / BLAKE3 advanced modes (spec §2.12)
+                'hash.adv.summary': 'Erweitert: mit Schlüssel & variable Länge (BLAKE2b / BLAKE3)',
+                'hash.adv.help': 'Hasht den Text oder die Datei oben. BLAKE2b unterstützt einen Schlüssel-MAC (RFC 7693) und 1–64 Byte Ausgabe; BLAKE3 unterstützt beliebige Ausgabelänge (XOF), einen 32-Byte-Schlüsselmodus und Schlüsselableitung.',
+                'hash.adv.b2bOutLen': 'Ausgabelänge (1–64 Byte)',
+                'hash.adv.b2bKey': 'Schlüssel — optional, MAC (≤ 64 Byte)',
+                'hash.adv.b3Mode': 'Modus',
+                'hash.adv.b3ModeHash': 'Hash (XOF)',
+                'hash.adv.b3ModeKeyed': 'Mit Schlüssel (32-Byte-Schlüssel)',
+                'hash.adv.b3ModeDerive': 'Schlüssel ableiten (KDF)',
+                'hash.adv.b3OutLen': 'Ausgabelänge (1–1024 Byte)',
+                'hash.adv.b3Key': 'Schlüssel (32 Byte, hex)',
+                'hash.adv.b3Context': 'Kontext-Zeichenkette (KDF-Domänentrenner)',
+                'hash.adv.keyedTag': 'mit Schlüssel (MAC)',
+                'btn.hashAdvanced': 'Berechnen',
+                'err.b2bOutLen': 'Die BLAKE2b-Ausgabelänge muss zwischen 1 und 64 Byte liegen.',
+                'err.b2bKeyLen': 'Der BLAKE2b-Schlüssel darf höchstens 64 Byte lang sein.',
+                'err.b3OutLen': 'Die BLAKE3-Ausgabelänge muss zwischen 1 und 1024 Byte liegen.',
+                'err.b3Key32': 'Der BLAKE3-Schlüsselmodus benötigt einen 32-Byte-Schlüssel (64 Hex-Zeichen).',
+                'err.b3Context': 'Der Schlüsselableitungsmodus benötigt eine Kontext-Zeichenkette.',
                 'err.hashEmpty': 'Text oder Datei angeben',
                 'err.hashRead': 'Eingabe konnte nicht gelesen werden',
                 'hmac.label.algo': 'Algorithmus:',
@@ -13037,6 +13162,25 @@ var qrcode = function() {
                 'hash.compare.match': 'हैश मेल खाते हैं',
                 'hash.compare.mismatch': 'हैश मेल नहीं खाते',
                 'btn.hashCompute': 'हैश गणना करें',
+                // BLAKE2b / BLAKE3 advanced modes (spec §2.12)
+                'hash.adv.summary': 'उन्नत: कुंजीयुक्त और परिवर्तनीय लंबाई (BLAKE2b / BLAKE3)',
+                'hash.adv.help': 'ऊपर दिए गए टेक्स्ट या फ़ाइल को हैश करता है। BLAKE2b कुंजीयुक्त MAC (RFC 7693) और 1–64 बाइट आउटपुट का समर्थन करता है; BLAKE3 मनमानी आउटपुट लंबाई (XOF), 32-बाइट कुंजीयुक्त मोड और कुंजी व्युत्पत्ति का समर्थन करता है।',
+                'hash.adv.b2bOutLen': 'आउटपुट लंबाई (1–64 बाइट)',
+                'hash.adv.b2bKey': 'कुंजी — वैकल्पिक, MAC (≤ 64 बाइट)',
+                'hash.adv.b3Mode': 'मोड',
+                'hash.adv.b3ModeHash': 'हैश (XOF)',
+                'hash.adv.b3ModeKeyed': 'कुंजीयुक्त (32-बाइट कुंजी)',
+                'hash.adv.b3ModeDerive': 'कुंजी व्युत्पन्न करें (KDF)',
+                'hash.adv.b3OutLen': 'आउटपुट लंबाई (1–1024 बाइट)',
+                'hash.adv.b3Key': 'कुंजी (32 बाइट, हेक्स)',
+                'hash.adv.b3Context': 'संदर्भ स्ट्रिंग (KDF डोमेन विभाजक)',
+                'hash.adv.keyedTag': 'कुंजीयुक्त (MAC)',
+                'btn.hashAdvanced': 'गणना करें',
+                'err.b2bOutLen': 'BLAKE2b आउटपुट लंबाई 1 से 64 बाइट के बीच होनी चाहिए।',
+                'err.b2bKeyLen': 'BLAKE2b कुंजी अधिकतम 64 बाइट होनी चाहिए।',
+                'err.b3OutLen': 'BLAKE3 आउटपुट लंबाई 1 से 1024 बाइट के बीच होनी चाहिए।',
+                'err.b3Key32': 'BLAKE3 कुंजीयुक्त मोड के लिए 32-बाइट कुंजी (64 हेक्स वर्ण) चाहिए।',
+                'err.b3Context': 'कुंजी-व्युत्पत्ति मोड के लिए संदर्भ स्ट्रिंग चाहिए।',
                 'err.hashEmpty': 'टेक्स्ट या फ़ाइल प्रदान करें',
                 'err.hashRead': 'इनपुट पढ़ा नहीं जा सका',
                 'hmac.label.algo': 'एल्गोरिदम:',
@@ -18295,11 +18439,21 @@ var qrcode = function() {
                 }
             }
         }
-        function blake2b(input, outLen) {
+        function blake2b(input, outLen, key) {
             outLen = outLen || 64;
+            key = key || new Uint8Array(0);
             if (outLen < 1 || outLen > 64) throw new Error('BLAKE2b output length must be 1..64');
+            if (key.length > 64) throw new Error('BLAKE2b key must be 0..64 bytes');
             const h = BLAKE2B_IV.map(w => w.slice());
-            h[0] = b2b_XOR(h[0], [0x01010000 | outLen, 0]);
+            // Parameter block byte 0 = digest length, byte 1 = key length (RFC 7693 §2.5 / §3.2).
+            h[0] = b2b_XOR(h[0], [0x01010000 | (key.length << 8) | outLen, 0]);
+            // Keyed mode (MAC): prepend the key padded to a full 128-byte block (RFC 7693 §3.2).
+            if (key.length > 0) {
+                const withKey = new Uint8Array(128 + input.length);
+                withKey.set(key, 0);
+                withKey.set(input, 128);
+                input = withKey;
+            }
             const t = [0, 0, 0, 0];
             const BLOCK = 128;
             let pos = 0;
@@ -18337,6 +18491,7 @@ var qrcode = function() {
         const B3_IV = [0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A, 0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19];
         const B3_PERM = [2, 6, 3, 10, 7, 0, 4, 13, 1, 11, 12, 5, 9, 14, 15, 8];
         const B3_CHUNK_START = 1, B3_CHUNK_END = 2, B3_PARENT = 4, B3_ROOT = 8;
+        const B3_KEYED_HASH = 16, B3_DERIVE_KEY_CONTEXT = 32, B3_DERIVE_KEY_MATERIAL = 64;
         const B3_BLOCK_LEN = 64, B3_CHUNK_LEN = 1024;
         function b3_rotr(x, n) { return ((x >>> n) | (x << (32 - n))) >>> 0; }
         function b3_g(s, a, b, c, d, mx, my) {
@@ -18373,59 +18528,80 @@ var qrcode = function() {
             }
             return w;
         }
-        function b3_root32(inCv, block, blockLen, flags) {
-            const words = b3_compress(inCv, block, 0, blockLen, flags | B3_ROOT);
-            const out = new Uint8Array(32);
-            for (let i = 0; i < 8; i++) {
-                out[i * 4] = words[i] & 0xff; out[i * 4 + 1] = (words[i] >>> 8) & 0xff;
-                out[i * 4 + 2] = (words[i] >>> 16) & 0xff; out[i * 4 + 3] = (words[i] >>> 24) & 0xff;
+        function b3_keyWords(key32) {
+            const w = new Array(8);
+            for (let i = 0; i < 8; i++) w[i] = (key32[i * 4] | (key32[i * 4 + 1] << 8) | (key32[i * 4 + 2] << 16) | (key32[i * 4 + 3] << 24)) >>> 0;
+            return w;
+        }
+        // Root output as an XOF: emit `outLen` bytes across as many 64-byte output blocks as the
+        // length needs, incrementing the output-block counter (BLAKE3 §2.6). The default 256-bit
+        // hash is the first 32 bytes at counter 0 — byte-identical to the old fixed b3_root32.
+        function b3_rootBytes(inCv, block, blockLen, flags, outLen) {
+            const out = new Uint8Array(outLen);
+            let done = 0, ctr = 0;
+            while (done < outLen) {
+                const words = b3_compress(inCv, block, ctr, blockLen, flags | B3_ROOT);
+                for (let i = 0; i < 16 && done < outLen; i++) {
+                    for (let b = 0; b < 4 && done < outLen; b++) out[done++] = (words[i] >>> (b * 8)) & 0xff;
+                }
+                ctr++;
             }
             return out;
         }
         // Compress a full chunk [pos,chunkEnd); the last block is returned (not folded) as the
-        // output node so finalize/root can re-run it with PARENT/ROOT flags.
-        function b3_chunkNode(input, pos, chunkEnd, counter) {
-            let cv = B3_IV.slice(), bpos = pos, blocksCompressed = 0;
+        // output node so finalize/root can re-run it with PARENT/ROOT flags. keyWords replaces the
+        // IV as the chaining-value init (keyed / derive-key modes); baseFlags OR's the mode flag.
+        function b3_chunkNode(input, pos, chunkEnd, counter, keyWords, baseFlags) {
+            let cv = keyWords.slice(), bpos = pos, blocksCompressed = 0;
             while (true) {
                 const blockLen = Math.min(B3_BLOCK_LEN, chunkEnd - bpos);
                 const block = b3_words(input, bpos, blockLen);
-                let flags = 0;
+                let flags = baseFlags;
                 if (blocksCompressed === 0) flags |= B3_CHUNK_START;
                 if (bpos + blockLen >= chunkEnd) { flags |= B3_CHUNK_END; return { inCv: cv, block, blockLen, flags }; }
                 cv = b3_compress(cv, block, counter, blockLen, flags).slice(0, 8);
                 blocksCompressed++; bpos += blockLen;
             }
         }
-        function blake3_256(input) {
+        // Generalized BLAKE3: keyWords = IV (plain), the 32-byte key (keyed), or the context-derived
+        // key (derive-key); baseFlags = 0 / KEYED_HASH / DERIVE_KEY_MATERIAL; outLen = any XOF length.
+        function blake3(input, outLen, keyWords, baseFlags) {
+            keyWords = keyWords || B3_IV; baseFlags = baseFlags || 0; outLen = outLen || 32;
             const stack = [];
             let counter = 0, pos = 0;
             const total = input.length;
             const addChunkCv = (totalChunks, newCv) => {
                 while ((totalChunks & 1) === 0) {
-                    newCv = b3_compress(B3_IV, stack.pop().concat(newCv), 0, B3_BLOCK_LEN, B3_PARENT).slice(0, 8);
+                    newCv = b3_compress(keyWords, stack.pop().concat(newCv), 0, B3_BLOCK_LEN, B3_PARENT | baseFlags).slice(0, 8);
                     totalChunks = Math.floor(totalChunks / 2);
                 }
                 stack.push(newCv);
             };
             while (true) {
                 const chunkEnd = Math.min(pos + B3_CHUNK_LEN, total);
-                const node = b3_chunkNode(input, pos, chunkEnd, counter);
+                const node = b3_chunkNode(input, pos, chunkEnd, counter, keyWords, baseFlags);
                 if (chunkEnd >= total) {
                     // Final chunk: fold its CV up through the stack; the outermost node carries ROOT.
                     let outCv = b3_compress(node.inCv, node.block, counter, node.blockLen, node.flags).slice(0, 8);
                     let rIn = node.inCv, rBlock = node.block, rLen = node.blockLen, rFlags = node.flags;
                     while (stack.length > 0) {
                         const left = stack.pop();
-                        rIn = B3_IV; rBlock = left.concat(outCv); rLen = B3_BLOCK_LEN; rFlags = B3_PARENT;
-                        outCv = b3_compress(B3_IV, rBlock, 0, B3_BLOCK_LEN, B3_PARENT).slice(0, 8);
+                        rIn = keyWords; rBlock = left.concat(outCv); rLen = B3_BLOCK_LEN; rFlags = B3_PARENT | baseFlags;
+                        outCv = b3_compress(keyWords, rBlock, 0, B3_BLOCK_LEN, B3_PARENT | baseFlags).slice(0, 8);
                     }
-                    return b3_root32(rIn, rBlock, rLen, rFlags);
+                    return b3_rootBytes(rIn, rBlock, rLen, rFlags, outLen);
                 }
                 const chunkCv = b3_compress(node.inCv, node.block, counter, node.blockLen, node.flags).slice(0, 8);
                 counter++;
                 addChunkCv(counter, chunkCv);
                 pos = chunkEnd;
             }
+        }
+        function blake3_256(input) { return blake3(input, 32, B3_IV, 0); }
+        function blake3Keyed(input, key32, outLen) { return blake3(input, outLen, b3_keyWords(key32), B3_KEYED_HASH); }
+        function blake3DeriveKey(contextStr, keyMaterial, outLen) {
+            const ctxKey = blake3(new TextEncoder().encode(contextStr), 32, B3_IV, B3_DERIVE_KEY_CONTEXT);
+            return blake3(keyMaterial, outLen, b3_keyWords(ctxKey), B3_DERIVE_KEY_MATERIAL);
         }
 
         // ---- Argon2 (RFC 9106) — hand-rolled, single-threaded reference, flat Uint32 memory ----------
@@ -18651,6 +18827,62 @@ var qrcode = function() {
         }
         document.getElementById('hash-a').addEventListener('input', refreshHashCompare);
         document.getElementById('hash-b').addEventListener('input', refreshHashCompare);
+
+        // ---- Advanced hash modes: BLAKE2b keyed / variable-length + BLAKE3 XOF / keyed / derive_key ----
+        document.getElementById('hash-b3-mode').addEventListener('change', (e) => {
+            document.getElementById('hash-b3-key-group').classList.toggle('hidden', e.target.value !== 'keyed');
+            document.getElementById('hash-b3-context-group').classList.toggle('hidden', e.target.value !== 'derive');
+        });
+        document.getElementById('btn-hash-advanced').addEventListener('click', async () => {
+            const out = document.getElementById('hash-advanced-results');
+            while (out.firstChild) out.removeChild(out.firstChild);
+            out.classList.remove('hidden');
+            const renderRow = (label, value) => {
+                const row = document.createElement('div');
+                row.style.cssText = 'margin-bottom: 14px;';
+                const lbl = document.createElement('div');
+                lbl.style.cssText = 'font-weight:600;font-size:0.85rem;color:var(--text-secondary);margin-bottom:4px;';
+                lbl.textContent = label;
+                const val = document.createElement('div');
+                val.style.cssText = 'font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:0.82rem;word-break:break-all;background:var(--bg-tertiary);padding:8px 10px;border-radius:6px;';
+                val.textContent = value;
+                row.appendChild(lbl); row.appendChild(val); out.appendChild(row);
+            };
+            try {
+                const file = document.getElementById('hash-file').files[0];
+                const bytes = file ? new Uint8Array(await file.arrayBuffer()) : new TextEncoder().encode(document.getElementById('hash-text').value || '');
+
+                // BLAKE2b — variable output length + optional keyed MAC.
+                const b2bOutLen = parseInt(document.getElementById('hash-b2b-outlen').value, 10);
+                if (!Number.isFinite(b2bOutLen) || b2bOutLen < 1 || b2bOutLen > 64) throw new Error(t('err.b2bOutLen'));
+                const b2bKeyRaw = document.getElementById('hash-b2b-key').value;
+                let b2bKey = new Uint8Array(0);
+                if (b2bKeyRaw) b2bKey = document.getElementById('hash-b2b-key-hex').checked ? hexToBytes(b2bKeyRaw.trim()) : new TextEncoder().encode(b2bKeyRaw);
+                if (b2bKey.length > 64) throw new Error(t('err.b2bKeyLen'));
+                const b2bLabel = 'BLAKE2b · ' + b2bOutLen + ' B' + (b2bKey.length ? ' · ' + t('hash.adv.keyedTag') : '');
+                renderRow(b2bLabel, bytesToHex(blake2b(bytes, b2bOutLen, b2bKey)));
+
+                // BLAKE3 — XOF / keyed / derive_key.
+                const mode = document.getElementById('hash-b3-mode').value;
+                const b3OutLen = parseInt(document.getElementById('hash-b3-outlen').value, 10);
+                if (!Number.isFinite(b3OutLen) || b3OutLen < 1 || b3OutLen > 1024) throw new Error(t('err.b3OutLen'));
+                let b3out, b3tag;
+                if (mode === 'keyed') {
+                    const key = hexToBytes(document.getElementById('hash-b3-key').value.trim());
+                    if (key.length !== 32) throw new Error(t('err.b3Key32'));
+                    b3out = blake3Keyed(bytes, key, b3OutLen); b3tag = t('hash.adv.b3ModeKeyed');
+                } else if (mode === 'derive') {
+                    const ctx = document.getElementById('hash-b3-context').value;
+                    if (!ctx) throw new Error(t('err.b3Context'));
+                    b3out = blake3DeriveKey(ctx, bytes, b3OutLen); b3tag = t('hash.adv.b3ModeDerive');
+                } else {
+                    b3out = blake3(bytes, b3OutLen, B3_IV, 0); b3tag = t('hash.adv.b3ModeHash');
+                }
+                renderRow('BLAKE3 · ' + b3OutLen + ' B · ' + b3tag, bytesToHex(b3out));
+            } catch (e) {
+                renderRow(t('argon2.row.error'), e.message);
+            }
+        });
 
         // ==================== Phase 6 Batch A: HMAC ====================
         async function hmacCompute(algo, keyBytes, msgBytes) {
