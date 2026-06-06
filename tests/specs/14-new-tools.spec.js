@@ -1,0 +1,167 @@
+/* eslint-disable */
+// ===================================================================
+// 14 — Specs for NEW tools (executable, test.fixme).
+//
+// A curated set of additions that increase the toolbox's value while
+// staying true to its three constraints: 100% client-side, no network
+// uploads, and standards-anchored. Each new tool gets a view id, the
+// control ids an implementer should add, and a concrete acceptance
+// test (with a published vector wherever one exists).
+//
+// Selection rationale: each fills a real gap adjacent to tools that
+// already exist — the ASN.1/CSR/JWK tools complete the X.509/JOSE
+// toolchain; age complements PGP; the QR decoder is the inverse of the
+// QR generator; strength + filetype are offline privacy aids. Nothing
+// here phones home — the "no server uploads" promise is preserved.
+//
+// When a tool ships: add its `<id>-view`, register it in the
+// KNOWN_VIEWS set in 08-stress.spec.js, add it to 00-introspect /
+// 05-a11y, and remove `.fixme` here.
+// ===================================================================
+
+import { test, expect } from '@playwright/test';
+
+async function gotoTool(page, tool) {
+  await page.evaluate(t => { location.hash = `#${t}`; }, tool);
+  await page.waitForFunction(t => document.getElementById(t + '-view')?.classList.contains('active'), tool);
+}
+async function readResult(page, sel) {
+  return (await page.locator(sel).textContent()).replace(/\s+/g, ' ').trim();
+}
+
+// ===================================================================
+// NEW TOOL 1 — ASN.1 / DER structure decoder (ITU-T X.690).
+// A generic tag-length-value tree viewer. The app already parses X.509,
+// CMS, and CBOR; a raw ASN.1 viewer lets users inspect ANY DER blob
+// (keys, OCSP, timestamps) that the specialized parsers don't cover.
+// view: #asn1-view  input: #asn1-input (hex/base64/PEM)  out: #asn1-results
+// ===================================================================
+test.fixme('NEW asn1: decodes a DER blob into a typed TLV tree (X.690)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'asn1');
+  // SEQUENCE { INTEGER 1, BOOLEAN TRUE } = 30 06 02 01 01 01 01 ff
+  await page.fill('#asn1-input', '30060201010101ff');
+  await page.click('#btn-asn1-decode');
+  const out = await readResult(page, '#asn1-results');
+  expect(out).toMatch(/SEQUENCE/i);
+  expect(out).toMatch(/INTEGER/i);
+  expect(out).toMatch(/BOOLEAN/i);
+});
+
+// ===================================================================
+// NEW TOOL 2 — CSR (PKCS#10) decoder (RFC 2986).
+// Completes the certificate lifecycle: the app reads certs (tls-cert)
+// but not the signing requests that produce them. Show subject DN,
+// public-key algorithm, SANs, and whether the self-signature verifies.
+// view: #csr-view  input: #csr-input  out: #csr-results
+// ===================================================================
+test.fixme('NEW csr: decodes a PKCS#10 request and checks the self-signature (RFC 2986)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'csr');
+  // A fixtured CSR PEM would be pasted here; acceptance criteria:
+  await page.fill('#csr-input', '-----BEGIN CERTIFICATE REQUEST-----\n...\n-----END CERTIFICATE REQUEST-----');
+  await page.click('#btn-csr-parse');
+  const out = await readResult(page, '#csr-results');
+  expect(out).toMatch(/Subject/i);
+  expect(out).toMatch(/Public Key|Algorithm/i);
+  expect(out).toMatch(/Signature|self-sign/i);
+});
+
+// ===================================================================
+// NEW TOOL 3 — JWK ↔ PEM key converter (RFC 7517 / RFC 7518 / RFC 8037).
+// The JWT verifier needs keys; today users must convert JWK→PEM elsewhere.
+// Bridges the Ed25519/X25519/RSA tools to the JOSE world, fully offline.
+// view: #jwk-view  input: #jwk-input  out: #jwk-output  btns: to-pem / to-jwk
+// ===================================================================
+test.fixme('NEW jwk: converts a public JWK to SPKI PEM and back (RFC 7517)', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'jwk');
+  // RFC 8037 Appendix A.1 public Ed25519 JWK:
+  const jwk = '{"kty":"OKP","crv":"Ed25519","x":"11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo"}';
+  await page.fill('#jwk-input', jwk);
+  await page.click('#btn-jwk-to-pem');
+  const pem = await page.locator('#jwk-output').inputValue();
+  expect(pem).toContain('-----BEGIN PUBLIC KEY-----');
+
+  await page.fill('#jwk-input', pem);
+  await page.click('#btn-jwk-to-jwk');
+  const back = JSON.parse(await page.locator('#jwk-output').inputValue());
+  expect(back.kty).toBe('OKP');
+  expect(back.crv).toBe('Ed25519');
+  expect(back.x).toBe('11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo');
+});
+
+// ===================================================================
+// NEW TOOL 4 — age encryption (X25519, the modern PGP alternative).
+// The app already has X25519 key agreement; age packages it into a
+// friendly file/text format. Round-trip a message through a known
+// recipient/identity pair. 100% local — no recipients are fetched.
+// view: #age-view  inputs: #age-recipient / #age-identity / #age-message
+// ===================================================================
+test.fixme('NEW age: encrypts to an age recipient and decrypts with its identity', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'age');
+  // A fixtured age key pair (age1... recipient + AGE-SECRET-KEY-... identity):
+  const recipient = 'age1ql3z7hjy54pw3hyww5ayyfg7zqgvc7w3j2elw8zmrj2kg5sfn9aqmcac8p';
+  const identity = 'AGE-SECRET-KEY-1GFPYYSJZGFPYYSJZGFPYYSJZGFPYYSJZGFPYYSJZGFPYYSJZGFPQ4EGAEA';
+  await page.click('#age-mode-encrypt');
+  await page.fill('#age-recipient', recipient);
+  await page.fill('#age-message', 'hello age');
+  await page.click('#btn-age-run');
+  const ciphertext = await page.locator('#age-output').inputValue();
+  expect(ciphertext).toContain('age-encryption.org/v1');
+
+  await page.click('#age-mode-decrypt');
+  await page.fill('#age-identity', identity);
+  await page.fill('#age-message', ciphertext);
+  await page.click('#btn-age-run');
+  expect(await page.locator('#age-output').inputValue()).toBe('hello age');
+});
+
+// ===================================================================
+// NEW TOOL 5 — QR decoder (image → text), the inverse of the QR tool.
+// Upload a QR PNG/JPEG and recover the payload, entirely in-browser.
+// Pairs naturally with the existing generator (and the "scan a paper
+// key back in" workflow). view: #qr-decode-view  input: #qr-decode-file
+// ===================================================================
+test.fixme('NEW qr-decode: recovers the payload from an uploaded QR image', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'qr-decode');
+  // A fixtured PNG of a QR encoding "encryptalotta" would be set on #qr-decode-file.
+  // Acceptance: the decoded text appears in #qr-decode-output.
+  await expect(page.locator('#qr-decode-output')).toHaveValue('encryptalotta');
+});
+
+// ===================================================================
+// NEW TOOL 6 — Passphrase strength estimator (offline).
+// Entropy + order-of-magnitude crack-time for a candidate secret, with
+// NO network call (unlike HIBP-style tools, which would breach the
+// "no uploads" promise). Complements the password generator.
+// view: #strength-view  input: #strength-input  out: #strength-results
+// ===================================================================
+test.fixme('NEW strength: rates a weak vs strong passphrase offline', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'strength');
+  await page.fill('#strength-input', 'password');
+  await page.click('#btn-strength-check');
+  expect((await readResult(page, '#strength-results')).toLowerCase()).toMatch(/very weak|weak|0|1/);
+
+  await page.fill('#strength-input', 'correct horse battery staple printer 9!');
+  await page.click('#btn-strength-check');
+  const strong = (await readResult(page, '#strength-results')).toLowerCase();
+  expect(strong).toMatch(/strong|excellent|4/);
+  expect(strong).toMatch(/bits|entropy/);
+});
+
+// ===================================================================
+// NEW TOOL 7 — File magic-number / type identifier (offline).
+// "Know what you're about to share." Reads only the leading bytes and
+// names the format from its signature — never uploads the file.
+// view: #filetype-view  inputs: #filetype-file (file) or #filetype-hex
+// ===================================================================
+test.fixme('NEW filetype: identifies a format from its magic bytes', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'filetype');
+  await page.fill('#filetype-hex', '89504e470d0a1a0a'); // PNG signature
+  await page.click('#btn-filetype-identify');
+  const out = await readResult(page, '#filetype-results');
+  expect(out).toMatch(/PNG/i);
+  expect(out).toMatch(/image\/png/i);
+
+  await page.fill('#filetype-hex', '25504446'); // "%PDF"
+  await page.click('#btn-filetype-identify');
+  expect(await readResult(page, '#filetype-results')).toMatch(/PDF/i);
+});
