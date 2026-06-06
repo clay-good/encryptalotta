@@ -67,12 +67,11 @@
     <meta property="og:description" content="Kostenlose Browser-Toolbox: PGP-Verschlüsselung / Entschlüsselung / Signatur, TLS- und SSH-Schlüssel-Parser, BIP39-Mnemonic, PBKDF2-Schlüsselableitung, HMAC, JWT, TOTP, Hash, Base64, UUID, Passwortgenerator, Shamir, EXIF, Steganographie, Regex-Tester, CSV / JSON / YAML / XML-Konvertierung, Zahlenbasis-Konverter, Cron-Decoder, Farbkonverter, CIDR-Rechner und mehr. Keine Uploads, keine Analytik, Open Source.">
     <meta property="og:image" content="https://encryptalotta.com/encryptalotta.png">
     <meta property="og:image:alt" content="encryptalotta logo">
-    <meta property="og:locale" content="en_US">
+    <meta property="og:locale" content="de_DE">
+    <meta property="og:locale:alternate" content="en_US">
     <meta property="og:locale:alternate" content="fr_FR">
     <meta property="og:locale:alternate" content="zh_CN">
-    <meta property="og:locale:alternate" content="de_DE">
     <meta property="og:locale:alternate" content="hi_IN">
-
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://encryptalotta.com/de/">
@@ -1059,16 +1058,22 @@
             color: var(--text-primary);
             font-weight: 700;
             font-size: 1.8rem;
+            /* Break long compound words (e.g. German "Dateiverschlüsselung") rather
+               than overflow the viewport at narrow widths — only kicks in when a word
+               would otherwise overflow, so short headings are unaffected. */
+            overflow-wrap: break-word;
         }
 
         h3 {
             color: var(--text-primary);
+            overflow-wrap: break-word;
         }
 
         h4 {
             color: var(--text-primary);
             font-weight: 600;
             margin-bottom: 10px;
+            overflow-wrap: break-word;
         }
 
         @media (max-width: 768px) {

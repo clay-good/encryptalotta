@@ -36,6 +36,12 @@ const VARIANTS = [
 
 const SITE = 'https://encryptalotta.com';
 
+// OpenGraph locale codes (Facebook/LinkedIn `ll_CC` form) per UI language, and the
+// canonical order of all supported locales. Each variant advertises its own locale
+// as og:locale and lists every *other* locale (including en) as og:locale:alternate.
+const OG_LOCALE = { en: 'en_US', fr: 'fr_FR', 'zh-CN': 'zh_CN', de: 'de_DE', hi: 'hi_IN' };
+const ALL_OG_LOCALES = ['en', 'fr', 'zh-CN', 'de', 'hi'];
+
 function extractStrings(source) {
     const start = source.indexOf('const STRINGS =');
     if (start < 0) throw new Error('STRINGS literal not found in source');
@@ -118,6 +124,20 @@ function buildVariant(srcHtml, strings, variant) {
     out = out.replace(
         /<meta property="twitter:url" content="[^"]*">/,
         `<meta property="twitter:url" content="${variantUrl}">`
+    );
+
+    // og:locale → the variant's own locale; og:locale:alternate → every *other*
+    // locale (including en). The source ships the en block (og:locale=en_US plus the
+    // four non-en alternates); without this rewrite each /<lang>/ would advertise
+    // itself as en_US and list its own locale as an alternate, so a shared /fr/ link
+    // previews as English on Facebook / LinkedIn / Slack.
+    const altLines = ALL_OG_LOCALES
+        .filter(l => l !== variant.lang)
+        .map(l => `<meta property="og:locale:alternate" content="${OG_LOCALE[l]}">`);
+    const localeBlock = [`<meta property="og:locale" content="${OG_LOCALE[variant.lang]}">`, ...altLines].join('\n    ');
+    out = out.replace(
+        /<meta property="og:locale" content="[^"]*">\s*(?:<meta property="og:locale:alternate" content="[^"]*">\s*)*/,
+        localeBlock + '\n    '
     );
 
     // Vendored script paths: ./*.js → ../*.js (one level up from /<lang>/).

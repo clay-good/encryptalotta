@@ -67,12 +67,11 @@
     <meta property="og:description" content="मुफ्त ब्राउज़र-साइड टूलबॉक्स: PGP एन्क्रिप्ट / डिक्रिप्ट / साइन, TLS व SSH कुंजी पार्सर, BIP39 निमोनिक, PBKDF2 कुंजी व्युत्पत्ति, HMAC, JWT, TOTP, हैश, Base64, UUID, पासवर्ड जनरेटर, Shamir सीक्रेट शेयरिंग, EXIF हटाना, स्टेगानोग्राफी, रेजेक्स परीक्षक, CSV / JSON / YAML / XML रूपांतरण, संख्या आधार कन्वर्टर, cron डिकोडर, रंग कन्वर्टर, CIDR कैलकुलेटर और अधिक। कोई अपलोड नहीं, कोई एनालिटिक्स नहीं, ओपन सोर्स।">
     <meta property="og:image" content="https://encryptalotta.com/encryptalotta.png">
     <meta property="og:image:alt" content="encryptalotta logo">
-    <meta property="og:locale" content="en_US">
+    <meta property="og:locale" content="hi_IN">
+    <meta property="og:locale:alternate" content="en_US">
     <meta property="og:locale:alternate" content="fr_FR">
     <meta property="og:locale:alternate" content="zh_CN">
     <meta property="og:locale:alternate" content="de_DE">
-    <meta property="og:locale:alternate" content="hi_IN">
-
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://encryptalotta.com/hi/">
@@ -1059,16 +1058,22 @@
             color: var(--text-primary);
             font-weight: 700;
             font-size: 1.8rem;
+            /* Break long compound words (e.g. German "Dateiverschlüsselung") rather
+               than overflow the viewport at narrow widths — only kicks in when a word
+               would otherwise overflow, so short headings are unaffected. */
+            overflow-wrap: break-word;
         }
 
         h3 {
             color: var(--text-primary);
+            overflow-wrap: break-word;
         }
 
         h4 {
             color: var(--text-primary);
             font-weight: 600;
             margin-bottom: 10px;
+            overflow-wrap: break-word;
         }
 
         @media (max-width: 768px) {

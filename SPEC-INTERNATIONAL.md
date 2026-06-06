@@ -731,9 +731,13 @@ For locales that have meaningful regional splits in date/number conventions, add
 
 **Status notes (draft 8):** Six regional English aliases (`en-GB`, `en-IE`, `en-AU`, `en-NZ`, `en-ZA`, `en-IN`) added to `<link rel="alternate" hreflang>` in `index.html` and to each `<url>` block in `sitemap.xml` via `scripts/build-sitemap.js`. All six point to the canonical English root. Variants inherit the same hreflang block via `build-i18n-variants.js`. Spanish and Portuguese regional aliases are deferred until the `es` / `pt-BR` / `pt-PT` locales themselves ship (Tier 1 roadmap, §1.2); `zh-TW` deferred per the same logic.
 
-### 5.4 Localized OpenGraph and Twitter cards
+### 5.4 Localized OpenGraph and Twitter cards — **✅ shipped (draft 293)**
 
 `scripts/build-i18n-variants.js` already does this for the five existing locales. Confirm new locales inherit the same treatment, with translated `og:title`, `og:description`, `og:locale`, and `twitter:title`/`twitter:description`.
+
+**Status notes (draft 293):** The variant build already localized `og:title` / `og:description` / `twitter:title` / `twitter:description` and rewrote `canonical` / `og:url` / `twitter:url` to the variant URL — but it left **`og:locale` hard-coded to `en_US`** in every variant and emitted the source's static `og:locale:alternate` set (which listed the variant's *own* locale). Net effect: a shared `/fr/`, `/de/`, `/zh/`, or `/hi/` link previewed as `en_US` on Facebook / LinkedIn / Slack, and advertised itself as one of its own alternates. Fixed in `build-i18n-variants.js`: an `OG_LOCALE` map (`en→en_US`, `fr→fr_FR`, `zh-CN→zh_CN`, `de→de_DE`, `hi→hi_IN`) now sets each variant's `og:locale` to its own locale and regenerates `og:locale:alternate` as exactly the *other four* locales (including `en_US`). The source `index.html` (en) was already correct and is untouched. 11 static Playwright assertions (`tests/specs/16-seo-variants.spec.js`) lock in the per-variant `og:locale` + alternate set, the localized `og:title`/`twitter:title`, and the per-variant `<html lang>` / canonical / `og:url` / `twitter:url`.
+
+**Incidental responsive fix (same draft):** a variant-sweep at 320 px surfaced two pre-existing horizontal overflows in the verbose German build — the `<h2>` headings `age — Dateiverschlüsselung` (`#/crypt/age`) and `PEPPOL- / UBL-Rechnungsinspektor` (`#/utilities/ubl`) — because those long compound words had no break opportunity at mobile width. Added `overflow-wrap: break-word` to the global `h2` / `h3` / `h4` rules (breaks a word only when it would otherwise overflow, so short English headings are unaffected). Verified zero horizontal overflow across all four variants at 320 / 360 / 414 px; 3 browser-based regression guards added to the same spec. No new UI strings, no CSP change, no page-weight impact; English source layout unchanged.
 
 ---
 

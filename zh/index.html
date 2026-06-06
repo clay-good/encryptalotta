@@ -67,12 +67,11 @@
     <meta property="og:description" content="免费的浏览器端工具集：PGP 加密 / 解密 / 签名、TLS 与 SSH 密钥解析、BIP39 助记词、PBKDF2 密钥派生、HMAC、JWT、TOTP、哈希、Base64、UUID、密码生成、Shamir 秘密共享、EXIF 清除、隐写、正则、CSV / JSON / YAML / XML 转换、进制转换、cron 解码、颜色转换、CIDR 计算等。无上传、无统计、开源。">
     <meta property="og:image" content="https://encryptalotta.com/encryptalotta.png">
     <meta property="og:image:alt" content="encryptalotta logo">
-    <meta property="og:locale" content="en_US">
+    <meta property="og:locale" content="zh_CN">
+    <meta property="og:locale:alternate" content="en_US">
     <meta property="og:locale:alternate" content="fr_FR">
-    <meta property="og:locale:alternate" content="zh_CN">
     <meta property="og:locale:alternate" content="de_DE">
     <meta property="og:locale:alternate" content="hi_IN">
-
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://encryptalotta.com/zh/">
@@ -1059,16 +1058,22 @@
             color: var(--text-primary);
             font-weight: 700;
             font-size: 1.8rem;
+            /* Break long compound words (e.g. German "Dateiverschlüsselung") rather
+               than overflow the viewport at narrow widths — only kicks in when a word
+               would otherwise overflow, so short headings are unaffected. */
+            overflow-wrap: break-word;
         }
 
         h3 {
             color: var(--text-primary);
+            overflow-wrap: break-word;
         }
 
         h4 {
             color: var(--text-primary);
             font-weight: 600;
             margin-bottom: 10px;
+            overflow-wrap: break-word;
         }
 
         @media (max-width: 768px) {

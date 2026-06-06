@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <!--
   encryptalotta — single-file portable build
-  Source mtime: 2026-06-06T12:01:31.400Z
-  Source: index.html (SHA-256: 02c6125f8ea6d8a72a4c235fba722fa6f7fbc15bab09e4b29529b7aa2dceb359)
+  Source mtime: 2026-06-06T12:37:44.912Z
+  Source: index.html (SHA-256: 2ca80939b937a61edc11b0430f3219b33395885291346f5f2f26148fb7ba66e3)
   All vendored JavaScript inlined; favicons inlined as data: URIs.
   Identical functionality to the live site at https://encryptalotta.com.
   Runs from file://, USB stick, chat attachment, anywhere. No network calls.
@@ -3370,16 +3370,22 @@ var qrcode = function() {
             color: var(--text-primary);
             font-weight: 700;
             font-size: 1.8rem;
+            /* Break long compound words (e.g. German "Dateiverschlüsselung") rather
+               than overflow the viewport at narrow widths — only kicks in when a word
+               would otherwise overflow, so short headings are unaffected. */
+            overflow-wrap: break-word;
         }
 
         h3 {
             color: var(--text-primary);
+            overflow-wrap: break-word;
         }
 
         h4 {
             color: var(--text-primary);
             font-weight: 600;
             margin-bottom: 10px;
+            overflow-wrap: break-word;
         }
 
         @media (max-width: 768px) {

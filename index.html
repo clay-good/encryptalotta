@@ -1062,16 +1062,22 @@
             color: var(--text-primary);
             font-weight: 700;
             font-size: 1.8rem;
+            /* Break long compound words (e.g. German "Dateiverschlüsselung") rather
+               than overflow the viewport at narrow widths — only kicks in when a word
+               would otherwise overflow, so short headings are unaffected. */
+            overflow-wrap: break-word;
         }
 
         h3 {
             color: var(--text-primary);
+            overflow-wrap: break-word;
         }
 
         h4 {
             color: var(--text-primary);
             font-weight: 600;
             margin-bottom: 10px;
+            overflow-wrap: break-word;
         }
 
         @media (max-width: 768px) {
