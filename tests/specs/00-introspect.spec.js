@@ -3,11 +3,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const TOOLS = [
-  'generate','key-info','revoke','qr','tls-cert','ssh-key','pem-der','bip39',
+  'generate','key-info','revoke','qr','tls-cert','ssh-key','pem-der','asn1','bip39',
   'encrypt','decrypt','text-crypto','password-encrypt','stego','age',
   'sign','verify','hmac','jwt',
-  'passwords','armor','shamir','exif',
-  'hash','encode','uuid','timestamp','url','totp','diff','csv','regex','cron','color','format','cidr','pbkdf2','argon2','base',
+  'passwords','strength','armor','shamir','exif',
+  'hash','encode','uuid','timestamp','url','totp','diff','csv','regex','cron','color','format','cidr','pbkdf2','argon2','base','filetype',
   'iban','bic','gs1','vat','sepa','lotl','ed25519','x25519'
 ];
 

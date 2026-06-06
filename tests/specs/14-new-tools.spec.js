@@ -36,7 +36,7 @@ async function readResult(page, sel) {
 // (keys, OCSP, timestamps) that the specialized parsers don't cover.
 // view: #asn1-view  input: #asn1-input (hex/base64/PEM)  out: #asn1-results
 // ===================================================================
-test.fixme('NEW asn1: decodes a DER blob into a typed TLV tree (X.690)', async ({ page }) => {
+test('NEW asn1: decodes a DER blob into a typed TLV tree (X.690)', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'asn1');
   // SEQUENCE { INTEGER 1, BOOLEAN TRUE } = 30 06 02 01 01 01 01 ff
   await page.fill('#asn1-input', '30060201010101ff');
@@ -143,7 +143,7 @@ test.fixme('NEW qr-decode: recovers the payload from an uploaded QR image', asyn
 // "no uploads" promise). Complements the password generator.
 // view: #strength-view  input: #strength-input  out: #strength-results
 // ===================================================================
-test.fixme('NEW strength: rates a weak vs strong passphrase offline', async ({ page }) => {
+test('NEW strength: rates a weak vs strong passphrase offline', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'strength');
   await page.fill('#strength-input', 'password');
   await page.click('#btn-strength-check');
@@ -162,7 +162,7 @@ test.fixme('NEW strength: rates a weak vs strong passphrase offline', async ({ p
 // names the format from its signature — never uploads the file.
 // view: #filetype-view  inputs: #filetype-file (file) or #filetype-hex
 // ===================================================================
-test.fixme('NEW filetype: identifies a format from its magic bytes', async ({ page }) => {
+test('NEW filetype: identifies a format from its magic bytes', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'filetype');
   await page.fill('#filetype-hex', '89504e470d0a1a0a'); // PNG signature
   await page.click('#btn-filetype-identify');
