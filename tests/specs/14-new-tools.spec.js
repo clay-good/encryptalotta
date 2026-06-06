@@ -95,23 +95,32 @@ test.fixme('NEW jwk: converts a public JWK to SPKI PEM and back (RFC 7517)', asy
 // recipient/identity pair. 100% local — no recipients are fetched.
 // view: #age-view  inputs: #age-recipient / #age-identity / #age-message
 // ===================================================================
-test.fixme('NEW age: encrypts to an age recipient and decrypts with its identity', async ({ page }) => {
+test('NEW age: generate keypair, encrypt to the recipient, decrypt with its identity', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'age');
-  // A fixtured age key pair (age1... recipient + AGE-SECRET-KEY-... identity):
-  const recipient = 'age1ql3z7hjy54pw3hyww5ayyfg7zqgvc7w3j2elw8zmrj2kg5sfn9aqmcac8p';
-  const identity = 'AGE-SECRET-KEY-1GFPYYSJZGFPYYSJZGFPYYSJZGFPYYSJZGFPYYSJZGFPYYSJZGFPQ4EGAEA';
-  await page.click('#age-mode-encrypt');
-  await page.fill('#age-recipient', recipient);
-  await page.fill('#age-message', 'hello age');
-  await page.click('#btn-age-run');
-  const ciphertext = await page.locator('#age-output').inputValue();
-  expect(ciphertext).toContain('age-encryption.org/v1');
+  // Generate a fresh keypair in-browser.
+  await page.check('input[name="age-mode"][value="generate"]');
+  await page.click('#btn-age-generate');
+  const recipient = (await page.locator('#age-gen-recipient').inputValue()).trim();
+  const identity = (await page.locator('#age-gen-identity').inputValue()).trim();
+  expect(recipient).toMatch(/^age1[0-9a-z]+$/);
+  expect(identity).toMatch(/^AGE-SECRET-KEY-1[0-9A-Z]+$/);
 
-  await page.click('#age-mode-decrypt');
-  await page.fill('#age-identity', identity);
-  await page.fill('#age-message', ciphertext);
-  await page.click('#btn-age-run');
-  expect(await page.locator('#age-output').inputValue()).toBe('hello age');
+  // Encrypt a message to the recipient.
+  await page.check('input[name="age-mode"][value="encrypt"]');
+  await page.check('input[name="age-enc-type"][value="keys"]');
+  await page.fill('#age-enc-recipients', recipient);
+  await page.fill('#age-enc-input', 'hello age');
+  await page.click('#btn-age-encrypt');
+  await expect(page.locator('#age-enc-output')).toHaveValue(/-----BEGIN AGE ENCRYPTED FILE-----/);
+  const ciphertext = await page.locator('#age-enc-output').inputValue();
+
+  // Decrypt with the identity and recover the plaintext.
+  await page.check('input[name="age-mode"][value="decrypt"]');
+  await page.check('input[name="age-dec-type"][value="key"]');
+  await page.fill('#age-dec-identity', identity);
+  await page.fill('#age-dec-input', ciphertext);
+  await page.click('#btn-age-decrypt');
+  await expect(page.locator('#age-dec-output')).toHaveValue('hello age');
 });
 
 // ===================================================================

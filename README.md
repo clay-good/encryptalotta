@@ -1,17 +1,17 @@
 # encryptalotta
 
-![encryptalotta — 46 client-side privacy and developer tools, zero server uploads](encryptalotta.png)
+![encryptalotta — 47 client-side privacy and developer tools, zero server uploads](encryptalotta.png)
 
-**Free, client-side privacy and developer toolbox — 46 tools, zero server uploads.**
+**Free, client-side privacy and developer toolbox — 47 tools, zero server uploads.**
 
-A comprehensive single-page web app with **46 cryptographic, encoding, parsing, and developer utilities** that run entirely in your browser. PGP key generation, key inspection, revocation certificates, QR public-key sharing, TLS / X.509 certificate parsing, OpenSSH public key parsing, PEM ↔ DER conversion, BIP39 mnemonic generation and validation, file and text encryption / decryption, password-only (symmetric) file encryption, image steganography, digital signing and verification, HMAC, JWT inspection and verification, PBKDF2 and Argon2 (RFC 9106) key derivation, TOTP / 2FA, password generation, ASCII armor conversion, Shamir's Secret Sharing, EXIF metadata stripping, hashing and checksums (SHA-1 / 256 / 384 / 512), Base64 / Base32 / Base58 / hex encoding, number base conversion (binary / octal / decimal / hex / any base 2–36), UUID v4 / v7 and ULID generation, Unix timestamp conversion, URL parsing, line-level diff, CSV ↔ JSON ↔ TSV conversion, regex testing, cron decoding, color conversion with WCAG contrast checking, JSON / YAML / XML formatting and CBOR (RFC 8949) decoding, and CIDR / IPv4 subnet calculation. Searchable command palette (`⌘K` / `Ctrl+K`), full keyboard navigation, five UI languages. No server uploads, no analytics, no CDN, no tracking.
+A comprehensive single-page web app with **47 cryptographic, encoding, parsing, and developer utilities** that run entirely in your browser. PGP key generation, key inspection, revocation certificates, QR public-key sharing, TLS / X.509 certificate parsing, OpenSSH public key parsing, PEM ↔ DER conversion, BIP39 mnemonic generation and validation, file and text encryption / decryption, password-only (symmetric) file encryption, image steganography, age file encryption (X25519 recipients or scrypt passphrase, interoperable with the age CLI), digital signing and verification, HMAC, JWT inspection and verification, PBKDF2 and Argon2 (RFC 9106) key derivation, TOTP / 2FA, password generation, ASCII armor conversion, Shamir's Secret Sharing, EXIF metadata stripping, hashing and checksums (SHA-1 / 256 / 384 / 512), Base64 / Base32 / Base58 / hex encoding, number base conversion (binary / octal / decimal / hex / any base 2–36), UUID v4 / v7 and ULID generation, Unix timestamp conversion, URL parsing, line-level diff, CSV ↔ JSON ↔ TSV conversion, regex testing, cron decoding, color conversion with WCAG contrast checking, JSON / YAML / XML formatting and CBOR (RFC 8949) decoding, and CIDR / IPv4 subnet calculation. Searchable command palette (`⌘K` / `Ctrl+K`), full keyboard navigation, five UI languages. No server uploads, no analytics, no CDN, no tracking.
 
 **Inspired by [Kevin Qiu](https://www.linkedin.com/in/kevinmqiu)**
 
 
 ---
 
-## Features (46 tools)
+## Features (47 tools)
 
 ### Keys (8 tools)
 - **Generate PGP Keys** — Create ECC (Curve25519) or RSA 3072 / 4096 key pairs with customizable expiry. Optional **regulator presets** (BSI TR-02102-1, ANSSI RGS B1, NIST SP 800-57, CNSA 2.0, Privacy Guides) auto-fill the algorithm + key size from each regulator's published recommendation and link out to the source document.
@@ -23,12 +23,13 @@ A comprehensive single-page web app with **46 cryptographic, encoding, parsing, 
 - **PEM ↔ DER** — Round-trip between PEM (Base64 with header/footer) and DER (raw binary as hex).
 - **BIP39 Mnemonic** — Generate cryptographically random 12 / 15 / 18 / 21 / 24-word seed phrases (BIP-0039) or validate the checksum of any existing mnemonic. Computes the BIP39 PBKDF2-HMAC-SHA512 seed locally with optional passphrase.
 
-### Encrypt / Decrypt (5 tools)
+### Encrypt / Decrypt (6 tools)
 - **Encrypt Files** — Encrypt files with one or more PGP public keys.
 - **Decrypt Files** — Decrypt PGP-encrypted files with your private key and passphrase.
 - **Text Messages** — Encrypt or decrypt PGP text blocks for email, chat, or notes.
 - **Password Encrypt** — Encrypt a file with a passphrase only (symmetric, no PGP key required).
 - **Steganography** — Hide an encrypted payload inside a PNG using LSB encoding. Optional password XORs the payload (wrong password fails magic-byte validation, no garbage output).
+- **age Encryption** — Encrypt and decrypt files with [age](https://age-encryption.org) (the modern PGP successor): to one or more X25519 recipients (`age1…`) or a scrypt passphrase, and decrypt with an `AGE-SECRET-KEY-1…` identity or passphrase. Generate keypairs. ASCII-armored output, byte-compatible with the `age` CLI and `rage`. Hand-rolled ChaCha20-Poly1305 / scrypt / bech32 (pure JS); X25519 / HKDF / HMAC via Web Crypto. Interop-verified against the age CLI 1.3.1.
 
 ### Sign / Verify (4 tools)
 - **Sign** — Produce detached, attached, or cleartext PGP signatures for files or text using your private key.
@@ -133,7 +134,7 @@ index.html
 ├─ <meta CSP>            connect-src 'none'; frame-ancestors 'none'; …
 ├─ inline <style>        CSS logical properties (RTL-ready), no external sheet
 ├─ STRINGS {}            1,873 keys × 5 locales — i18n table, vendored inline
-├─ tool registry         46 tools → {id, group, route, render()}
+├─ tool registry         47 tools → {id, group, route, render()}
 │    ├─ Keys (8)         OpenPGP.js · hand-rolled ASN.1/DER · SSH wire format
 │    ├─ Encrypt (5)      OpenPGP.js · LSB stego (Web Crypto keystream)
 │    ├─ Sign (4)         OpenPGP.js · Web Crypto HMAC / JWT verify
@@ -244,7 +245,7 @@ This eliminates entire categories of supply chain attacks that have affected oth
 Sensitive data is cleared from memory after use:
 
 - **Automatic passphrase clearing** — Passphrase fields are wiped after decryption operations.
-- **Page unload protection** — On `beforeunload`, `clearSensitiveFields()` wipes every passphrase, private-key, shared-secret, BIP39 mnemonic, and PBKDF2 password input across all 46 tools, plus the readonly output panes that render decrypted plaintext, derived keys, BIP39 seeds, Shamir secrets, and steganographic payloads. Public keys, signed messages, and signature-verification statuses are left alone (they aren't secrets and clearing them would erase audit context).
+- **Page unload protection** — On `beforeunload`, `clearSensitiveFields()` wipes every passphrase, private-key, shared-secret, BIP39 mnemonic, and PBKDF2 password input across all 47 tools, plus the readonly output panes that render decrypted plaintext, derived keys, BIP39 seeds, Shamir secrets, and steganographic payloads. Public keys, signed messages, and signature-verification statuses are left alone (they aren't secrets and clearing them would erase audit context).
 - **JavaScript variable clearing** — Sensitive `Uint8Array` buffers (PBKDF2 password bytes, generated PGP private keys) are zeroized via `.fill(0)` / `secureWipe()` after use. (Note: this is best-effort — JS engines may have already retained internal copies for GC, and `String` values are immutable so we cannot overwrite them in place.)
 
 ### Strict Content Security Policy
@@ -351,7 +352,7 @@ The interface is a **home grid + command palette**, designed to stay minimal on 
 
 ## All Features at Your Fingertips
 
-All 46 tools are organized into four groups. Every tool has a deep-link route.
+All 47 tools are organized into four groups. Every tool has a deep-link route.
 
 ### Keys (8)
 | Tool | Route | What it does |
@@ -365,7 +366,7 @@ All 46 tools are organized into four groups. Every tool has a deep-link route.
 | **PEM ↔ DER** | `#/keys/pem-der` | Convert between PEM (Base64) and DER (binary) encodings |
 | **BIP39 Mnemonic** | `#/keys/bip39` | Generate or validate BIP-0039 mnemonic seed phrases (12 / 15 / 18 / 21 / 24 words) |
 
-### Encrypt / Decrypt (5)
+### Encrypt / Decrypt (6)
 | Tool | Route | What it does |
 |---|---|---|
 | **Encrypt Files** | `#/crypt/encrypt` | Encrypt files with one or more PGP public keys |
@@ -373,6 +374,7 @@ All 46 tools are organized into four groups. Every tool has a deep-link route.
 | **Text Messages** | `#/crypt/text-crypto` | Encrypt / decrypt PGP text for email, chat, or notes |
 | **Password Encrypt** | `#/crypt/password-encrypt` | Encrypt a file with a passphrase only (no PGP key needed) |
 | **Steganography** | `#/crypt/stego` | Hide a payload inside a PNG using LSB encoding |
+| **age Encryption** | `#/crypt/age` | age v1 encrypt / decrypt (X25519 or scrypt) + keygen, ASCII armor |
 
 ### Sign / Verify (4)
 | Tool | Route | What it does |
@@ -430,6 +432,44 @@ All 46 tools are organized into four groups. Every tool has a deep-link route.
 - Format: 4-byte magic `EAL1` + 4-byte big-endian length + payload bytes encoded into LSBs of R/G/B channels (alpha untouched, transparency preserved).
 - Optional password XORs the payload with a `SHA-256(password || counter_be32)` keystream. A wrong password produces a magic-byte mismatch in 99.9%+ of cases, surfacing a "no payload found" error rather than garbage output.
 - **PNG only.** JPEG output is impossible — re-encoding would destroy the LSB data. Input format is enforced via `accept="image/png"`.
+
+### age Encryption
+
+A full, hand-rolled implementation of the [age v1 format](https://github.com/C2SP/C2SP/blob/main/age.md) (`age-encryption.org/v1`) — Filippo Valsorda's modern file-encryption tool. Encrypt to X25519 recipients **or** a scrypt passphrase, decrypt with a secret-key identity or passphrase, and generate keypairs. Output is the standard ASCII armor, **byte-compatible with the `age` CLI and `rage`**.
+
+**Wire format (decrypted, before armor):**
+
+```
+age-encryption.org/v1                          ← intro line
+-> X25519 <base64(ephemeral_share)>            ← one stanza per recipient
+<base64(ChaCha20Poly1305(wrap_key, fileKey))>     (or: -> scrypt <salt> <log2N>)
+--- <base64(HMAC-SHA256(hdr_key, header))>     ← header MAC (authenticates everything above)
+‖ 16-byte payload nonce ‖ STREAM ciphertext…   ← binary payload follows the header
+```
+
+**Key derivation cheat sheet:**
+
+| Step | Construction |
+|---|---|
+| File key | 16 random bytes (`crypto.getRandomValues`) |
+| X25519 wrap key | `HKDF-SHA256(ikm = X25519(eph, recipient), salt = eph_share ‖ recipient_pub, info = "age-encryption.org/v1/X25519")` → 32 B |
+| scrypt wrap key | `scrypt(passphrase, salt = "age-encryption.org/v1/scrypt" ‖ rand16, N = 2^logN, r = 8, p = 1)` → 32 B |
+| Header MAC key | `HKDF-SHA256(ikm = fileKey, salt = "", info = "header")` → HMAC-SHA256 key |
+| Payload key | `HKDF-SHA256(ikm = fileKey, salt = nonce16, info = "payload")` → 32 B |
+| Payload | ChaCha20-Poly1305 **STREAM**: 64 KiB chunks, nonce = `counter[11 B big-endian] ‖ last_flag[1 B]` |
+| Recipient / identity encoding | bech32 (BIP-173): `age1…` (lowercase HRP `age`) / `AGE-SECRET-KEY-1…` (uppercase HRP `age-secret-key-`) |
+
+**Crypto provenance.** ChaCha20, Poly1305 (the audited TweetNaCl limb arithmetic), the ChaCha20-Poly1305 AEAD (RFC 8439), scrypt (RFC 7914 — Salsa20/8 + BlockMix + ROMix), and bech32 are hand-rolled in pure JavaScript. X25519, HKDF-SHA-256, HMAC-SHA-256, and scrypt's inner/outer PBKDF2 rounds use **Web Crypto**. The decrypt-side HKDF needs the *recipient's own* public key as salt; it is recovered from the pasted secret scalar via the basepoint trick `X25519(scalar, u=9)` rather than being stored alongside the identity.
+
+**Design decisions.**
+- **Hand-rolled, not vendored.** The age v1 format is ~600 lines; implementing it inline avoids a new vendored `.js` file, keeps the SHA-384 supply-chain manifest unchanged, and adds nothing to the CSP. The same "ship pure-JS first" choice made for Argon2.
+- **No low-order-point footgun.** Web Crypto's X25519 `deriveBits` throws on an all-zero shared secret, so the age spec's low-order-point check is enforced by the platform.
+- **scrypt work factor is selectable** (log₂ N: 12 / 14 / 15 default / 16 / 18). The CLI's default of 18 (256 MiB) is decryptable here but takes a few seconds in pure JS; lower factors are offered for interactive use. Decryption honours whatever factor the file carries (capped at 2³⁰ to bound a malicious header).
+- **Passphrase = sole recipient.** Per the age spec, a scrypt stanza may not be mixed with X25519 stanzas; the tool enforces this on encrypt.
+
+**Interop is verified, not assumed.** The test suite decrypts static armored fixtures produced by **age CLI 1.3.1** (one X25519, one scrypt) entirely in-browser, and the development harness round-trips both directions (CLI→tool and tool→CLI, including multi-chunk ≥150 KiB and empty inputs) plus RFC 8439 / RFC 7914 known-answer vectors and a cross-check against the platform's native ChaCha20-Poly1305 and scrypt.
+
+**Threat-model notes.** Everything runs locally; secret keys, passphrases, and decrypted output are wiped on page unload (`clearSensitiveFields()`). age provides confidentiality and integrity but, like the format itself, **no sender authentication** — a recipient cannot prove *who* encrypted a file (use the Sign / Verify tools if you need that). Anyone holding an `AGE-SECRET-KEY-1…` can decrypt every file sent to its `age1…` recipient; treat it like a private key.
 
 ### Shamir Secret Sharing
 - Built on the well-audited [secrets.js-grempe](https://github.com/grempe/secrets.js) library, initialized with a 256-bit security parameter.
@@ -704,7 +744,7 @@ node scripts/build-i18n-variants.js
 node scripts/audit-release.js
 ```
 
-The audit checks: zero `innerHTML =` assignments, STRINGS parity across all 5 locales, every `data-i18n` key resolves, vendored SHA-384 hashes match across HTML comments + the README manifest + on-disk bytes, CSP `connect-src 'none'` on both meta and `_headers`, no outbound network call sites, page weight under 2 MB gzipped, locale variants (`/fr/`, `/zh/`, `/de/`, `/hi/`) in sync with source, `robots.txt` + `sitemap.xml` + JSON-LD presence, Phase-7 SEO prose key coverage for all 46 tools, and (if present) `sbom.json` hash consistency and `encryptalotta-portable.html` having no `<script src=>` references.
+The audit checks: zero `innerHTML =` assignments, STRINGS parity across all 5 locales, every `data-i18n` key resolves, vendored SHA-384 hashes match across HTML comments + the README manifest + on-disk bytes, CSP `connect-src 'none'` on both meta and `_headers`, no outbound network call sites, page weight under 2 MB gzipped, locale variants (`/fr/`, `/zh/`, `/de/`, `/hi/`) in sync with source, `robots.txt` + `sitemap.xml` + JSON-LD presence, Phase-7 SEO prose key coverage for all 47 tools, and (if present) `sbom.json` hash consistency and `encryptalotta-portable.html` having no `<script src=>` references.
 
 ### Build artifacts (for distribution / audit, optional)
 
@@ -830,7 +870,7 @@ This site is optimized for Cloudflare Pages deployment with automatic security h
 
 This application is open source specifically so security researchers can audit it. Key areas to review:
 
-- `index.html` - All application logic (CSP meta tags, JavaScript cryptographic calls, memory clearing, i18n, all 46 tools)
+- `index.html` - All application logic (CSP meta tags, JavaScript cryptographic calls, memory clearing, i18n, all 47 tools)
 - `_headers` - HTTP security headers
 - `openpgp.min.js` - Compare against official OpenPGP.js v6.3.0 release
 - `qrcode.js` - Compare against official qrcode-generator v2.0.4 release

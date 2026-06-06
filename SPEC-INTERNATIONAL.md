@@ -569,17 +569,21 @@ Full Playwright suite: 230 passed. Tool count 43 → 44; JSON-LD featureList + f
 
 **Dependencies:** none — `window.crypto.subtle` handles both. Gracefully degrade on Safari < 17.
 
-### 2.11 age file encryption
+### 2.11 age file encryption — **✅ shipped (draft 292): full age v1 (X25519 + scrypt), encrypt / decrypt / keygen, ASCII armor**
 
 **Why:** Filippo Valsorda's age is a simpler, modern PGP successor — widely adopted in EU privacy circles (used by NixOS deployments, dotfile encryption, password managers like passage).
 
-**Spec:**
-- Encrypt to one or more X25519 recipients or scrypt passphrase recipients.
-- Decrypt with X25519 identity or passphrase.
-- Generate age keypairs (`age-keygen` equivalent).
-- Output: armored age format (`-----BEGIN AGE ENCRYPTED FILE-----...`).
+**Status notes (draft 292):** Shipped as the standalone `age` tool in the **Encrypt / Decrypt** group (group `crypt`), a modern sibling to the OpenPGP encrypt/decrypt tools. **Hand-rolled pure JavaScript — no vendored `age.min.js`, no WASM, no CSP change** — exactly the "hand-roll against the age v1 spec" recommendation below. The recommendation to vendor `age-encryption.js` was *not* followed; the format is small enough to implement inline and audit. Three operations behind a radio selector — **Encrypt**, **Decrypt**, **Generate keypair** — each surfacing the standard age artifacts (`age1…` recipients, `AGE-SECRET-KEY-1…` identities, the `-----BEGIN AGE ENCRYPTED FILE-----` ASCII armor). Encrypt accepts multiple X25519 recipients (one `age1…` per line) **or** a scrypt passphrase with a selectable work factor (log₂ N: 12 / 14 / 15 default / 16 / 18); decrypt accepts an `AGE-SECRET-KEY-1…` identity **or** the passphrase. Text-area input plus an optional file picker on both sides (binary or armored `.age` inputs auto-detected on decrypt); copy + download buttons on both outputs.
 
-**Dependencies:** `age-encryption.js` (or hand-roll against the age v1 spec — it's small, ~600 lines). Vendor as `age.min.js`.
+The crypto stack: **ChaCha20, Poly1305 (the audited TweetNaCl limb implementation), the ChaCha20-Poly1305 AEAD (RFC 8439), scrypt (RFC 7914 — Salsa20/8 core + BlockMix + ROMix), and bech32 (BIP-173)** are all hand-rolled in pure JS; **X25519, HKDF-SHA-256, HMAC-SHA-256, and PBKDF2** (scrypt's inner/outer rounds) use Web Crypto. The X25519 public key needed for the decrypt-side HKDF salt is recovered from the secret scalar via the basepoint-deriveBits trick (`X25519(scalar, 9)`), so a pasted `AGE-SECRET-KEY-1…` decrypts without storing the public half. The payload is ChaCha20-Poly1305 in the **STREAM** construction (64 KiB chunks, 11-byte big-endian counter ‖ 1-byte last-chunk flag); the header is authenticated with HMAC-SHA-256 keyed by `HKDF(file_key, "header")`. Passphrase (scrypt) recipients are enforced as the sole stanza, per the age spec. Verified against **the real `age` CLI 1.3.1**: bidirectional X25519 interop (CLI-encrypt → in-tool-decrypt and in-tool-encrypt → CLI-decrypt, including multi-chunk ≥150 KiB and empty inputs), bidirectional scrypt-passphrase interop, and recipient/identity bech32 agreement with `age-keygen`; plus RFC 8439 §2.5/§2.8 and RFC 7914 §12 known-answer vectors and a Node cross-check against the platform's native ChaCha20-Poly1305 and scrypt across many lengths/parameters. 9 Playwright cases (two of them decrypt static CLI-produced armored fixtures — one X25519, one scrypt — entirely in-browser). ~45 new UI strings × 5 locales (en/fr/de reviewed against the age vocabulary; zh-CN/hi machine-quality drafts pending native review per the project pattern) + 5 en-only SEO prose keys. No new vendored dependency (SHA-384 manifest + page-weight budget untouched at 0.80 MB gzipped), no CSP change, no outbound vectors. Tool count 46 → 47.
+
+**Spec:**
+- Encrypt to one or more X25519 recipients or scrypt passphrase recipients. ✅
+- Decrypt with X25519 identity or passphrase. ✅
+- Generate age keypairs (`age-keygen` equivalent). ✅
+- Output: armored age format (`-----BEGIN AGE ENCRYPTED FILE-----...`). ✅
+
+**Dependencies:** none — hand-rolled inline against the age v1 spec (the "hand-roll … it's small, ~600 lines" option below was taken; no `age.min.js` was vendored). The original analysis, preserved for the record: *`age-encryption.js` (or hand-roll against the age v1 spec — it's small, ~600 lines). Vendor as `age.min.js`.*
 
 ### 2.12 BLAKE2b / BLAKE3 hashes — **✅ feature-complete: BLAKE2b-512 (draft 5) + BLAKE3-256 (draft 290)**
 
@@ -1091,8 +1095,8 @@ Full suite: 247 → 250 passed. Audit OK. No new vendored deps, no CSP change, t
 3. ✅ EU LOTL viewer (§2.6) — shipped draft 17.
 4. 🟡 Factur-X / ZUGFeRD / PEPPOL inspector (§2.7) — PEPPOL UBL Invoice / CreditNote shipped draft 18; Factur-X / ZUGFeRD hybrid PDF + UN/CEFACT CII deferred until the §2.5 PDF attachment extractor lands.
 5. 🟡 EUDI Wallet credential decoder (§2.8) — SD-JWT decoder shipped draft 20 as an extension of the JWT inspector; ISO mdoc CBOR decoder deferred.
-6. Argon2id (§2.9).
-7. age (§2.11).
+6. ✅ Argon2id (§2.9) — shipped draft 291.
+7. ✅ age (§2.11) — shipped draft 292 (full age v1: X25519 + scrypt, encrypt/decrypt/keygen, ASCII armor; hand-rolled, interop-verified against the age CLI 1.3.1).
 
 ### Phase 8 — Tier 2 and 3 locales
 

@@ -14,7 +14,7 @@ import path from 'node:path';
 const TOOLS = [
   'home',
   'generate','key-info','revoke','qr','tls-cert','ssh-key','pem-der','bip39',
-  'encrypt','decrypt','text-crypto','password-encrypt','stego',
+  'encrypt','decrypt','text-crypto','password-encrypt','stego','age',
   'sign','verify','hmac','jwt',
   'passwords','armor','shamir','exif',
   'hash','encode','uuid','timestamp','url','totp','diff','csv','regex','cron','color','format','cidr','pbkdf2','argon2','base',
