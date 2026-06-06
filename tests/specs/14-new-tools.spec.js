@@ -54,15 +54,37 @@ test('NEW asn1: decodes a DER blob into a typed TLV tree (X.690)', async ({ page
 // public-key algorithm, SANs, and whether the self-signature verifies.
 // view: #csr-view  input: #csr-input  out: #csr-results
 // ===================================================================
-test.fixme('NEW csr: decodes a PKCS#10 request and checks the self-signature (RFC 2986)', async ({ page }) => {
+test('NEW csr: decodes a PKCS#10 request and checks the self-signature (RFC 2986)', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'csr');
-  // A fixtured CSR PEM would be pasted here; acceptance criteria:
-  await page.fill('#csr-input', '-----BEGIN CERTIFICATE REQUEST-----\n...\n-----END CERTIFICATE REQUEST-----');
+  // Real RSA-2048 CSR fixture (CN=encryptalotta.example, O=Encryptalotta Test, C=US),
+  // generated with `openssl req -new -newkey rsa:2048 -nodes`; `openssl req -verify`
+  // confirms the self-signature is valid.
+  const csr = [
+    '-----BEGIN CERTIFICATE REQUEST-----',
+    'MIICjzCCAXcCAQAwSjEeMBwGA1UEAwwVZW5jcnlwdGFsb3R0YS5leGFtcGxlMRsw',
+    'GQYDVQQKDBJFbmNyeXB0YWxvdHRhIFRlc3QxCzAJBgNVBAYTAlVTMIIBIjANBgkq',
+    'hkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtS765IIjFo3Ouub52Lz4FEsnbrsEee7L',
+    '4vI2W36l4UEzI4mbJIerOzEIklzkz4619RCFUhpXYlPl7bFq88aJ9rgWE60kphld',
+    'jEpNtmzCMJLrdb2mKVL966GXvoy0iU7EwfRIdj4dmnI+Z8okUKAOTfjhxxb58cWk',
+    'sIjGVA83HiVwjkZ4k6wXRxgkp7pdOqXP9/jVehKat0Qp82aKWPeLjPSvEJqJgZNl',
+    'vZ57UlbZ4w82PaDYCeqoO4nHyhli2q0R26IO8ao4cqOfHUclLOT2tW0ZW8F1TfsR',
+    'QvkUult+VLjG6vv/u+5XyX0MOlDWgx8N2h9x+c5qBtaElUf+HmyPxQIDAQABoAAw',
+    'DQYJKoZIhvcNAQELBQADggEBADsQeVnKCeOajs2p4sBPDE6NqvuDTFsj/E7p894L',
+    '2x4iGvHDLqFw70OUY4n0q1O0NdFWPkgaIVjgvTrje0ZCjGuAhrOv0b/3jboEHtch',
+    'XgRdwsEA7pYAcOycdG9zlWcQm3tMTIWeNYUCxyHuddmEzYPsn0eBdZ+rqsFCqfhr',
+    'umuJP4W1c5OBVBzcAWF1tP4Z+1Mm8PCEMnBuR/e5jrtyKII4D+V1qeRKEZ3Xtyd2',
+    'vA4Nj3TnnfjKzd8lH1YEQkPn0hfMkZJj5tEkUl36kfD+Re7vbxKC2BXb093aRN1C',
+    'Jz0gFpp+ATIcee9q0os46+/E3xzsAO//GUgeOvudrrCxEqQ=',
+    '-----END CERTIFICATE REQUEST-----'
+  ].join('\n');
+  await page.fill('#csr-input', csr);
   await page.click('#btn-csr-parse');
   const out = await readResult(page, '#csr-results');
   expect(out).toMatch(/Subject/i);
+  expect(out).toMatch(/encryptalotta\.example/);   // subject CN decoded
   expect(out).toMatch(/Public Key|Algorithm/i);
   expect(out).toMatch(/Signature|self-sign/i);
+  expect(out).toMatch(/valid/i);                   // RSA self-signature verifies
 });
 
 // ===================================================================
@@ -71,7 +93,7 @@ test.fixme('NEW csr: decodes a PKCS#10 request and checks the self-signature (RF
 // Bridges the Ed25519/X25519/RSA tools to the JOSE world, fully offline.
 // view: #jwk-view  input: #jwk-input  out: #jwk-output  btns: to-pem / to-jwk
 // ===================================================================
-test.fixme('NEW jwk: converts a public JWK to SPKI PEM and back (RFC 7517)', async ({ page }) => {
+test('NEW jwk: converts a public JWK to SPKI PEM and back (RFC 7517)', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'jwk');
   // RFC 8037 Appendix A.1 public Ed25519 JWK:
   const jwk = '{"kty":"OKP","crv":"Ed25519","x":"11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo"}';

@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const TOOLS = [
-  'generate','key-info','revoke','qr','tls-cert','ssh-key','pem-der','asn1','bip39',
+  'generate','key-info','revoke','qr','tls-cert','ssh-key','pem-der','asn1','csr','jwk','bip39',
   'encrypt','decrypt','text-crypto','password-encrypt','stego','age',
   'sign','verify','hmac','jwt',
   'passwords','strength','armor','shamir','exif',
