@@ -326,3 +326,23 @@ test('hash file: SHA-256 of "abc" file matches FIPS 180-4 §B.1', async ({ page 
   expect(out).toContain('cb00753f45a35e8bb5a03d699ac65007272c32ab0eded1631a8b605a43ff5bed8086072ba1e7cc2358baeca134c825a7'); // SHA-384
   expect(out).toContain('ddaf35a193617abacc417349ae20413112e6fa4e89a97ea20a9eeee64b55d39a2192992a274fc1a836ba3c23a3feebbd454d4423643ce80e2a9ac94fa54ca49f'); // SHA-512
 });
+
+// BLAKE3-256 of a 3072-byte file — exercises the multi-chunk Merkle-tree path (3 chunks of
+// 1024 bytes each, two levels of parent nodes). Input is the official BLAKE3 test-vector
+// pattern (byte i = i % 251); expected hash is the published length-3072 "hash" vector.
+test('hash file: BLAKE3-256 of a 3072-byte file matches the official multi-chunk vector', async ({ page }) => {
+  const inPath = 'reports/blake3-3072.bin';
+  const buf = Buffer.alloc(3072);
+  for (let i = 0; i < buf.length; i++) buf[i] = i % 251;
+  fs.writeFileSync(inPath, buf);
+
+  await page.goto('/index.html'); await gotoTool(page, 'hash');
+  await page.setInputFiles('#hash-file', inPath);
+  await page.click('#btn-hash-compute');
+  await page.waitForFunction(() => {
+    const r = document.getElementById('hash-results');
+    return r && !r.classList.contains('hidden') && (r.textContent || '').length > 50;
+  }, { timeout: 5_000 });
+  const out = (await page.locator('#hash-results').textContent()).toLowerCase();
+  expect(out).toContain('b98cb0ff3623be03326b373de6b9095218513e64f1ee2edd2525c7ad1e5cffd2');
+});

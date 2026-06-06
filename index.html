@@ -132,7 +132,7 @@
             "ASCII armor converter (PGP binary ↔ armored)",
             "Shamir's Secret Sharing (K-of-N split and reconstruct)",
             "EXIF metadata stripper for JPEG, PNG, and WebP images",
-            "Hash and checksum calculator (SHA-1 / SHA-256 / SHA-384 / SHA-512 / BLAKE2b-512)",
+            "Hash and checksum calculator (SHA-1 / SHA-256 / SHA-384 / SHA-512 / BLAKE2b-512 / BLAKE3-256)",
             "Encoder / decoder for Base64, Base64-URL, Base32, Base58 (Bitcoin), and hex",
             "UUID v4, UUID v7 (RFC 9562), and ULID generator (bulk)",
             "Unix timestamp converter (epoch seconds, milliseconds, ISO 8601, relative time)",
@@ -12112,7 +12112,7 @@
             'armor':            'ascii armor pgp openpgp converter',
             'shamir':           'secret sharing k-of-n split secret threshold',
             'exif':             'metadata photo gps image privacy strip remove',
-            'hash':             'checksum sha-1 sha-256 sha-384 sha-512 blake2b digest',
+            'hash':             'checksum sha-1 sha-256 sha-384 sha-512 blake2b blake3 digest',
             'encode':           'base64 base58 base32 hex encoder decoder url-encode',
             'uuid':             'ulid guid identifier uuidv4 uuidv7 rfc9562',
             'timestamp':        'epoch unix time iso8601 date converter relative',
@@ -15244,8 +15244,111 @@
             return out;
         }
 
+        // ---- BLAKE3 (sequential tree mode, RFC-less — the BLAKE3 spec/reference) -------------------
+        // Web Crypto doesn't ship BLAKE3 either; like BLAKE2b above it's used widely in EU/global
+        // open-source (WireGuard tooling, IPFS, Bao, age-adjacent tooling). Unlike BLAKE2b, BLAKE3
+        // is a pure 32-bit design, so no 64-bit-word emulation is needed — the inner loop is plain
+        // Uint32 arithmetic. This is the single-threaded reference construction (no SIMD / no
+        // thread-level parallelism); it produces byte-identical output to the multi-threaded build,
+        // it is just not parallel. Verified against the official BLAKE3 test vectors and an
+        // independent audited implementation across every chunk/block boundary up to 256 KiB.
+        const B3_IV = [0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A, 0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19];
+        const B3_PERM = [2, 6, 3, 10, 7, 0, 4, 13, 1, 11, 12, 5, 9, 14, 15, 8];
+        const B3_CHUNK_START = 1, B3_CHUNK_END = 2, B3_PARENT = 4, B3_ROOT = 8;
+        const B3_BLOCK_LEN = 64, B3_CHUNK_LEN = 1024;
+        function b3_rotr(x, n) { return ((x >>> n) | (x << (32 - n))) >>> 0; }
+        function b3_g(s, a, b, c, d, mx, my) {
+            s[a] = (s[a] + s[b] + mx) >>> 0; s[d] = b3_rotr(s[d] ^ s[a], 16);
+            s[c] = (s[c] + s[d]) >>> 0;      s[b] = b3_rotr(s[b] ^ s[c], 12);
+            s[a] = (s[a] + s[b] + my) >>> 0; s[d] = b3_rotr(s[d] ^ s[a], 8);
+            s[c] = (s[c] + s[d]) >>> 0;      s[b] = b3_rotr(s[b] ^ s[c], 7);
+        }
+        function b3_round(s, m) {
+            b3_g(s, 0, 4, 8, 12, m[0], m[1]);  b3_g(s, 1, 5, 9, 13, m[2], m[3]);
+            b3_g(s, 2, 6, 10, 14, m[4], m[5]); b3_g(s, 3, 7, 11, 15, m[6], m[7]);
+            b3_g(s, 0, 5, 10, 15, m[8], m[9]); b3_g(s, 1, 6, 11, 12, m[10], m[11]);
+            b3_g(s, 2, 7, 8, 13, m[12], m[13]); b3_g(s, 3, 4, 9, 14, m[14], m[15]);
+        }
+        function b3_compress(cv, block, counter, blockLen, flags) {
+            const cLo = counter >>> 0, cHi = Math.floor(counter / 0x100000000) >>> 0;
+            const s = [
+                cv[0], cv[1], cv[2], cv[3], cv[4], cv[5], cv[6], cv[7],
+                B3_IV[0], B3_IV[1], B3_IV[2], B3_IV[3], cLo, cHi, blockLen >>> 0, flags >>> 0
+            ];
+            let m = block.slice();
+            for (let r = 0; r < 7; r++) {
+                b3_round(s, m);
+                if (r < 6) { const p = new Array(16); for (let i = 0; i < 16; i++) p[i] = m[B3_PERM[i]]; m = p; }
+            }
+            for (let i = 0; i < 8; i++) { s[i] ^= s[i + 8]; s[i + 8] ^= cv[i]; }
+            return s;
+        }
+        function b3_words(input, off, len) {
+            const w = new Array(16).fill(0);
+            for (let i = 0; i < len; i++) {
+                const wi = i >> 2, sh = (i & 3) * 8;
+                w[wi] = (w[wi] | (input[off + i] << sh)) >>> 0;
+            }
+            return w;
+        }
+        function b3_root32(inCv, block, blockLen, flags) {
+            const words = b3_compress(inCv, block, 0, blockLen, flags | B3_ROOT);
+            const out = new Uint8Array(32);
+            for (let i = 0; i < 8; i++) {
+                out[i * 4] = words[i] & 0xff; out[i * 4 + 1] = (words[i] >>> 8) & 0xff;
+                out[i * 4 + 2] = (words[i] >>> 16) & 0xff; out[i * 4 + 3] = (words[i] >>> 24) & 0xff;
+            }
+            return out;
+        }
+        // Compress a full chunk [pos,chunkEnd); the last block is returned (not folded) as the
+        // output node so finalize/root can re-run it with PARENT/ROOT flags.
+        function b3_chunkNode(input, pos, chunkEnd, counter) {
+            let cv = B3_IV.slice(), bpos = pos, blocksCompressed = 0;
+            while (true) {
+                const blockLen = Math.min(B3_BLOCK_LEN, chunkEnd - bpos);
+                const block = b3_words(input, bpos, blockLen);
+                let flags = 0;
+                if (blocksCompressed === 0) flags |= B3_CHUNK_START;
+                if (bpos + blockLen >= chunkEnd) { flags |= B3_CHUNK_END; return { inCv: cv, block, blockLen, flags }; }
+                cv = b3_compress(cv, block, counter, blockLen, flags).slice(0, 8);
+                blocksCompressed++; bpos += blockLen;
+            }
+        }
+        function blake3_256(input) {
+            const stack = [];
+            let counter = 0, pos = 0;
+            const total = input.length;
+            const addChunkCv = (totalChunks, newCv) => {
+                while ((totalChunks & 1) === 0) {
+                    newCv = b3_compress(B3_IV, stack.pop().concat(newCv), 0, B3_BLOCK_LEN, B3_PARENT).slice(0, 8);
+                    totalChunks = Math.floor(totalChunks / 2);
+                }
+                stack.push(newCv);
+            };
+            while (true) {
+                const chunkEnd = Math.min(pos + B3_CHUNK_LEN, total);
+                const node = b3_chunkNode(input, pos, chunkEnd, counter);
+                if (chunkEnd >= total) {
+                    // Final chunk: fold its CV up through the stack; the outermost node carries ROOT.
+                    let outCv = b3_compress(node.inCv, node.block, counter, node.blockLen, node.flags).slice(0, 8);
+                    let rIn = node.inCv, rBlock = node.block, rLen = node.blockLen, rFlags = node.flags;
+                    while (stack.length > 0) {
+                        const left = stack.pop();
+                        rIn = B3_IV; rBlock = left.concat(outCv); rLen = B3_BLOCK_LEN; rFlags = B3_PARENT;
+                        outCv = b3_compress(B3_IV, rBlock, 0, B3_BLOCK_LEN, B3_PARENT).slice(0, 8);
+                    }
+                    return b3_root32(rIn, rBlock, rLen, rFlags);
+                }
+                const chunkCv = b3_compress(node.inCv, node.block, counter, node.blockLen, node.flags).slice(0, 8);
+                counter++;
+                addChunkCv(counter, chunkCv);
+                pos = chunkEnd;
+            }
+        }
+
         async function digestHex(algo, bytes) {
             if (algo === 'BLAKE2b-512') return bytesToHex(blake2b(bytes, 64));
+            if (algo === 'BLAKE3-256') return bytesToHex(blake3_256(bytes));
             const buf = await crypto.subtle.digest(algo, bytes);
             return bytesToHex(new Uint8Array(buf));
         }
@@ -15271,7 +15374,7 @@
                 return;
             }
 
-            const algos = ['SHA-1', 'SHA-256', 'SHA-384', 'SHA-512', 'BLAKE2b-512'];
+            const algos = ['SHA-1', 'SHA-256', 'SHA-384', 'SHA-512', 'BLAKE2b-512', 'BLAKE3-256'];
             const heading = document.createElement('div');
             heading.style.cssText = 'font-weight:700;margin-bottom:10px;';
             heading.textContent = file

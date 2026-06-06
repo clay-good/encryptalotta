@@ -41,7 +41,7 @@ A comprehensive single-page web app with **45 cryptographic, encoding, parsing, 
 - **ASCII Armor Converter** — Round-trip between PGP binary and ASCII-armored encodings.
 - **Shamir Secret Sharing** — Split a secret into N shares where any K reconstruct it; share format `EAL-SSS/v1/{K}-of-{N}/{rawShare}`.
 - **EXIF Eraser** — Strip GPS, camera serial numbers, timestamps from JPEG / PNG / WebP via canvas re-encode.
-- **Hash & Checksum** — SHA-1 / 256 / 384 / 512 (Web Crypto) and BLAKE2b-512 (RFC 7693, hand-rolled) over text or files, with constant-time hash comparison.
+- **Hash & Checksum** — SHA-1 / 256 / 384 / 512 (Web Crypto), BLAKE2b-512 (RFC 7693, hand-rolled), and BLAKE3-256 (hand-rolled, full Merkle-tree mode) over text or files, with constant-time hash comparison. Neither BLAKE digest is in Web Crypto, so both are hand-rolled inline with no vendored dependency; BLAKE3 is verified against the official test vectors and cross-checked byte-for-byte against the audited `@noble/hashes` build across every chunk/block boundary.
 - **Base64 / 32 / 58 / Hex Encoder** — Cross-convert text ↔ hex ↔ Base64 (standard + URL-safe) ↔ Base32 ↔ Base58 (Bitcoin alphabet).
 - **UUID / ULID Generator** — UUID v4 (random), UUID v7 (RFC 9562 time-ordered), ULID. Bulk generate up to 1000 per click.
 - **Unix Timestamp Converter** — Auto-detect epoch seconds / milliseconds / ISO 8601; render in UTC, local, and relative ("5 minutes ago").
@@ -131,7 +131,7 @@ The only time the network is touched is the initial GET that loads the page and 
 index.html
 ├─ <meta CSP>            connect-src 'none'; frame-ancestors 'none'; …
 ├─ inline <style>        CSS logical properties (RTL-ready), no external sheet
-├─ STRINGS {}            1,724 keys × 5 locales — i18n table, vendored inline
+├─ STRINGS {}            1,832 keys × 5 locales — i18n table, vendored inline
 ├─ tool registry         45 tools → {id, group, route, render()}
 │    ├─ Keys (8)         OpenPGP.js · hand-rolled ASN.1/DER · SSH wire format
 │    ├─ Encrypt (5)      OpenPGP.js · LSB stego (Web Crypto keystream)
@@ -331,7 +331,7 @@ Vendored libraries are pinned by SHA-384 hash, so we don't auto-pull upstream fi
 - **Quarterly review** — at least once a quarter, check for new releases of OpenPGP.js, qrcode-generator, secrets.js-grempe, and js-yaml. Compare the diff against the pinned version, vendor the new minified file, update the SHA-384 hash in two places (HTML comment beside the `<script>` tag, and the [Manifest](#manifest) table above), and re-run `node scripts/audit-release.js`.
 - **Immediate response on advisory** — if a CVE or security advisory is published for any vendored library, treat the bump as a P0: vendor the patch within 48 hours, push a release, and note the CVE in the commit message.
 - **Pre-commit hash check** — `scripts/git-hooks/pre-commit` (a versioned hook in this repo) re-hashes every vendored library on every commit and refuses to land changes if the on-disk bytes don't match the recorded hashes. Install on a fresh clone with: `ln -sf ../../scripts/git-hooks/pre-commit .git/hooks/pre-commit`. The hook simply runs `scripts/audit-release.js`, which gates all 14 mechanically-checkable invariants (innerHTML hygiene, STRINGS parity, i18n key resolution, vendored SHA-384 cross-check, CSP integrity, no outbound vectors, page weight, locale-variant sync, robots.txt + sitemap.xml + JSON-LD presence, and Phase-7 SEO prose key coverage).
-- **Server-side CI gate** — `.github/workflows/audit.yml` re-runs that same `scripts/audit-release.js` on every push and pull request to `main` (and on demand via `workflow_dispatch`), so the invariants above are enforced in GitHub Actions even when a contributor bypasses the local hook (`git commit --no-verify`) or pushes from a clone where it was never installed. The audit uses only Node built-ins (no `npm install`, no browser, no network), so the job is fast and deterministic. The Playwright end-to-end suite (`tests/`, ~739 serial cases, `workers: 1`) and the responsive-overflow sweep (`tests/responsive-check.mjs`) stay a local / manual gate by design — run them with `cd tests && npm ci && npx playwright test`.
+- **Server-side CI gate** — `.github/workflows/audit.yml` re-runs that same `scripts/audit-release.js` on every push and pull request to `main` (and on demand via `workflow_dispatch`), so the invariants above are enforced in GitHub Actions even when a contributor bypasses the local hook (`git commit --no-verify`) or pushes from a clone where it was never installed. The audit uses only Node built-ins (no `npm install`, no browser, no network), so the job is fast and deterministic. The Playwright end-to-end suite (`tests/`, ~775 serial cases, `workers: 1`) and the responsive-overflow sweep (`tests/responsive-check.mjs`) stay a local / manual gate by design — run them with `cd tests && npm ci && npx playwright test`.
 - **Automated quarterly reminder** — `.github/workflows/dep-check.yml` runs `scripts/check-dependency-updates.js` on the 1st of each quarter (Jan / Apr / Jul / Oct). The script reads the [Manifest](#manifest), queries each upstream's GitHub Releases API, and exits non-zero if any pinned version is behind upstream. The workflow then opens a tracking issue. The shipped site never makes a network call — this runs in GitHub Actions only. The reminder is informational; the actual vendoring + re-hashing remains manual (steps below).
 
 ---
@@ -388,7 +388,7 @@ All 45 tools are organized into four groups. Every tool has a deep-link route.
 | **Armor** | `#/utilities/armor` | Convert between PGP binary and ASCII-armored encodings |
 | **Shamir Split** | `#/utilities/shamir` | Split a secret into N shares; any K reconstruct |
 | **EXIF Eraser** | `#/utilities/exif` | Strip GPS / metadata from JPEG, PNG, WebP images |
-| **Hash & Checksum** | `#/utilities/hash` | SHA-1/256/384/512 with constant-time compare |
+| **Hash & Checksum** | `#/utilities/hash` | SHA-1/256/384/512 + BLAKE2b-512 + BLAKE3-256, constant-time compare |
 | **Encode** | `#/utilities/encode` | Cross-convert Base64 / Base32 / Base58 / Hex / text |
 | **UUID / ULID** | `#/utilities/uuid` | Bulk-generate UUID v4, UUID v7, or ULID |
 | **Unix Timestamp** | `#/utilities/timestamp` | Convert epoch ↔ ISO 8601 ↔ UTC ↔ local ↔ relative |
@@ -485,7 +485,7 @@ Every tool maps to a published standard so its output is checkable against an au
 | Signatures (EdDSA) | RFC 8032 (Ed25519) | Ed25519 |
 | Key agreement (ECDH) | RFC 7748 (X25519), RFC 5869 (HKDF) | X25519 |
 | HMAC | RFC 2104, FIPS 198-1; vectors RFC 4231 | HMAC |
-| Hashing | FIPS 180-4 (SHA-1/2), RFC 7693 (BLAKE2b) | Hash & Checksum |
+| Hashing | FIPS 180-4 (SHA-1/2), RFC 7693 (BLAKE2b), BLAKE3 spec | Hash & Checksum |
 | JWT / JOSE | RFC 7519, 7515, 7518; RFC 8725 (BCP) | JWT Inspector |
 | EUDI credentials | SD-JWT (IETF draft), ISO 18013-5 mdoc | JWT / credential Inspector |
 | TOTP / HOTP | RFC 6238, RFC 4226 | TOTP / 2FA |

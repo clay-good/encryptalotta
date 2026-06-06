@@ -1170,6 +1170,40 @@ test('hash: BLAKE2b-512 of "abc" matches RFC 7693', async ({ page }) => {
   );
 });
 
+// BLAKE3-256 of empty string — official BLAKE3 test vectors (length 0), cross-checked
+// against the audited @noble/hashes implementation.
+test('hash: BLAKE3-256 of "" matches the official BLAKE3 vector', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'hash');
+  await page.fill('#hash-text', '');
+  await page.click('#btn-hash-compute');
+  await expect(page.locator('#hash-results')).toContainText(
+    'af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262',
+    { timeout: 5_000 }
+  );
+});
+
+// BLAKE3-256 of "abc".
+test('hash: BLAKE3-256 of "abc" matches the official BLAKE3 vector', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'hash');
+  await page.fill('#hash-text', 'abc');
+  await page.click('#btn-hash-compute');
+  await expect(page.locator('#hash-results')).toContainText(
+    '6437b3ac38465133ffb63b75273a8db548c558465d79db03fd359c6cd5bd9d85',
+    { timeout: 5_000 }
+  );
+});
+
+// BLAKE3-256 of the pangram — a >43-byte input still inside the first chunk.
+test('hash: BLAKE3-256 of the quick-brown-fox pangram', async ({ page }) => {
+  await page.goto('/index.html'); await gotoTool(page, 'hash');
+  await page.fill('#hash-text', 'The quick brown fox jumps over the lazy dog');
+  await page.click('#btn-hash-compute');
+  await expect(page.locator('#hash-results')).toContainText(
+    '2f1514181aadccd913abd94cfa592701a5686ab23f8df1dff1b74710febc6d4a',
+    { timeout: 5_000 }
+  );
+});
+
 // X25519: HKDF-SHA-256 post-processing produces 32 hex bytes (64 chars).
 test('x25519: HKDF-SHA-256 post-processing produces 32 bytes', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'x25519');

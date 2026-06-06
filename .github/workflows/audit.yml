@@ -16,7 +16,7 @@ name: Audit (release gate)
 #
 # The audit uses only Node built-ins (fs / path / crypto / zlib) — no npm install,
 # no browser, no network — so the job runs in seconds and is deterministic (never
-# flaky). The Playwright end-to-end suite (tests/, ~739 serial cases, workers:1,
+# flaky). The Playwright end-to-end suite (tests/, ~775 serial cases, workers:1,
 # ~14 min–1.8 h) and the responsive-overflow sweep stay a local / manual gate by
 # design; trigger them with `cd tests && npm ci && npx playwright test`.
 #
