@@ -89,6 +89,8 @@ playwright/.cache/
 # --------------------
 coverage/
 *.zip
+# ...except test fixtures, which the specs read (e.g. tests/fixtures/office/plain.zip).
+!tests/fixtures/**/*.zip
 *.tar
 *.tar.gz
 *.tgz
