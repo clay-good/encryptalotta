@@ -6,7 +6,7 @@ const TOOLS = [
   'generate','key-info','revoke','qr','qr-decode','tls-cert','ssh-key','pem-der','asn1','csr','jwk','bip39',
   'encrypt','decrypt','text-crypto','password-encrypt','stego','age',
   'sign','verify','hmac','jwt',
-  'passwords','strength','armor','shamir','exif','docmeta','linkclean','linkcheck','mailhdr',
+  'passwords','strength','armor','shamir','exif','docmeta','linkclean','linkcheck','mailhdr','browserprint',
   'hash','encode','uuid','timestamp','url','totp','diff','csv','regex','cron','color','format','cidr','pbkdf2','argon2','base','filetype',
   'iban','bic','gs1','vat','sepa','lotl','ed25519','x25519'
 ];

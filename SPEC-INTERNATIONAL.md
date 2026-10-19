@@ -770,6 +770,34 @@ The tool lists all of it and writes a cleaned copy. The file never leaves the pa
 
 `tests/specs/27-docmeta.spec.js` has 7 cases: leaky fields, clean / download / Python-verify / re-inspect, xlsx and stored + UTF-8 names, non-Office errors, an XSS payload in the author field rendered inert, French plurals, and palette + 320 px. The engine was first tested in Node: CRC-32 check value, scrub, idempotence, and errors.
 
+
+### 2.18 What Your Browser Reveals (fingerprint check) — **✅ shipped (draft 313)**
+
+This shows the threat the rest of the toolbox works around: sites can recognize a browser without cookies. The tool reads, in the page:
+- canvas and audio rendering (hashed),
+- the WebGL renderer,
+- installed fonts (50 candidates, measured against generic fallbacks),
+- screen and pixel ratio, time zone with offset, languages,
+- hardware threads and memory, touch points, display preferences,
+- Do Not Track / Global Privacy Control, and cookies.
+
+It hashes the raw readings into a 16-hex-digit **fingerprint ID** that the visitor compares across browsers, private windows, or after clearing cookies.
+
+- **No uniqueness score, on purpose.** Sites that report "you are unique among N" can do so because they store every visitor's fingerprint. This page stores and sends nothing (CSP `connect-src 'none'`), so each signal instead gets a qualitative identifying-power rating (high / medium / low) drawn from the published fingerprinting literature.
+- **Randomization detection:** canvas and audio are read twice. Differing readings mean the browser randomizes them (Brave, Firefox resistFingerprinting, Tor Browser), which is reported as a *protection*. The ID hashes the raw first reading, so a randomizing browser gets a new ID each check, which is exactly what a tracker would see.
+- **Advice:** stable canvas (with which browsers defend it), GPC on (it is a legal opt-out signal in, for example, California and Colorado) or off, and the `navigator.webdriver` automation flag.
+- **Size:** 33 STRINGS × 5 locales plus 5 en SEO keys. Tool count goes from 57 to 58. The font-probe element is removed after measuring.
+
+`tests/specs/28-browserprint.spec.js` has 8 cases, using Playwright contexts as different visitors:
+- all 13 signals plus the ID format;
+- the same browser yields the same ID, across checks and reloads;
+- Asia/Tokyo + ja-JP changes the ID;
+- a canvas-randomizing context is detected as protected and gets a fresh ID per check;
+- spoofed GPC is reported as on;
+- an XSS payload in the user agent renders inert;
+- the French UI;
+- palette, 320 px, and probe cleanup.
+
 ---
 
 ## 3. Regulator presets — **✅ shipped in PGP key generator (draft 5) + PBKDF2 tool (draft 10) + Argon2 tool (draft 291, with §2.9)**
