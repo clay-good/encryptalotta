@@ -29,6 +29,9 @@ Thumbs.db
 # and any future nested install are covered automatically.
 # --------------------
 node_modules/
+# (also the bare name: a worktree may symlink tests/node_modules, and a
+# trailing-slash pattern does not match a symlink)
+node_modules
 *.log
 .npm
 .eslintcache
@@ -90,3 +93,10 @@ coverage/
 *.tar.gz
 *.tgz
 .wrangler/
+
+# --------------------
+# Release signing — the minisign SECRET key never enters the repo.
+# Only minisign.pub and RELEASES.md.minisig are committed.
+# --------------------
+*.key
+minisign.key

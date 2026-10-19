@@ -402,6 +402,52 @@ const isSeoEnOnly = (k) => SEO_EN_ONLY_RE.test(k);
     else pass('plural keys', `${groups.size} plural group(s) in en, each with .other (CLDR fallback)`);
 }
 
+// ----- 19. Release-manifest signature (SPEC §4.2) -----
+// RELEASES.md must carry a valid minisign signature from the committed
+// minisign.pub; that key must be the one pinned in SECURITY.md and README.md;
+// and no minisign *secret* key may ever be tracked in git.
+{
+    const { verifyMinisign } = require('./verify-release-signature.js');
+    const rel = path.join(ROOT, 'RELEASES.md');
+    const sig = rel + '.minisig';
+    const pubPath = path.join(ROOT, 'minisign.pub');
+    let ok = true;
+    if (fs.existsSync(pubPath)) {
+        const keyLine = fs.readFileSync(pubPath, 'utf8').split(/\r?\n/)[1].trim();
+        for (const doc of ['SECURITY.md', 'README.md']) {
+            if (!fs.readFileSync(path.join(ROOT, doc), 'utf8').includes(keyLine)) {
+                fail('release signature', `${doc} does not pin the minisign.pub key ${keyLine.slice(0, 12)}…`); ok = false;
+            }
+        }
+    }
+    try {
+        const tracked = require('child_process').execSync('git ls-files -z', { cwd: ROOT }).toString().split('\0').filter(Boolean);
+        const leaked = tracked.filter(f => {
+            const fp = path.join(ROOT, f);
+            if (!fs.existsSync(fp) || fs.statSync(fp).size > 4096) return false;
+            // Structural, not textual: signatures also say "secret key" in their untrusted
+            // comment. A secret-key file's second line decodes to a 158-byte "Ed…" blob
+            // (a signature is 74 bytes, a public key 42).
+            const lines = fs.readFileSync(fp, 'utf8').split(/\r?\n/);
+            if (!/^untrusted comment:/.test(lines[0] || '')) return false;
+            const blob = Buffer.from((lines[1] || '').trim(), 'base64');
+            return blob.length === 158 && blob.toString('latin1', 0, 2) === 'Ed';
+        });
+        if (leaked.length) { fail('release signature', `minisign SECRET key tracked in git: ${leaked.join(', ')}`); ok = false; }
+    } catch (e) { /* not a git checkout (e.g. tarball) — skip the leak scan */ }
+    if (fs.existsSync(rel)) {
+        if (!fs.existsSync(sig) || !fs.existsSync(pubPath)) {
+            fail('release signature', 'RELEASES.md present but RELEASES.md.minisig or minisign.pub missing — sign it (README: Releases)'); ok = false;
+        } else {
+            const r = verifyMinisign(fs.readFileSync(rel), fs.readFileSync(sig, 'utf8'), fs.readFileSync(pubPath, 'utf8'));
+            if (!r.ok) { fail('release signature', `RELEASES.md: ${r.error} — re-sign after regenerating`); ok = false; }
+            else if (ok) pass('release signature', `RELEASES.md verified against minisign.pub (key ${r.keyId})`);
+        }
+    } else if (ok) {
+        pass('release signature', 'no RELEASES.md yet; no secret key tracked');
+    }
+}
+
 console.log('');
 if (failed > 0) {
     console.log(`AUDIT FAILED — ${failed} error(s)${warned ? ', ' + warned + ' warning(s)' : ''}.`);
