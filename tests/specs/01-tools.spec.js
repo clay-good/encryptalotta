@@ -135,7 +135,7 @@ function buildPadesPdf(cmsB64) {
 test('tls-cert: extracts and decodes a PAdES (signed-PDF) CMS signature (draft 285)', async ({ page }) => {
   await page.goto('/index.html'); await gotoTool(page, 'tls-cert');
   await page.setInputFiles('#tls-pdf', { name: 'signed.pdf', mimeType: 'application/pdf', buffer: buildPadesPdf(CMS_P7S_B64) });
-  await expect(page.locator('#tls-pdf-status')).toContainText(/PAdES — 1 signature\(s\) found in signed\.pdf/i, { timeout: 5_000 });
+  await expect(page.locator('#tls-pdf-status')).toContainText(/PAdES — 1 signature found in signed\.pdf/i, { timeout: 5_000 });
   const res = page.locator('#tls-cert-results');
   await expect(res).toContainText(/Signature #1/i);
   await expect(res).toContainText('ecdsa-with-SHA256');
@@ -175,7 +175,7 @@ test('tls-cert: decodes a XAdES / XML-DSig signature (draft 286)', async ({ page
   await page.fill('#tls-cert-input', XADES_XML);
   await page.click('#btn-tls-cert-parse');
   const res = page.locator('#tls-cert-results');
-  await expect(res).toContainText(/XAdES \/ XML-DSig — 1 signature\(s\)/i, { timeout: 5_000 });
+  await expect(res).toContainText(/XAdES \/ XML-DSig — 1 signature(?!s)/, { timeout: 5_000 });
   await expect(res).toContainText('B-B');               // XAdES level (SignedProperties, no timestamp)
   await expect(res).toContainText('ecdsa-sha256');      // signature method
   await expect(res).toContainText('2024-03-15');        // SigningTime

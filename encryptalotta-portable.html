@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <!--
   encryptalotta — single-file portable build
-  Source mtime: 2026-10-19T15:20:07.175Z
-  Source: index.html (SHA-256: c0450c49b771037f6b14f78e487285ba5b5311bff5618dd050b4b3691e319ca6)
+  Source mtime: 2026-10-19T15:55:13.061Z
+  Source: index.html (SHA-256: f3720fbbadb70caafe609dcb76339c26d5f860247a38429f829fe64eec580487)
   All vendored JavaScript inlined; favicons inlined as data: URIs.
   Identical functionality to the live site at https://encryptalotta.com.
   Runs from file://, USB stick, chat attachment, anywhere. No network calls.
@@ -6253,8 +6253,10 @@ var qrcode = function() {
                 'hash.label.file': 'Or pick a file:',
                 'hash.ph.text': 'Type or paste any text…',
                 'hash.aria.file': 'File to hash',
-                'hash.results.text': 'Text input ({bytes} bytes)',
-                'hash.results.file': 'File: {name} ({size} bytes)',
+                'hash.results.text.one': 'Text input ({n} byte)',
+                'hash.results.text.other': 'Text input ({n} bytes)',
+                'hash.results.file.one': 'File: {name} ({n} byte)',
+                'hash.results.file.other': 'File: {name} ({n} bytes)',
                 'hash.compareHeading': 'Compare two hashes',
                 'hash.label.compareA': 'Hash A:',
                 'hash.label.compareB': 'Hash B:',
@@ -6753,11 +6755,13 @@ var qrcode = function() {
                 'btn.exifDownload': 'Download',
                 'exif.before.label': 'Before:',
                 'exif.after.label': 'After: all metadata stripped',
-                'exif.tags.found': '{count} EXIF tags · GPS: {gps}',
+                'exif.tags.found.one': '{n} EXIF tag · GPS: {gps}',
+                'exif.tags.found.other': '{n} EXIF tags · GPS: {gps}',
                 'exif.tags.none': 'No EXIF tags detected',
                 'exif.gps.yes': 'yes',
                 'exif.gps.no': 'no',
-                'exif.png.text': '{count} text chunks (tEXt/iTXt/zTXt)',
+                'exif.png.text.one': '{n} text chunk (tEXt/iTXt/zTXt)',
+                'exif.png.text.other': '{n} text chunks (tEXt/iTXt/zTXt)',
                 'err.exifNoFiles': 'Error: please select at least one image.',
                 'err.exifProcessing': 'Error processing image',
                 // Wave 4 — shared per-tool helpers
@@ -6904,10 +6908,12 @@ var qrcode = function() {
                 'cms.noSigningTime': '(no signed signing-time attribute)',
                 'btn.tlsLoadPdf': 'Load a signed PDF (PAdES)',
                 'tls-pdf.aria': 'Load a PAdES-signed PDF and decode its embedded CMS signature(s)',
-                'pades.summary': 'PAdES — {n} signature(s) found in {name}',
+                'pades.summary.one': 'PAdES — {n} signature found in {name}',
+                'pades.summary.other': 'PAdES — {n} signatures found in {name}',
                 'pades.sig': 'Signature #{n}',
                 'pades.none': 'No PAdES / CMS signature found in {name} — the PDF carries no signature dictionary with a /Contents CMS blob.',
-                'xades.summary': 'XAdES / XML-DSig — {n} signature(s)',
+                'xades.summary.one': 'XAdES / XML-DSig — {n} signature',
+                'xades.summary.other': 'XAdES / XML-DSig — {n} signatures',
                 'xades.level': 'XAdES level',
                 'xades.row.sigMethod': 'Signature method',
                 'xades.row.canon': 'Canonicalization',
@@ -8416,8 +8422,10 @@ var qrcode = function() {
                 'hash.label.file': 'Ou choisissez un fichier :',
                 'hash.ph.text': 'Saisir ou coller du texte…',
                 'hash.aria.file': 'Fichier à hacher',
-                'hash.results.text': 'Texte ({bytes} octets)',
-                'hash.results.file': 'Fichier : {name} ({size} octets)',
+                'hash.results.text.one': 'Texte ({n} octet)',
+                'hash.results.text.other': 'Texte ({n} octets)',
+                'hash.results.file.one': 'Fichier : {name} ({n} octet)',
+                'hash.results.file.other': 'Fichier : {name} ({n} octets)',
                 'hash.compareHeading': 'Comparer deux hachages',
                 'hash.label.compareA': 'Hachage A :',
                 'hash.label.compareB': 'Hachage B :',
@@ -8898,11 +8906,13 @@ var qrcode = function() {
                 'btn.exifDownload': 'Télécharger',
                 'exif.before.label': 'Avant :',
                 'exif.after.label': 'Après : toutes les métadonnées supprimées',
-                'exif.tags.found': '{count} balises EXIF · GPS : {gps}',
+                'exif.tags.found.one': '{n} balise EXIF · GPS : {gps}',
+                'exif.tags.found.other': '{n} balises EXIF · GPS : {gps}',
                 'exif.tags.none': 'Aucune balise EXIF détectée',
                 'exif.gps.yes': 'oui',
                 'exif.gps.no': 'non',
-                'exif.png.text': '{count} blocs de texte (tEXt/iTXt/zTXt)',
+                'exif.png.text.one': '{n} bloc de texte (tEXt/iTXt/zTXt)',
+                'exif.png.text.other': '{n} blocs de texte (tEXt/iTXt/zTXt)',
                 'err.exifNoFiles': 'Erreur : veuillez sélectionner au moins une image.',
                 'err.exifProcessing': 'Erreur lors du traitement de l’image',
                 'alert.clientSideGenericBody': 'Toutes les opérations s’effectuent localement dans votre navigateur. Rien n’est envoyé à un serveur.',
@@ -9046,10 +9056,12 @@ var qrcode = function() {
                 'cms.noSigningTime': '(aucun attribut signé de date de signature)',
                 'btn.tlsLoadPdf': 'Charger un PDF signé (PAdES)',
                 'tls-pdf.aria': 'Charger un PDF signé PAdES et décoder sa/ses signature(s) CMS intégrée(s)',
-                'pades.summary': 'PAdES — {n} signature(s) trouvée(s) dans {name}',
+                'pades.summary.one': 'PAdES — {n} signature trouvée dans {name}',
+                'pades.summary.other': 'PAdES — {n} signatures trouvées dans {name}',
                 'pades.sig': 'Signature n°{n}',
                 'pades.none': 'Aucune signature PAdES / CMS trouvée dans {name} — le PDF ne contient aucun dictionnaire de signature avec un blob CMS /Contents.',
-                'xades.summary': 'XAdES / XML-DSig — {n} signature(s)',
+                'xades.summary.one': 'XAdES / XML-DSig — {n} signature',
+                'xades.summary.other': 'XAdES / XML-DSig — {n} signatures',
                 'xades.level': 'Niveau XAdES',
                 'xades.row.sigMethod': 'Méthode de signature',
                 'xades.row.canon': 'Canonicalisation',
@@ -10313,8 +10325,10 @@ var qrcode = function() {
                 'hash.label.file': '或选择文件：',
                 'hash.ph.text': '输入或粘贴任意文本…',
                 'hash.aria.file': '要哈希的文件',
-                'hash.results.text': '文本输入（{bytes} 字节）',
-                'hash.results.file': '文件：{name}（{size} 字节）',
+                'hash.results.text.one': '文本输入（{n} 字节）',
+                'hash.results.text.other': '文本输入（{n} 字节）',
+                'hash.results.file.one': '文件：{name}（{n} 字节）',
+                'hash.results.file.other': '文件：{name}（{n} 字节）',
                 'hash.compareHeading': '比较两个哈希',
                 'hash.label.compareA': '哈希 A：',
                 'hash.label.compareB': '哈希 B：',
@@ -10795,11 +10809,13 @@ var qrcode = function() {
                 'btn.exifDownload': '下载',
                 'exif.before.label': '清除前：',
                 'exif.after.label': '清除后：所有元数据已移除',
-                'exif.tags.found': '{count} 个 EXIF 标签 · GPS：{gps}',
+                'exif.tags.found.one': '{n} 个 EXIF 标签 · GPS：{gps}',
+                'exif.tags.found.other': '{n} 个 EXIF 标签 · GPS：{gps}',
                 'exif.tags.none': '未检测到 EXIF 标签',
                 'exif.gps.yes': '是',
                 'exif.gps.no': '否',
-                'exif.png.text': '{count} 个文本块（tEXt/iTXt/zTXt）',
+                'exif.png.text.one': '{n} 个文本块（tEXt/iTXt/zTXt）',
+                'exif.png.text.other': '{n} 个文本块（tEXt/iTXt/zTXt）',
                 'err.exifNoFiles': '错误：请至少选择一张图像。',
                 'err.exifProcessing': '处理图像时出错',
                 'alert.clientSideGenericBody': '所有操作均在您的浏览器本地完成，不会上传到任何服务器。',
@@ -10943,10 +10959,12 @@ var qrcode = function() {
                 'cms.noSigningTime': '（无已签名的签名时间属性）',
                 'btn.tlsLoadPdf': '加载已签名的 PDF（PAdES）',
                 'tls-pdf.aria': '加载 PAdES 签名的 PDF 并解码其内嵌的 CMS 签名',
-                'pades.summary': 'PAdES——在 {name} 中找到 {n} 个签名',
+                'pades.summary.one': 'PAdES——在 {name} 中找到 {n} 个签名',
+                'pades.summary.other': 'PAdES——在 {name} 中找到 {n} 个签名',
                 'pades.sig': '签名 #{n}',
                 'pades.none': '在 {name} 中未找到 PAdES / CMS 签名——该 PDF 不含带有 /Contents CMS blob 的签名字典。',
-                'xades.summary': 'XAdES / XML-DSig——{n} 个签名',
+                'xades.summary.one': 'XAdES / XML-DSig——{n} 个签名',
+                'xades.summary.other': 'XAdES / XML-DSig——{n} 个签名',
                 'xades.level': 'XAdES 级别',
                 'xades.row.sigMethod': '签名方法',
                 'xades.row.canon': '规范化',
@@ -12195,8 +12213,10 @@ var qrcode = function() {
                 'hash.label.file': 'Oder Datei wählen:',
                 'hash.ph.text': 'Text eingeben oder einfügen…',
                 'hash.aria.file': 'Zu hashende Datei',
-                'hash.results.text': 'Text ({bytes} Bytes)',
-                'hash.results.file': 'Datei: {name} ({size} Bytes)',
+                'hash.results.text.one': 'Text ({n} Byte)',
+                'hash.results.text.other': 'Text ({n} Bytes)',
+                'hash.results.file.one': 'Datei: {name} ({n} Byte)',
+                'hash.results.file.other': 'Datei: {name} ({n} Bytes)',
                 'hash.compareHeading': 'Zwei Hashes vergleichen',
                 'hash.label.compareA': 'Hash A:',
                 'hash.label.compareB': 'Hash B:',
@@ -12677,11 +12697,13 @@ var qrcode = function() {
                 'btn.exifDownload': 'Herunterladen',
                 'exif.before.label': 'Vorher:',
                 'exif.after.label': 'Nachher: alle Metadaten entfernt',
-                'exif.tags.found': '{count} EXIF-Tags · GPS: {gps}',
+                'exif.tags.found.one': '{n} EXIF-Tag · GPS: {gps}',
+                'exif.tags.found.other': '{n} EXIF-Tags · GPS: {gps}',
                 'exif.tags.none': 'Keine EXIF-Tags erkannt',
                 'exif.gps.yes': 'ja',
                 'exif.gps.no': 'nein',
-                'exif.png.text': '{count} Textblöcke (tEXt/iTXt/zTXt)',
+                'exif.png.text.one': '{n} Textblock (tEXt/iTXt/zTXt)',
+                'exif.png.text.other': '{n} Textblöcke (tEXt/iTXt/zTXt)',
                 'err.exifNoFiles': 'Fehler: Bitte mindestens ein Bild auswählen.',
                 'err.exifProcessing': 'Fehler beim Verarbeiten des Bildes',
                 'alert.clientSideGenericBody': 'Alle Operationen finden lokal in deinem Browser statt. Es wird nichts an einen Server gesendet.',
@@ -12825,10 +12847,12 @@ var qrcode = function() {
                 'cms.noSigningTime': '(kein signiertes Signaturzeitpunkt-Attribut)',
                 'btn.tlsLoadPdf': 'Signiertes PDF laden (PAdES)',
                 'tls-pdf.aria': 'Ein PAdES-signiertes PDF laden und seine eingebettete(n) CMS-Signatur(en) decodieren',
-                'pades.summary': 'PAdES — {n} Signatur(en) in {name} gefunden',
+                'pades.summary.one': 'PAdES — {n} Signatur in {name} gefunden',
+                'pades.summary.other': 'PAdES — {n} Signaturen in {name} gefunden',
                 'pades.sig': 'Signatur #{n}',
                 'pades.none': 'Keine PAdES-/CMS-Signatur in {name} gefunden — das PDF enthält kein Signaturwörterbuch mit einem /Contents-CMS-Blob.',
-                'xades.summary': 'XAdES / XML-DSig — {n} Signatur(en)',
+                'xades.summary.one': 'XAdES / XML-DSig — {n} Signatur',
+                'xades.summary.other': 'XAdES / XML-DSig — {n} Signaturen',
                 'xades.level': 'XAdES-Stufe',
                 'xades.row.sigMethod': 'Signaturverfahren',
                 'xades.row.canon': 'Kanonisierung',
@@ -14092,8 +14116,10 @@ var qrcode = function() {
                 'hash.label.file': 'या फ़ाइल चुनें:',
                 'hash.ph.text': 'कोई भी टेक्स्ट टाइप या पेस्ट करें…',
                 'hash.aria.file': 'हैश की जाने वाली फ़ाइल',
-                'hash.results.text': 'टेक्स्ट इनपुट ({bytes} बाइट)',
-                'hash.results.file': 'फ़ाइल: {name} ({size} बाइट)',
+                'hash.results.text.one': 'टेक्स्ट इनपुट ({n} बाइट)',
+                'hash.results.text.other': 'टेक्स्ट इनपुट ({n} बाइट)',
+                'hash.results.file.one': 'फ़ाइल: {name} ({n} बाइट)',
+                'hash.results.file.other': 'फ़ाइल: {name} ({n} बाइट)',
                 'hash.compareHeading': 'दो हैश की तुलना करें',
                 'hash.label.compareA': 'हैश A:',
                 'hash.label.compareB': 'हैश B:',
@@ -14574,11 +14600,13 @@ var qrcode = function() {
                 'btn.exifDownload': 'डाउनलोड',
                 'exif.before.label': 'पहले:',
                 'exif.after.label': 'बाद में: सभी मेटाडेटा हटा दिए गए',
-                'exif.tags.found': '{count} EXIF टैग · GPS: {gps}',
+                'exif.tags.found.one': '{n} EXIF टैग · GPS: {gps}',
+                'exif.tags.found.other': '{n} EXIF टैग · GPS: {gps}',
                 'exif.tags.none': 'कोई EXIF टैग नहीं मिला',
                 'exif.gps.yes': 'हाँ',
                 'exif.gps.no': 'नहीं',
-                'exif.png.text': '{count} टेक्स्ट ब्लॉक (tEXt/iTXt/zTXt)',
+                'exif.png.text.one': '{n} टेक्स्ट ब्लॉक (tEXt/iTXt/zTXt)',
+                'exif.png.text.other': '{n} टेक्स्ट ब्लॉक (tEXt/iTXt/zTXt)',
                 'err.exifNoFiles': 'त्रुटि: कृपया कम से कम एक छवि चुनें।',
                 'err.exifProcessing': 'छवि संसाधित करने में त्रुटि',
                 'alert.clientSideGenericBody': 'सभी कार्य आपके ब्राउज़र में स्थानीय रूप से होते हैं। कुछ भी किसी सर्वर पर अपलोड नहीं होता।',
@@ -14722,10 +14750,12 @@ var qrcode = function() {
                 'cms.noSigningTime': '(कोई हस्ताक्षरित signing-time विशेषता नहीं)',
                 'btn.tlsLoadPdf': 'हस्ताक्षरित PDF लोड करें (PAdES)',
                 'tls-pdf.aria': 'एक PAdES-हस्ताक्षरित PDF लोड करें और उसकी अंतर्निहित CMS हस्ताक्षर डिकोड करें',
-                'pades.summary': 'PAdES — {name} में {n} हस्ताक्षर मिले',
+                'pades.summary.one': 'PAdES — {name} में {n} हस्ताक्षर मिले',
+                'pades.summary.other': 'PAdES — {name} में {n} हस्ताक्षर मिले',
                 'pades.sig': 'हस्ताक्षर #{n}',
                 'pades.none': '{name} में कोई PAdES / CMS हस्ताक्षर नहीं मिला — PDF में /Contents CMS blob वाला कोई हस्ताक्षर शब्दकोश नहीं है।',
-                'xades.summary': 'XAdES / XML-DSig — {n} हस्ताक्षर',
+                'xades.summary.one': 'XAdES / XML-DSig — {n} हस्ताक्षर',
+                'xades.summary.other': 'XAdES / XML-DSig — {n} हस्ताक्षर',
                 'xades.level': 'XAdES स्तर',
                 'xades.row.sigMethod': 'हस्ताक्षर विधि',
                 'xades.row.canon': 'कैनॉनिकलीकरण',
@@ -15911,11 +15941,16 @@ var qrcode = function() {
         function applyI18n() {
             // textContent. If data-i18n-vars (JSON-encoded object) is present, the value
             // is formatted with placeholder substitution via tFormat() so dynamic strings
-            // re-translate on language switch.
+            // re-translate on language switch. data-i18n-plural carries the count for a
+            // plural group, re-selected via intlPlural() under the new locale's rules.
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.dataset.i18n;
                 const varsRaw = el.dataset.i18nVars;
-                if (varsRaw) {
+                if (el.dataset.i18nPlural !== undefined) {
+                    let vars;
+                    try { vars = varsRaw ? JSON.parse(varsRaw) : undefined; } catch (e) { vars = undefined; }
+                    el.textContent = intlPlural(key, Number(el.dataset.i18nPlural), vars);
+                } else if (varsRaw) {
                     try {
                         el.textContent = tFormat(key, JSON.parse(varsRaw));
                     } catch (e) {
@@ -16064,6 +16099,21 @@ var qrcode = function() {
             const arr = Array.isArray(items) ? items.map(String) : [];
             try { return new Intl.ListFormat(intlLang(), Object.assign({ type: 'conjunction', style: 'long' }, opts || {})).format(arr); }
             catch (e) { return arr.join(', '); }
+        }
+
+        // Locale-aware country name (SPEC §1.5) — Intl.DisplayNames for an ISO 3166-1 alpha-2
+        // code, so a French user reads "Allemagne" and a German one "Deutschland". English keeps
+        // the curated table name (engine spellings drift: "Czechia", "Türkiye"). VAT uses "EL"
+        // for Greece; codes the engine does not know (it echoes them back) or a missing
+        // Intl.DisplayNames fall back to the table's English name.
+        function intlRegion(code, fallback) {
+            if (fallback && intlLang().split('-')[0] === 'en') return fallback;
+            const cc = code === 'EL' ? 'GR' : code;
+            try {
+                const name = new Intl.DisplayNames([intlLang()], { type: 'region', fallback: 'none' }).of(cc);
+                if (name && name !== cc) return name;
+            } catch (e) { /* fall through */ }
+            return fallback || code;
         }
 
         // Replace an alert/status div's contents with a bold title (+ optional body) using
@@ -16489,6 +16539,7 @@ var qrcode = function() {
         document.getElementById('lang-select').addEventListener('change', (e) => {
             setLang(e.target.value);
             refreshBreadcrumb();
+            ibanPopulateCountries();
         });
 
         // ==================== Command palette (SPEC §1.6) ====================
@@ -19266,16 +19317,16 @@ var qrcode = function() {
             return { count };
         }
 
-        // Returns { key, vars? } so the caller can tag the DOM node with data-i18n /
-        // data-i18n-vars and let applyI18n() re-translate on language switch.
+        // Returns { key, vars?, plural? } so the caller can tag the DOM node with data-i18n /
+        // data-i18n-vars / data-i18n-plural and let applyI18n() re-translate on language switch.
         function summarizeMetadata(file, buf) {
             if (file.type === 'image/jpeg') {
                 const r = inspectJpegExif(buf);
                 if (!r) return { key: 'exif.tags.none' };
                 return {
                     key: 'exif.tags.found',
+                    plural: r.tagCount,
                     vars: {
-                        count: r.tagCount,
                         // `@:` prefix → tFormat resolves through t() at format time.
                         gps: r.hasGps ? '@:exif.gps.yes' : '@:exif.gps.no'
                     }
@@ -19284,7 +19335,7 @@ var qrcode = function() {
             if (file.type === 'image/png') {
                 const r = inspectPngText(buf);
                 if (!r || r.count === 0) return { key: 'exif.tags.none' };
-                return { key: 'exif.png.text', vars: { count: r.count } };
+                return { key: 'exif.png.text', plural: r.count };
             }
             return { key: 'exif.tags.none' };
         }
@@ -19346,7 +19397,10 @@ var qrcode = function() {
                 const summarySpan = document.createElement('span');
                 summarySpan.dataset.i18n = summary.key;
                 if (summary.vars) summarySpan.dataset.i18nVars = JSON.stringify(summary.vars);
-                summarySpan.textContent = tFormat(summary.key, summary.vars);
+                if (summary.plural !== undefined) summarySpan.dataset.i18nPlural = String(summary.plural);
+                summarySpan.textContent = summary.plural !== undefined
+                    ? intlPlural(summary.key, summary.plural, summary.vars)
+                    : tFormat(summary.key, summary.vars);
                 beforeLine.appendChild(summarySpan);
 
                 const afterLine = document.createElement('div');
@@ -20056,8 +20110,8 @@ var qrcode = function() {
             const heading = document.createElement('div');
             heading.style.cssText = 'font-weight:700;margin-bottom:10px;';
             heading.textContent = file
-                ? tFormat('hash.results.file', { name: file.name, size: file.size })
-                : tFormat('hash.results.text', { bytes: bytes.length });
+                ? intlPlural('hash.results.file', file.size, { name: file.name })
+                : intlPlural('hash.results.text', bytes.length);
             resultsEl.appendChild(heading);
 
             for (const algo of algos) {
@@ -22198,8 +22252,8 @@ var qrcode = function() {
                     status.textContent = tFormat('pades.none', { name: file.name });
                     return;
                 }
-                status.textContent = tFormat('pades.summary', { n: intlNumber(sigs.length), name: file.name });
-                tlsRenderRow(out, t('tls-cert.row.type'), tFormat('pades.summary', { n: intlNumber(sigs.length), name: file.name }));
+                status.textContent = intlPlural('pades.summary', sigs.length, { name: file.name });
+                tlsRenderRow(out, t('tls-cert.row.type'), intlPlural('pades.summary', sigs.length, { name: file.name }));
                 for (let i = 0; i < sigs.length; i++) {
                     tlsRenderHeading(out, tFormat('pades.sig', { n: intlNumber(i + 1) }));
                     try {
@@ -22294,7 +22348,7 @@ var qrcode = function() {
                     // XML → XAdES / XML-DSig signature.
                     const sigs = xadesSignatures(raw);
                     if (!sigs.length) { tlsRenderRow(out, t('tls-cert.row.error'), t('xades.noSig')); return; }
-                    tlsRenderRow(out, t('tls-cert.row.type'), tFormat('xades.summary', { n: intlNumber(sigs.length) }));
+                    tlsRenderRow(out, t('tls-cert.row.type'), intlPlural('xades.summary', sigs.length));
                     for (let i = 0; i < sigs.length; i++) {
                         tlsRenderHeading(out, tFormat('pades.sig', { n: intlNumber(i + 1) }));
                         await renderXadesInto(out, sigs[i]);
@@ -24212,14 +24266,21 @@ var qrcode = function() {
         }
 
         function ibanPopulateCountries() {
+            // Rebuilt on every language switch: names via intlRegion(), ordered by the active
+            // locale's collation rules, current selection preserved.
             const sel = document.getElementById('iban-gen-country');
-            if (!sel || sel.options.length) return;
-            const entries = Object.entries(IBAN_COUNTRIES).map(([cc, m]) => [cc, m.name]).sort((a, b) => a[1].localeCompare(b[1]));
+            if (!sel) return;
+            const keep = sel.value || 'DE';
+            let compare;
+            try { compare = new Intl.Collator(intlLang()).compare; }
+            catch (e) { compare = (a, b) => a.localeCompare(b); }
+            const entries = Object.entries(IBAN_COUNTRIES).map(([cc, m]) => [cc, intlRegion(cc, m.name)]).sort((a, b) => compare(a[1], b[1]));
+            while (sel.firstChild) sel.removeChild(sel.firstChild);
             for (const [cc, name] of entries) {
                 const opt = document.createElement('option');
                 opt.value = cc;
                 opt.textContent = cc + ' — ' + name;
-                if (cc === 'DE') opt.selected = true;
+                if (cc === keep) opt.selected = true;
                 sel.appendChild(opt);
             }
         }
@@ -24233,7 +24294,7 @@ var qrcode = function() {
                 const r = ibanValidate(document.getElementById('iban-input').value);
                 tlsRenderRow(out, t('iban.row.status'), r.ok ? '✓ ' + t('iban.row.valid') : '✗ ' + t('iban.row.invalidChecksum'));
                 tlsRenderRow(out, t('iban.row.pretty'), r.pretty);
-                tlsRenderRow(out, t('iban.row.country'), r.country + ' — ' + r.countryName);
+                tlsRenderRow(out, t('iban.row.country'), r.country + ' — ' + intlRegion(r.country, r.countryName));
                 tlsRenderRow(out, t('iban.row.checkDigits'), r.checkDigits);
                 tlsRenderRow(out, t('iban.row.length'), String(r.length));
                 if (r.fields.bank)   tlsRenderRow(out, t('iban.row.bank'),   r.fields.bank);
@@ -24299,7 +24360,7 @@ var qrcode = function() {
                 tlsRenderRow(out, t('bic.row.status'), '✓ ' + t('bic.row.valid'));
                 tlsRenderRow(out, t('bic.row.pretty'), r.pretty);
                 tlsRenderRow(out, t('bic.row.bank'), r.bank);
-                tlsRenderRow(out, t('bic.row.country'), r.country + (r.countryName ? ' — ' + r.countryName : ''));
+                tlsRenderRow(out, t('bic.row.country'), r.country + (r.countryName ? ' — ' + intlRegion(r.country, r.countryName) : ''));
                 tlsRenderRow(out, t('bic.row.location'), r.location);
                 tlsRenderRow(out, t('bic.row.branch'), r.branch || t('bic.row.branchNone'));
                 tlsRenderRow(out, t('bic.row.length'), String(r.length));
@@ -24953,7 +25014,7 @@ var qrcode = function() {
                 else statusText = '✗ ' + t('vat.row.invalidChecksum');
                 tlsRenderRow(out, t('vat.row.status'), statusText);
                 tlsRenderRow(out, t('vat.row.pretty'), r.pretty);
-                tlsRenderRow(out, t('vat.row.country'), r.country + ' — ' + r.countryName);
+                tlsRenderRow(out, t('vat.row.country'), r.country + ' — ' + intlRegion(r.country, r.countryName));
                 tlsRenderRow(out, t('vat.row.body'), r.body);
                 tlsRenderRow(out, t('vat.row.note'), t('vat.row.viesNote'));
             } catch (e) {
