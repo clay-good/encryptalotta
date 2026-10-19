@@ -682,6 +682,19 @@ The crypto stack: **ChaCha20, Poly1305 (the audited TweetNaCl limb implementatio
 
 **Dependencies:** none. ~80 lines.
 
+### 2.14 Link Cleaner (tracking-parameter remover) — **✅ shipped (draft 309)**
+
+Goes beyond the Europe-specific list. It's a privacy tool that every visitor can use: paste a link, or a whole message, and it removes tracking parameters and unwraps redirect wrappers, offline. Online "link cleaners" see every URL they are given; this tool makes no request at all. Because of that it cannot expand shorteners (bit.ly, t.co), and the UI says so.
+
+- **What it strips:** `utm_*`, `fbclid`, `gclid` / `gbraid` / `wbraid`, `msclkid`, `dclid`, `yclid`, `twclid`, `ttclid`, `mc_cid` / `mc_eid`, HubSpot (`_hsenc`, `__hs*`, `hsa_*`), Matomo (`pk_*`, `mtm_*`), `igshid`, `_ga` / `_gl`, `srsltid`, and similar. A short list of host-scoped keys is stripped only where they are tracking: YouTube / Spotify `si`, Amazon `ref` / `qid` / `sr` plus the `/ref=…` path segment, X `s` / `t`, LinkedIn `trk`. Elsewhere those keys can carry meaning.
+- **Redirect wrappers:** Google `/url`, Facebook / Instagram `l.php`, Outlook Safe Links, YouTube `/redirect`, `out.reddit.com`, Tumblr, and DuckDuckGo `/l/`. These are unwrapped up to 5 levels deep, and only when the target is an http(s) URL, so a `javascript:` "target" is never surfaced. Unwrapping can be switched off.
+- **Fidelity:** only the matching query pairs are removed, by splitting the raw query string; parameter order, percent-encoding, and the `#fragment` are byte-identical. Re-serializing through `URLSearchParams` would have re-encoded the kept values. In free text, sentence punctuation after a link is left outside it, while a `)` that closes a `(` inside the URL (Wikipedia-style) is kept.
+- **Registration:** id `linkclean`, route `#/utilities/linkclean`. It is wired into the registry, home grid, command palette (`utm`, `fbclid`, …), related-tools map, JSON-LD, SEO prose, the introspect / a11y / stress / XSS rosters, and 20 STRINGS × 5 locales (en/fr/de reviewed; zh-CN/hi machine-quality drafts). The tool count went from 53 to 54, and audit gate 20 enforced every advertised count.
+
+`tests/specs/24-linkclean.spec.js` has 9 cases: 10 exact vectors, free text, nested unwrap, the toggle, already-clean links, error states, the French UI, palette lookup, and 320 px overflow. Plus one XSS case. The engine was first unit-tested in Node (17 cases).
+
+**Incidental site-wide fix (same draft):** the global `input { width: 100%; padding }` rule was also applied to checkboxes and radios, so every checkbox floated in a 54–122 px box (HMAC, Diff, CSV, Passwords, Strength, …). A scoped `input[type=checkbox|radio] { width: auto; padding: 0 }` rule fixes them, and sampled checkboxes now measure 13 px.
+
 ---
 
 ## 3. Regulator presets — **✅ shipped in PGP key generator (draft 5) + PBKDF2 tool (draft 10) + Argon2 tool (draft 291, with §2.9)**
