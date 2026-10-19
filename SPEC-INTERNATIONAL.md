@@ -738,6 +738,38 @@ This completes the phishing kit begun in §2.14 / §2.15: "is this email really 
 - **Phone layout of result rows:** the shared key/value renderer (`tlsRenderRow`, 796 call sites, used by almost every inspector tool) had a fixed 200 px label column. On a phone that left values about 90 px wide, and `word-break: break-all` then split even prose mid-word. The rows are now `.kv-*` CSS classes. Below 560 px the label stacks above the value, and values use `overflow-wrap: anywhere`: long tokens still wrap, words stay whole. The desktop layout is unchanged; screenshots were checked at 390 and 1200 px.
 - **Test helpers:** the Link Safety and Email Header specs waited out the 10 s action timeout looking for a verdict that error results never render. They now check for the element first, taking those tests from 11–21 s to 1.5 s.
 
+
+### 2.17 Document Metadata Cleaner (.docx / .xlsx / .pptx) — **✅ shipped (draft 312)**
+
+This is the document counterpart to the EXIF eraser. Office files carry metadata the sender rarely sees:
+- author and last-modified-by names,
+- company and manager,
+- revision count, total editing time, and created / saved / printed dates,
+- the attached template's folder path (`C:\Users\name\…`),
+- custom properties,
+- an embedded thumbnail of page 1,
+- a timestamp on every file inside the ZIP package.
+
+The tool lists all of it and writes a cleaned copy. The file never leaves the page.
+
+- **In-page ZIP:**
+  - *Reading* goes through the central directory and handles stored and deflate entries (via `DecompressionStream('deflate-raw')`). Every inflated part is checked against its CRC-32.
+  - *Writing* keeps unchanged parts' compressed bytes verbatim, stores rewritten parts uncompressed, resets every entry's DOS timestamp to 1980-01-01, and drops extra fields, which can hold more timestamps.
+  - *Rejected cleanly:* ZIP64, encrypted entries, and other compression methods. Password-protected Office files are not ZIPs, and the error says so.
+- **What changes:**
+  - `docProps/core.xml` is reduced to the title. The title is kept because it is usually intended, and the result says it was kept.
+  - Company, Manager, Template, TotalTime, and HyperlinkBase are removed from `app.xml`.
+  - `custom.xml` is emptied.
+  - The thumbnail is removed **together with its relationship**, so no dangling reference is left.
+  - An attached-template relationship target is reduced to its file name.
+  - Every other part is byte-identical.
+- **What doesn't change:** tracked changes and comments. They are content, and removing them would change what the document says. Their count and the people they name are reported, with a warning to resolve them in Office. The verdict is three-state (leaky / review / clean), so a ✓ only appears when nothing names anyone.
+- **Independent validation.** The fixtures (`tests/fixtures/office/`) are built with Python's `zipfile`, and every cleaned download in the browser spec is re-verified with Python. The checks: `testzip`, untouched parts byte-identical, all XML parses, every root relationship target exists, and timestamps reset. This caught a real bug before shipping: the `.rels` matcher (`/_rels\/[^/]+\.rels$/`) skipped the package-root `_rels/.rels`, which left a dangling thumbnail relationship. Office can report a file like that as damaged.
+- **Limits, stated plainly:** no Word / Excel / PowerPoint was available to open the outputs. Validation is structural (OPC / ZIP / XML), and the changes are kept conservative for that reason. Legacy `.doc` / `.xls` / `.ppt` and PDFs are out of scope.
+- **Size:** 63 STRINGS × 5 locales (including two CLDR plural groups) plus 5 en SEO keys. Tool count goes from 56 to 57.
+
+`tests/specs/27-docmeta.spec.js` has 7 cases: leaky fields, clean / download / Python-verify / re-inspect, xlsx and stored + UTF-8 names, non-Office errors, an XSS payload in the author field rendered inert, French plurals, and palette + 320 px. The engine was first tested in Node: CRC-32 check value, scrub, idempotence, and errors.
+
 ---
 
 ## 3. Regulator presets — **✅ shipped in PGP key generator (draft 5) + PBKDF2 tool (draft 10) + Argon2 tool (draft 291, with §2.9)**
