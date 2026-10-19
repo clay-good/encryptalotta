@@ -100,7 +100,7 @@ Language is auto-detected from `navigator.language` on first visit, persisted in
 - **100% Client-Side** - All operations happen in your browser
 - **No Server Uploads** - Your files and keys never leave your device
 - **Open Source** - Audit the code yourself
-- **Works Offline** - Download and use without internet connection. A minimal service worker (`sw.js`) precaches the shell on first visit so subsequent loads work offline straight from the cache.
+- **Works Offline** - Download and use without internet connection. A minimal service worker (`sw.js`) precaches the shell on first visit. It is network-first: online loads always get the current files, including vendored-library security patches, and the cached copy is the fallback when you're offline.
 
 ---
 
@@ -194,7 +194,7 @@ Encryptalotta was designed from the ground up with security as the primary conce
 
 ### Modern Cryptography
 
-Built on [OpenPGP.js](https://openpgpjs.org/) v6.3.0, a well-audited cryptographic library:
+Built on [OpenPGP.js](https://openpgpjs.org/) v6.3.2, a well-audited cryptographic library:
 
 | Algorithm | Type | Security Level |
 |-----------|------|----------------|
@@ -218,10 +218,10 @@ All third-party JavaScript is vendored directly in the repository with SHA-384 i
 
 | File | Library | Version | License | Source | SHA-384 (base64) |
 |---|---|---|---|---|---|
-| `openpgp.min.js` | OpenPGP.js | 6.3.0 | LGPL-3.0 | <https://github.com/openpgpjs/openpgpjs> | `Z5tStPoeClmuLPd1gAwdTCU53WcAkUjBNw7mEEvrQumVuNqEl52A9Nx5IhFdKE/c` |
+| `openpgp.min.js` | OpenPGP.js | 6.3.2 | LGPL-3.0 | <https://github.com/openpgpjs/openpgpjs> | `Q6tBjZrAPJTIxj5F9KxCni/T9dTGDsXfi4U7aBZOl+3zPHpzU6gKcyKzAhs8Xeoa` |
 | `qrcode.js` | qrcode-generator | 2.0.4 | MIT | <https://github.com/kazuhikoarase/qrcode-generator> | `e9EFD6BGC90bkW9aDV5xbbBfzwN7G8YImHao2lfLVKV/hPB0E0go+H3I64h7oHtA` |
 | `secrets.min.js` | secrets.js-grempe | 2.0.0 | MIT | <https://github.com/grempe/secrets.js> | `xfBMbh8fdSIrQ9XbZARwZ5z/Eh9zC7gsgG5vSE331lZSjgXQob1KxM4m7vEdH0e0` |
-| `js-yaml.min.js` | js-yaml | 4.1.1 | MIT | <https://github.com/nodeca/js-yaml> | `ZeqCzuWczURac3RacSufGD7oSbzeaX7xxnnOr3PTcYTLx4Av0qBj0kBq7AeCtHLA` |
+| `js-yaml.min.js` | js-yaml | 4.3.2 | MIT | <https://github.com/nodeca/js-yaml> | `uwLg6oO8ZhFG2SuQfgmkMtosjtrFYlkPspa/cXS+b3D8GLRTHMDl/mTwqImdlKQO` |
 
 Each hash is also recorded inline as an HTML comment beside the corresponding `<script>` tag in [index.html](index.html), so a reader auditing the page source sees the same integrity claim.
 
@@ -242,7 +242,7 @@ If you fork this repo onto a different domain and want to add SRI, replace each 
 
 ```html
 <script src="./openpgp.min.js"
-        integrity="sha384-Z5tStPoeClmuLPd1gAwdTCU53WcAkUjBNw7mEEvrQumVuNqEl52A9Nx5IhFdKE/c"
+        integrity="sha384-Q6tBjZrAPJTIxj5F9KxCni/T9dTGDsXfi4U7aBZOl+3zPHpzU6gKcyKzAhs8Xeoa"
         crossorigin="anonymous"></script>
 ```
 
@@ -348,7 +348,7 @@ Vendored libraries are pinned by SHA-384 hash, so we don't auto-pull upstream fi
 - **Immediate response on advisory** — if a CVE or security advisory is published for any vendored library, treat the bump as a P0: vendor the patch within 48 hours, push a release, and note the CVE in the commit message.
 - **Pre-commit hash check** — `scripts/git-hooks/pre-commit` (a versioned hook in this repo) re-hashes every vendored library on every commit and refuses to land changes if the on-disk bytes don't match the recorded hashes. Install on a fresh clone with: `ln -sf ../../scripts/git-hooks/pre-commit .git/hooks/pre-commit`. The hook simply runs `scripts/audit-release.js`, which gates all 14 mechanically-checkable invariants (innerHTML hygiene, STRINGS parity, i18n key resolution, vendored SHA-384 cross-check, CSP integrity, no outbound vectors, page weight, locale-variant sync, robots.txt + sitemap.xml + JSON-LD presence, and Phase-7 SEO prose key coverage).
 - **Server-side CI gate** — `.github/workflows/audit.yml` re-runs that same `scripts/audit-release.js` on every push and pull request to `main` (and on demand via `workflow_dispatch`), so the invariants above are enforced in GitHub Actions even when a contributor bypasses the local hook (`git commit --no-verify`) or pushes from a clone where it was never installed. The audit uses only Node built-ins (no `npm install`, no browser, no network), so the job is fast and deterministic. The Playwright end-to-end suite (`tests/`, ~1,090 serial cases, `workers: 1`) and the responsive-overflow sweep (`tests/responsive-check.mjs`) stay a local / manual gate by design — run them with `cd tests && npm ci && npx playwright test`.
-- **Automated quarterly reminder** — `.github/workflows/dep-check.yml` runs `scripts/check-dependency-updates.js` on the 1st of each quarter (Jan / Apr / Jul / Oct). The script reads the [Manifest](#manifest), queries each upstream's GitHub Releases API, and exits non-zero if any pinned version is behind upstream. The workflow then opens a tracking issue. The shipped site never makes a network call — this runs in GitHub Actions only. The reminder is informational; the actual vendoring + re-hashing remains manual (steps below).
+- **Automated quarterly reminder** — `.github/workflows/dep-check.yml` runs `scripts/check-dependency-updates.js` on the 1st of each quarter (Jan / Apr / Jul / Oct). The script reads the [Manifest](#manifest) and queries npm (with GitHub Releases as a fallback). It exits non-zero if any pinned version is behind upstream, or if the GitHub Advisory Database lists an advisory against the exact pinned version; those are flagged `SECURITY`, P0 per the policy above. When `latest` is a new major, it also names the newest release on the pinned major line, so a same-major security patch isn't hidden behind a MAJOR-only report. js-yaml 4.1.1 sat on four DoS advisories for that reason until draft 305. The workflow then opens a tracking issue. The shipped site never makes a network call — this runs in GitHub Actions only. The reminder is informational; the actual vendoring + re-hashing remains manual (steps below).
 
 ---
 
@@ -549,10 +549,10 @@ age-encryption.org/v1                          ← intro line
 ## Technology
 
 - Pure HTML, CSS, and JavaScript — no frameworks, no build step at deploy time.
-- [OpenPGP.js](https://openpgpjs.org/) v6.3.0 — PGP key generation, encryption, decryption, signatures (vendored locally).
+- [OpenPGP.js](https://openpgpjs.org/) v6.3.2 — PGP key generation, encryption, decryption, signatures (vendored locally).
 - [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) v2.0.4 — QR rendering for the QR Share tool (vendored locally).
 - [secrets.js-grempe](https://github.com/grempe/secrets.js) v2.0.0 — Shamir's Secret Sharing math (vendored locally).
-- [js-yaml](https://github.com/nodeca/js-yaml) v4.1.1 — YAML parsing and emitting for the Format / Convert tool (vendored locally).
+- [js-yaml](https://github.com/nodeca/js-yaml) v4.3.2 — YAML parsing and emitting for the Format / Convert tool (vendored locally).
 - **Web Crypto API** (`SubtleCrypto.digest` / `sign` / `verify` / `importKey`) — hashing, HMAC, JWT verification, TOTP, steganography keystream, certificate fingerprints.
 - **Hand-rolled, no library**: ASN.1 / DER decoding (TLS Certificate Parser), OpenSSH wire format (SSH Key Parser), Base32 / Base58 codecs, OKLCH colour matrices, cron parser, CIDR arithmetic, line-level LCS diff, RFC 4180 CSV parser, regex highlighting, percent-encoding helpers — kept hand-rolled rather than vendored to keep total page weight under 0.32 MB gzipped.
 - **Single-file deployment** (`index.html`) plus four vendored libraries — every script pinned with a SHA-384 hash that is cross-checked against the README manifest and the on-disk bytes by `scripts/audit-release.js` on every commit.
@@ -824,7 +824,7 @@ To verify that the vendored libraries haven't been tampered with, run:
 
 ```bash
 openssl dgst -sha384 -binary openpgp.min.js  | openssl base64 -A
-# Z5tStPoeClmuLPd1gAwdTCU53WcAkUjBNw7mEEvrQumVuNqEl52A9Nx5IhFdKE/c
+# Q6tBjZrAPJTIxj5F9KxCni/T9dTGDsXfi4U7aBZOl+3zPHpzU6gKcyKzAhs8Xeoa
 
 openssl dgst -sha384 -binary qrcode.js   | openssl base64 -A
 # e9EFD6BGC90bkW9aDV5xbbBfzwN7G8YImHao2lfLVKV/hPB0E0go+H3I64h7oHtA
@@ -833,7 +833,7 @@ openssl dgst -sha384 -binary secrets.min.js  | openssl base64 -A
 # xfBMbh8fdSIrQ9XbZARwZ5z/Eh9zC7gsgG5vSE331lZSjgXQob1KxM4m7vEdH0e0
 
 openssl dgst -sha384 -binary js-yaml.min.js  | openssl base64 -A
-# ZeqCzuWczURac3RacSufGD7oSbzeaX7xxnnOr3PTcYTLx4Av0qBj0kBq7AeCtHLA
+# uwLg6oO8ZhFG2SuQfgmkMtosjtrFYlkPspa/cXS+b3D8GLRTHMDl/mTwqImdlKQO
 ```
 
 Or all at once:
@@ -921,10 +921,10 @@ This application is open source specifically so security researchers can audit i
 
 - `index.html` - All application logic (CSP meta tags, JavaScript cryptographic calls, memory clearing, i18n, all 53 tools)
 - `_headers` - HTTP security headers
-- `openpgp.min.js` - Compare against official OpenPGP.js v6.3.0 release
+- `openpgp.min.js` - Compare against official OpenPGP.js v6.3.2 release
 - `qrcode.js` - Compare against official qrcode-generator v2.0.4 release
 - `secrets.min.js` - Compare against official secrets.js-grempe v2.0.0 release
-- `js-yaml.min.js` - Compare against official js-yaml v4.1.1 release
+- `js-yaml.min.js` - Compare against official js-yaml v4.3.2 release
 - [Manifest](#manifest) section above — SHA-384 manifest for all vendored libraries
 
 A grep-friendly audit invariant: the codebase has **zero `innerHTML =` assignments**. All DOM construction goes through `createElement` / `textContent` / `setAttribute`, eliminating the most common XSS vector even when content is fully controlled by the developer.

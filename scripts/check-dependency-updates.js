@@ -10,6 +10,12 @@
 // non-zero with a summary if any are stale. The summary becomes the body of
 // the auto-opened issue (see .github/workflows/dep-check.yml).
 //
+// Two checks beyond "is there a newer latest": for npm packages it also names
+// the newest release on the *pinned major line* (a patched 4.x can exist while
+// `latest` is 5.x — a MAJOR-only report hides it), and it asks the GitHub
+// Advisory Database which advisories affect the exact pinned version. An
+// advisory hit is flagged SECURITY: the README policy treats it as P0.
+//
 // Manifest row format (markdown table):
 //   | `<file>` | <name> | <version> | <license> | <https://github.com/<owner>/<repo>> | `<sha384>` |
 
@@ -62,7 +68,7 @@ function httpsGetJson(opts) {
     });
 }
 
-async function npmLatest(pkg) {
+async function npmLatest(pkg, pinned) {
     // npm registry returns the latest dist-tag in `dist-tags.latest`. This is the
     // canonical "what users get if they `npm install <pkg>` today" — much more
     // reliable than GitHub Releases for packages that publish multi-language
@@ -72,7 +78,33 @@ async function npmLatest(pkg) {
         path: `/${encodeURIComponent(pkg)}`,
         headers: { 'User-Agent': 'encryptalotta-dep-check', 'Accept': 'application/json' }
     });
-    return (data && data['dist-tags'] && data['dist-tags'].latest) || null;
+    const latest = (data && data['dist-tags'] && data['dist-tags'].latest) || null;
+    return { latest, sameMajor: newestInMajor(Object.keys((data && data.versions) || {}), pinned) };
+}
+
+function newestInMajor(versions, pinned) {
+    // Highest stable (no pre-release suffix) version sharing the pinned major.
+    const m = /^(\d+)\./.exec(pinned || '');
+    if (!m) return null;
+    let best = null;
+    for (const v of versions) {
+        if (!/^\d+\.\d+\.\d+$/.test(v) || v.split('.')[0] !== m[1]) continue;
+        if (!best || compareSemver(best, v) === 'minor' || compareSemver(best, v) === 'patch') best = v;
+    }
+    return best;
+}
+
+async function advisoriesFor(pkg, version) {
+    // GitHub Advisory Database, filtered to advisories whose vulnerable range
+    // contains this exact version. Works unauthenticated (60 req/h).
+    const opts = {
+        host: 'api.github.com',
+        path: `/advisories?ecosystem=npm&per_page=100&affects=${encodeURIComponent(pkg + '@' + version)}`,
+        headers: { 'User-Agent': 'encryptalotta-dep-check', 'Accept': 'application/vnd.github+json' }
+    };
+    if (process.env.GITHUB_TOKEN) opts.headers['Authorization'] = `Bearer ${process.env.GITHUB_TOKEN}`;
+    const arr = await httpsGetJson(opts);
+    return (Array.isArray(arr) ? arr : []).map(a => ({ id: a.ghsa_id, severity: a.severity, summary: a.summary }));
 }
 
 async function ghLatestRelease(owner, repo) {
@@ -121,8 +153,8 @@ async function lookupUpstream(entry) {
     const npmName = NPM_OVERRIDE[entry.file];
     if (npmName) {
         try {
-            const v = await npmLatest(npmName);
-            if (v) return { source: 'npm:' + npmName, version: v };
+            const v = await npmLatest(npmName, normalizeVersion(entry.version));
+            if (v.latest) return { source: 'npm:' + npmName, version: v.latest, sameMajor: v.sameMajor };
         } catch (e) {
             // Fall through to GitHub on any npm error.
         }
@@ -141,7 +173,18 @@ async function main() {
     console.log(`Checking ${entries.length} vendored libraries against upstream (npm-preferred, GitHub fallback)…`);
 
     const stale = [];
+    const insecure = [];
     for (const e of entries) {
+        const npmName = NPM_OVERRIDE[e.file];
+        if (npmName) {
+            try {
+                const adv = await advisoriesFor(npmName, normalizeVersion(e.version));
+                for (const a of adv) console.log(`!! ${e.file}: SECURITY ${a.id} (${a.severity}) affects pinned ${normalizeVersion(e.version)} — ${a.summary}`);
+                if (adv.length) insecure.push({ file: e.file, pinned: normalizeVersion(e.version), advisories: adv });
+            } catch (err) {
+                console.log(`?  ${e.file}: advisory lookup failed — ${err.message}`);
+            }
+        }
         try {
             const lookup = await lookupUpstream(e);
             const pinned = normalizeVersion(e.version);
@@ -158,26 +201,35 @@ async function main() {
                 stale.push({ ...e, upstream, pinned, gap, source: lookup.source });
             } else {
                 const tag = gap === 'major' ? 'MAJOR' : gap.toUpperCase();
-                console.log(`!! ${e.file}: pinned=${pinned} → upstream=${upstream}  [${tag}]  (${lookup.source})`);
-                stale.push({ ...e, upstream, pinned, gap, source: lookup.source });
+                const line = lookup.sameMajor && compareSemver(pinned, lookup.sameMajor) !== 'same' && lookup.sameMajor !== upstream
+                    ? lookup.sameMajor : null;
+                console.log(`!! ${e.file}: pinned=${pinned} → upstream=${upstream}  [${tag}]  (${lookup.source})` +
+                    (line ? `; newest on the ${pinned.split('.')[0]}.x line: ${line}` : ''));
+                stale.push({ ...e, upstream, pinned, gap, source: lookup.source, sameMajor: line });
             }
         } catch (err) {
             console.log(`?  ${e.file}: lookup failed — ${err.message}`);
         }
     }
 
+    if (insecure.length) {
+        console.log('');
+        console.log('SECURITY: ' + insecure.length + ' pinned vendored libraries have published advisories — P0 per README.md.');
+        for (const s of insecure) console.log(`  - ${s.file} ${s.pinned}: ${s.advisories.map(a => a.id + ' (' + a.severity + ')').join(', ')}`);
+    }
     if (stale.length) {
         console.log('');
         console.log('STALE: ' + stale.length + ' vendored libraries have newer upstream versions.');
         console.log('Follow the manual update procedure in README.md (Dependency update cadence).');
         for (const s of stale) {
-            const note = s.gap === 'major' ? ' — MAJOR version jump, review changelog and API surface before vendoring'
+            const note = s.gap === 'major' ? ' — MAJOR version jump, review changelog and API surface before vendoring' +
+                                             (s.sameMajor ? `; ${s.sameMajor} stays on the pinned major line` : '')
                        : s.gap === 'unknown' ? ' — non-semver version, manual review required'
                        : '';
             console.log(`  - ${s.file}: ${s.pinned} → ${s.upstream} (${s.source})${note}`);
         }
-        process.exit(1);
     }
+    if (stale.length || insecure.length) process.exit(1);
     console.log('');
     console.log('All vendored libraries are at the current upstream release.');
 }

@@ -41,7 +41,7 @@ const VENDORED = [
         file: 'openpgp.min.js',
         name: 'openpgpjs',
         purlName: 'openpgp',
-        version: '6.3.0',
+        version: '6.3.2',
         license: 'LGPL-3.0-or-later',
         vcs: 'https://github.com/openpgpjs/openpgpjs',
         description: 'OpenPGP.js — JavaScript implementation of the OpenPGP protocol.'
@@ -68,7 +68,7 @@ const VENDORED = [
         file: 'js-yaml.min.js',
         name: 'js-yaml',
         purlName: 'js-yaml',
-        version: '4.1.1',
+        version: '4.3.2',
         license: 'MIT',
         vcs: 'https://github.com/nodeca/js-yaml',
         description: 'js-yaml — YAML parse / stringify.'

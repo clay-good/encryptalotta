@@ -3,19 +3,24 @@
 // What this does (and explicitly does not):
 //   - Precaches the static shell on install: index.html + locale variants +
 //     the four vendored libraries + icons + manifest + privacy.html.
-//   - Serves precached responses with a cache-first strategy. Same-origin GETs
-//     hit the cache; everything else passes through.
+//   - Network-first for same-origin GETs: a successful response is served and
+//     refreshes the cache; the cached copy is the fallback only when the network
+//     fails (offline). Cache-first would pin every returning visitor to the
+//     snapshot taken at install time — including security patches to the
+//     vendored libraries — until this file changed. Cross-origin requests pass
+//     straight through.
 //   - Never reaches outside the origin. The site's `connect-src 'none'`
 //     document policy is unchanged; the SW only fetches its own origin's
 //     shell URLs during install and (lazily) on first-seen GETs.
-//   - No background sync. No push. No analytics. No update prompts — the
-//     `CACHE` version below is bumped manually at release time.
+//   - No background sync. No push. No analytics. No update prompts. Bump the
+//     `CACHE` version below when the SHELL list changes; obsolete caches are
+//     dropped on activate.
 //
 // CSP note: _headers serves this file with a path-scoped CSP that allows
 // `connect-src 'self'` so install-time fetch() works. The document CSP
 // (`connect-src 'none'`) is unchanged and continues to apply to index.html.
 
-const CACHE = 'encryptalotta-shell-v1';
+const CACHE = 'encryptalotta-shell-v2';
 
 const SHELL = [
     '/',
@@ -66,15 +71,14 @@ self.addEventListener('fetch', (event) => {
 
     event.respondWith(
         caches.open(CACHE).then((cache) =>
-            cache.match(req, { ignoreSearch: true }).then((hit) => {
-                if (hit) return hit;
-                return fetch(req).then((resp) => {
-                    if (resp && resp.ok && resp.type === 'basic') {
-                        cache.put(req, resp.clone()).catch(() => {});
-                    }
-                    return resp;
-                }).catch(() => hit);
-            })
+            fetch(req).then((resp) => {
+                if (resp && resp.ok && resp.type === 'basic') {
+                    cache.put(req, resp.clone()).catch(() => {});
+                }
+                return resp;
+            }).catch(() =>
+                cache.match(req, { ignoreSearch: true }).then((hit) => hit || Response.error())
+            )
         )
     );
 });

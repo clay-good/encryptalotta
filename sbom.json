@@ -1,10 +1,10 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:d2070299-d75d-5c9b-9892-84cffcd9677a",
+  "serialNumber": "urn:uuid:5b88ccd7-23e7-59d3-4d9f-c291e5219093",
   "version": 1,
   "metadata": {
-    "timestamp": "2026-05-06T20:41:25.039Z",
+    "timestamp": "2026-10-19T16:21:44.201Z",
     "tools": {
       "components": [
         {
@@ -42,9 +42,9 @@
   "components": [
     {
       "type": "library",
-      "bom-ref": "pkg:npm/openpgp@6.3.0",
+      "bom-ref": "pkg:npm/openpgp@6.3.2",
       "name": "openpgpjs",
-      "version": "6.3.0",
+      "version": "6.3.2",
       "description": "OpenPGP.js — JavaScript implementation of the OpenPGP protocol.",
       "scope": "required",
       "licenses": [
@@ -54,19 +54,19 @@
           }
         }
       ],
-      "purl": "pkg:npm/openpgp@6.3.0",
+      "purl": "pkg:npm/openpgp@6.3.2",
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "46d3e5b6bfe4f0d19b44fd3aa826ac1c67174e95a97be082a3982160b6caae4e"
+          "content": "e19bf4f04f34f24caded3ff3f3643099538b2674a0a94221e2faca75ac3e4aa1"
         },
         {
           "alg": "SHA-384",
-          "content": "679b52b4fa1e0a59ae2cf775800c1d4c2539dd67009148c1370ee6104beb42e995b8da84979d80f4dc7922115d284fdc"
+          "content": "43ab418d9ac03c94c8c63e45f4ac429e2fd3f5d4c60ec5df8b853b68164e97edf33c7a7353a80a7322b3021b3c5dea1a"
         },
         {
           "alg": "SHA-512",
-          "content": "35546cb84fde2aa79f3889b9c780632ae40620206e75176c7a95aabe504aa6d050b72dd8e97792ff29c406c4aaf673c5a285e3c53fb651b6766c51af98be10ee"
+          "content": "86d91ed0756802e016a5c4958d79a08dfad19412d0ea98bb12cf5eee427c422eb19bba80fa83487dd245d204d544abfa3bc5e3cb84f68c3755be711725311124"
         }
       ],
       "externalReferences": [
@@ -86,7 +86,7 @@
         },
         {
           "name": "encryptalotta:file-size-bytes",
-          "value": "393474"
+          "value": "395214"
         }
       ]
     },
@@ -192,9 +192,9 @@
     },
     {
       "type": "library",
-      "bom-ref": "pkg:npm/js-yaml@4.1.1",
+      "bom-ref": "pkg:npm/js-yaml@4.3.2",
       "name": "js-yaml",
-      "version": "4.1.1",
+      "version": "4.3.2",
       "description": "js-yaml — YAML parse / stringify.",
       "scope": "required",
       "licenses": [
@@ -204,19 +204,19 @@
           }
         }
       ],
-      "purl": "pkg:npm/js-yaml@4.1.1",
+      "purl": "pkg:npm/js-yaml@4.3.2",
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "0de3dec92d20eab9e0b46a5d928cd45ec025d73e348ddf458dbfb01da00cb473"
+          "content": "32391560601990bb6e0daabd8106a35a6a539de088532413931a70a4cb4f4769"
         },
         {
           "alg": "SHA-384",
-          "content": "65ea82cee59ccd445a73745a712b9f183ee849bcde697ef1c679ceaf73d37184cbc7802fd2a063d2406aec0782b472c0"
+          "content": "bb02e0ea83bc661146d92b907e09a432da2c8edac562590fb296bf7174be6f70fc18b4531cc0e5fe64f0a8899d94a40e"
         },
         {
           "alg": "SHA-512",
-          "content": "09cbdaf6d6633dfc910cc328b004c16849c02af5fe7816c37c7327afed0b8536be34ca8a471500a0318fa2d6fc6e2c3343ac677f8218b8368f897c35d0361a34"
+          "content": "ffabb7fd68eebe7104f33920a02d78080aec71a94ddb4234182066089604312405b0af9c28a7a9e75ea01cccffbbf2f115db062e581ca54d155ef2197acb4e03"
         }
       ],
       "externalReferences": [
@@ -236,7 +236,7 @@
         },
         {
           "name": "encryptalotta:file-size-bytes",
-          "value": "39513"
+          "value": "43644"
         }
       ]
     }
