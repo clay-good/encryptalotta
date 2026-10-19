@@ -1,0 +1,52 @@
+schema: spec-driven
+
+# Project context — constraints every OpenSpec artifact in this repo must respect.
+# These restate the load-bearing rules from SPEC-INTERNATIONAL.md §0 / §7 and
+# THREAT-MODEL.md so a change proposal can be judged without re-reading them.
+context: |
+  encryptalotta is a single-page, fully client-side toolbox (58 tools as of
+  draft 313). Every change must preserve these invariants:
+
+  - Client-side only. No server, no runtime network call. The document CSP is
+    `connect-src 'none'`; `scripts/audit-release.js` greps for fetch / XHR /
+    WebSocket / EventSource / sendBeacon call sites. A tool that needs a lookup
+    (DNS, OCSP, VIES, a keyserver, a trust list) asks the user to paste the
+    record instead.
+  - No third-party requests, no CDN, no fonts, no analytics, no telemetry.
+    Vendored dependencies only; new ones must be small, MIT/BSD/Apache-2 (or
+    CC-BY for data lists, credited in README), copy-pasteable as one file, and
+    pinned by SHA-384 in index.html, README manifest, and sbom.json.
+  - No build step beyond the existing Node scripts. Pure JavaScript first;
+    no WASM unless a real user complains (§7.6). Hand-rolled parsers are the
+    house norm (ASN.1, CBOR, BLAKE3, Argon2, Reed-Solomon, ZIP all live inline).
+  - `textContent` / `createElement` only — zero `innerHTML =` assignments.
+  - No PII validators (national ID numbers are rejected per §7.1). Commercial
+    identifiers (IBAN, VAT, BIC, GS1, LEI, ISIN, CUSIP) are fine.
+  - No compliance theater (cookie banners, DPA templates, GDPR wizards).
+  - No accounts, no sync, no cloud, no mobile wrapper, no country detection.
+  - Page weight budget: 2 MB gzipped (index.html + vendored libs).
+  - Verdict language is conservative: tools report structure and math, never
+    "safe" / "trusted" without the user supplying the trust anchor.
+
+  A new tool ships as a four-part unit — spec entry, implementation, STRINGS
+  keys × 5 locales (en / fr / de / zh-CN / hi; en/fr/de reviewed, zh-CN/hi
+  machine-quality drafts) + 5 en-only SEO prose keys, and a Playwright
+  confirm/flag pair. It is wired into TOOL_ORDER, TOOL_TO_GROUP, TOOL_SYNONYMS,
+  RELATED_TOOLS, the JSON-LD featureList, and the introspect / a11y / stress /
+  XSS test rosters; audit gate 20 enforces the tool count. View ids follow
+  `#<tool>-view`, controls `#<tool>-<field>` and `#btn-<tool>-<action>`.
+
+rules:
+  proposal:
+    - State what is out of scope and name the §7 non-goal it stays clear of.
+    - Cite the governing standard (RFC / ETSI / ISO / EPC / NIST / W3C) by number.
+    - Give the tool-count delta (e.g. "57 → 58") or say "no new top-level tool".
+  specs:
+    - Every requirement names the published standard or test vector it is checked against.
+    - Every tool spec has an offline requirement and an "input never leaves the page" scenario.
+    - Every verdict-producing tool has a scenario that a clean result is not phrased as "safe".
+  design:
+    - Record the pure-JS vs Web Crypto decision for each primitive.
+    - Name reuse of existing inline engines (ASN.1, CBOR, ZIP, QR, IBAN, BIC, x509) explicitly.
+  tasks:
+    - Last task group is always "Wiring and gates" (STRINGS × 5, palette, related map, JSON-LD, rosters, audit, variants rebuild).
