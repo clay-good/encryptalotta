@@ -36,6 +36,9 @@ const VARIANTS = [
 
 const SITE = 'https://encryptalotta.com';
 
+// Primary subtags written right-to-left; mirrors RTL_LANGS in index.html.
+const RTL_LANGS = new Set(['ar', 'he', 'fa', 'ur']);
+
 // OpenGraph locale codes (Facebook/LinkedIn `ll_CC` form) per UI language, and the
 // canonical order of all supported locales. Each variant advertises its own locale
 // as og:locale and lists every *other* locale (including en) as og:locale:alternate.
@@ -80,8 +83,10 @@ function buildVariant(srcHtml, strings, variant) {
     const variantUrl = `${SITE}/${variant.dir}/`;
     let out = srcHtml;
 
-    // <html lang="en">  →  <html lang="<variant>">
-    out = out.replace(/<html lang="[^"]*">/, `<html lang="${escapeAttr(variant.html)}">`);
+    // <html lang="en">  →  <html lang="<variant>"> (plus dir="rtl" for right-to-left
+    // locales, SPEC §1.4 step 2, so crawlers and first paint see the right direction).
+    const rtl = RTL_LANGS.has(variant.lang.split('-')[0]) ? ' dir="rtl"' : '';
+    out = out.replace(/<html lang="[^"]*">/, `<html lang="${escapeAttr(variant.html)}"${rtl}>`);
 
     // <title>...</title> — kept as a constant brand mark across every locale so the
     // browser tab is short and recognizable. Rich locale-specific titles are still

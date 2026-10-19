@@ -95,7 +95,7 @@ Procedure for each new locale:
 
 Anything short of this ships with a visible banner: *"This locale is machine-translated and awaiting native review — corrections welcome at [link]."*
 
-### 1.4 RTL support (one-time architectural change) — **🟡 CSS logical-property refactor shipped (draft 13)**
+### 1.4 RTL support (one-time architectural change) — **✅ RTL-ready: logical-property refactor (draft 13) + steps 2–6 (draft 303); end-to-end validation waits on the first RTL locale (Phase 3)**
 
 **Status notes (draft 13):** Step 1 of the §1.4 plan is done. Every physical-direction CSS property in `index.html` was replaced with its logical equivalent:
 
@@ -118,6 +118,16 @@ What remains for §1.4 before an RTL locale can ship:
 - Step 6 — `word-break: keep-all` under `:lang(zh), :lang(ja), :lang(ko)` for CJK line-wrap behavior.
 
 Steps 2–6 are deferred to the slice that ships the first RTL locale (Arabic, per the §1.2 roadmap), since none of them are observable until then.
+
+**Status notes (draft 303):** Steps 2–6 shipped ahead of the first RTL locale. They are all observable under a runtime `dir="rtl"` flip, and that flip is what the §8 Phase 1 acceptance criterion tests:
+
+- **Step 2:** `RTL_LANGS = ['ar', 'he', 'fa', 'ur']` in `index.html`. `setLang()` sets `<html dir>` from the primary subtag, so `rtl` for those four and `ltr` for everything else. `build-i18n-variants.js` keeps a matching set and emits `<html lang="…" dir="rtl">` for RTL variants, so crawlers and first paint get the right direction. None of the shipped variants is RTL.
+- **Step 3:** the `.tool-card::after` `→` arrow is the only direction-bearing glyph. Under `[dir="rtl"]` it gets `scaleX(-1)` and slides in from the mirrored side. The audit also turned up a missed physical property: the ≤700 px breakpoint still set `right: 18px`, which the draft-13 grep (`(margin|padding|border)-(left|right)`) didn't catch. It is now `inset-inline-end: 18px`.
+- **Step 4:** `pre, code, output, kbd, samp, .key-display { direction: ltr; unicode-bidi: isolate; }`. This uses `isolate` rather than the spec's `embed`, which is the modern equivalent and doesn't leak bidi state into surrounding RTL prose.
+- **Step 5:** 43 more code-like fields get `dir="ltr"`, on top of the 32 that already had it: PGP key and armor inputs, regex pattern / flags / replacement, cron, JWT, PEM / TLS / SSH, hex salts and keys, HMAC outputs, UUID namespace, timestamps, URLs, colors, CIDR, JSON / YAML input, BIP-39 mnemonic. Free-text fields (messages, names, comments) keep auto direction.
+- **Step 6, with a deliberate deviation:** `word-break: keep-all` applies to `:lang(ko)` only. Chinese and Japanese are written without spaces, so `keep-all` there would forbid every break between ideographs and overflow narrow screens. That would be a regression on the shipped `/zh/` variant. They get `line-break: strict` instead, which is the real CJK concern: no break before small kana or closing punctuation.
+
+The 13 Playwright cases in `tests/specs/19-rtl-i18n.spec.js` cover the dir flip and its reset, the shipped locales staying `ltr`, the arrow mirror, the mobile inline-end offset, LTR code blocks inside an RTL page, `dir="ltr"` on code fields, the CJK line-break rules, zero horizontal overflow on `/zh/` at 320 px, and the §1.6 synonyms below. Hebrew and Arabic glyph-level review is still part of Pass 5 (§1.3) when those locales ship.
 
 Currently the CSS uses `left`/`right`/`margin-left`/`padding-right`/`text-align: left` in places. RTL support is a one-time refactor that then makes every future RTL locale free.
 
@@ -265,7 +275,7 @@ The browser's `Intl` namespace handles this without dependencies. Touch points:
 - **`Intl.ListFormat`** — "share A, share B, and share C" / "share A, share B y share C". Surfaces in Shamir, QR multi-part output, multi-recipient encryption.
 - **`Intl.Collator`** — If the command palette ever sorts strings alphabetically per locale (German ß, Swedish å, Czech č all sort differently), use `Collator`. Not urgent.
 
-### 1.6 Command-palette synonyms — **🟡 palette + en synonyms shipped (draft 15); locale-specific synonyms deferred**
+### 1.6 Command-palette synonyms — **✅ palette + en synonyms (draft 15) + glossary-vetted fr / de synonyms (draft 303); broader per-locale lists still gated on §1.3 native review**
 
 **Status notes (draft 15):** The command palette landed end-to-end:
 
@@ -292,6 +302,8 @@ Full Playwright suite: 223 passed.
 
 - **Per-locale synonyms.** The spec lists illustrative French / German / Spanish / Polish / Arabic / Japanese / Russian / Portuguese examples per tool. Implementing these is gated on §1.3 native review per locale — the failure mode (`crypter` as a French synonym for `encrypt` when `chiffrer` is the actual term used by French cryptographers; `cifrar` vs. `encriptar` for Spanish) is exactly the textbook MT failure the spec warns against. Will be added incrementally as native reviewers come online per locale.
 - **Synonym schema in the CSV.** Locale-specific synonyms, when they arrive, will plug into the existing STRINGS table with a `nav.tool.<id>.synonyms` key. The audit script's en-only carve-out (currently scoped to `tool.<id>.{title,metaDescription,about.{what,how,why}}`) will be extended to allow synonyms to drop to en-only when a locale hasn't been reviewed yet — same pattern as the existing SEO prose carve-out.
+
+**Status notes (draft 303):** `TOOL_SYNONYMS_L10N` adds current-locale synonyms on top of the always-on English set. It is limited to the terms this spec vets by name in §1.6 / §1.7: French `chiffrer` (the correct term), `crypter` (the common calque, which the spec allows as a palette synonym only), `coder`, and `chiffrement`; German `verschlüsseln`, `Verschlüsselung`, and `chiffrieren`. These attach to the four encryption tools (`encrypt`, `text-crypto`, `password-encrypt`, `age`). Synonyms apply only in their own locale, so English `crypter` finds nothing, and English synonyms keep working in every locale. These are a JS constant rather than a `STRINGS` key so the 5-locale parity audit stays strict. A French user typing `crypter` now lands on *Chiffrer des fichiers*, which meets the §8 Phase 1 criterion.
 
 The `⌘K` command palette currently matches against English tool names. A French user typing "chiffrer" finds nothing. Fix:
 
@@ -795,9 +807,9 @@ Each phase is independent. Stop after any phase; nothing below requires the next
 
 ### Phase 1 — i18n infrastructure (no new tools yet)
 
-1. ✅ Logical-property CSS refactor for RTL readiness (§1.4) — shipped draft 13. RTL runtime flip + icon mirroring + LTR code-block embedding deferred until the first RTL locale is queued.
+1. ✅ RTL readiness (§1.4) — logical-property refactor shipped draft 13; runtime + build-time `dir` flip, icon mirroring, LTR code blocks, `dir="ltr"` code fields, and CJK line-break rules shipped draft 303.
 2. ✅ `Intl.PluralRules` / `Intl.RelativeTimeFormat` / `Intl.ListFormat` integration (§1.5) — three slices shipped (drafts 11, 12, 14). `Intl.NumberFormat` + `Intl.RelativeTimeFormat` drive PBKDF2 timing, CIDR address counts, PGP key dates, and the Unix-timestamp relative phrasing. `Intl.PluralRules` powers the regex match-count row. `Intl.ListFormat` powers the BIC multi-tag row. Remaining `.join(', ')` sites are technical lists where the locale's "and" / "und" / "et" final-joiner would feel wrong; the passphrase-strength prose case is deferred until its issue strings are translated.
-3. 🟡 Command-palette synonym field added to the `STRINGS` schema (§1.6) — palette + 42 English synonym blocks + 3 localized UI strings × 5 locales shipped draft 15. Locale-specific synonyms (`chiffrer` / `cifrar` / etc.) deferred until §1.3 native reviewers are sourced.
+3. ✅ Command-palette synonyms (§1.6) — palette + 42 English synonym blocks + 3 localized UI strings × 5 locales shipped draft 15; glossary-vetted French / German encrypt synonyms shipped draft 303 (the §8 "one French synonym" criterion). Broader per-locale lists wait on §1.3 native reviewers.
 4. ✅ CSV schema extended for plural categories (§1.5) — convention formalized in draft 25. Plural-suffixed keys follow the six CLDR rule names (`.zero|.one|.two|.few|.many|.other`); audit-release.js enforces that every group defines `.other` in en (the universal Intl.PluralRules fallback). Non-en locales may omit rules their grammar does not use. Convention documented inline at the top of `scripts/export-strings-csv.js`.
 
 ### Phase 2 — Tier 1 locales
@@ -1138,15 +1150,15 @@ Full suite: 247 → 250 passed. Audit OK. No new vendored deps, no CSP change, t
 
 1. ✅ Implement the dropdown + JSON config (§3) — shipped draft 5 (PGP key generator) and draft 10 (PBKDF2 tool).
 2. ✅ First sources: BSI TR-02102, ANSSI RGS, NIST SP 800-57 / SP 800-132, Privacy Guides — all four regulators surfaced in both tools.
-3. Argon2id presets pending §2.9 (the Argon2id tool itself is deferred to Phase 7).
+3. ✅ Argon2id presets — shipped with the Argon2 tool (draft 291, §2.9).
 
 ### Phase 7 — Larger tool builds
 
-1. 🟡 SEPA XML inspector (§2.4) — pain.001 + camt.053 shipped draft 16; pain.008 inherits the pain.001 renderer; XAdES-signed files deferred to §2.5.
-2. eIDAS signature inspector — PAdES/CAdES/XAdES (§2.5).
+1. 🟡 SEPA XML inspector (§2.4) — pain.001 + camt.053 shipped draft 16; pain.008 inherits the pain.001 renderer; 111 EPC Rulebook gates since (drafts 49–246). XAdES signatures are inspected by the §2.5 X.509 parser (draft 286).
+2. ✅ eIDAS signature inspector (§2.5) — CAdES / PKCS#7 (draft 284), PAdES (draft 285), XAdES / XML-DSig (draft 286).
 3. ✅ EU LOTL viewer (§2.6) — shipped draft 17.
-4. 🟡 Factur-X / ZUGFeRD / PEPPOL inspector (§2.7) — PEPPOL UBL Invoice / CreditNote shipped draft 18; Factur-X / ZUGFeRD hybrid PDF + UN/CEFACT CII deferred until the §2.5 PDF attachment extractor lands.
-5. 🟡 EUDI Wallet credential decoder (§2.8) — SD-JWT decoder shipped draft 20 as an extension of the JWT inspector; ISO mdoc CBOR decoder deferred.
+4. 🟡 Factur-X / ZUGFeRD / PEPPOL inspector (§2.7) — PEPPOL UBL Invoice / CreditNote shipped draft 18; UN/CEFACT CII rendering (draft 258) + CII conformance gates (drafts 259–282) + hybrid PDF/A-3 attachment extraction (draft 283). The CII slice is feature-complete to its drafted scope.
+5. ✅ EUDI Wallet credential decoder (§2.8) — SD-JWT (drafts 20–24) + ISO 18013-5 mdoc (draft 289).
 6. ✅ Argon2id (§2.9) — shipped draft 291.
 7. ✅ age (§2.11) — shipped draft 292 (full age v1: X25519 + scrypt, encrypt/decrypt/keygen, ASCII armor; hand-rolled, interop-verified against the age CLI 1.3.1).
 

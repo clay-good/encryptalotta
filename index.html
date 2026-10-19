@@ -610,6 +610,18 @@
 
         .tool-card:active { transform: translateY(0); }
 
+        /* RTL readiness (SPEC §1.4 steps 3–6). The → indicator is direction-bearing, so it
+           mirrors and slides in from the opposite side under dir=rtl. Code / crypto output
+           (Base64, hex, PGP armor, JSON) stays LTR inside an RTL page. CJK line-breaking:
+           keep-all only for Korean (space-separated words) — applied to Chinese / Japanese
+           it would forbid breaks between ideographs and overflow narrow screens, so those
+           get line-break: strict (no break before small kana / closing punctuation). */
+        [dir="rtl"] .tool-card::after { transform: translateX(4px) scaleX(-1); }
+        [dir="rtl"] .tool-card:hover::after { transform: scaleX(-1); }
+        pre, code, output, kbd, samp, .key-display { direction: ltr; unicode-bidi: isolate; }
+        :lang(ko) { word-break: keep-all; }
+        :lang(zh), :lang(ja) { line-break: strict; }
+
         .tool-card:focus {
             outline: 2px solid var(--focus-ring);
             outline-offset: 3px;
@@ -767,7 +779,7 @@
             .home-section { margin-bottom: 40px; }
             .home-grid { grid-template-columns: 1fr; gap: 12px; }
             .tool-card { padding: 20px 18px; min-height: 96px; }
-            .tool-card::after { top: 18px; right: 18px; }
+            .tool-card::after { top: 18px; inset-inline-end: 18px; }
             .site-footer { margin: 32px auto 24px; }
         }
 
@@ -1644,7 +1656,7 @@
 
                 <div class="form-group">
                     <label for="encrypt-public-key" data-i18n="label.encryptPubkey">Recipient's Public Key *</label>
-                    <textarea id="encrypt-public-key" placeholder="Paste the recipient's public PGP key here..." data-i18n-attr="placeholder:ph.encryptPubkey" required></textarea>
+                    <textarea id="encrypt-public-key" placeholder="Paste the recipient's public PGP key here..." data-i18n-attr="placeholder:ph.encryptPubkey" required dir="ltr"></textarea>
                     <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 5px;" data-i18n="help.orUploadAsc">Or upload a .asc file:</p>
                     <input type="file" id="public-key-file" accept=".asc,.txt,.pub" aria-label="Upload public key file" data-i18n-attr="aria-label:aria.uploadPubkey">
                 </div>
@@ -1686,7 +1698,7 @@
 
                 <div class="form-group">
                     <label for="decrypt-private-key" data-i18n="label.decryptPrivkey">Your Private Key *</label>
-                    <textarea id="decrypt-private-key" placeholder="Paste your private PGP key here..." data-i18n-attr="placeholder:ph.decryptPrivkey" required></textarea>
+                    <textarea id="decrypt-private-key" placeholder="Paste your private PGP key here..." data-i18n-attr="placeholder:ph.decryptPrivkey" required dir="ltr"></textarea>
                     <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 5px;" data-i18n="help.orUploadAsc">Or upload a .asc file:</p>
                     <input type="file" id="private-key-file" accept=".asc,.txt" aria-label="Upload private key file" data-i18n-attr="aria-label:aria.uploadPrivkey">
                 </div>
@@ -1729,7 +1741,7 @@
 
                 <div class="form-group">
                     <label for="sign-private-key" data-i18n="label.signPrivkey">Your Private Key *</label>
-                    <textarea id="sign-private-key" placeholder="Paste your private PGP key here..." data-i18n-attr="placeholder:ph.signPrivkey" required></textarea>
+                    <textarea id="sign-private-key" placeholder="Paste your private PGP key here..." data-i18n-attr="placeholder:ph.signPrivkey" required dir="ltr"></textarea>
                     <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 5px;" data-i18n="help.orUploadAsc">Or upload a .asc file:</p>
                     <input type="file" id="sign-private-key-file" accept=".asc,.txt" aria-label="Upload private key file for signing" data-i18n-attr="aria-label:aria.uploadPrivkeyForSigning">
                 </div>
@@ -1789,7 +1801,7 @@
 
                 <div class="form-group">
                     <label for="verify-public-key" data-i18n="label.verifyPubkey">Signer's Public Key *</label>
-                    <textarea id="verify-public-key" placeholder="Paste the signer's public PGP key here..." data-i18n-attr="placeholder:ph.verifyPubkey" required></textarea>
+                    <textarea id="verify-public-key" placeholder="Paste the signer's public PGP key here..." data-i18n-attr="placeholder:ph.verifyPubkey" required dir="ltr"></textarea>
                     <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 5px;" data-i18n="help.orUploadAsc">Or upload a .asc file:</p>
                     <input type="file" id="verify-public-key-file" accept=".asc,.txt,.pub" aria-label="Upload public key file for verification" data-i18n-attr="aria-label:aria.uploadPubkeyForVerify">
                 </div>
@@ -1821,7 +1833,7 @@
                     </div>
                     <div class="form-group">
                         <label for="verify-signature" data-i18n="label.verifySignature">Detached Signature *</label>
-                        <textarea id="verify-signature" placeholder="Paste the detached signature here..." data-i18n-attr="placeholder:ph.verifySignature" style="min-height: 100px;"></textarea>
+                        <textarea id="verify-signature" placeholder="Paste the detached signature here..." data-i18n-attr="placeholder:ph.verifySignature" style="min-height: 100px;" dir="ltr"></textarea>
                     </div>
                 </div>
 
@@ -1859,7 +1871,7 @@
                 <div id="text-encrypt-fields">
                     <div class="form-group">
                         <label for="text-encrypt-pubkey" data-i18n="label.textEncryptPubkey">Recipient's Public Key *</label>
-                        <textarea id="text-encrypt-pubkey" placeholder="Paste the recipient's public PGP key here..." data-i18n-attr="placeholder:ph.textEncryptPubkey" style="min-height: 100px;"></textarea>
+                        <textarea id="text-encrypt-pubkey" placeholder="Paste the recipient's public PGP key here..." data-i18n-attr="placeholder:ph.textEncryptPubkey" style="min-height: 100px;" dir="ltr"></textarea>
                     </div>
                     <div class="form-group">
                         <label for="text-encrypt-message" data-i18n="label.textEncryptMessage">Message to Encrypt *</label>
@@ -1870,7 +1882,7 @@
                 <div id="text-decrypt-fields" class="hidden">
                     <div class="form-group">
                         <label for="text-decrypt-privkey" data-i18n="label.textDecryptPrivkey">Your Private Key *</label>
-                        <textarea id="text-decrypt-privkey" placeholder="Paste your private PGP key here..." data-i18n-attr="placeholder:ph.textDecryptPrivkey" style="min-height: 100px;"></textarea>
+                        <textarea id="text-decrypt-privkey" placeholder="Paste your private PGP key here..." data-i18n-attr="placeholder:ph.textDecryptPrivkey" style="min-height: 100px;" dir="ltr"></textarea>
                     </div>
                     <div class="form-group">
                         <label for="text-decrypt-passphrase" data-i18n="label.textDecryptPassphrase">Passphrase *</label>
@@ -1878,7 +1890,7 @@
                     </div>
                     <div class="form-group">
                         <label for="text-decrypt-message" data-i18n="label.textDecryptMessage">Encrypted Message *</label>
-                        <textarea id="text-decrypt-message" placeholder="Paste the encrypted PGP message here (starts with -----BEGIN PGP MESSAGE-----)..." data-i18n-attr="placeholder:ph.textDecryptMessage" style="min-height: 150px;"></textarea>
+                        <textarea id="text-decrypt-message" placeholder="Paste the encrypted PGP message here (starts with -----BEGIN PGP MESSAGE-----)..." data-i18n-attr="placeholder:ph.textDecryptMessage" style="min-height: 150px;" dir="ltr"></textarea>
                     </div>
                 </div>
 
@@ -1947,7 +1959,7 @@
 
                 <div class="form-group">
                     <label for="key-info-input" data-i18n="label.keyInfoInput">PGP Key (Public or Private) *</label>
-                    <textarea id="key-info-input" placeholder="Paste a PGP key here (starts with -----BEGIN PGP PUBLIC KEY BLOCK----- or -----BEGIN PGP PRIVATE KEY BLOCK-----)..." data-i18n-attr="placeholder:ph.keyInfoInput" style="min-height: 150px;"></textarea>
+                    <textarea id="key-info-input" placeholder="Paste a PGP key here (starts with -----BEGIN PGP PUBLIC KEY BLOCK----- or -----BEGIN PGP PRIVATE KEY BLOCK-----)..." data-i18n-attr="placeholder:ph.keyInfoInput" style="min-height: 150px;" dir="ltr"></textarea>
                     <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 5px;" data-i18n="help.orUploadAsc">Or upload a .asc file:</p>
                     <input type="file" id="key-info-file" accept=".asc,.txt,.pub" aria-label="Upload key file" data-i18n-attr="aria-label:aria.uploadKey">
                 </div>
@@ -2013,7 +2025,7 @@
 
                 <div class="form-group">
                     <label for="revoke-private-key" data-i18n="label.revokePrivkey">Your Private Key *</label>
-                    <textarea id="revoke-private-key" placeholder="Paste your private PGP key here..." data-i18n-attr="placeholder:ph.revokePrivkey" style="min-height: 100px;"></textarea>
+                    <textarea id="revoke-private-key" placeholder="Paste your private PGP key here..." data-i18n-attr="placeholder:ph.revokePrivkey" style="min-height: 100px;" dir="ltr"></textarea>
                 </div>
 
                 <div class="form-group">
@@ -2058,7 +2070,7 @@
 
                 <div id="dearmor-input" class="form-group">
                     <label for="armor-text-input" data-i18n="label.armorInput">Armored PGP Data *</label>
-                    <textarea id="armor-text-input" placeholder="Paste ASCII-armored PGP data here (starts with -----BEGIN PGP...)..." data-i18n-attr="placeholder:ph.armorInput" style="min-height: 150px;"></textarea>
+                    <textarea id="armor-text-input" placeholder="Paste ASCII-armored PGP data here (starts with -----BEGIN PGP...)..." data-i18n-attr="placeholder:ph.armorInput" style="min-height: 150px;" dir="ltr"></textarea>
                 </div>
 
                 <div id="armor-input" class="form-group hidden">
@@ -2216,7 +2228,7 @@
                 <div id="shamir-combine-panel" hidden>
                     <div class="form-group">
                         <label for="shamir-combine-input" data-i18n="shamir.label.combineInput">Paste shares (one per line) *</label>
-                        <textarea id="shamir-combine-input" placeholder="Paste each share on its own line..." data-i18n-attr="placeholder:shamir.ph.combineInput" style="min-height: 150px;"></textarea>
+                        <textarea id="shamir-combine-input" placeholder="Paste each share on its own line..." data-i18n-attr="placeholder:shamir.ph.combineInput" style="min-height: 150px;" dir="ltr"></textarea>
                     </div>
 
                     <button id="btn-shamir-verify" class="btn btn-secondary" data-i18n="btn.shamirVerify">Verify shares</button>
@@ -2226,7 +2238,7 @@
 
                     <div class="form-group" style="margin-top: 20px;">
                         <label for="shamir-output" data-i18n="shamir.label.recovered">Recovered secret</label>
-                        <textarea id="shamir-output" readonly style="min-height: 100px;"></textarea>
+                        <textarea id="shamir-output" readonly style="min-height: 100px;" dir="ltr"></textarea>
                     </div>
                 </div>
             </div>
@@ -2318,7 +2330,7 @@
                         </div>
                         <div class="form-group">
                             <label for="hash-b2b-key" data-i18n="hash.adv.b2bKey">Key — optional, MAC (≤ 64 bytes)</label>
-                            <input type="text" id="hash-b2b-key" autocomplete="off" spellcheck="false">
+                            <input type="text" id="hash-b2b-key" autocomplete="off" spellcheck="false" dir="ltr">
                             <label style="display:inline-flex;align-items:center;gap:6px;margin-top:8px;font-weight:400;font-size:0.9rem;">
                                 <input type="checkbox" id="hash-b2b-key-hex"> <span data-i18n="hmac.label.keyHex">Key is hex-encoded</span>
                             </label>
@@ -2404,12 +2416,12 @@
 
                 <div class="form-group" style="margin-top: 24px;">
                     <label for="hmac-result" data-i18n="hmac.label.result">HMAC (hex):</label>
-                    <textarea id="hmac-result" rows="3" readonly></textarea>
+                    <textarea id="hmac-result" rows="3" readonly dir="ltr"></textarea>
                 </div>
 
                 <div class="form-group">
                     <label for="hmac-out-base64" data-i18n="hmac.label.resultB64">HMAC (Base64):</label>
-                    <textarea id="hmac-out-base64" rows="2" readonly spellcheck="false"></textarea>
+                    <textarea id="hmac-out-base64" rows="2" readonly spellcheck="false" dir="ltr"></textarea>
                 </div>
 
                 <hr style="margin: 30px 0; border: none; border-top: 1px solid var(--border);">
@@ -2417,7 +2429,7 @@
                 <h3 style="margin-bottom: 12px;" data-i18n="hmac.verifyHeading">Verify a known HMAC</h3>
                 <div class="form-group">
                     <label for="hmac-expected" data-i18n="hmac.label.expected">Expected HMAC (hex):</label>
-                    <input type="text" id="hmac-expected" autocomplete="off" spellcheck="false" data-i18n-attr="placeholder:hmac.ph.expected" placeholder="Paste the expected HMAC hex…">
+                    <input type="text" id="hmac-expected" autocomplete="off" spellcheck="false" data-i18n-attr="placeholder:hmac.ph.expected" placeholder="Paste the expected HMAC hex…" dir="ltr">
                 </div>
                 <button id="btn-hmac-verify" class="btn" data-i18n="btn.hmacVerify">Verify HMAC</button>
                 <div id="hmac-verify-result" style="font-weight: 600; margin-top: 10px;"></div>
@@ -2491,7 +2503,7 @@
 
                 <div class="form-group" id="uuid-v5-fields" style="display: none;">
                     <label for="uuid-namespace" data-i18n="uuid.label.namespace">Namespace UUID:</label>
-                    <input type="text" id="uuid-namespace" autocomplete="off" spellcheck="false" placeholder="6ba7b810-9dad-11d1-80b4-00c04fd430c8 (DNS)">
+                    <input type="text" id="uuid-namespace" autocomplete="off" spellcheck="false" placeholder="6ba7b810-9dad-11d1-80b4-00c04fd430c8 (DNS)" dir="ltr">
                     <label for="uuid-name" data-i18n="uuid.label.name" style="margin-top: 10px;">Name:</label>
                     <input type="text" id="uuid-name" autocomplete="off" spellcheck="false" data-i18n-attr="placeholder:uuid.ph.name" placeholder="e.g. example.com">
                 </div>
@@ -2505,7 +2517,7 @@
 
                 <div class="form-group" style="margin-top: 24px;">
                     <label for="uuid-output" data-i18n="uuid.label.output">Output:</label>
-                    <textarea id="uuid-output" rows="8" readonly spellcheck="false"></textarea>
+                    <textarea id="uuid-output" rows="8" readonly spellcheck="false" dir="ltr"></textarea>
                 </div>
             </div>
 
@@ -2519,7 +2531,7 @@
 
                 <div class="form-group">
                     <label for="ts-input" data-i18n="timestamp.label.input">Input (Unix seconds, milliseconds, or ISO 8601):</label>
-                    <input type="text" id="ts-input" autocomplete="off" spellcheck="false" data-i18n-attr="placeholder:timestamp.ph.input" placeholder="e.g. 1700000000 or 2023-11-14T22:13:20Z">
+                    <input type="text" id="ts-input" autocomplete="off" spellcheck="false" data-i18n-attr="placeholder:timestamp.ph.input" placeholder="e.g. 1700000000 or 2023-11-14T22:13:20Z" dir="ltr">
                 </div>
 
                 <div class="form-group">
@@ -2554,7 +2566,7 @@
 
                 <div class="form-group">
                     <label for="url-input" data-i18n="url.label.input">URL:</label>
-                    <input type="text" id="url-input" autocomplete="off" spellcheck="false" data-i18n-attr="placeholder:url.ph.input" placeholder="https://example.com/path?key=value#hash">
+                    <input type="text" id="url-input" autocomplete="off" spellcheck="false" data-i18n-attr="placeholder:url.ph.input" placeholder="https://example.com/path?key=value#hash" dir="ltr">
                 </div>
 
                 <button id="btn-url-parse" class="btn" data-i18n="btn.urlParse">Parse</button>
@@ -2565,7 +2577,7 @@
 
                 <div class="form-group" style="margin-top: 24px;">
                     <label for="url-codec" data-i18n="url.label.codec">Encode/decode result:</label>
-                    <textarea id="url-codec" rows="3" readonly spellcheck="false"></textarea>
+                    <textarea id="url-codec" rows="3" readonly spellcheck="false" dir="ltr"></textarea>
                 </div>
             </div>
 
@@ -2583,7 +2595,7 @@
 
                 <div class="form-group">
                     <label for="jwt-input" data-i18n="jwt.label.token">JWT (paste the full token):</label>
-                    <textarea id="jwt-input" rows="4" spellcheck="false" data-i18n-attr="placeholder:jwt.ph.token" placeholder="eyJhbGciOi…"></textarea>
+                    <textarea id="jwt-input" rows="4" spellcheck="false" data-i18n-attr="placeholder:jwt.ph.token" placeholder="eyJhbGciOi…" dir="ltr"></textarea>
                 </div>
 
                 <details style="margin-bottom: 14px;">
@@ -2619,7 +2631,7 @@
 
                 <div class="form-group">
                     <label for="jwt-verify-key" data-i18n="jwt.label.key">Public key (PEM) or shared secret:</label>
-                    <textarea id="jwt-verify-key" rows="6" spellcheck="false" data-i18n-attr="placeholder:jwt.ph.key" placeholder="-----BEGIN PUBLIC KEY-----…  or  shared-secret-string"></textarea>
+                    <textarea id="jwt-verify-key" rows="6" spellcheck="false" data-i18n-attr="placeholder:jwt.ph.key" placeholder="-----BEGIN PUBLIC KEY-----…  or  shared-secret-string" dir="ltr"></textarea>
                 </div>
 
                 <button id="btn-jwt-verify" class="btn" data-i18n="btn.jwtVerify">Verify Signature</button>
@@ -2640,7 +2652,7 @@
 
                 <div class="form-group">
                     <label for="totp-input" data-i18n="totp.label.input">Secret or otpauth:// URI:</label>
-                    <input type="text" id="totp-input" autocomplete="off" spellcheck="false" data-i18n-attr="placeholder:totp.ph.input" placeholder="JBSWY3DPEHPK3PXP   or   otpauth://totp/Acme:alice?secret=…">
+                    <input type="text" id="totp-input" autocomplete="off" spellcheck="false" data-i18n-attr="placeholder:totp.ph.input" placeholder="JBSWY3DPEHPK3PXP   or   otpauth://totp/Acme:alice?secret=…" dir="ltr">
                 </div>
 
                 <div class="form-group">
@@ -2726,7 +2738,7 @@
 
                 <div class="form-group" id="diff-unified-wrap" style="margin-top: 18px; display: none;">
                     <label for="diff-unified" data-i18n="diff.label.unified">Unified diff (--- / +++ / @@ hunks, 3 lines of context):</label>
-                    <textarea id="diff-unified" rows="10" readonly spellcheck="false" style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.85rem;"></textarea>
+                    <textarea id="diff-unified" rows="10" readonly spellcheck="false" style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.85rem;" dir="ltr"></textarea>
                 </div>
             </div>
 
@@ -2790,11 +2802,11 @@
                 <div style="display: flex; gap: 16px; flex-wrap: wrap;">
                     <div class="form-group" style="flex: 3; min-width: 240px;">
                         <label for="regex-pattern" data-i18n="regex.label.pattern">Pattern:</label>
-                        <input type="text" id="regex-pattern" autocomplete="off" spellcheck="false" placeholder="\\bword\\b">
+                        <input type="text" id="regex-pattern" autocomplete="off" spellcheck="false" placeholder="\\bword\\b" dir="ltr">
                     </div>
                     <div class="form-group" style="flex: 1; min-width: 90px;">
                         <label for="regex-flags" data-i18n="regex.label.flags">Flags:</label>
-                        <input type="text" id="regex-flags" autocomplete="off" spellcheck="false" data-i18n-attr="placeholder:regex.ph.flags" placeholder="gimsuy" value="g">
+                        <input type="text" id="regex-flags" autocomplete="off" spellcheck="false" data-i18n-attr="placeholder:regex.ph.flags" placeholder="gimsuy" value="g" dir="ltr">
                     </div>
                 </div>
 
@@ -2805,7 +2817,7 @@
 
                 <div class="form-group">
                     <label for="regex-replace" data-i18n="regex.label.replace">Replacement (optional):</label>
-                    <input type="text" id="regex-replace" autocomplete="off" spellcheck="false" data-i18n-attr="placeholder:regex.ph.replace" placeholder="$1, $&amp;, named groups, …">
+                    <input type="text" id="regex-replace" autocomplete="off" spellcheck="false" data-i18n-attr="placeholder:regex.ph.replace" placeholder="$1, $&amp;, named groups, …" dir="ltr">
                 </div>
 
                 <button id="btn-regex-run" class="btn" data-i18n="btn.regexRun">Run</button>
@@ -2830,7 +2842,7 @@
 
                 <div class="form-group">
                     <label for="tls-cert-input" data-i18n="tls-cert.label.input">PEM-encoded X.509 certificate:</label>
-                    <textarea id="tls-cert-input" rows="10" spellcheck="false" data-i18n-attr="placeholder:tls-cert.ph.input" placeholder="-----BEGIN CERTIFICATE-----&#10;MIID…&#10;-----END CERTIFICATE-----"></textarea>
+                    <textarea id="tls-cert-input" rows="10" spellcheck="false" data-i18n-attr="placeholder:tls-cert.ph.input" placeholder="-----BEGIN CERTIFICATE-----&#10;MIID…&#10;-----END CERTIFICATE-----" dir="ltr"></textarea>
                 </div>
 
                 <div class="form-group" style="margin-top: -10px;">
@@ -2854,7 +2866,7 @@
 
                 <div class="form-group">
                     <label for="ssh-key-input" data-i18n="ssh-key.label.input">OpenSSH public key (one line):</label>
-                    <textarea id="ssh-key-input" rows="5" spellcheck="false" data-i18n-attr="placeholder:ssh-key.ph.input" placeholder="ssh-ed25519 AAAAC3Nza… user@host"></textarea>
+                    <textarea id="ssh-key-input" rows="5" spellcheck="false" data-i18n-attr="placeholder:ssh-key.ph.input" placeholder="ssh-ed25519 AAAAC3Nza… user@host" dir="ltr"></textarea>
                 </div>
 
                 <button id="btn-ssh-key-parse" class="btn" data-i18n="btn.sshKeyParse">Parse</button>
@@ -2872,7 +2884,7 @@
 
                 <div class="form-group">
                     <label for="pem-der-input" data-i18n="pem-der.label.input">Input (PEM text or DER as hex / Base64):</label>
-                    <textarea id="pem-der-input" rows="9" spellcheck="false" data-i18n-attr="placeholder:pem-der.ph.input" placeholder="-----BEGIN CERTIFICATE-----&#10;…&#10;-----END CERTIFICATE-----"></textarea>
+                    <textarea id="pem-der-input" rows="9" spellcheck="false" data-i18n-attr="placeholder:pem-der.ph.input" placeholder="-----BEGIN CERTIFICATE-----&#10;…&#10;-----END CERTIFICATE-----" dir="ltr"></textarea>
                 </div>
 
                 <div class="form-group">
@@ -2887,7 +2899,7 @@
 
                 <div class="form-group" style="margin-top: 12px;">
                     <label for="pem-der-output" data-i18n="pem-der.label.output">Output:</label>
-                    <textarea id="pem-der-output" rows="9" readonly spellcheck="false"></textarea>
+                    <textarea id="pem-der-output" rows="9" readonly spellcheck="false" dir="ltr"></textarea>
                 </div>
             </div>
 
@@ -2901,7 +2913,7 @@
 
                 <div class="form-group">
                     <label for="cron-input" data-i18n="cron.label.input">Cron expression (5 fields: min hour dom month dow):</label>
-                    <input type="text" id="cron-input" autocomplete="off" spellcheck="false" data-i18n-attr="placeholder:cron.ph.input" placeholder="0 */6 * * *">
+                    <input type="text" id="cron-input" autocomplete="off" spellcheck="false" data-i18n-attr="placeholder:cron.ph.input" placeholder="0 */6 * * *" dir="ltr">
                 </div>
 
                 <button id="btn-cron-decode" class="btn" data-i18n="btn.cronDecode">Decode</button>
@@ -2920,7 +2932,7 @@
                 <div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end;">
                     <div class="form-group" style="flex: 2; min-width: 240px;">
                         <label for="color-input" data-i18n="color.label.input">Color (any format):</label>
-                        <input type="text" id="color-input" autocomplete="off" spellcheck="false" data-i18n-attr="placeholder:color.ph.input" placeholder="#3366ff   or   rgb(51,102,255)   or   hsl(225 100% 60%)" value="#3366ff">
+                        <input type="text" id="color-input" autocomplete="off" spellcheck="false" data-i18n-attr="placeholder:color.ph.input" placeholder="#3366ff   or   rgb(51,102,255)   or   hsl(225 100% 60%)" value="#3366ff" dir="ltr">
                     </div>
                     <div class="form-group" style="flex: 0 0 auto;">
                         <label for="color-picker" data-i18n="color.label.picker">Pick:</label>
@@ -2940,11 +2952,11 @@
                 <div style="display: flex; gap: 16px; flex-wrap: wrap;">
                     <div class="form-group" style="flex: 1; min-width: 180px;">
                         <label for="color-fg" data-i18n="color.label.fg">Foreground:</label>
-                        <input type="text" id="color-fg" autocomplete="off" spellcheck="false" value="#0a0a0a">
+                        <input type="text" id="color-fg" autocomplete="off" spellcheck="false" value="#0a0a0a" dir="ltr">
                     </div>
                     <div class="form-group" style="flex: 1; min-width: 180px;">
                         <label for="color-bg" data-i18n="color.label.bg">Background:</label>
-                        <input type="text" id="color-bg" autocomplete="off" spellcheck="false" value="#ffffff">
+                        <input type="text" id="color-bg" autocomplete="off" spellcheck="false" value="#ffffff" dir="ltr">
                     </div>
                 </div>
 
@@ -2967,7 +2979,7 @@
 
                 <div class="form-group">
                     <label for="format-input" data-i18n="format.label.input">Input:</label>
-                    <textarea id="format-input" rows="9" spellcheck="false" data-i18n-attr="placeholder:format.ph.input" placeholder="Paste JSON, YAML, or XML here…"></textarea>
+                    <textarea id="format-input" rows="9" spellcheck="false" data-i18n-attr="placeholder:format.ph.input" placeholder="Paste JSON, YAML, or XML here…" dir="ltr"></textarea>
                 </div>
 
                 <div style="display: flex; gap: 16px; flex-wrap: wrap;">
@@ -3005,7 +3017,7 @@
 
                 <div class="form-group" style="margin-top: 12px;">
                     <label for="format-output" data-i18n="format.label.output">Output:</label>
-                    <textarea id="format-output" rows="9" readonly spellcheck="false"></textarea>
+                    <textarea id="format-output" rows="9" readonly spellcheck="false" dir="ltr"></textarea>
                 </div>
             </div>
 
@@ -3019,7 +3031,7 @@
 
                 <div class="form-group">
                     <label for="cidr-input" data-i18n="cidr.label.input">CIDR (IPv4 / IPv6):</label>
-                    <input type="text" id="cidr-input" autocomplete="off" spellcheck="false" data-i18n-attr="placeholder:cidr.ph.input" placeholder="10.0.0.0/24   or   2001:db8::/32" value="10.0.0.0/24">
+                    <input type="text" id="cidr-input" autocomplete="off" spellcheck="false" data-i18n-attr="placeholder:cidr.ph.input" placeholder="10.0.0.0/24   or   2001:db8::/32" value="10.0.0.0/24" dir="ltr">
                 </div>
 
                 <button id="btn-cidr-decode" class="btn" data-i18n="btn.cidrDecode">Decode</button>
@@ -3052,7 +3064,7 @@
                 <div class="grid-2">
                     <div class="form-group">
                         <label for="pbkdf2-salt" data-i18n="pbkdf2.label.salt">Salt (text or hex)</label>
-                        <input type="text" id="pbkdf2-salt" autocomplete="off" spellcheck="false" value="encryptalotta">
+                        <input type="text" id="pbkdf2-salt" autocomplete="off" spellcheck="false" value="encryptalotta" dir="ltr">
                     </div>
                     <div class="form-group">
                         <label for="pbkdf2-salt-type" data-i18n="pbkdf2.label.saltType">Salt format</label>
@@ -3239,7 +3251,7 @@
 
                 <div class="form-group" style="margin-top: 24px;">
                     <label for="bip39-mnemonic" data-i18n="bip39.label.mnemonic">Mnemonic</label>
-                    <textarea id="bip39-mnemonic" rows="3" autocomplete="off" spellcheck="false" style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace;"></textarea>
+                    <textarea id="bip39-mnemonic" rows="3" autocomplete="off" spellcheck="false" style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace;" dir="ltr"></textarea>
                 </div>
 
                 <button id="btn-bip39-validate" class="btn btn-secondary" data-i18n="btn.bip39Validate">Validate</button>
@@ -3257,7 +3269,7 @@
 
                 <div class="form-group">
                     <label for="base-input" data-i18n="base.label.input">Number</label>
-                    <input type="text" id="base-input" autocomplete="off" spellcheck="false" data-i18n-attr="placeholder:base.ph.input" placeholder="42  or  0x2a  or  0b101010" value="42">
+                    <input type="text" id="base-input" autocomplete="off" spellcheck="false" data-i18n-attr="placeholder:base.ph.input" placeholder="42  or  0x2a  or  0b101010" value="42" dir="ltr">
                 </div>
 
                 <div class="grid-2">
@@ -3847,6 +3859,9 @@
         // Wave 2 covers form labels, alerts, placeholders, and help text.
         // No fetch — keeps CSP `connect-src 'none'`. No innerHTML — uses textContent only.
         const SUPPORTED_LANGS = ['en', 'fr', 'zh-CN', 'de', 'hi'];
+        // Primary subtags written right-to-left (SPEC §1.4 step 2). None ships yet; setLang()
+        // flips <html dir> the moment one joins SUPPORTED_LANGS.
+        const RTL_LANGS = ['ar', 'he', 'fa', 'ur'];
         const DEFAULT_LANG = 'en';
 
         // NATIVE-REVIEW STATUS:
@@ -13657,6 +13672,7 @@
         function setLang(lang) {
             if (!SUPPORTED_LANGS.includes(lang)) lang = DEFAULT_LANG;
             document.documentElement.lang = lang;
+            document.documentElement.dir = RTL_LANGS.includes(lang.split('-')[0]) ? 'rtl' : 'ltr';
             try { localStorage.setItem('lang', lang); } catch (e) { /* ignore */ }
             applyI18n();
             const sel = document.getElementById('lang-select');
@@ -13969,10 +13985,8 @@
 
         // English-only synonyms for the command palette (SPEC §1.6). Whitespace-separated tokens;
         // they augment the localized nav label so a polyglot user typing "swift" finds the BIC tool
-        // and a French user typing "rsa" still finds the key generator. Locale-specific synonyms
-        // (chiffrer / cifrar / verschlüsseln / 加密 / जोड़ें-typing) are deferred until a §1.3
-        // native reviewer is in the loop for each locale — the spec flags this as the single most
-        // error-prone localization gap and explicitly recommends shipping en-only first.
+        // and a French user typing "rsa" still finds the key generator. These stay active in every
+        // locale; TOOL_SYNONYMS_L10N below adds a few current-locale terms on top.
         const TOOL_SYNONYMS = {
             'generate':         'pgp keygen openpgp ecc curve25519 rsa gpg keys keypair',
             'key-info':         'fingerprint inspect parse pgp key viewer openpgp',
@@ -14027,6 +14041,26 @@
             'jwk':              'json web key jwk pem spki convert okp ed25519 x25519 ec rsa rfc7517 rfc8037 jose',
             'csr':              'certificate signing request pkcs10 pkcs#10 rfc2986 subject dn self-signature x.509 csr decoder',
             'qr-decode':        'qr decoder scan read qr-code image png reader inverse decode payload reed-solomon'
+        };
+
+        // Current-locale palette synonyms (SPEC §1.6). Deliberately limited to the encrypt terms
+        // the spec's §1.6 / §1.7 glossary notes vet by name — French "chiffrer" plus the common
+        // calque "crypter" and "coder", German "verschlüsseln" / "chiffrieren" — so the palette
+        // finds the tool however a French or German user phrases it. Broader per-locale lists
+        // stay gated on §1.3 native review; the English TOOL_SYNONYMS always apply as well.
+        const TOOL_SYNONYMS_L10N = {
+            'fr': {
+                'encrypt':          'chiffrer chiffrement crypter coder',
+                'text-crypto':      'chiffrer chiffrement crypter coder',
+                'password-encrypt': 'chiffrer chiffrement crypter coder',
+                'age':              'chiffrer chiffrement crypter coder'
+            },
+            'de': {
+                'encrypt':          'verschlüsseln verschlüsselung chiffrieren',
+                'text-crypto':      'verschlüsseln verschlüsselung chiffrieren',
+                'password-encrypt': 'verschlüsseln verschlüsselung chiffrieren',
+                'age':              'verschlüsseln verschlüsselung chiffrieren'
+            }
         };
 
         function isValidTool(t) { return Object.prototype.hasOwnProperty.call(TOOL_TO_GROUP, t); }
@@ -14151,8 +14185,8 @@
 
         // ==================== Command palette (SPEC §1.6) ====================
         // ⌘K / Ctrl+K opens an overlay search; results filter against tool id, localized label,
-        // and English synonyms (TOOL_SYNONYMS). Locale folding via toLocaleLowerCase(lang) so the
-        // German user typing "Verschlüsseln" matches just as well as one typing "verschlüsseln".
+        // English synonyms (TOOL_SYNONYMS) and current-locale synonyms (TOOL_SYNONYMS_L10N).
+        // Locale folding via toLocaleLowerCase(lang) so the German user typing "Verschlüsseln" matches just as well as one typing "verschlüsseln".
         const palette = {
             overlay: document.getElementById('palette-overlay'),
             panel:   document.getElementById('palette'),
@@ -14187,7 +14221,7 @@
             const matches = [];
             for (const tool of TOOL_ORDER) {
                 const label = t('nav.tool.' + tool) || tool;
-                const syn = TOOL_SYNONYMS[tool] || '';
+                const syn = (TOOL_SYNONYMS[tool] || '') + ' ' + ((TOOL_SYNONYMS_L10N[lang] || {})[tool] || '');
                 const haystack = norm(tool + ' ' + label + ' ' + syn);
                 if (terms.length === 0 || terms.every(term => haystack.includes(term))) {
                     matches.push({ tool, label });

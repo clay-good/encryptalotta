@@ -90,6 +90,8 @@ Language is auto-detected from `navigator.language` on first visit, persisted in
 
 **Pre-rendered SEO variants.** `/fr/`, `/zh/`, `/de/`, `/hi/` are generated as static HTML by `scripts/build-i18n-variants.js`. Each variant carries a localized `<meta name="description">`, OpenGraph / Twitter `title` + `description`, and a per-variant `<link rel="canonical">` / `og:url` / `twitter:url`. Social-share locale is localized too: each variant sets `og:locale` to its own locale (`fr_FR`, `zh_CN`, `de_DE`, `hi_IN`) and lists the other four — including `en_US` — as `og:locale:alternate`, so a shared `/fr/` link previews as French rather than English. The source `index.html` declares `<link rel="alternate" hreflang>` for all five locales plus `x-default`. Long compound words in localized headings (e.g. German `Dateiverschlüsselung`) wrap rather than overflow on narrow viewports via `overflow-wrap: break-word`.
 
+**RTL- and CJK-ready.** No right-to-left locale ships yet, but the layout is ready for one (`SPEC-INTERNATIONAL.md` §1.4). Every CSS rule uses logical properties (`inset-inline-end`, `margin-inline-start`, `text-align: start`). Switching to an RTL language sets `<html dir="rtl">` at runtime, and the variant build emits the same attribute. The tool-card `→` arrow mirrors. Code and crypto output (`pre` / `code` / `output`, PGP armor, hex, JSON) stays left-to-right, and code-like inputs (keys, regex, cron, JWT, PEM, salts) carry `dir="ltr"`. For CJK, Korean gets `word-break: keep-all` and Chinese / Japanese get `line-break: strict`; `keep-all` would stop unspaced ideographs from wrapping. The command palette also takes a few vetted current-locale synonyms (French `chiffrer` / `crypter`, German `verschlüsseln` / `chiffrieren`) on top of the English ones. Coverage is in [tests/specs/19-rtl-i18n.spec.js](tests/specs/19-rtl-i18n.spec.js).
+
 **Native-review tooling.** `scripts/export-strings-csv.js` produces `i18n/strings.csv` (key, en, fr, zh-CN, de, hi, plus per-locale status columns) for native reviewers. `scripts/import-strings-csv.js` round-trips edits back into the inline `STRINGS` literal in `index.html`. The `en` column is treated as source of truth and is not overwritten.
 
 ### Security & Privacy
@@ -138,7 +140,7 @@ The only time the network is touched is the initial GET that loads the page and 
 ```
 index.html
 ├─ <meta CSP>            connect-src 'none'; frame-ancestors 'none'; …
-├─ inline <style>        CSS logical properties (RTL-ready), no external sheet
+├─ inline <style>        CSS logical properties + RTL / CJK rules, no external sheet
 ├─ STRINGS {}            2,124 keys × 5 locales — i18n table, vendored inline
 ├─ tool registry         53 tools → {id, group, route, render()}
 │    ├─ Keys (12)        OpenPGP.js · hand-rolled ASN.1/DER reader · CSR (PKCS#10)
