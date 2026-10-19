@@ -43,6 +43,8 @@ const OUT = path.join(ROOT, 'RELEASES.md');
 // shipped files.
 const SHIPPED = [
     'index.html',
+    'privacy.html',
+    'sw.js',
     'fr/index.html',
     'zh/index.html',
     'de/index.html',

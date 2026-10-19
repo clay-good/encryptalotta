@@ -724,13 +724,15 @@ Codeberg is an EU-based (Germany), non-profit Forgejo instance. Many EU public-s
 - Add a `git remote` so pushes go to both GitHub and Codeberg.
 - Mention both URLs in README and footer.
 
-### 4.2 Reproducible release manifest — **✅ generator shipped (draft 6); signing deferred**
+### 4.2 Reproducible release manifest — **✅ generator (draft 6) + minisign signing (draft 306)**
 
 - Each tagged release publishes a `RELEASES.md` line with the SHA-256 of every shipped file (or a single SHA-256 of a deterministic tarball).
 - Sign the manifest with a project minisign or sigstore key. Publish the public key in `SECURITY.md` and in the README.
 - The build is essentially "copy files + run `build-i18n-variants.js` + run `build-sitemap.js`"; reproducibility is trivial.
 
 **Status notes (draft 6):** `scripts/build-release-manifest.js` shipped. Generates an append-only `RELEASES.md` with the SHA-256 of every shipped file (index.html, the four locale variants, the four vendored .js libraries, all icons, sitemap.xml, robots.txt, _headers, site.webmanifest, plus optional artifacts encryptalotta-portable.html and sbom.json). Each entry records the git commit, tag (if any), working-tree cleanliness flag, and a manifest-fingerprint SHA-256 of all per-file hashes. RELEASES.md itself is *not* committed in this round — maintainers will regenerate at tagged-release time when the working tree is clean and the fingerprint is meaningful. Signing the manifest with minisign/sigstore is still deferred.
+
+**Status notes (draft 306):** Signing has shipped, with minisign (Ed25519) rather than sigstore. A keyless sigstore flow ties signatures to an OIDC identity and a public transparency log, which cuts against the project's offline, no-third-party stance. The release key is `1A2AA423F08EDA85` (`RWSF2o7wI6QqGgABIako11R3e1+V9trHpv6k0b4vNPw/Q/qXnRXTtVX0`), committed as `minisign.pub` and pinned in SECURITY.md and the README. The secret key is passphrase-encrypted (scrypt) and kept offline by the maintainer; it never enters the repo, and `*.key` is gitignored. `RELEASES.md` and `RELEASES.md.minisig` are now committed. `scripts/verify-release-signature.js` is a minisign verifier built on Node built-ins only, interop-tested against minisign 0.12 fixtures (prehashed and legacy signatures, tampered file, tampered trusted comment, wrong key). Audit gate 19 checks three things on every commit and in CI: the manifest signature verifies, the three key copies agree, and no secret key is tracked (detected structurally, by a 158-byte `Ed` blob).
 
 ### 4.3 Software Bill of Materials (SBOM) — **✅ shipped (draft 6)**
 
@@ -1158,7 +1160,7 @@ Full suite: 247 → 250 passed. Audit OK. No new vendored deps, no CSP change, t
 ### Phase 5 — Distribution and sovereignty
 
 1. Codeberg mirror (§4.1).
-2. ✅ Reproducible release manifest (§4.2) — generator shipped draft 6; signing deferred.
+2. ✅ Reproducible release manifest (§4.2) — generator shipped draft 6; minisign signing shipped draft 306.
 3. ✅ SBOM (§4.3) — shipped draft 6.
 4. ✅ Single-file portable build (§4.6) — shipped draft 6.
 5. ✅ PWA precache (§4.5) — shipped draft 9.

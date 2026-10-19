@@ -11,6 +11,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
+import { execSync } from 'node:child_process';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const FX = path.join(ROOT, 'tests/fixtures/minisign');
@@ -48,6 +49,17 @@ test('minisign: a signature from a different key is rejected by key id', () => {
 test('minisign: malformed inputs are reported, not thrown', () => {
   expect(verifyMinisign(read('msg.txt'), 'junk', text('test.pub')).error).toBe('malformed signature');
   expect(verifyMinisign(read('msg.txt'), text('msg.txt.minisig'), 'junk').error).toBe('malformed public key');
+});
+
+test('release: the manifest covers every deployed file in the repo', () => {
+  // Anything tracked outside the dev-only trees ships to the static host, so it must be
+  // hashed in RELEASES.md. sw.js and privacy.html were missing until draft 306.
+  const src = fs.readFileSync(path.join(ROOT, 'scripts/build-release-manifest.js'), 'utf8');
+  const listed = new Set([...src.matchAll(/^\s+'([^']+)',?$/gm)].map(m => m[1]));
+  const tracked = execSync('git ls-files', { cwd: ROOT, encoding: 'utf8' }).split('\n').filter(Boolean);
+  const deployed = tracked.filter(f => !/^(tests|scripts|i18n|\.github)\//.test(f) && !/(^|\/)\.[^/]+$/.test(f)
+    && !/\.md$/.test(f) && !['LICENSE', 'minisign.pub', 'RELEASES.md.minisig'].includes(f));
+  expect(deployed.filter(f => !listed.has(f))).toEqual([]);
 });
 
 test('release: if RELEASES.md is committed it verifies against minisign.pub', () => {

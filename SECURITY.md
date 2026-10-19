@@ -86,7 +86,8 @@ for a fuller treatment:
 Each tagged release publishes:
 
 - `RELEASES.md` with the SHA-256 of every shipped file (run
-  `node scripts/build-release-manifest.js` on a clean clone to verify).
+  `node scripts/build-release-manifest.js` on a clean clone to verify),
+  signed as `RELEASES.md.minisig` (see [Release signing](#release-signing)).
 - `sbom.json` (CycloneDX 1.5) listing every vendored library with SHA-256 /
   -384 / -512 hashes (run `node scripts/build-sbom.js` to regenerate).
 - `encryptalotta-portable.html` — the entire site as a single file (run
@@ -94,6 +95,25 @@ Each tagged release publishes:
   modulo input mtimes).
 
 All three are reproducible from a clean clone with no network access.
+
+## Release signing
+
+`RELEASES.md` is signed with [minisign](https://jedisct1.github.io/minisign/) (Ed25519). The project's release public key is:
+
+```
+untrusted comment: minisign public key 1A2AA423F08EDA85
+RWSF2o7wI6QqGgABIako11R3e1+V9trHpv6k0b4vNPw/Q/qXnRXTtVX0
+```
+
+It is also committed as `minisign.pub` and pinned in the README. If these three ever disagree, treat the release as untrusted and report it. To verify:
+
+```bash
+minisign -Vm RELEASES.md -P RWSF2o7wI6QqGgABIako11R3e1+V9trHpv6k0b4vNPw/Q/qXnRXTtVX0
+# or, with no minisign installed (Node built-ins only):
+node scripts/verify-release-signature.js
+```
+
+`scripts/audit-release.js` runs the same verification on every commit and in CI. It also confirms that this key is pinned here and in the README, and that no minisign secret key is tracked in git. The secret key stays offline with the maintainer, encrypted with a passphrase. A key rotation would be announced in this file and signed with the outgoing key.
 
 ## Auditing
 

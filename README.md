@@ -846,6 +846,24 @@ done
 
 Compare each output against the [Manifest](#manifest) above.
 
+**Release manifest signature.** `RELEASES.md`, which lists the SHA-256 of every shipped file, is signed with minisign. The release public key is key ID `1A2AA423F08EDA85`:
+
+```
+RWSF2o7wI6QqGgABIako11R3e1+V9trHpv6k0b4vNPw/Q/qXnRXTtVX0
+```
+
+```bash
+minisign -Vm RELEASES.md -P RWSF2o7wI6QqGgABIako11R3e1+V9trHpv6k0b4vNPw/Q/qXnRXTtVX0
+node scripts/verify-release-signature.js   # same check, Node built-ins only
+```
+
+The same key is in [SECURITY.md](SECURITY.md#release-signing) and `minisign.pub`, and the audit fails if any copy drifts. To cut a signed release, regenerate the manifest on a clean tree, then sign it with the offline key:
+
+```bash
+node scripts/build-release-manifest.js
+minisign -Sm RELEASES.md -s ~/.minisign/encryptalotta.key -t "encryptalotta RELEASES.md @ $(git rev-parse --short HEAD)"
+```
+
 ---
 
 ## Deployment
