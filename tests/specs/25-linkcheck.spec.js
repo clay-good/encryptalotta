@@ -16,7 +16,9 @@ async function inspect(page, link, lang) {
   await page.fill('#linkcheck-input', link);
   await page.click('#btn-linkcheck-run');
   await expect(page.locator('#linkcheck-results')).toBeVisible();
-  const level = await page.locator('#linkcheck-verdict').getAttribute('data-level').catch(() => null);
+  // Error results render no verdict; don't wait out the action timeout looking for one.
+  const v = page.locator('#linkcheck-verdict');
+  const level = (await v.count()) ? await v.getAttribute('data-level') : null;
   return { level, text: (await page.locator('#linkcheck-results').textContent()).replace(/\s+/g, ' ') };
 }
 

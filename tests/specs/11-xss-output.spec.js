@@ -52,6 +52,7 @@ function craftJwt() {
 // Each target: how to fill its input(s) + the button that renders output.
 const TARGETS = [
   { tool: 'url',     fill: p => p.fill('#url-input', 'https://e.com/' + XSS + '?q=' + XSS), act: '#btn-url-parse' },
+  { tool: 'mailhdr', fill: p => p.fill('#mailhdr-input', 'From: "' + XSS + '" <x@' + XSS + '.example>\nSubject: ' + XSS + '\nReply-To: ' + XSS + '@r.example\nReceived: from ' + XSS + ' by mx; Mon, 19 Oct 2026 10:00:00 +0000'), act: '#btn-mailhdr-run' },
   { tool: 'linkcheck', fill: p => p.fill('#linkcheck-input', 'https://' + XSS + '@e.com/' + XSS + '.pdf.exe'), act: '#btn-linkcheck-run' },
   { tool: 'linkclean', fill: p => p.fill('#linkclean-input', 'see https://e.com/' + XSS + '?utm_source=' + XSS + '&k=' + XSS + ' ' + XSS), act: '#btn-linkclean-run' },
   { tool: 'regex',   fill: async p => { await p.fill('#regex-pattern', '.+'); await p.fill('#regex-input', XSS); }, act: '#btn-regex-run' },

@@ -1,0 +1,10 @@
+Authentication-Results: mx.example.net; spf=softfail smtp.mailfrom=evil.example;
+ dkim=none; dmarc=fail (p=NONE) header.from=evil.example
+Received: from mail.evil.example (mail.evil.example [203.0.113.9])
+ by mx.example.net; Mon, 19 Oct 2026 10:00:00 +0000
+Return-Path: <bounce@evil.example>
+From: "service@paypal.com" <alerts@evil.example>
+Reply-To: billing@collect.example
+Subject: =?iso-8859-1?Q?Votre_compte_est_suspendu_=E0_cause?=
+ =?iso-8859-1?Q?_d=27une_activit=E9?=
+Date: Mon, 12 Oct 2026 10:00:00 +0000

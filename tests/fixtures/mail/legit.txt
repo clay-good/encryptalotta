@@ -1,0 +1,19 @@
+Delivered-To: me@gmail.com
+Received: by 2002:a05:6a10:1234 with SMTP id abc;
+        Mon, 19 Oct 2026 10:00:05 -0700 (PDT)
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@github.com header.s=pf2023 header.b=abc;
+       spf=pass (google.com: domain of noreply@github.com designates 192.30.252.201 as permitted sender) smtp.mailfrom=noreply@github.com;
+       dmarc=pass (p=REJECT sp=REJECT dis=NONE) header.from=github.com
+Received: from out-21.smtp.github.com (out-21.smtp.github.com. [192.30.252.201])
+        by mx.google.com with ESMTPS id x;
+        Mon, 19 Oct 2026 10:00:04 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=github.com;
+	s=pf2023; h=from:to; bh=x; b=y
+Date: Mon, 19 Oct 2026 10:00:02 -0700
+From: GitHub <noreply@github.com>
+To: me@gmail.com
+Message-ID: <abc@github.com>
+Subject: =?UTF-8?B?W0dpdEh1Yl0g8J+OiSBXZWxjb21l?=
+
+Hello body: not a header: line

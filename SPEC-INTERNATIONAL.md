@@ -715,6 +715,29 @@ The companion to §2.14. Paste a suspicious link (from an email, a message, or a
 
 `tests/specs/25-linkcheck.spec.js` has 10 cases: Cyrillic "apple", a swapped letter, legitimate IDNs untouched, userinfo / IP / http / shortener / double-extension / javascript:, a wrapper hiding a spoof, the honest clean verdict, errors, French, Enter key plus palette, and 320 px. There is also one XSS case. The engine was first unit-tested in Node (24 cases).
 
+
+### 2.16 Email Header Analyzer (sender-authentication check) — **✅ shipped (draft 311)**
+
+This completes the phishing kit begun in §2.14 / §2.15: "is this email really from who it says?" Paste the raw headers ("Show original" in Gmail; the placeholder names where Gmail, Outlook, and Apple Mail keep them). Everything is analyzed offline.
+
+- **Parsing:** RFC 5322 header unfolding, stopping at the body, and RFC 2047 encoded-word decoding (B and Q, any `TextDecoder` charset, adjacent words joined). Addresses come from the `"Name" <addr>`, `addr (comment)`, and bare forms.
+- **Authentication:** SPF / DKIM / DMARC (and ARC) are read from the **topmost** `Authentication-Results`, the one the user's own provider added. Lower copies can be injected by the sender, so they are ignored and their presence is reported. `Received-SPF` is used as a fallback. Results are **not re-verified**, since that needs DNS; the info panel says so.
+- **Alignment:** the DKIM signing domains (from `header.d` and `DKIM-Signature d=`) are compared with the From domain. This uses an organizational-domain approximation (exact or subdomain match), because no Public Suffix List is shipped.
+- **The pass verdict is strict.** It appears only on DMARC pass or aligned DKIM pass. SPF alone gives "didn't confirm the From domain", because SPF checks the envelope sender, not the visible From. Even on a pass, the verdict says it "shows who sent it, not that the content is safe".
+- **Spoofing signs:**
+  - a display name containing a different address or domain (`"service@paypal.com" <alerts@evil.example>`);
+  - a Reply-To on another domain;
+  - a Return-Path on another domain (info only, since it's normal for mailing services);
+  - a Date header more than a day from the first `Received`.
+- **Relay path:** `Received` headers reversed into chronological hops, with sending IP and per-hop delay. Delays are formatted with `Intl.NumberFormat` unit style ("1 sec", "2 hr", localized). Slow hops use a CLDR plural group (`mailhdr.f.slowHop.one/.other`).
+- **Size:** 41 STRINGS × 5 locales plus 5 en SEO keys. Tool count goes from 55 to 56.
+
+`tests/specs/26-mailhdr.spec.js` has 9 cases with fixtures in `tests/fixtures/mail/`: aligned pass, a phish flagged on five axes, no-auth, SPF-only, an injected second Authentication-Results, plural slow hops, errors, French, and palette plus 320 px. There is also one XSS case. The engine was unit-tested in Node first (15 cases).
+
+**Incidental site-wide fixes (same draft):**
+- **Phone layout of result rows:** the shared key/value renderer (`tlsRenderRow`, 796 call sites, used by almost every inspector tool) had a fixed 200 px label column. On a phone that left values about 90 px wide, and `word-break: break-all` then split even prose mid-word. The rows are now `.kv-*` CSS classes. Below 560 px the label stacks above the value, and values use `overflow-wrap: anywhere`: long tokens still wrap, words stay whole. The desktop layout is unchanged; screenshots were checked at 390 and 1200 px.
+- **Test helpers:** the Link Safety and Email Header specs waited out the 10 s action timeout looking for a verdict that error results never render. They now check for the element first, taking those tests from 11–21 s to 1.5 s.
+
 ---
 
 ## 3. Regulator presets — **✅ shipped in PGP key generator (draft 5) + PBKDF2 tool (draft 10) + Argon2 tool (draft 291, with §2.9)**
