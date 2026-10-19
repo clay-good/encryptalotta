@@ -1,0 +1,35 @@
+name: Mirror to Codeberg
+
+# SPEC-INTERNATIONAL.md §4.1: keep an EU-hosted (Codeberg, Germany) mirror of
+# main + tags for users who prefer it for jurisdictional reasons.
+#
+# Inert until the maintainer opts in: scripts/mirror-to-codeberg.sh exits 0
+# with "skipped" unless both the CODEBERG_TOKEN secret and the CODEBERG_REPO
+# repository variable are set. It never force-pushes or deletes refs.
+
+on:
+  push:
+    branches: [main]
+    tags: ['*']
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mirror-codeberg
+  cancel-in-progress: false
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Push main + tags to Codeberg
+        env:
+          CODEBERG_TOKEN: ${{ secrets.CODEBERG_TOKEN }}
+          CODEBERG_REPO: ${{ vars.CODEBERG_REPO }}
+        run: bash scripts/mirror-to-codeberg.sh

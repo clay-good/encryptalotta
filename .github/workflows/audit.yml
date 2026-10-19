@@ -13,11 +13,13 @@ name: Audit (release gate)
 #   - page-weight budget (<= 2 MB gzipped)     - locale-variant /<lang>/ sync
 #   - robots.txt / sitemap.xml / JSON-LD       - SBOM + portable-build presence
 #   - SEO prose key coverage                   - regulator-preset freshness
+#   - signed RELEASES.md (minisign) + no       - PWA manifest icons + advertised
+#     secret key tracked in git                  tool count = TOOL_ORDER
 #
 # The audit uses only Node built-ins (fs / path / crypto / zlib) — no npm install,
 # no browser, no network — so the job runs in seconds and is deterministic (never
-# flaky). The Playwright end-to-end suite (tests/, ~775 serial cases, workers:1,
-# ~14 min–1.8 h) and the responsive-overflow sweep stay a local / manual gate by
+# flaky). The Playwright end-to-end suite (tests/, ~1,100 serial cases, workers:1,
+# ~22 min) and the responsive-overflow sweep stay a local / manual gate by
 # design; trigger them with `cd tests && npm ci && npx playwright test`.
 #
 # Runs in GitHub Actions only. The shipped site never makes a network call, so this

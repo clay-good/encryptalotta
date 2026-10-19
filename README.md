@@ -810,6 +810,16 @@ node scripts/build-release-manifest.js  # → RELEASES.md (append-only)
 
 All three scripts are deterministic: re-running with unchanged inputs produces byte-identical output, so they're safe to wire into a release pipeline. The audit cross-checks `sbom.json` hashes against the on-disk vendored bytes — if you update a vendored library and forget to regenerate the SBOM, the next commit's audit will fail.
 
+### Codeberg mirror (optional)
+
+`.github/workflows/mirror-codeberg.yml` mirrors `main` and tags to Codeberg, an EU-hosted Forgejo instance. It does nothing until you opt in:
+
+1. Create an empty repository on codeberg.org.
+2. Create a Codeberg access token with repository write scope.
+3. In GitHub, go to **Settings → Secrets and variables → Actions**. Add the secret `CODEBERG_TOKEN`, and add the variable `CODEBERG_REPO` set to `owner/repo`.
+
+It never force-pushes or deletes refs. If the mirror diverges, the job fails instead of overwriting it.
+
 ### Pre-commit hook (recommended)
 
 Install the versioned hook on a fresh clone so `audit-release.js` runs on every commit:

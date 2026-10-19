@@ -716,13 +716,15 @@ Each preset:
 
 These changes do not touch the codebase; they touch how the project is published and discovered.
 
-### 4.1 Mirror on Codeberg
+### 4.1 Mirror on Codeberg — **🟡 automation shipped (draft 308); awaiting maintainer activation**
 
 Codeberg is an EU-based (Germany), non-profit Forgejo instance. Many EU public-sector and activist users prefer it for jurisdictional reasons.
 
 - Push a mirror to `codeberg.org/<user>/encryptalotta`.
 - Add a `git remote` so pushes go to both GitHub and Codeberg.
 - Mention both URLs in README and footer.
+
+**Status notes (draft 308): mirror automation shipped; activation is the maintainer's step.** `.github/workflows/mirror-codeberg.yml` runs `scripts/mirror-to-codeberg.sh` on every push to `main`, on every tag, and on demand. It is inert, logging "skipped" and exiting 0, until the `CODEBERG_TOKEN` secret and `CODEBERG_REPO` variable (`owner/repo`) are both set. It pushes `main` and tags only, never `--force` or `--mirror`, so nothing on Codeberg is deleted or rewritten, and a diverged mirror fails loudly. The source of `main` is `origin/main`, because a tag-triggered checkout is detached and a local `main` can be stale (testing caught this). The token is passed in an `http.extraHeader`, never in the URL, and `CODEBERG_REPO` is validated as `owner/repo`. Tested locally against a bare repo: unconfigured run skips; malformed repo name is rejected; push lands main at HEAD; rerun is a no-op; tags propagate; diverged mirror is refused and left unchanged. The remaining items are the maintainer's: create the Codeberg repo, add the secret and variable, and list the Codeberg URL in the README and footer once it is live. Not yet done: those steps, and the acceptance criterion "mirror pushes succeed automatically on tag", which can only be confirmed after activation.
 
 ### 4.2 Reproducible release manifest — **✅ generator (draft 6) + minisign signing (draft 306)**
 
@@ -1161,7 +1163,7 @@ Full suite: 247 → 250 passed. Audit OK. No new vendored deps, no CSP change, t
 
 ### Phase 5 — Distribution and sovereignty
 
-1. Codeberg mirror (§4.1).
+1. 🟡 Codeberg mirror (§4.1) — automation shipped draft 308; activation (Codeberg repo + `CODEBERG_TOKEN` / `CODEBERG_REPO`) is the maintainer's step.
 2. ✅ Reproducible release manifest (§4.2) — generator shipped draft 6; minisign signing shipped draft 306.
 3. ✅ SBOM (§4.3) — shipped draft 6.
 4. ✅ Single-file portable build (§4.6) — shipped draft 6.
