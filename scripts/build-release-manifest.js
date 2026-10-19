@@ -54,6 +54,8 @@ const SHIPPED = [
     'secrets.min.js',
     'js-yaml.min.js',
     'apple-touch-icon.png',
+    'icon-192.png',
+    'icon-512.png',
     'favicon-16x16.png',
     'favicon-32x32.png',
     'favicon.ico',

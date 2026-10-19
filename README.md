@@ -100,7 +100,7 @@ Language is auto-detected from `navigator.language` on first visit, persisted in
 - **100% Client-Side** - All operations happen in your browser
 - **No Server Uploads** - Your files and keys never leave your device
 - **Open Source** - Audit the code yourself
-- **Works Offline** - Download and use without internet connection. A minimal service worker (`sw.js`) precaches the shell on first visit. It is network-first: online loads always get the current files, including vendored-library security patches, and the cached copy is the fallback when you're offline.
+- **Works Offline** - Download and use without internet connection. A minimal service worker (`sw.js`) precaches the shell on first visit. It is network-first: online loads always get the current files, including vendored-library security patches, and the cached copy is the fallback when you're offline. It's also installable as an app (standalone window, 192 / 512 px and maskable icons).
 
 ---
 

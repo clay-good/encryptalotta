@@ -20,7 +20,7 @@
 // `connect-src 'self'` so install-time fetch() works. The document CSP
 // (`connect-src 'none'`) is unchanged and continues to apply to index.html.
 
-const CACHE = 'encryptalotta-shell-v2';
+const CACHE = 'encryptalotta-shell-v3';
 
 const SHELL = [
     '/',
@@ -42,6 +42,8 @@ const SHELL = [
     '/favicon-16x16.png',
     '/favicon-32x32.png',
     '/apple-touch-icon.png',
+    '/icon-192.png',
+    '/icon-512.png',
     '/site.webmanifest'
 ];
 

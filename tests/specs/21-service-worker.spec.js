@@ -32,15 +32,15 @@ async function installSw(page) {
 
 test.afterEach(() => { try { fs.unlinkSync(PROBE); } catch (e) { /* not created */ } });
 
-test('sw: installs the v2 shell cache and drops obsolete caches', async ({ page }) => {
+test('sw: installs the v3 shell cache and drops obsolete caches', async ({ page }) => {
   await installSw(page);
   const r = await page.evaluate(async () => {
     const keys = await caches.keys();
-    const cache = await caches.open('encryptalotta-shell-v2');
+    const cache = await caches.open('encryptalotta-shell-v3');
     const urls = (await cache.keys()).map(q => new URL(q.url).pathname);
     return { keys, hasPgp: urls.includes('/openpgp.min.js'), hasIndex: urls.includes('/index.html'), count: urls.length };
   });
-  expect(r.keys).toEqual(['encryptalotta-shell-v2']);
+  expect(r.keys).toEqual(['encryptalotta-shell-v3']);
   expect(r.hasPgp).toBe(true);
   expect(r.hasIndex).toBe(true);
   expect(r.count).toBeGreaterThanOrEqual(20);
@@ -77,4 +77,19 @@ test('sw: offline requests fall back to the cached copy', async ({ page, context
   } finally {
     await context.setOffline(false);
   }
+});
+
+test('pwa: Chromium reports the site installable (no installability errors)', async ({ page }) => {
+  // SPEC §8 Phase 5: "PWA install prompt fires on Chrome". Ask Chromium directly via
+  // DevTools: with the SW controlling the page, Page.getInstallabilityErrors must be
+  // empty and the manifest must parse cleanly. (Chromium 147 no longer needs 192/512
+  // px icons to install; audit gate 20 enforces those sizes separately.)
+  await installSw(page);
+  await page.reload();
+  const cdp = await page.context().newCDPSession(page);
+  const { installabilityErrors } = await cdp.send('Page.getInstallabilityErrors');
+  expect(installabilityErrors.map(e => e.errorId)).toEqual([]);
+  const { url, errors } = await cdp.send('Page.getAppManifest');
+  expect(url).toMatch(/\/site\.webmanifest$/);
+  expect(errors).toEqual([]);
 });

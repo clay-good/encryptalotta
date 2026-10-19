@@ -448,6 +448,65 @@ const isSeoEnOnly = (k) => SEO_EN_ONLY_RE.test(k);
     }
 }
 
+// ----- 20. PWA installability + advertised tool count -----
+// The manifest must be installable (standalone display, start_url, names) and
+// carry 192 + 512 px PNG icons — the sizes Android uses for the home-screen
+// icon and splash screen (with only 16/32/180 it upscaled the 180). Current
+// Chrome installs without them, so this is a quality gate, not a hard install
+// blocker. And every place that advertises "N tools" must say the real
+// TOOL_ORDER count — the manifest and titles sat at 36 while 53 shipped.
+{
+    const pngSize = f => {
+        const b = fs.readFileSync(f);
+        if (b.length < 24 || b.toString('latin1', 1, 4) !== 'PNG') return null;
+        return `${b.readUInt32BE(16)}x${b.readUInt32BE(20)}`;
+    };
+    let ok = true;
+    let manifest = null;
+    try { manifest = JSON.parse(fs.readFileSync(path.join(ROOT, 'site.webmanifest'), 'utf8')); }
+    catch (e) { fail('PWA manifest', 'site.webmanifest missing or not JSON: ' + e.message); ok = false; }
+    if (manifest) {
+        if (!['standalone', 'fullscreen', 'minimal-ui'].includes(manifest.display)) { fail('PWA manifest', `display "${manifest.display}" is not installable`); ok = false; }
+        if (!manifest.start_url || !manifest.name || !manifest.short_name) { fail('PWA manifest', 'start_url / name / short_name missing'); ok = false; }
+        for (const need of ['192x192', '512x512']) {
+            const icon = (manifest.icons || []).find(i => i.sizes === need && (i.purpose || 'any').split(' ').includes('any'));
+            if (!icon) { fail('PWA manifest', `no ${need} "any" icon (Android home-screen / splash size)`); ok = false; continue; }
+            const f = path.join(ROOT, icon.src.replace(/^\//, ''));
+            const real = fs.existsSync(f) ? pngSize(f) : null;
+            if (real !== need) { fail('PWA manifest', `${icon.src} is ${real || 'missing'}, manifest says ${need}`); ok = false; }
+        }
+        for (const icon of manifest.icons || []) {
+            const f = path.join(ROOT, icon.src.replace(/^\//, ''));
+            if (!fs.existsSync(f)) { fail('PWA manifest', `icon ${icon.src} missing on disk`); ok = false; }
+        }
+    }
+    if (ok) pass('PWA manifest', 'standalone, start_url, 192 + 512 px PNG icons match their declared sizes');
+
+    const ts = html.indexOf('const TOOL_ORDER');
+    let count = 0;
+    if (ts >= 0) {
+        const after = html.slice(ts), lb = after.indexOf('['), rb = after.indexOf('];', lb);
+        try { count = new Function('return ' + after.slice(lb, rb + 1))().length; } catch (e) { /* leave 0 */ }
+    }
+    if (!count) warn('tool count', 'TOOL_ORDER not extracted — skipping advertised-count check');
+    else {
+        const claims = [];
+        if (manifest) claims.push(['site.webmanifest name', manifest.name], ['site.webmanifest description', manifest.description]);
+        for (const [label, re] of [['og:title', /property="og:title" content="([^"]*)"/], ['twitter:title', /property="twitter:title" content="([^"]*)"/],
+                                   ['meta description', /<meta name="description" content="([^"]*)"/]]) {
+            const m = re.exec(html); if (m) claims.push([label, m[1]]);
+        }
+        for (const lang of Object.keys(STRINGS)) if (STRINGS[lang]["meta.title"]) claims.push([`STRINGS.${lang} meta.title`, STRINGS[lang]["meta.title"]]);
+        const wrong = [];
+        for (const [label, text] of claims) {
+            const m = /(?:^|[^\d.–-])(\d{2})(?![\d.–-])/.exec(text || '');
+            if (m && Number(m[1]) !== count) wrong.push(`${label} says ${m[1]}`);
+        }
+        if (wrong.length) fail('tool count', `TOOL_ORDER has ${count}; ${wrong.join('; ')}`);
+        else pass('tool count', `${claims.length} advertised counts all match TOOL_ORDER (${count})`);
+    }
+}
+
 console.log('');
 if (failed > 0) {
     console.log(`AUDIT FAILED — ${failed} error(s)${warned ? ', ' + warned + ' warning(s)' : ''}.`);
