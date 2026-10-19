@@ -695,6 +695,26 @@ Goes beyond the Europe-specific list. It's a privacy tool that every visitor can
 
 **Incidental site-wide fix (same draft):** the global `input { width: 100%; padding }` rule was also applied to checkboxes and radios, so every checkbox floated in a 54–122 px box (HMAC, Diff, CSV, Passwords, Strength, …). A scoped `input[type=checkbox|radio] { width: auto; padding: 0 }` rule fixes them, and sampled checkboxes now measure 13 px.
 
+### 2.15 Link Safety Inspector (phishing-trick detector) — **✅ shipped (draft 310)**
+
+The companion to §2.14. Paste a suspicious link (from an email, a message, or a decoded QR code) and it shows where the link really goes and lists the deception visible in it, offline. The link is never opened, and there is no DNS, certificate, or reputation lookup. So a clean result is worded as "no deception visible in the link — this doesn't prove the site is safe", never as "safe".
+
+- **What it detects:**
+  - IDN lookalikes. Hostnames are decoded with a hand-rolled RFC 3492 punycode decoder; the URL API exposes only the `xn--` form. It is checked against the RFC's §7.1 samples. `xn--80ak6aa92e.com` shows as Cyrillic "аррӏе.com", which imitates "apple".
+  - Mixed-script labels, checked against the UTS #39 "highly restrictive" profile. Latin may combine with Han / Kana or Han / Hangul, so legitimate Japanese and Korean names pass. Whole-script confusables are found through a ~40-entry Cyrillic / Greek → Latin skeleton map.
+  - The `trusted.com@evil.example` userinfo trick.
+  - Raw IP hosts, including decimal forms such as `http://3232235521`, which normalizes to 192.168.0.1.
+  - Plain http, non-standard ports, and link shorteners (the destination is hidden).
+  - Redirect wrappers, reusing §2.14's table, with the hops listed.
+  - Program downloads, plus documents disguised with a double extension (`invoice.pdf.exe`).
+  - `javascript:` / `data:` / `file:` schemes.
+- **Legitimate IDNs are not flagged** (münchen.de, 日本語.jp); they get an informational note with the decoded name.
+- **Host syntax check:** a host must be ASCII LDH labels or a bracketed IPv6 literal after IDNA. Chromium percent-encodes junk like `exa mple.com` where Node throws, and the explicit check makes behavior identical across engines. Testing caught this.
+- **Localization:** script names come from `Intl.DisplayNames` (`type: 'script'`), so French shows "cyrillique". 28 STRINGS × 5 locales (en/fr/de reviewed; zh-CN/hi machine-quality drafts). Tool count goes from 54 to 55.
+- **Design:** the monochrome palette is kept. Severity is carried by ✗ / ⚠ / ✓ symbols and weight, not color.
+
+`tests/specs/25-linkcheck.spec.js` has 10 cases: Cyrillic "apple", a swapped letter, legitimate IDNs untouched, userinfo / IP / http / shortener / double-extension / javascript:, a wrapper hiding a spoof, the honest clean verdict, errors, French, Enter key plus palette, and 320 px. There is also one XSS case. The engine was first unit-tested in Node (24 cases).
+
 ---
 
 ## 3. Regulator presets — **✅ shipped in PGP key generator (draft 5) + PBKDF2 tool (draft 10) + Argon2 tool (draft 291, with §2.9)**

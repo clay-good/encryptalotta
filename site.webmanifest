@@ -1,7 +1,7 @@
 {
-  "name": "encryptalotta — 54 free client-side privacy and developer tools",
+  "name": "encryptalotta — 55 free client-side privacy and developer tools",
   "short_name": "encryptalotta",
-  "description": "Free, client-side privacy and developer toolbox with 54 tools that run entirely in your browser: PGP encryption / decryption / signing / verification, age file encryption, X.509 / CSR / ASN.1 / SSH / JWK key tools, QR encode / decode, HMAC, JWT, TOTP / HOTP, PBKDF2 / scrypt / Argon2, SHA-2 / SHA-3 / BLAKE hashing, encoding, IBAN / BIC / VAT / SEPA / e-invoice inspectors, Shamir secret sharing, EXIF eraser, steganography, regex, CSV / JSON / YAML / XML / CBOR, cron, color, CIDR. No server uploads, no analytics, no CDN.",
+  "description": "Free, client-side privacy and developer toolbox with 55 tools that run entirely in your browser: PGP encryption / decryption / signing / verification, age file encryption, X.509 / CSR / ASN.1 / SSH / JWK key tools, QR encode / decode, HMAC, JWT, TOTP / HOTP, PBKDF2 / scrypt / Argon2, SHA-2 / SHA-3 / BLAKE hashing, encoding, IBAN / BIC / VAT / SEPA / e-invoice inspectors, Shamir secret sharing, EXIF eraser, steganography, regex, CSV / JSON / YAML / XML / CBOR, cron, color, CIDR. No server uploads, no analytics, no CDN.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
