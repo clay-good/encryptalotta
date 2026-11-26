@@ -132,3 +132,78 @@ test('age: a malformed recipient is rejected with an error', async ({ page }) =>
   await expect(page.locator('#age-status')).toBeVisible();
   await expect(page.locator('#age-enc-output-group')).toBeHidden();
 });
+
+// ===================================================================
+// Issue #3 — Edge 109 (Chromium 109) has no X25519 in Web Crypto, so
+// recipient-key mode used to die with "Failed to execute 'generateKey'
+// on 'SubtleCrypto': Algorithm: Unrecognized name". These tests strip
+// X25519 out of Web Crypto to force the hand-rolled RFC 7748 ladder
+// and prove it is interop-correct and round-trips.
+// ===================================================================
+
+// Reject every X25519 Web Crypto call exactly the way Chromium 109 does.
+async function withoutNativeX25519(page) {
+  await page.addInitScript(() => {
+    const importKey = crypto.subtle.importKey.bind(crypto.subtle);
+    const generateKey = crypto.subtle.generateKey.bind(crypto.subtle);
+    const isX = a => a === 'X25519' || (a && a.name === 'X25519');
+    const nope = fn => Promise.reject(new Error(
+      `Failed to execute '${fn}' on 'SubtleCrypto': Algorithm: Unrecognized name`));
+    crypto.subtle.importKey = (fmt, data, alg, ...rest) =>
+      isX(alg) ? nope('importKey') : importKey(fmt, data, alg, ...rest);
+    crypto.subtle.generateKey = (alg, ...rest) =>
+      isX(alg) ? nope('generateKey') : generateKey(alg, ...rest);
+  });
+}
+
+test('age fallback: decrypts the age CLI X25519 fixture with no native X25519', async ({ page }) => {
+  await withoutNativeX25519(page);
+  await page.goto('/index.html'); await gotoTool(page, 'age');
+  // The banner now reports the fallback rather than an unsupported browser.
+  await expect(page.locator('#age-unsupported')).toBeVisible();
+  await page.check('input[name="age-mode"][value="decrypt"]');
+  await page.check('input[name="age-dec-type"][value="key"]');
+  await page.fill('#age-dec-identity', CLI_IDENTITY);
+  await page.fill('#age-dec-input', CLI_X25519);
+  await page.click('#btn-age-decrypt');
+  await expect(page.locator('#age-dec-output')).toHaveValue(CLI_MESSAGE);
+});
+
+test('age fallback: generate + recipient round-trip with no native X25519', async ({ page }) => {
+  await withoutNativeX25519(page);
+  await page.goto('/index.html'); await gotoTool(page, 'age');
+  await page.check('input[name="age-mode"][value="generate"]');
+  await page.click('#btn-age-generate');
+  const recipient = (await page.locator('#age-gen-recipient').inputValue()).trim();
+  const identity = (await page.locator('#age-gen-identity').inputValue()).trim();
+  expect(recipient).toMatch(/^age1[a-z0-9]+$/);
+  expect(identity).toMatch(/^AGE-SECRET-KEY-1[A-Z0-9]+$/);
+
+  await page.check('input[name="age-mode"][value="encrypt"]');
+  await page.check('input[name="age-enc-type"][value="keys"]');
+  await page.fill('#age-enc-recipients', recipient);
+  await page.fill('#age-enc-input', 'encrypted on a browser without native X25519');
+  await page.click('#btn-age-encrypt');
+  await expect(page.locator('#age-enc-output')).toHaveValue(/-----BEGIN AGE ENCRYPTED FILE-----/);
+  const ct = await page.locator('#age-enc-output').inputValue();
+
+  await page.check('input[name="age-mode"][value="decrypt"]');
+  await page.check('input[name="age-dec-type"][value="key"]');
+  await page.fill('#age-dec-identity', identity);
+  await page.fill('#age-dec-input', ct);
+  await page.click('#btn-age-decrypt');
+  await expect(page.locator('#age-dec-output')).toHaveValue('encrypted on a browser without native X25519');
+});
+
+test('x25519 fallback: RFC 7748 §6.1 shared secret with no native X25519', async ({ page }) => {
+  await withoutNativeX25519(page);
+  await page.goto('/index.html'); await gotoTool(page, 'x25519');
+  await expect(page.locator('#x25519-unsupported')).toBeVisible();
+  // RFC 7748 §6.1: Alice's scalar + Bob's public key -> the documented shared secret.
+  await page.fill('#x25519-priv', '77076d0a7318a57d3c16c17251b26645df4c2f87ebc0992ab177fba51db92c2a');
+  await page.fill('#x25519-peer', 'de9edb7d7b7dc1b4d35b61c2ece435373f8343c85b78674dadfc7e146f882b4f');
+  await page.selectOption('#x25519-hkdf', 'none');
+  await page.click('#btn-x25519-derive');
+  await expect(page.locator('#x25519-shared'))
+    .toHaveValue('4a5d9d5ba4ce2de1728e3bf480350f25e07e21c947d19e3376f09b3c1e161742');
+});

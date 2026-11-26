@@ -3544,8 +3544,8 @@
                 </div>
 
                 <div id="x25519-unsupported" class="alert alert-warning hidden" style="margin-bottom: 20px;">
-                    <strong data-i18n="x25519.unsupported.title">Browser does not support X25519 in Web Crypto.</strong>
-                    <span data-i18n="x25519.unsupported.body">X25519 landed in Safari 17, Chrome 123, and Firefox 130. Please upgrade your browser to use this tool.</span>
+                    <strong data-i18n="x25519.unsupported.title">Using the pure-JavaScript X25519 fallback.</strong>
+                    <span data-i18n="x25519.unsupported.body">This browser has no X25519 in Web Crypto (it landed in Safari 17, Chrome 123, and Firefox 130), so key agreement runs on the built-in JavaScript implementation. Results are identical, but it is slower and not constant-time.</span>
                 </div>
 
                 <h3 style="margin: 0 0 12px; font-size: 1rem;" data-i18n="x25519.gen.heading">1. Generate local keypair</h3>
@@ -3818,8 +3818,8 @@
                 </div>
 
                 <div id="age-unsupported" class="alert alert-warning hidden" style="margin-bottom: 20px;">
-                    <strong data-i18n="age.unsupported.title">Browser does not support X25519 in Web Crypto.</strong>
-                    <span data-i18n="age.unsupported.body">X25519 landed in Safari 17, Chrome 123, and Firefox 130. The passphrase (scrypt) mode still works on older browsers; recipient-key mode needs X25519.</span>
+                    <strong data-i18n="age.unsupported.title">Using the pure-JavaScript X25519 fallback.</strong>
+                    <span data-i18n="age.unsupported.body">This browser has no X25519 in Web Crypto (it landed in Safari 17, Chrome 123, and Firefox 130), so recipient-key mode runs on the built-in JavaScript implementation. Files stay interoperable with the age CLI, but it is slower and not constant-time.</span>
                 </div>
 
                 <div class="form-group">
@@ -5943,8 +5943,8 @@
                 'nav.tool.x25519': 'X25519',
                 'tool.x25519.desc': 'Generate X25519 keypairs and derive a shared secret (ECDH, RFC 7748) with optional HKDF.',
                 'view.x25519.h2': 'X25519 — Key Agreement (ECDH)',
-                'x25519.unsupported.title': 'Browser does not support X25519 in Web Crypto.',
-                'x25519.unsupported.body': 'X25519 landed in Safari 17, Chrome 123, and Firefox 130. Please upgrade your browser to use this tool.',
+                'x25519.unsupported.title': 'Using the pure-JavaScript X25519 fallback.',
+                'x25519.unsupported.body': 'This browser has no X25519 in Web Crypto (it landed in Safari 17, Chrome 123, and Firefox 130), so key agreement runs on the built-in JavaScript implementation. Results are identical, but it is slower and not constant-time.',
                 'x25519.gen.heading': '1. Generate local keypair',
                 'x25519.peer.heading': '2. Peer public key',
                 'x25519.derive.heading': '3. Derive shared secret',
@@ -6254,7 +6254,7 @@
                 'tool.x25519.title': 'X25519 ECDH Key Agreement (RFC 7748) with HKDF Post-Processing',
                 'tool.x25519.metaDescription': 'Generate X25519 keypairs and derive a shared secret with a peer\'s public key, optionally piped through HKDF-SHA-256 or HKDF-SHA-512 for a symmetric key. Local-only, via Web Crypto.',
                 'tool.x25519.about.what': 'Performs X25519 ECDH key agreement: given your private key and a peer\'s public key, produces the 32-byte shared secret. Optional HKDF (RFC 5869) post-processing yields a 32- or 64-byte uniformly-random key for use with AES, ChaCha20, etc.',
-                'tool.x25519.about.how': 'Native Web Crypto X25519 (Safari 17+, Chrome 123+, Firefox 130+). Keys are exchanged on the wire as the 32-byte clamped scalar (private) or 32-byte u-coordinate (public). HKDF uses an empty salt and the user-supplied "info" context, matching common protocol conventions (X3DH, Noise).',
+                'tool.x25519.about.how': 'Native Web Crypto X25519 (Safari 17+, Chrome 123+, Firefox 130+), with a hand-rolled RFC 7748 Montgomery ladder as fallback on older engines — identical results, but slower and not constant-time, which the page says when it is in use. Keys are exchanged on the wire as the 32-byte clamped scalar (private) or 32-byte u-coordinate (public). HKDF uses an empty salt and the user-supplied "info" context, matching common protocol conventions (X3DH, Noise).',
                 'tool.x25519.about.why': 'Underlies WireGuard, age, the Signal Protocol, the Noise Protocol Framework, OPAQUE, Tor onion services, TLS 1.3, and many other modern systems. A local agreement tool lets you sanity-check protocol implementations or compute fresh keys for fixtures without exposing private scalars to a third-party service.',
                 // -------- NEW tools SEO prose (en-only, Phase 7 carve-out) --------
                 'tool.strength.title': 'Offline Passphrase Strength Estimator — Entropy and Crack-Time',
@@ -6316,8 +6316,8 @@
                 'nav.tool.age': 'age Encryption',
                 'tool.age.desc': 'Encrypt and decrypt files with age — X25519 recipients or a passphrase (scrypt). Generate keypairs.',
                 'view.age.h2': 'age — File Encryption',
-                'age.unsupported.title': 'Browser does not support X25519 in Web Crypto.',
-                'age.unsupported.body': 'X25519 landed in Safari 17, Chrome 123, and Firefox 130. The passphrase (scrypt) mode still works on older browsers; recipient-key mode needs X25519.',
+                'age.unsupported.title': 'Using the pure-JavaScript X25519 fallback.',
+                'age.unsupported.body': 'This browser has no X25519 in Web Crypto (it landed in Safari 17, Chrome 123, and Firefox 130), so recipient-key mode runs on the built-in JavaScript implementation. Files stay interoperable with the age CLI, but it is slower and not constant-time.',
                 'age.label.mode': 'Operation',
                 'age.mode.encrypt': 'Encrypt',
                 'age.mode.decrypt': 'Decrypt',
@@ -6361,7 +6361,7 @@
                 'tool.age.title': 'age File Encryption — X25519 and scrypt (ChaCha20-Poly1305), in your browser',
                 'tool.age.metaDescription': 'Encrypt and decrypt files with age (age-encryption.org/v1) entirely in your browser: X25519 recipients or a scrypt passphrase, ChaCha20-Poly1305 payload, ASCII-armored output. Generate age keypairs. Interoperable with the age CLI. Nothing is uploaded.',
                 'tool.age.about.what': 'Implements the age v1 format (age-encryption.org/v1): encrypt to one or more X25519 recipients (age1…) or to a scrypt passphrase, and decrypt with an AGE-SECRET-KEY-1… identity or passphrase. Also generates age keypairs. Output is the standard ASCII-armored age format, byte-compatible with Filippo Valsorda’s age CLI and rage.',
-                'tool.age.about.how': 'A 16-byte file key is wrapped per recipient — X25519 stanzas derive their wrap key via HKDF-SHA-256 over the ephemeral share and recipient key; scrypt stanzas derive it from the passphrase. The payload is encrypted with ChaCha20-Poly1305 in the STREAM construction (64 KiB chunks), and the header is authenticated with HMAC-SHA-256. ChaCha20, Poly1305, scrypt, and bech32 are hand-rolled in pure JavaScript; X25519, HKDF, HMAC, and PBKDF2 use Web Crypto. Everything runs locally.',
+                'tool.age.about.how': 'A 16-byte file key is wrapped per recipient — X25519 stanzas derive their wrap key via HKDF-SHA-256 over the ephemeral share and recipient key; scrypt stanzas derive it from the passphrase. The payload is encrypted with ChaCha20-Poly1305 in the STREAM construction (64 KiB chunks), and the header is authenticated with HMAC-SHA-256. ChaCha20, Poly1305, scrypt, and bech32 are hand-rolled in pure JavaScript; HKDF, HMAC, and PBKDF2 use Web Crypto. X25519 uses Web Crypto where available and otherwise a hand-rolled RFC 7748 ladder, so recipient-key mode still works on browsers without the native curve (Chromium 109 / Edge 109). Everything runs locally.',
                 'tool.age.about.why': 'age is a simple, modern file-encryption tool — a PGP successor widely used in EU privacy circles for NixOS secrets, dotfile encryption, and password managers like passage. A local, no-install browser implementation lets you encrypt to a colleague’s age key, decrypt a file someone sent you, or generate a keypair without trusting a third-party service or installing the CLI.',
                 // -------- Phase 6 (spec §3): Regulator presets in PGP generator --------
                 'label.regulatorPreset': 'Regulator Preset',
@@ -8105,8 +8105,8 @@
                 'nav.tool.x25519': 'X25519',
                 'tool.x25519.desc': 'Générer des paires de clés X25519 et dériver un secret partagé (ECDH, RFC 7748) avec HKDF en option.',
                 'view.x25519.h2': 'X25519 — Accord de clés (ECDH)',
-                'x25519.unsupported.title': 'Le navigateur ne prend pas en charge X25519 dans Web Crypto.',
-                'x25519.unsupported.body': 'X25519 est disponible depuis Safari 17, Chrome 123 et Firefox 130. Mettez votre navigateur à jour pour utiliser cet outil.',
+                'x25519.unsupported.title': 'Utilisation de l’implémentation X25519 en JavaScript pur.',
+                'x25519.unsupported.body': 'Ce navigateur n’a pas X25519 dans Web Crypto (disponible depuis Safari 17, Chrome 123 et Firefox 130) : l’accord de clés s’exécute donc avec l’implémentation JavaScript intégrée. Les résultats sont identiques, mais elle est plus lente et non à temps constant.',
                 'x25519.gen.heading': '1. Générer la paire de clés locale',
                 'x25519.peer.heading': '2. Clé publique du pair',
                 'x25519.derive.heading': '3. Dériver le secret partagé',
@@ -8417,8 +8417,8 @@
                 'nav.tool.age': 'Chiffrement age',
                 'tool.age.desc': 'Chiffrer et déchiffrer des fichiers avec age — destinataires X25519 ou phrase secrète (scrypt). Générer des paires de clés.',
                 'view.age.h2': 'age — Chiffrement de fichiers',
-                'age.unsupported.title': 'Le navigateur ne prend pas en charge X25519 dans Web Crypto.',
-                'age.unsupported.body': 'X25519 est arrivé dans Safari 17, Chrome 123 et Firefox 130. Le mode phrase secrète (scrypt) fonctionne sur les navigateurs plus anciens ; le mode clé de destinataire nécessite X25519.',
+                'age.unsupported.title': 'Utilisation de l’implémentation X25519 en JavaScript pur.',
+                'age.unsupported.body': 'Ce navigateur n’a pas X25519 dans Web Crypto (disponible depuis Safari 17, Chrome 123 et Firefox 130) : le mode clé de destinataire s’exécute donc avec l’implémentation JavaScript intégrée. Les fichiers restent interopérables avec la CLI age, mais elle est plus lente et non à temps constant.',
                 'age.label.mode': 'Opération',
                 'age.mode.encrypt': 'Chiffrer',
                 'age.mode.decrypt': 'Déchiffrer',
@@ -10185,8 +10185,8 @@
                 'nav.tool.x25519': 'X25519',
                 'tool.x25519.desc': '生成 X25519 密钥对，并派生共享密钥（ECDH，RFC 7748），可选 HKDF 后处理。',
                 'view.x25519.h2': 'X25519 — 密钥协商（ECDH）',
-                'x25519.unsupported.title': '当前浏览器不支持 Web Crypto 中的 X25519。',
-                'x25519.unsupported.body': 'X25519 已在 Safari 17、Chrome 123 与 Firefox 130 中可用。请升级浏览器以使用此工具。',
+                'x25519.unsupported.title': '正在使用纯 JavaScript 的 X25519 实现。',
+                'x25519.unsupported.body': '当前浏览器的 Web Crypto 不支持 X25519（Safari 17、Chrome 123 与 Firefox 130 起可用），因此密钥协商改用内置的 JavaScript 实现。结果完全相同，但速度较慢且非恒定时间。',
                 'x25519.gen.heading': '1. 生成本地密钥对',
                 'x25519.peer.heading': '2. 对端公钥',
                 'x25519.derive.heading': '3. 派生共享密钥',
@@ -10497,8 +10497,8 @@
                 'nav.tool.age': 'age 加密',
                 'tool.age.desc': '使用 age 加密和解密文件 — X25519 收件人或口令（scrypt）。生成密钥对。',
                 'view.age.h2': 'age — 文件加密',
-                'age.unsupported.title': '浏览器的 Web Crypto 不支持 X25519。',
-                'age.unsupported.body': 'X25519 在 Safari 17、Chrome 123 和 Firefox 130 中引入。口令（scrypt）模式在较旧的浏览器上仍可使用；收件人密钥模式需要 X25519。',
+                'age.unsupported.title': '正在使用纯 JavaScript 的 X25519 实现。',
+                'age.unsupported.body': '当前浏览器的 Web Crypto 不支持 X25519（Safari 17、Chrome 123 和 Firefox 130 起可用），因此收件人密钥模式改用内置的 JavaScript 实现。生成的文件仍与 age 命令行工具互操作，但速度较慢且非恒定时间。',
                 'age.label.mode': '操作',
                 'age.mode.encrypt': '加密',
                 'age.mode.decrypt': '解密',
@@ -12280,8 +12280,8 @@
                 'nav.tool.x25519': 'X25519',
                 'tool.x25519.desc': 'X25519-Schlüsselpaare erzeugen und ein gemeinsames Geheimnis ableiten (ECDH, RFC 7748) — optional mit HKDF.',
                 'view.x25519.h2': 'X25519 — Schlüsselvereinbarung (ECDH)',
-                'x25519.unsupported.title': 'Der Browser unterstützt X25519 in Web Crypto nicht.',
-                'x25519.unsupported.body': 'X25519 ist in Safari 17, Chrome 123 und Firefox 130 verfügbar. Bitte aktualisieren Sie Ihren Browser, um dieses Werkzeug zu verwenden.',
+                'x25519.unsupported.title': 'Die reine JavaScript-Implementierung von X25519 wird verwendet.',
+                'x25519.unsupported.body': 'Dieser Browser hat kein X25519 in Web Crypto (verfügbar ab Safari 17, Chrome 123 und Firefox 130), daher läuft der Schlüsselaustausch über die eingebaute JavaScript-Implementierung. Die Ergebnisse sind identisch, sie ist aber langsamer und nicht laufzeitkonstant.',
                 'x25519.gen.heading': '1. Lokales Schlüsselpaar erzeugen',
                 'x25519.peer.heading': '2. Öffentlicher Schlüssel des Peers',
                 'x25519.derive.heading': '3. Gemeinsames Geheimnis ableiten',
@@ -12592,8 +12592,8 @@
                 'nav.tool.age': 'age-Verschlüsselung',
                 'tool.age.desc': 'Dateien mit age verschlüsseln und entschlüsseln — X25519-Empfänger oder eine Passphrase (scrypt). Schlüsselpaare erzeugen.',
                 'view.age.h2': 'age — Dateiverschlüsselung',
-                'age.unsupported.title': 'Der Browser unterstützt X25519 in Web Crypto nicht.',
-                'age.unsupported.body': 'X25519 kam mit Safari 17, Chrome 123 und Firefox 130. Der Passphrase-Modus (scrypt) funktioniert auch in älteren Browsern; der Empfängerschlüssel-Modus benötigt X25519.',
+                'age.unsupported.title': 'Die reine JavaScript-Implementierung von X25519 wird verwendet.',
+                'age.unsupported.body': 'Dieser Browser hat kein X25519 in Web Crypto (verfügbar ab Safari 17, Chrome 123 und Firefox 130), daher läuft der Empfängerschlüssel-Modus über die eingebaute JavaScript-Implementierung. Die Dateien bleiben mit der age-CLI interoperabel, die Implementierung ist aber langsamer und nicht laufzeitkonstant.',
                 'age.label.mode': 'Vorgang',
                 'age.mode.encrypt': 'Verschlüsseln',
                 'age.mode.decrypt': 'Entschlüsseln',
@@ -14360,8 +14360,8 @@
                 'nav.tool.x25519': 'X25519',
                 'tool.x25519.desc': 'X25519 कुंजी युग्म बनाएँ और साझा रहस्य व्युत्पन्न करें (ECDH, RFC 7748), वैकल्पिक HKDF के साथ।',
                 'view.x25519.h2': 'X25519 — कुंजी समझौता (ECDH)',
-                'x25519.unsupported.title': 'यह ब्राउज़र Web Crypto में X25519 का समर्थन नहीं करता।',
-                'x25519.unsupported.body': 'X25519 Safari 17, Chrome 123 और Firefox 130 में उपलब्ध है। इस टूल का उपयोग करने के लिए ब्राउज़र अपडेट करें।',
+                'x25519.unsupported.title': 'शुद्ध JavaScript वाला X25519 फ़ॉलबैक उपयोग में है।',
+                'x25519.unsupported.body': 'इस ब्राउज़र के Web Crypto में X25519 नहीं है (यह Safari 17, Chrome 123 और Firefox 130 से उपलब्ध है), इसलिए कुंजी-समझौता अंतर्निहित JavaScript कार्यान्वयन से चलता है। परिणाम समान रहते हैं, पर यह धीमा है और नियत-समय (constant-time) नहीं है।',
                 'x25519.gen.heading': '1. स्थानीय कुंजी युग्म बनाएँ',
                 'x25519.peer.heading': '2. पीयर सार्वजनिक कुंजी',
                 'x25519.derive.heading': '3. साझा रहस्य व्युत्पन्न करें',
@@ -14672,8 +14672,8 @@
                 'nav.tool.age': 'age एन्क्रिप्शन',
                 'tool.age.desc': 'age से फ़ाइलें एन्क्रिप्ट और डिक्रिप्ट करें — X25519 प्राप्तकर्ता या पासफ़्रेज़ (scrypt)। कुंजी युग्म बनाएँ।',
                 'view.age.h2': 'age — फ़ाइल एन्क्रिप्शन',
-                'age.unsupported.title': 'ब्राउज़र Web Crypto में X25519 का समर्थन नहीं करता।',
-                'age.unsupported.body': 'X25519 Safari 17, Chrome 123 और Firefox 130 में आया। पासफ़्रेज़ (scrypt) मोड पुराने ब्राउज़रों पर भी काम करता है; प्राप्तकर्ता-कुंजी मोड के लिए X25519 आवश्यक है।',
+                'age.unsupported.title': 'शुद्ध JavaScript वाला X25519 फ़ॉलबैक उपयोग में है।',
+                'age.unsupported.body': 'इस ब्राउज़र के Web Crypto में X25519 नहीं है (यह Safari 17, Chrome 123 और Firefox 130 से उपलब्ध है), इसलिए प्राप्तकर्ता-कुंजी मोड अंतर्निहित JavaScript कार्यान्वयन से चलता है। फ़ाइलें age CLI के साथ संगत रहती हैं, पर यह धीमा है और नियत-समय (constant-time) नहीं है।',
                 'age.label.mode': 'संचालन',
                 'age.mode.encrypt': 'एन्क्रिप्ट',
                 'age.mode.decrypt': 'डिक्रिप्ट',
@@ -37354,6 +37354,105 @@
             return der.slice(der.length - 32);
         }
 
+        // ==================== X25519 (RFC 7748) — Web Crypto with a pure-JS fallback ====================
+        // Web Crypto gained X25519 only in Safari 17 / Chrome 123 / Firefox 130. Older engines
+        // (e.g. Edge 109 on Windows 7/8, Chromium 109) reject generateKey with "Unrecognized name",
+        // which used to break the age recipient-key mode outright. The ladder below is a direct
+        // transcription of RFC 7748 §5 over BigInt, used only when the native curve is missing.
+        // Caveat: BigInt arithmetic is not constant-time, so the fallback is not side-channel
+        // hardened the way the native implementation is; the banner tells the user it is in use.
+        const X25519_P = (1n << 255n) - 19n;
+        const X25519_A24 = 121665n;
+        const X25519_MASK256 = (1n << 256n) - 1n;
+
+        function x25519JsPow(base, exp) {
+            let r = 1n, b = base % X25519_P;
+            while (exp > 0n) {
+                if (exp & 1n) r = (r * b) % X25519_P;
+                b = (b * b) % X25519_P;
+                exp >>= 1n;
+            }
+            return r;
+        }
+        function x25519JsCswap(bit, a, b) {
+            const mask = bit ? X25519_MASK256 : 0n;
+            const d = (a ^ b) & mask;
+            return [a ^ d, b ^ d];
+        }
+        function x25519JsScalarMult(scalarBytes, uBytes) {
+            const k = new Uint8Array(scalarBytes);
+            k[0] &= 248; k[31] &= 127; k[31] |= 64;          // clamp (RFC 7748 §5)
+            let u = 0n;
+            for (let i = 31; i >= 0; i--) u = (u << 8n) | BigInt(i === 31 ? (uBytes[31] & 0x7f) : uBytes[i]);
+            u %= X25519_P;
+            let x1 = u, x2 = 1n, z2 = 0n, x3 = u, z3 = 1n, swap = 0;
+            for (let t = 254; t >= 0; t--) {
+                const kt = (k[t >> 3] >> (t & 7)) & 1;
+                swap ^= kt;
+                [x2, x3] = x25519JsCswap(swap, x2, x3);
+                [z2, z3] = x25519JsCswap(swap, z2, z3);
+                swap = kt;
+                const A = (x2 + z2) % X25519_P;
+                const AA = (A * A) % X25519_P;
+                const B = (x2 - z2 + X25519_P) % X25519_P;
+                const BB = (B * B) % X25519_P;
+                const E = (AA - BB + X25519_P) % X25519_P;
+                const C = (x3 + z3) % X25519_P;
+                const D = (x3 - z3 + X25519_P) % X25519_P;
+                const DA = (D * A) % X25519_P;
+                const CB = (C * B) % X25519_P;
+                const s = (DA + CB) % X25519_P;
+                const d = (DA - CB + X25519_P) % X25519_P;
+                x3 = (s * s) % X25519_P;
+                z3 = (((d * d) % X25519_P) * x1) % X25519_P;
+                x2 = (AA * BB) % X25519_P;
+                z2 = (E * ((AA + X25519_A24 * E) % X25519_P)) % X25519_P;
+            }
+            [x2, x3] = x25519JsCswap(swap, x2, x3);
+            [z2, z3] = x25519JsCswap(swap, z2, z3);
+            let res = (x2 * x25519JsPow(z2, X25519_P - 2n)) % X25519_P;
+            const out = new Uint8Array(32);
+            for (let i = 0; i < 32; i++) { out[i] = Number(res & 0xffn); res >>= 8n; }
+            return out;
+        }
+
+        // Native-first dispatch. X25519_NATIVE is probed once, lazily.
+        let X25519_NATIVE = null;
+        async function x25519Native() {
+            if (X25519_NATIVE === null) {
+                try {
+                    await crypto.subtle.importKey('pkcs8', (() => {
+                        const p = new Uint8Array(48); p.set(X25519_PKCS8_PREFIX, 0); p[16] = 1; return p;
+                    })(), { name: 'X25519' }, false, ['deriveBits']);
+                    X25519_NATIVE = true;
+                } catch (e) { X25519_NATIVE = false; }
+            }
+            return X25519_NATIVE;
+        }
+        function x25519IsAllZero(b) { let acc = 0; for (let i = 0; i < b.length; i++) acc |= b[i]; return acc === 0; }
+        async function x25519SharedSecret(scalar, peerPub) {
+            if (await x25519Native()) {
+                const pkcs8 = new Uint8Array(48);
+                pkcs8.set(X25519_PKCS8_PREFIX, 0); pkcs8.set(scalar, 16);
+                const priv = await crypto.subtle.importKey('pkcs8', pkcs8, { name: 'X25519' }, false, ['deriveBits']);
+                const peer = await crypto.subtle.importKey('raw', peerPub, { name: 'X25519' }, false, []);
+                return new Uint8Array(await crypto.subtle.deriveBits({ name: 'X25519', public: peer }, priv, 256));
+            }
+            const out = x25519JsScalarMult(scalar, peerPub);
+            // Match Web Crypto, which rejects an all-zero output (low-order peer point).
+            if (x25519IsAllZero(out)) throw new Error('X25519: all-zero shared secret (low-order public key)');
+            return out;
+        }
+        async function x25519PublicFromScalar(scalar) {
+            const base = new Uint8Array(32); base[0] = 9;
+            if (await x25519Native()) return x25519SharedSecret(scalar, base);
+            return x25519JsScalarMult(scalar, base);   // base point never yields all-zero
+        }
+        async function x25519Keypair() {
+            const scalar = crypto.getRandomValues(new Uint8Array(32));
+            return { scalar, pub: await x25519PublicFromScalar(scalar) };
+        }
+
         async function checkCurve25519Support(curve) {
             try {
                 await crypto.subtle.generateKey({ name: curve }, true, curve === 'X25519' ? ['deriveBits'] : ['sign']);
@@ -37367,7 +37466,8 @@
         (async () => {
             ED25519_OK = await checkCurve25519Support('Ed25519');
             if (!ED25519_OK) document.getElementById('ed25519-unsupported').classList.remove('hidden');
-            X25519_OK = await checkCurve25519Support('X25519');
+            // X25519 always works (pure-JS fallback); the banner only notes that the fallback is in use.
+            X25519_OK = await x25519Native();
             if (!X25519_OK) document.getElementById('x25519-unsupported').classList.remove('hidden');
         })();
 
@@ -37427,11 +37527,9 @@
 
         document.getElementById('btn-x25519-generate').addEventListener('click', async () => {
             try {
-                const kp = await crypto.subtle.generateKey({ name: 'X25519' }, true, ['deriveBits']);
-                const pubRaw = new Uint8Array(await crypto.subtle.exportKey('raw', kp.publicKey));
-                const privPkcs8 = new Uint8Array(await crypto.subtle.exportKey('pkcs8', kp.privateKey));
-                document.getElementById('x25519-pub').value = bytesToHex(pubRaw);
-                document.getElementById('x25519-priv').value = bytesToHex(pkcs8ToSeed(privPkcs8));
+                const kp = await x25519Keypair();
+                document.getElementById('x25519-pub').value = bytesToHex(kp.pub);
+                document.getElementById('x25519-priv').value = bytesToHex(kp.scalar);
                 document.getElementById('x25519-shared').value = '';
             } catch (e) {
                 alert(t('err.x25519Generate') + ': ' + (e.message || e));
@@ -37444,9 +37542,7 @@
                 if (privSeed.length !== 32) throw new Error(t('err.x25519BadPriv'));
                 const peerRaw = hexToBytes(document.getElementById('x25519-peer').value.trim());
                 if (peerRaw.length !== 32) throw new Error(t('err.x25519BadPeer'));
-                const privKey = await crypto.subtle.importKey('pkcs8', seedToPkcs8(privSeed, true), { name: 'X25519' }, false, ['deriveBits']);
-                const peerKey = await crypto.subtle.importKey('raw', peerRaw, { name: 'X25519' }, false, []);
-                const sharedBits = new Uint8Array(await crypto.subtle.deriveBits({ name: 'X25519', public: peerKey }, privKey, 256));
+                const sharedBits = await x25519SharedSecret(privSeed, peerRaw);
                 const mode = document.getElementById('x25519-hkdf').value;
                 let final;
                 if (mode === 'none') {
@@ -37906,18 +38002,10 @@
             return new Uint8Array(await ageSubtle.sign('HMAC', k, data));
         }
 
-        // X25519 helpers (PKCS#8 wrapping copied from the existing tool)
-        const AGE_X25519_PKCS8_PREFIX = new Uint8Array([0x30,0x2e,0x02,0x01,0x00,0x30,0x05,0x06,0x03,0x2b,0x65,0x6e,0x04,0x22,0x04,0x20]);
-        function ageSeedToPkcs8(seed) { const out = new Uint8Array(48); out.set(AGE_X25519_PKCS8_PREFIX, 0); out.set(seed, 16); return out; }
-        async function ageX25519(scalar, peerPub) {
-            const priv = await ageSubtle.importKey('pkcs8', ageSeedToPkcs8(scalar), { name: 'X25519' }, false, ['deriveBits']);
-            const peer = await ageSubtle.importKey('raw', peerPub, { name: 'X25519' }, false, []);
-            return new Uint8Array(await ageSubtle.deriveBits({ name: 'X25519', public: peer }, priv, 256));
-        }
-        async function ageX25519Public(scalar) {
-            const base = new Uint8Array(32); base[0] = 9;
-            return ageX25519(scalar, base);
-        }
+        // X25519 helpers — delegate to the shared native-or-pure-JS implementation above,
+        // so recipient-key mode also works on engines without X25519 in Web Crypto.
+        async function ageX25519(scalar, peerPub) { return x25519SharedSecret(scalar, peerPub); }
+        async function ageX25519Public(scalar) { return x25519PublicFromScalar(scalar); }
 
         // ---------- age STREAM payload ----------
         const AGE_CHUNK = 65536;
@@ -37964,13 +38052,10 @@
         }
 
         async function ageGenerateIdentity() {
-            const kp = await ageSubtle.generateKey({ name: 'X25519' }, true, ['deriveBits']);
-            const pub = new Uint8Array(await ageSubtle.exportKey('raw', kp.publicKey));
-            const pkcs8 = new Uint8Array(await ageSubtle.exportKey('pkcs8', kp.privateKey));
-            const scalar = pkcs8.slice(pkcs8.length - 32);
+            const kp = await x25519Keypair();
             return {
-                recipient: ageBech32Encode('age', pub),
-                identity: ageBech32Encode('age-secret-key-', scalar).toUpperCase(),
+                recipient: ageBech32Encode('age', kp.pub),
+                identity: ageBech32Encode('age-secret-key-', kp.scalar).toUpperCase(),
             };
         }
 
@@ -37987,10 +38072,9 @@
                 stanzas.push({ args: ['scrypt', ageB64Encode(salt, false), String(opts.scryptLogN)], body });
             } else {
                 for (const rpub of opts.recipients) {
-                    const eph = await ageSubtle.generateKey({ name: 'X25519' }, true, ['deriveBits']);
-                    const ephShare = new Uint8Array(await ageSubtle.exportKey('raw', eph.publicKey));
-                    const peer = await ageSubtle.importKey('raw', rpub, { name: 'X25519' }, false, []);
-                    const shared = new Uint8Array(await ageSubtle.deriveBits({ name: 'X25519', public: peer }, eph.privateKey, 256));
+                    const eph = await x25519Keypair();
+                    const ephShare = eph.pub;
+                    const shared = await ageX25519(eph.scalar, rpub);
                     const salt = ageConcat(ephShare, rpub);
                     const wrapKey = await ageHkdfSha256(shared, salt, 'age-encryption.org/v1/X25519', 32);
                     const body = ageAeadSeal(wrapKey, new Uint8Array(12), fileKey);
@@ -38105,10 +38189,12 @@
         let ageEncFileBytes = null, ageEncFileName = null;
         let ageDecFileBytes = null, ageLastDecBytes = null;
 
-        // X25519 support probe — passphrase (scrypt) mode works regardless; recipient-key mode needs X25519.
+        // X25519 support probe — both modes work regardless; without native X25519 the
+        // recipient-key mode runs on the pure-JS ladder, which the banner points out.
         (async () => {
-            try { await crypto.subtle.generateKey({ name: 'X25519' }, true, ['deriveBits']); }
-            catch (e) { const b = document.getElementById('age-unsupported'); if (b) b.classList.remove('hidden'); }
+            if (!await x25519Native()) {
+                const b = document.getElementById('age-unsupported'); if (b) b.classList.remove('hidden');
+            }
         })();
 
         function ageShowStatus(kind, msg) {
